@@ -1,0 +1,208 @@
+@import "tailwindcss";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer utilities {
+  .perspective-1000 {
+    perspective: 1000px;
+  }
+  
+  .transform-style-3d {
+    transform-style: preserve-3d;
+    will-change: transform;
+  }
+  
+  .backface-hidden {
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+  }
+  
+  .rotate-y-180 {
+    transform: rotateY(180deg);
+  }
+
+  /* New utilities for our redesign */
+  .hide-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* For stacked card effects */
+  .rotate-1 {
+    transform: rotate(1deg);
+  }
+
+  .rotate-2 {
+    transform: rotate(2deg);
+  }
+
+  .-rotate-1 {
+    transform: rotate(-1deg);
+  }
+
+  /* Smooth transitions */
+  .transition-all {
+    transition-property: all;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: 150ms;
+  }
+  
+  /* Hover pulse animation for interactive elements */
+  .hover-pulse:hover {
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+  
+  @keyframes pulse {
+    0%, 100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.85;
+    }
+  }
+
+  /* Card flip animation utilities */
+  .card-front {
+    z-index: 2;
+    transform: rotateY(0deg);
+  }
+  
+  .card-back {
+    transform: rotateY(180deg);
+  }
+
+  /* Enhanced card stack animation */
+  .card-stack-container {
+    position: relative;
+    perspective: 1000px;
+  }
+
+  .card-stack-item {
+    transition: all 0.6s cubic-bezier(0.165, 0.84, 0.44, 1);
+  }
+
+  /* Enhanced smooth transitions */
+  .smooth-transform {
+    transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+}
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+    
+    /* Color scheme for the application */
+    --primary: 226 100% 59%;
+    --primary-foreground: 0 0% 100%;
+    
+    --secondary: 250 95% 76%;
+    --secondary-foreground: 0 0% 100%;
+    
+    --accent: 262 80% 50%;
+    --accent-foreground: 0 0% 100%;
+    
+    --success: 160 84% 39%;
+    --success-foreground: 0 0% 100%;
+    
+    --warning: 35 92% 65%;
+    --warning-foreground: 0 0% 10%;
+    
+    --danger: 0 84% 60%;
+    --danger-foreground: 0 0% 100%;
+    
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 0 0% 0%;
+    
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 0%;
+  }
+  
+  body {
+    @apply bg-white text-black;
+    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-medium tracking-tight text-black;
+  }
+  
+  h1 {
+    @apply text-3xl;
+  }
+  
+  h2 {
+    @apply text-2xl;
+  }
+
+  h3 {
+    @apply text-xl;
+  }
+
+  p {
+    @apply text-black;
+  }
+
+  /* Default text color classes override */
+  .text-slate-500, .text-slate-600, .text-slate-700 {
+    @apply text-black;
+  }
+
+  .text-slate-900 {
+    @apply text-black;
+  }
+  
+  /* Make placeholders darker */
+  ::placeholder {
+    color: rgba(0, 0, 0, 0.65) !important;
+    opacity: 1 !important;
+  }
+  
+  /* Input styles */
+  input, select, textarea {
+    @apply text-black;
+  }
+  
+  /* Category card styles */
+  .category-card {
+    @apply p-5 rounded-xl border border-blue-200 hover:shadow-md transition-shadow h-full cursor-pointer;
+  }
+  
+  .category-card-speaking {
+    @apply bg-blue-100;
+  }
+  
+  .category-card-listening {
+    @apply bg-purple-100;
+  }
+  
+  .category-card-tutorial {
+    @apply bg-green-100;
+  }
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: 240 10% 3.9%;
+    --foreground: 0 0% 98%;
+  }
+}
+
+body {
+  color: rgb(var(--foreground));
+  background: rgb(var(--background));
+  font-family: Arial, Helvetica, sans-serif;
+}

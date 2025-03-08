@@ -1,0 +1,325 @@
+<think>
+You're asking for a more straightforward, implementable version of the plan that focuses on specific goals and rules for software engineers to follow - essentially a Standard Operating Procedure (SOP) document. I'll revise the plan to be more concrete, actionable, and easy to grasp with clear guidelines and implementation details.
+
+I'll structure this as:
+1. Project Overview - Brief and clear
+2. Technology Stack - Specific versions and requirements
+3. Development Principles - Clear rules to follow
+4. Feature Implementation Guide - Broken down by component with acceptance criteria
+5. Development Workflow - Clear process for implementation
+6. Timeline and Milestones - Measurable goals
+
+This will be designed to be handed directly to developers as implementation instructions.
+</think>
+
+# Chinese Flashcard App - Development SOP
+
+## Project Overview
+
+We're building a mobile-responsive Chinese language learning app with flashcards (hanzi, pinyin, English), organized by lessons, with social features like comments and reactions. The app will also include homework reminders with discussion capabilities.
+
+## Technology Stack
+
+- **Frontend**: Next.js 14 with App Router, React 18 (TSX)
+- **Styling**: Tailwind CSS
+- **Backend**: Supabase for authentication, database, and storage
+- **Deployment**: Vercel
+
+## Development Principles
+
+1. **Mobile-First**: Design all components for mobile screens first, then scale up
+2. **Component Modularity**: Keep components under 150 lines; extract complex logic to hooks
+3. **Type Safety**: Use TypeScript interfaces for all data structures
+4. **Performance**: Implement lazy loading for images and pagination for lists
+5. **Accessibility**: Maintain WCAG 2.1 AA compliance
+6. **Testing**: Write unit tests for critical functionality
+
+## Core Features & Implementation Guide
+
+### 1. Authentication System
+
+**Goal**: Simple, secure login using Supabase Auth
+
+**Implementation**:
+- Email/password authentication
+- Protected routes with middleware
+- Persist session using local storage
+- Implement "remember me" functionality
+
+**APIs**:
+```typescript
+interface User {
+  id: string;
+  email: string;
+  name: string;
+  created_at: string;
+}
+
+// Auth functions
+signUp(email: string, password: string): Promise<User>
+signIn(email: string, password: string): Promise<User>
+signOut(): Promise<void>
+getCurrentUser(): User | null
+```
+
+### 2. Flashcard System
+
+**Goal**: Interactive, mobile-friendly flashcards with spaced repetition
+
+**Implementation**:
+- Card component with flip animation
+- Swipe gestures for mobile (right = know, left = don't know)
+- Group cards by lesson (1-10)
+- Store user progress and calculate next review dates
+
+**Data Structure**:
+```typescript
+interface Flashcard {
+  id: string;
+  lesson_id: string;
+  hanzi: string;
+  pinyin: string;
+  english: string;
+  example_sentence?: string;
+  difficulty_level: number;
+  created_at: string;
+}
+
+interface UserProgress {
+  flashcard_id: string;
+  familiarity_level: number; // 1-5
+  next_review_date: string;
+}
+```
+
+### 3. Lesson Organization
+
+**Goal**: Clear lesson structure that follows curriculum
+
+**Implementation**:
+- Lesson list view with progress indicators
+- 10 lessons total, each containing 12-18 words
+- Progress tracking per lesson
+- Completion status visualization
+
+**Data Structure**:
+```typescript
+interface Lesson {
+  id: string;
+  lesson_number: number;
+  title: string;
+  description: string;
+  total_cards: number;
+  created_at: string;
+}
+
+interface LessonProgress {
+  lesson_id: string;
+  cards_mastered: number;
+  completion_percentage: number;
+}
+```
+
+### 4. Comment System
+
+**Goal**: Simple threaded discussion on flashcards
+
+**Implementation**:
+- Comment section below each flashcard
+- Support for replies (one level deep only)
+- Pagination for comments (10 per page)
+- Basic text formatting only (no rich media)
+
+**Data Structure**:
+```typescript
+interface Comment {
+  id: string;
+  parent_id?: string; // For replies
+  user_id: string;
+  flashcard_id: string;
+  content: string;
+  created_at: string;
+  user: {
+    name: string;
+  }
+}
+```
+
+### 5. Homework Reminder
+
+**Goal**: Simple list of assignments with discussion
+
+**Implementation**:
+- List view of upcoming homework
+- Sort by due date
+- Comment capability on each homework item
+- No complex scheduling or notifications (v1)
+
+**Data Structure**:
+```typescript
+interface Homework {
+  id: string;
+  lesson_id: string;
+  title: string;
+  description: string;
+  due_date: string;
+  created_at: string;
+}
+```
+
+### 6. Admin Dashboard
+
+**Goal**: Easy content management for admins
+
+**Implementation**:
+- Protected admin routes
+- CRUD operations for flashcards, lessons, and homework
+- Batch upload capability for flashcards (CSV)
+- Basic user management
+
+## Database Schema Implementation
+
+```sql
+-- Example of Supabase SQL schema
+
+-- Users table (handled by Supabase Auth)
+-- Additional user data
+CREATE TABLE public.user_profiles (
+  id UUID REFERENCES auth.users NOT NULL PRIMARY KEY,
+  name TEXT,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc', NOW())
+);
+
+-- Lessons
+CREATE TABLE public.lessons (
+  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  lesson_number INTEGER NOT NULL,
+  title TEXT NOT NULL,
+  description TEXT,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc', NOW())
+);
+
+-- Flashcards
+CREATE TABLE public.flashcards (
+  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  lesson_id UUID REFERENCES public.lessons NOT NULL,
+  hanzi TEXT NOT NULL,
+  pinyin TEXT NOT NULL,
+  english TEXT NOT NULL,
+  example_sentence TEXT,
+  difficulty_level INTEGER DEFAULT 1,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc', NOW())
+);
+
+-- User progress
+CREATE TABLE public.user_flashcard_progress (
+  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  user_id UUID REFERENCES auth.users NOT NULL,
+  flashcard_id UUID REFERENCES public.flashcards NOT NULL,
+  familiarity_level INTEGER DEFAULT 1,
+  next_review_date TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc', NOW()),
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc', NOW()),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc', NOW()),
+  UNIQUE(user_id, flashcard_id)
+);
+
+-- Comments
+CREATE TABLE public.comments (
+  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  parent_id UUID REFERENCES public.comments,
+  user_id UUID REFERENCES auth.users NOT NULL,
+  flashcard_id UUID REFERENCES public.flashcards NOT NULL,
+  content TEXT NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc', NOW())
+);
+
+-- Homework
+CREATE TABLE public.homework (
+  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  lesson_id UUID REFERENCES public.lessons NOT NULL,
+  title TEXT NOT NULL,
+  description TEXT,
+  due_date TIMESTAMP WITH TIME ZONE NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc', NOW())
+);
+```
+
+## Development Workflow
+
+1. **Setup Phase** (1 week)
+   - Configure Next.js with TypeScript
+   - Set up Supabase project and tables
+   - Create authentication system
+   - Establish CI/CD pipeline
+
+2. **Core Feature Development** (3 weeks)
+   - Build flashcard component and study interface
+   - Implement lesson organization
+   - Create spaced repetition algorithm
+   - Develop admin panel for content management
+
+3. **Social Features** (1 week)
+   - Implement comment system
+   - Add reactions functionality
+   - Build homework reminder system
+
+4. **Testing & Refinement** (1 week)
+   - Perform cross-device testing
+   - Optimize performance
+   - Fix bugs and UX issues
+
+## Development Guidelines
+
+1. **Branch Strategy**:
+   - `main`: Production-ready code
+   - `develop`: Integration branch
+   - Feature branches: `feature/feature-name`
+   - Bug fixes: `fix/bug-description`
+
+2. **Code Review Requirements**:
+   - All PRs require at least one approval
+   - PRs must pass automated tests
+   - No direct commits to `main` or `develop`
+
+3. **Performance Standards**:
+   - Page load under 2 seconds
+   - First Contentful Paint under 1.2 seconds
+   - Total bundle size under 250KB (initial load)
+
+4. **Responsive Breakpoints**:
+   - Mobile: 320px - 480px (primary focus)
+   - Tablet: 481px - 768px
+   - Desktop: 769px and above
+
+## File Structure
+
+```
+src/
+├── app/
+│   ├── (auth)/
+│   │   ├── login/
+│   │   └── register/
+│   ├── (dashboard)/
+│   │   ├── lessons/
+│   │   ├── flashcards/
+│   │   └── homework/
+│   └── (admin)/
+│       ├── lessons/
+│       ├── flashcards/
+│       └── homework/
+├── components/
+│   ├── auth/
+│   ├── flashcards/
+│   ├── lessons/
+│   ├── comments/
+│   └── ui/ (reusable UI components)
+├── hooks/
+├── lib/
+│   ├── supabase/
+│   ├── utils/
+│   └── spaced-repetition/
+├── types/
+└── styles/
+```
+
+This SOP provides clear guidelines and structure for your engineering team to implement the Chinese flashcard application efficiently and consistently. The focus is on a mobile-first approach with clear separation of concerns and modular components.
