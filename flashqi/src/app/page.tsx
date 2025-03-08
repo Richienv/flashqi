@@ -43,7 +43,7 @@ export default function Home() {
             Learn Mandarin Chinese with our intelligent flashcard system powered by spaced repetition
           </p>
           <div className="flex justify-center animate-slide-up opacity-0" style={{ animationDelay: '0.9s', animationFillMode: 'forwards' }}>
-            <Link href="/auth/register">
+            <Link href="/dashboard/flashcards">
               <Button 
                 variant="primary" 
                 size="lg" 

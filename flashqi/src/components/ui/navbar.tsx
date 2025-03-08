@@ -12,7 +12,7 @@ export function Navbar() {
   return (
     <header className="sticky top-0 z-50 w-full border-b border-blue-100 bg-white">
       <div className="container flex h-16 items-center px-4 sm:px-6 lg:px-8">
-        <Link href="/" className="flex items-center">
+        <Link href="/dashboard/flashcards" className="flex items-center">
           <span className="text-xl font-bold text-blue-600">FlashQi</span>
         </Link>
         
@@ -93,51 +93,48 @@ export function MobileNav() {
   
   return (
     <div className="fixed bottom-0 left-0 z-50 w-full h-16 bg-white border-t border-blue-100 md:hidden">
-      <div className="grid h-full grid-cols-2">
+      <div className="grid h-full max-w-lg grid-cols-2 mx-auto">
         <Link
           href="/dashboard/flashcards"
-          className={`flex flex-col items-center justify-center ${
+          className={`inline-flex flex-col items-center justify-center font-medium ${
             pathname.includes('/dashboard/flashcards') ? 'text-blue-600' : 'text-black'
           }`}
         >
           <svg 
             xmlns="http://www.w3.org/2000/svg" 
-            width="20" 
-            height="20" 
-            viewBox="0 0 24 24" 
             fill="none" 
+            viewBox="0 0 24 24" 
+            strokeWidth="1.5" 
             stroke="currentColor" 
-            strokeWidth="2" 
-            strokeLinecap="round" 
-            strokeLinejoin="round"
+            className="w-6 h-6 mb-1"
           >
-            <rect x="2" y="2" width="20" height="8" rx="2" ry="2"></rect>
-            <rect x="2" y="14" width="20" height="8" rx="2" ry="2"></rect>
+            <path 
+              strokeLinecap="round" 
+              strokeLinejoin="round" 
+              d="M4.26 10.147a60.438 60.438 0 0 0-.491 6.347A48.62 48.62 0 0 1 12 20.904a48.62 48.62 0 0 1 8.232-4.41 60.46 60.46 0 0 0-.491-6.347m-15.482 0a50.636 50.636 0 0 0-2.658-.813A59.906 59.906 0 0 1 12 3.493a59.903 59.903 0 0 1 10.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.717 50.717 0 0 1 12 13.489a50.702 50.702 0 0 1 7.74-3.342M6.75 15a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Zm0 0v-3.675A55.378 55.378 0 0 1 12 8.443m-7.007 11.55A5.981 5.981 0 0 0 6.75 15.75v-1.5" 
+            />
           </svg>
-          <span className="text-xs mt-1">Flashcards</span>
+          <span className="text-xs">Flashcards</span>
         </Link>
         
         <Link
-          href="/dashboard/homework"
-          className={`flex flex-col items-center justify-center ${
+          href="/dashboard/flashcards"
+          className={`inline-flex flex-col items-center justify-center font-medium ${
             pathname.includes('/dashboard/homework') ? 'text-blue-600' : 'text-black'
           }`}
         >
           <svg 
             xmlns="http://www.w3.org/2000/svg" 
-            width="20" 
-            height="20" 
-            viewBox="0 0 24 24" 
             fill="none" 
+            viewBox="0 0 24 24" 
+            strokeWidth="1.5" 
             stroke="currentColor" 
-            strokeWidth="2" 
-            strokeLinecap="round" 
-            strokeLinejoin="round"
+            className="w-6 h-6 mb-1"
           >
             <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
             <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
           </svg>
-          <span className="text-xs mt-1">Homework</span>
+          <span className="text-xs">Homework</span>
         </Link>
       </div>
     </div>
