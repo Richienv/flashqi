@@ -1,35 +1,29 @@
-import { type ClassValue, clsx } from "clsx";
-import { twMerge } from "tailwind-merge";
+import { clsx, type ClassValue } from "clsx"
+import { twMerge } from "tailwind-merge"
 
-/**
- * Combines multiple class names into a single string and merges Tailwind CSS classes
- */
 export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs));
+  return twMerge(clsx(inputs))
 }
 
 /**
- * Helper for spaced repetition algorithm
- * Calculates the next review date based on familiarity level
+ * Format a date string to a human-readable format
+ * @param dateString - ISO date string to format
+ * @returns Formatted date string (e.g. "Jan 1, 2023")
  */
-export function calculateNextReviewDate(familiarityLevel: number): Date {
-  const now = new Date();
-  const days = Math.pow(2, familiarityLevel - 1); // 1, 2, 4, 8, 16 days
-  const nextReview = new Date(now);
-  nextReview.setDate(now.getDate() + days);
-  return nextReview;
-}
-
-/**
- * Format a date to a readable string
- */
-export function formatDate(date: Date | string): string {
-  if (typeof date === 'string') {
-    date = new Date(date);
+export function formatDate(dateString: string): string {
+  if (!dateString) return "";
+  
+  const date = new Date(dateString);
+  
+  // Check if the date is valid
+  if (isNaN(date.getTime())) {
+    console.error(`Invalid date string provided: ${dateString}`);
+    return "Invalid date";
   }
-  return new Intl.DateTimeFormat('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
+  
+  return new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
   }).format(date);
-} 
+}

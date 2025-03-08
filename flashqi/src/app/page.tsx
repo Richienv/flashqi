@@ -1,90 +1,76 @@
 import Link from "next/link";
-import { Navbar } from "@/components/ui/navbar";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
+import { AuroraText } from "@/components/magicui/aurora-text";
 
 export default function Home() {
   return (
-    <div className="flex flex-col min-h-screen">
-      <Navbar />
-      <main className="flex-1">
-        {/* Hero Section */}
-        <section className="bg-gradient-to-b from-white to-blue-50 py-16 md:py-24">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="max-w-3xl mx-auto text-center">
-              <h1 className="text-4xl font-bold tracking-tight text-slate-900 sm:text-5xl md:text-6xl">
-                Learn Chinese with <span className="text-blue-600">FlashQi</span>
-              </h1>
-              <p className="mt-6 text-xl text-slate-600">
-                Master Mandarin Chinese with our effective flashcard system that uses spaced repetition to optimize your learning.
-              </p>
-              <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center">
-                <Link href="/auth/register">
-                  <Button variant="primary" size="lg">
-                    Get Started
-                  </Button>
-                </Link>
-                <Link href="/dashboard/flashcards">
-                  <Button variant="outline" size="lg">
-                    Try Demo
-                  </Button>
-                </Link>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Features Section */}
-        <section className="py-16 bg-white">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-16">
-              <h2 className="text-3xl font-bold text-slate-900">Features</h2>
-              <p className="mt-4 text-lg text-slate-600">Everything you need to learn Chinese effectively</p>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              <div className="bg-white p-6 rounded-lg shadow-sm border border-slate-200">
-                <h3 className="text-xl font-semibold text-slate-900 mb-3">Spaced Repetition</h3>
-                <p className="text-slate-600">Our smart algorithm presents cards at optimal intervals to maximize retention.</p>
-              </div>
-              <div className="bg-white p-6 rounded-lg shadow-sm border border-slate-200">
-                <h3 className="text-xl font-semibold text-slate-900 mb-3">Structured Lessons</h3>
-                <p className="text-slate-600">Learn progressively with carefully designed lessons that build on each other.</p>
-              </div>
-              <div className="bg-white p-6 rounded-lg shadow-sm border border-slate-200">
-                <h3 className="text-xl font-semibold text-slate-900 mb-3">Community Discussion</h3>
-                <p className="text-slate-600">Learn with others by leaving comments and discussing difficult concepts.</p>
-              </div>
-            </div>
-          </div>
-        </section>
-      </main>
+    <div className="relative min-h-screen overflow-hidden">
+      {/* Background Image with subtle zoom animation */}
+      <div className="absolute inset-0 z-0">
+        <Image 
+          src="/bg-flashqi.jpeg" 
+          alt="FlashQi Background" 
+          fill 
+          priority
+          className="object-cover animate-slow-zoom"
+        />
+        <div className="absolute inset-0 bg-black/40" /> {/* Overlay for better text visibility */}
+      </div>
       
-      {/* Footer */}
-      <footer className="bg-slate-900 text-white py-8">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col md:flex-row justify-between items-center">
-            <div className="mb-4 md:mb-0">
-              <span className="text-2xl font-bold">FlashQi</span>
-            </div>
-            <div className="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-8">
-              <Link href="/about" className="text-slate-300 hover:text-white">
-                About
-              </Link>
-              <Link href="/privacy" className="text-slate-300 hover:text-white">
-                Privacy
-              </Link>
-              <Link href="/terms" className="text-slate-300 hover:text-white">
-                Terms
-              </Link>
-              <Link href="/contact" className="text-slate-300 hover:text-white">
-                Contact
-              </Link>
-            </div>
-            <div className="mt-4 md:mt-0">
-              <p className="text-slate-400 text-sm">© 2024 FlashQi. All rights reserved.</p>
-            </div>
+      {/* Navbar - Minimalist with fade-in animation */}
+      <header className="relative z-10 w-full py-6 px-8 animate-fade-in">
+        <div className="flex justify-between items-center">
+          {/* Brand Logo/Name */}
+          <Link href="/" className="flex items-center group">
+            <span className="text-2xl font-bold text-white group-hover:text-blue-300 transition-colors duration-300">FlashQi</span>
+          </Link>
+          
+          {/* Sign In Button - Top Right */}
+          <Link href="/auth/login">
+            <Button variant="ghost" className="text-white hover:bg-white/10 transition-all duration-300">
+              Sign In
+            </Button>
+          </Link>
+        </div>
+      </header>
+      
+      {/* Hero Content - Centered with staggered animations */}
+      <main className="relative z-10 flex items-center justify-center h-[calc(100vh-80px)]">
+        <div className="text-center px-4 max-w-2xl">
+          <h1 className="text-5xl font-bold tracking-tight text-white md:text-6xl mb-6 animate-slide-up opacity-0" style={{ animationDelay: '0.3s', animationFillMode: 'forwards' }}>
+            Master Chinese <AuroraText className="text-5xl font-bold md:text-6xl" colors={["#38bdf8", "#a855f7", "#2dd4bf", "#0070F3", "#6366f1"]}>Effortlessly</AuroraText>
+          </h1>
+          <p className="text-xl text-white/90 mb-10 animate-slide-up opacity-0" style={{ animationDelay: '0.6s', animationFillMode: 'forwards' }}>
+            Learn Mandarin Chinese with our intelligent flashcard system powered by spaced repetition
+          </p>
+          <div className="flex justify-center animate-slide-up opacity-0" style={{ animationDelay: '0.9s', animationFillMode: 'forwards' }}>
+            <Link href="/auth/register">
+              <Button 
+                variant="primary" 
+                size="lg" 
+                className="px-10 py-6 text-lg shadow-xl hover:shadow-2xl hover:scale-105 transform transition-all duration-300 ease-in-out"
+              >
+                Get Started
+              </Button>
+            </Link>
           </div>
         </div>
-      </footer>
+      </main>
+      
+      {/* Visual Navigation Indicator with pulse animation */}
+      <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-10 animate-fade-in" style={{ animationDelay: '1.2s' }}>
+        <div className="flex space-x-2">
+          <div className="w-2 h-2 rounded-full bg-white opacity-100 animate-pulse"></div>
+          <div className="w-2 h-2 rounded-full bg-white opacity-50"></div>
+          <div className="w-2 h-2 rounded-full bg-white opacity-50"></div>
+        </div>
+      </div>
+      
+      {/* Scroll indicator */}
+      <div className="absolute bottom-10 right-10 z-10 animate-bounce hidden md:block opacity-0 animate-fade-in" style={{ animationDelay: '1.5s', animationFillMode: 'forwards' }}>
+        <p className="text-white text-sm tracking-widest uppercase rotate-90 transform origin-bottom-left">Scroll</p>
+      </div>
     </div>
   );
 }
