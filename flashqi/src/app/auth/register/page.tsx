@@ -3,7 +3,8 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { supabase } from '@/lib/supabase/client';
+// Commented out because it's not being used
+// import { supabase } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
 
 export default function RegisterPage() {

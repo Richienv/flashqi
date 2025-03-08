@@ -1,7 +1,8 @@
 'use client';
 
 import Link from "next/link";
-import { Button } from "./button";
+// Commented out because it's not being used
+// import { Button } from "./button";
 import { usePathname } from "next/navigation";
 
 export function Navbar() {

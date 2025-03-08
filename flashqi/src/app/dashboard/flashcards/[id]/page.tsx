@@ -90,7 +90,14 @@ const SAMPLE_COMMENTS: Record<string, Comment[]> = {
   ]
 };
 
-export default function FlashcardDetailPage({ params }: { params: { id: string } }) {
+// Add the proper interface for the page props
+interface PageProps {
+  params: {
+    id: string;
+  };
+}
+
+export default function FlashcardDetailPage({ params }: PageProps) {
   const router = useRouter();
   const flashcardId = params.id;
   const [flashcard, setFlashcard] = useState<any>(null);

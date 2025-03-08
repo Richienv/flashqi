@@ -114,7 +114,14 @@ const SAMPLE_COMMENTS: Record<string, Comment[]> = {
   ]
 };
 
-export default function HomeworkDetailPage({ params }: { params: { id: string } }) {
+// Add the proper interface for the page props
+interface PageProps {
+  params: {
+    id: string;
+  };
+}
+
+export default function HomeworkDetailPage({ params }: PageProps) {
   const router = useRouter();
   const homeworkId = params.id;
   const [homework, setHomework] = useState<any>(null);

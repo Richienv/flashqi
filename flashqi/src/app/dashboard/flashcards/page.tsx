@@ -4,8 +4,9 @@ import { useState, useEffect } from 'react';
 import { Navbar, MobileNav } from "@/components/ui/navbar";
 import { Button } from "@/components/ui/button";
 import { Tabs } from "@/components/ui/tabs";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
+// Commented out because it's not being used in this file
+// import Link from "next/link";
+// import { useRouter } from "next/navigation";
 
 // Mock lessons data
 const LESSONS = [
@@ -187,7 +188,7 @@ const PRACTICE_CATEGORIES = [
 ];
 
 export default function FlashcardsPage() {
-  const router = useRouter();
+  // const router = useRouter();
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [previewLessonId, setPreviewLessonId] = useState<string | null>(null); 
   const [activeStudyTab, setActiveStudyTab] = useState<string | number>("new");

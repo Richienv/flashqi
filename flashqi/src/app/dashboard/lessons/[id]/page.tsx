@@ -118,7 +118,14 @@ const LESSON_FLASHCARDS = {
   ]
 };
 
-export default function LessonPage({ params }: { params: { id: string } }) {
+// Add the proper interface for the page props
+interface PageProps {
+  params: {
+    id: string;
+  };
+}
+
+export default function LessonPage({ params }: PageProps) {
   const router = useRouter();
   const lessonId = params.id;
   const [currentCardIndex, setCurrentCardIndex] = useState(0);

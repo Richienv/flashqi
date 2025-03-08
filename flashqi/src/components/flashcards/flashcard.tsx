@@ -68,7 +68,7 @@ export function Flashcard({ card, onKnown, onUnknown }: FlashcardProps) {
           onClick={(e) => { e.stopPropagation(); onUnknown?.(); }}
           className="px-4 py-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition-colors"
         >
-          Don't Know
+          Don&apos;t Know
         </button>
         <button 
           onClick={(e) => { e.stopPropagation(); onKnown?.(); }}
