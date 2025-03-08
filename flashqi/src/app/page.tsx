@@ -1,5 +1,4 @@
 import Link from "next/link";
-import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { AuroraText } from "@/components/magicui/aurora-text";
 
@@ -7,15 +6,14 @@ export default function Home() {
   return (
     <div className="relative min-h-screen overflow-hidden">
       {/* Background Image with subtle zoom animation */}
-      <div className="absolute inset-0 z-0">
-        <Image 
-          src="/bg-flashqi.jpeg" 
-          alt="FlashQi Background" 
-          fill 
-          priority
-          className="object-cover animate-slow-zoom"
-        />
-        <div className="absolute inset-0 bg-black/40" /> {/* Overlay for better text visibility */}
+      <div 
+        className="absolute inset-0 bg-cover bg-center z-0" 
+        style={{ 
+          backgroundImage: 'url(/bg-flashqi.jpeg)',
+          animation: 'slowZoom 20s ease-in-out infinite alternate'
+        }}
+      >
+        <div className="absolute inset-0 bg-black/70" /> {/* Increased overlay opacity for better text visibility */}
       </div>
       
       {/* Navbar - Minimalist with fade-in animation */}
