@@ -1153,6 +1153,268 @@ export const LESSON_FLASHCARDS = {
         english: "Mr. Wang is my teacher."
       }
     }
+  ],
+  "lesson6": [
+    {
+      id: "6-1",
+      lesson_id: "lesson6",
+      hanzi: "请问",
+      pinyin: "qǐngwèn",
+      english: "May I ask/Excuse me",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "请问，图书馆在哪里？",
+        pinyin: "Qǐngwèn, túshūguǎn zài nǎlǐ?",
+        english: "Excuse me, where is the library?"
+      }
+    },
+    {
+      id: "6-2",
+      lesson_id: "lesson6",
+      hanzi: "问",
+      pinyin: "wèn",
+      english: "To ask",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "我想问你一个问题。",
+        pinyin: "Wǒ xiǎng wèn nǐ yī gè wèntí.",
+        english: "I want to ask you a question."
+      }
+    },
+    {
+      id: "6-3",
+      lesson_id: "lesson6",
+      hanzi: "贵姓",
+      pinyin: "guìxìng",
+      english: "Your surname (polite)",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "请问您贵姓？",
+        pinyin: "Qǐngwèn nín guìxìng?",
+        english: "May I ask your surname?"
+      }
+    },
+    {
+      id: "6-4",
+      lesson_id: "lesson6",
+      hanzi: "姓",
+      pinyin: "xìng",
+      english: "Surname",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "我姓王。",
+        pinyin: "Wǒ xìng Wáng.",
+        english: "My surname is Wang."
+      }
+    },
+    {
+      id: "6-5",
+      lesson_id: "lesson6",
+      hanzi: "叫",
+      pinyin: "jiào",
+      english: "To be called",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "我叫小明。",
+        pinyin: "Wǒ jiào Xiǎo Míng.",
+        english: "My name is Xiao Ming."
+      }
+    },
+    {
+      id: "6-6",
+      lesson_id: "lesson6",
+      hanzi: "名字",
+      pinyin: "míngzi",
+      english: "Name",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "你的名字是什么？",
+        pinyin: "Nǐ de míngzi shì shénme?",
+        english: "What is your name?"
+      }
+    },
+    {
+      id: "6-7",
+      lesson_id: "lesson6",
+      hanzi: "那",
+      pinyin: "nà",
+      english: "That",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "那是我的书。",
+        pinyin: "Nà shì wǒ de shū.",
+        english: "That is my book."
+      }
+    },
+    {
+      id: "6-8",
+      lesson_id: "lesson6",
+      hanzi: "国",
+      pinyin: "guó",
+      english: "Country",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "中国是一个大国。",
+        pinyin: "Zhōngguó shì yī gè dà guó.",
+        english: "China is a big country."
+      }
+    },
+    {
+      id: "6-9",
+      lesson_id: "lesson6",
+      hanzi: "人",
+      pinyin: "rén",
+      english: "Person",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "我是美国人。",
+        pinyin: "Wǒ shì Měiguó rén.",
+        english: "I am American."
+      }
+    },
+    {
+      id: "6-10",
+      lesson_id: "lesson6",
+      hanzi: "认识",
+      pinyin: "rènshi",
+      english: "To know (someone)",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "很高兴认识你。",
+        pinyin: "Hěn gāoxìng rènshi nǐ.",
+        english: "Nice to meet you."
+      }
+    },
+    {
+      id: "6-11",
+      lesson_id: "lesson6",
+      hanzi: "高兴",
+      pinyin: "gāoxìng",
+      english: "Happy",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "我很高兴。",
+        pinyin: "Wǒ hěn gāoxìng.",
+        english: "I am very happy."
+      }
+    },
+    {
+      id: "6-12",
+      lesson_id: "lesson6",
+      hanzi: "也",
+      pinyin: "yě",
+      english: "Also",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "我也是学生。",
+        pinyin: "Wǒ yě shì xuéshēng.",
+        english: "I am also a student."
+      }
+    },
+    {
+      id: "6-13",
+      lesson_id: "lesson6",
+      hanzi: "学校",
+      pinyin: "xuéxiào",
+      english: "School",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "这是我的学校。",
+        pinyin: "Zhè shì wǒ de xuéxiào.",
+        english: "This is my school."
+      }
+    },
+    {
+      id: "6-14",
+      lesson_id: "lesson6",
+      hanzi: "什么",
+      pinyin: "shénme",
+      english: "What",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "你想吃什么？",
+        pinyin: "Nǐ xiǎng chī shénme?",
+        english: "What do you want to eat?"
+      }
+    },
+    {
+      id: "6-15",
+      lesson_id: "lesson6",
+      hanzi: "发音",
+      pinyin: "fāyīn",
+      english: "Pronunciation",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "这个字的发音很难。",
+        pinyin: "Zhège zì de fāyīn hěn nán.",
+        english: "This character's pronunciation is difficult."
+      }
+    },
+    {
+      id: "6-16",
+      lesson_id: "lesson6",
+      hanzi: "汉字",
+      pinyin: "hànzì",
+      english: "Chinese character",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "我在学习汉字。",
+        pinyin: "Wǒ zài xuéxí hànzì.",
+        english: "I am learning Chinese characters."
+      }
+    },
+    {
+      id: "6-17",
+      lesson_id: "lesson6",
+      hanzi: "书",
+      pinyin: "shū",
+      english: "Book",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "这是中文书。",
+        pinyin: "Zhè shì Zhōngwén shū.",
+        english: "This is a Chinese book."
+      }
+    },
+    {
+      id: "6-18",
+      lesson_id: "lesson6",
+      hanzi: "谁",
+      pinyin: "shéi/shuí",
+      english: "Who",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "他是谁？",
+        pinyin: "Tā shì shéi?",
+        english: "Who is he?"
+      }
+    },
+    {
+      id: "6-19",
+      lesson_id: "lesson6",
+      hanzi: "的",
+      pinyin: "de",
+      english: "Possessive particle",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "这是我的书。",
+        pinyin: "Zhè shì wǒ de shū.",
+        english: "This is my book."
+      }
+    },
+    {
+      id: "6-20",
+      lesson_id: "lesson6",
+      hanzi: "杂志",
+      pinyin: "zázhì",
+      english: "Magazine",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "我喜欢看杂志。",
+        pinyin: "Wǒ xǐhuan kàn zázhì.",
+        english: "I like to read magazines."
+      }
+    }
   ]
 };
 
@@ -1162,7 +1424,8 @@ export const LESSON_PROGRESS = {
   "lesson2": 40,
   "lesson3": 10,
   "lesson4": 0,
-  "lesson5": 0
+  "lesson5": 0,
+  "lesson6": 0
 };
 
 // Study mode tabs
@@ -1179,7 +1442,8 @@ const calculateTotalFlashcards = () => {
     (LESSON_FLASHCARDS.lesson2?.length || 0) +
     (LESSON_FLASHCARDS.lesson3?.length || 0) +
     (LESSON_FLASHCARDS.lesson4?.length || 0) +
-    (LESSON_FLASHCARDS.lesson5?.length || 0);
+    (LESSON_FLASHCARDS.lesson5?.length || 0) +
+    (LESSON_FLASHCARDS.lesson6?.length || 0);
   
   return tutorialCount;
 };
@@ -1192,7 +1456,7 @@ export const PRACTICE_CATEGORIES = [
     color: 'from-[#EEF1FF] to-white',
     hoverColor: 'from-[#E6EBFF] to-white',
     textColor: 'text-[#2D41D1]',
-    lessons: 5,
+    lessons: 6,
     flashcards: calculateTotalFlashcards()
   },
   {
