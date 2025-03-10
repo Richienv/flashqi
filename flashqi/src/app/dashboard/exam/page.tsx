@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { Navbar, MobileNav } from "@/components/ui/navbar";
 import { Button } from "@/components/ui/button";
@@ -25,8 +25,32 @@ interface ExamQuestion {
   matchPairs?: { hanzi: string; pinyin: string }[];
 }
 
+// Add this interface for matching pairs
+interface MatchingPair {
+  hanzi: string;
+  pinyin: string;
+  matched?: boolean;
+  selectedAnswer?: string;
+}
+
+// Add this helper function
+const convertToNumberedTone = (pinyin: string): string => {
+  const toneMarks = {
+    'ā': 'a1', 'á': 'a2', 'ǎ': 'a3', 'à': 'a4',
+    'ē': 'e1', 'é': 'e2', 'ě': 'e3', 'è': 'e4',
+    'ī': 'i1', 'í': 'i2', 'ǐ': 'i3', 'ì': 'i4',
+    'ō': 'o1', 'ó': 'o2', 'ǒ': 'o3', 'ò': 'o4',
+    'ū': 'u1', 'ú': 'u2', 'ǔ': 'u3', 'ù': 'u4',
+    'ǖ': 'ü1', 'ǘ': 'ü2', 'ǚ': 'ü3', 'ǜ': 'ü4',
+  };
+
+  return pinyin.split('').map(char => toneMarks[char as keyof typeof toneMarks] || char).join('');
+};
+
 export default function ExamPage() {
   const router = useRouter();
+  
+  // Group all state declarations together
   const [questions, setQuestions] = useState<ExamQuestion[]>([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
@@ -35,17 +59,25 @@ export default function ExamPage() {
   const [examStarted, setExamStarted] = useState(false);
   const [score, setScore] = useState(0);
   const [showAnswer, setShowAnswer] = useState(false);
-  const [timeRemaining, setTimeRemaining] = useState(30 * 60); // 30 minutes in seconds
+  const [timeRemaining, setTimeRemaining] = useState(30 * 60);
+  const [matchingPairs, setMatchingPairs] = useState<MatchingPair[]>([]);
+  const [selectedPair, setSelectedPair] = useState<{hanzi?: string; pinyin?: string}>({});
 
-  // Generate exam questions on component mount
-  useEffect(() => {
-    // Generate random questions when the component mounts
-    const examQuestions = generateExamQuestions(30);
-    setQuestions(examQuestions);
+  // Define handlers before useEffect
+  const handleExamCompletion = useCallback(() => {
+    // Save the last answer if not already saved
+    const finalUserAnswers = [...userAnswers];
+    finalUserAnswers[currentQuestionIndex] = selectedAnswer;
+    setUserAnswers(finalUserAnswers);
     
-    // Initialize userAnswers array with nulls
-    setUserAnswers(new Array(examQuestions.length).fill(null));
-  }, []);
+    // Calculate score
+    const correctAnswers = finalUserAnswers.filter(
+      (answer, index) => answer === questions[index]?.correctAnswer
+    ).length;
+    
+    setScore(correctAnswers);
+    setExamCompleted(true);
+  }, [currentQuestionIndex, questions, selectedAnswer, userAnswers]);
 
   // Timer effect
   useEffect(() => {
@@ -63,7 +95,43 @@ export default function ExamPage() {
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [examStarted, examCompleted]);
+  }, [examStarted, examCompleted, handleExamCompletion]);
+
+  // Initialize exam questions
+  useEffect(() => {
+    const examQuestions = generateExamQuestions(30);
+    setQuestions(examQuestions);
+    setUserAnswers(new Array(examQuestions.length).fill(null));
+  }, []);
+
+  // Handle matching pairs initialization
+  useEffect(() => {
+    const currentQuestion = questions[currentQuestionIndex];
+    if (currentQuestion?.type === 'matching' && currentQuestion.matchPairs) {
+      setMatchingPairs(currentQuestion.matchPairs.map(pair => ({
+        ...pair,
+        matched: false,
+        selectedAnswer: undefined
+      })));
+    }
+  }, [currentQuestionIndex, questions]);
+
+  // Handle matching pair selection
+  useEffect(() => {
+    if (selectedPair.hanzi && selectedPair.pinyin) {
+      setMatchingPairs(prev => prev.map(pair => {
+        if (pair.hanzi === selectedPair.hanzi) {
+          return {
+            ...pair,
+            selectedAnswer: selectedPair.pinyin,
+            matched: true
+          };
+        }
+        return pair;
+      }));
+      setSelectedPair({});
+    }
+  }, [selectedPair]);
 
   const startExam = () => {
     setExamStarted(true);
@@ -111,41 +179,55 @@ export default function ExamPage() {
     }
   };
 
-  const checkAnswer = () => {
-    setShowAnswer(true);
-    
-    // Display a success message when the answer is correct
+  const normalizePinyin = (pinyin: string) => {
+    return pinyin.normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toLowerCase()
+      .trim();
+  };
+
+  // Add this helper function to check if all matches are complete
+  const isMatchingComplete = () => {
     const currentQuestion = questions[currentQuestionIndex];
-    const isCorrect = selectedAnswer === currentQuestion.correctAnswer;
+    if (currentQuestion?.type === 'matching') {
+      return matchingPairs.every(pair => pair.matched);
+    }
+    return !!selectedAnswer;
+  };
+
+  const checkAnswer = () => {
+    const currentQuestion = questions[currentQuestionIndex];
+    
+    // For matching questions, verify all pairs are matched before proceeding
+    if (currentQuestion.type === 'matching') {
+      const allMatched = matchingPairs.every(pair => pair.matched);
+      if (!allMatched) {
+        return; // Don't proceed if not all pairs are matched
+      }
+    }
+    
+    setShowAnswer(true);
+    let isCorrect = false;
+    
+    if (currentQuestion.type === 'matching') {
+      isCorrect = matchingPairs.every(pair => pair.selectedAnswer === pair.pinyin);
+      setSelectedAnswer(JSON.stringify(matchingPairs.map(p => p.selectedAnswer)));
+    } else if (currentQuestion.type === 'tone-selection') {
+      isCorrect = selectedAnswer === currentQuestion.correctAnswer;
+    } else {
+      isCorrect = selectedAnswer === currentQuestion.correctAnswer;
+    }
     
     if (isCorrect) {
-      // You could use a toast notification library here
-      // For now, let's update the DOM directly
       const messageDiv = document.createElement('div');
       messageDiv.className = 'fixed top-20 right-4 bg-green-100 border border-green-500 text-green-800 rounded-lg px-4 py-2 z-50 animate-fadeIn';
       messageDiv.textContent = 'Correct! ✓';
       document.body.appendChild(messageDiv);
       
-      // Remove after 2 seconds
       setTimeout(() => {
         messageDiv.remove();
       }, 2000);
     }
-  };
-
-  const handleExamCompletion = () => {
-    // Save the last answer if not already saved
-    const finalUserAnswers = [...userAnswers];
-    finalUserAnswers[currentQuestionIndex] = selectedAnswer;
-    setUserAnswers(finalUserAnswers);
-    
-    // Calculate score
-    const correctAnswers = finalUserAnswers.filter(
-      (answer, index) => answer === questions[index]?.correctAnswer
-    ).length;
-    
-    setScore(correctAnswers);
-    setExamCompleted(true);
   };
 
   const restartExam = () => {
@@ -302,110 +384,152 @@ export default function ExamPage() {
   const renderToneSelectionQuestion = (question: ExamQuestion) => (
     <div className="bg-white rounded-xl shadow-md overflow-hidden">
       <div className="p-6">
-        <h3 className="font-bold text-xl mb-4">{question.prompt}</h3>
+        <h3 className="text-xl font-bold mb-4 text-center">{question.prompt}</h3>
         
-        <div className="mb-6 text-center">
-          <div className="text-4xl font-bold">{question.hanzi}</div>
-          <div className="text-xl text-gray-600">(Select the correct tone)</div>
+        <div className="mb-6">
+          <div className="text-6xl font-bold text-center">{question.hanzi}</div>
+          <div className="mt-2 text-center text-gray-500">
+            (Select the correct tone)
+          </div>
         </div>
         
         <div className="grid grid-cols-2 gap-3">
           {question.options?.map((option, index) => (
-            <div 
+            <button
               key={index}
-              className={`border rounded-lg p-3 cursor-pointer transition-colors text-center ${
-                selectedAnswer === option 
-                  ? 'border-blue-500 bg-blue-50' 
-                  : 'border-gray-200 hover:border-blue-300'
-              } ${
-                showAnswer && option === question.correctAnswer
-                  ? 'border-green-500 bg-green-50'
-                  : showAnswer && selectedAnswer === option && option !== question.correctAnswer
-                  ? 'border-red-500 bg-red-50'
-                  : ''
-              }`}
+              type="button"
+              className={`w-full border rounded-lg p-3 text-center cursor-pointer transition-colors text-xl
+                ${selectedAnswer === option ? 'border-blue-500 bg-blue-50' : 'hover:bg-gray-50'} 
+                ${showAnswer && option === question.correctAnswer ? 'correct-answer' : ''}
+                ${showAnswer && selectedAnswer === option && option !== question.correctAnswer ? 'incorrect-answer' : ''}
+              `}
               onClick={() => !showAnswer && handleAnswerSelect(option)}
+              disabled={showAnswer}
             >
-              <div className="text-xl">{option}</div>
-            </div>
+              {option}
+            </button>
           ))}
         </div>
         
         {showAnswer && (
           <div className="mt-4 p-3 bg-blue-50 rounded-lg">
-            <p className="font-medium">Correct answer: {question.correctAnswer}</p>
+            <p className="font-medium text-blue-800">
+              {selectedAnswer === question.correctAnswer ? 
+                '✓ Correct!' : 
+                `✗ The correct tone is: ${question.correctAnswer}`}
+            </p>
           </div>
         )}
       </div>
     </div>
   );
 
-  const renderMatchingQuestion = (question: ExamQuestion) => (
-    <div className="bg-white rounded-xl shadow-md overflow-hidden">
-      <div className="p-6">
-        <h3 className="text-xl font-bold mb-4 text-center">{question.prompt}</h3>
-        
-        <div className="grid grid-cols-2 gap-x-8 gap-y-4">
-          {/* Left column - Characters */}
-          <div className="space-y-3">
-            {question.matchPairs?.map((pair, index) => (
-              <div key={`left-${index}`} className="border border-gray-200 rounded p-3 text-center text-xl">
-                {pair.hanzi}
-              </div>
-            ))}
-          </div>
+  const renderMatchingQuestion = (question: ExamQuestion) => {
+    const handleMatch = (type: 'hanzi' | 'pinyin', value: string) => {
+      if (showAnswer) return;
+
+      if (type === 'hanzi') {
+        setSelectedPair(prev => ({ ...prev, hanzi: value }));
+      } else {
+        setSelectedPair(prev => ({ ...prev, pinyin: value }));
+      }
+    };
+
+    // Check if all pairs are matched
+    const allMatched = matchingPairs.every(pair => pair.matched);
+
+    return (
+      <div className="bg-white rounded-xl shadow-md overflow-hidden">
+        <div className="p-6">
+          <h3 className="text-xl font-bold mb-4 text-center">{question.prompt}</h3>
           
-          {/* Right column - Selectable answers */}
-          <div className="space-y-3">
-            {question.options?.map((option, index) => {
-              // Parse selected answer from JSON if it exists
-              const currentSelections = selectedAnswer ? JSON.parse(selectedAnswer) : [];
-              const isSelected = Array.isArray(currentSelections) && currentSelections.includes(option);
-              
-              return (
-                <button 
-                  key={`right-${index}`}
+          <div className="grid grid-cols-2 gap-x-8 gap-y-4">
+            {/* Left column - Characters */}
+            <div className="space-y-3">
+              <div className="text-center mb-2 text-gray-500">Characters</div>
+              {matchingPairs.map((pair, index) => (
+                <button
+                  key={`hanzi-${index}`}
                   type="button"
-                  className={`border rounded p-3 text-center cursor-pointer transition-colors w-full text-left
-                    ${isSelected ? 'bg-blue-100 border-blue-500' : 'hover:bg-gray-50'} 
-                    ${showAnswer && question.matchPairs?.[index].pinyin === option ? 'bg-green-100 border-green-500' : ''}
-                    ${showAnswer && isSelected && question.matchPairs?.[index].pinyin !== option ? 'bg-red-100 border-red-500' : ''}
+                  className={`w-full border rounded-lg p-3 text-center text-2xl transition-colors relative
+                    ${selectedPair.hanzi === pair.hanzi ? 'bg-blue-50 border-blue-500' : 'hover:bg-gray-50'}
+                    ${pair.matched ? 'border-green-500 bg-green-50' : ''}
+                    ${showAnswer && pair.selectedAnswer !== pair.pinyin ? 'border-red-500 bg-red-50' : ''}
                   `}
-                  onClick={() => {
-                    if (!showAnswer) {
-                      const current = selectedAnswer ? JSON.parse(selectedAnswer) : [];
-                      if (!current.includes(option)) {
-                        const newAnswer = [...current, option];
-                        setSelectedAnswer(JSON.stringify(newAnswer));
-                      }
-                    }
-                  }}
-                  disabled={showAnswer}
+                  onClick={() => handleMatch('hanzi', pair.hanzi)}
+                  disabled={pair.matched || showAnswer}
                 >
+                  {/* Add number indicator */}
+                  <span className="absolute left-2 top-2 text-sm text-gray-500">
+                    {index + 1}.
+                  </span>
+                  {pair.hanzi}
+                </button>
+              ))}
+            </div>
+            
+            {/* Right column - Pinyin */}
+            <div className="space-y-3">
+              <div className="text-center mb-2 text-gray-500">Pronunciation</div>
+              {question.options?.map((option, index) => (
+                <button
+                  key={`pinyin-${index}`}
+                  type="button"
+                  className={`w-full border rounded-lg p-3 text-center transition-colors relative
+                    ${selectedPair.pinyin === option ? 'bg-blue-50 border-blue-500' : 'hover:bg-gray-50'}
+                    ${matchingPairs.find(p => p.selectedAnswer === option && p.pinyin === option) ? 'border-green-500 bg-green-50' : ''}
+                    ${matchingPairs.find(p => p.selectedAnswer === option && p.pinyin !== option) ? 'border-red-500 bg-red-50' : ''}
+                    ${matchingPairs.find(p => p.selectedAnswer === option) ? 'opacity-50' : ''}
+                  `}
+                  onClick={() => handleMatch('pinyin', option)}
+                  disabled={matchingPairs.find(p => p.selectedAnswer === option) || showAnswer}
+                >
+                  {/* Add letter indicator */}
+                  <span className="absolute left-2 top-2 text-sm text-gray-500">
+                    {String.fromCharCode(65 + index)}.
+                  </span>
                   {option}
                 </button>
-              );
-            })}
-          </div>
-        </div>
-        
-        {showAnswer && (
-          <div className="mt-6 p-4 bg-blue-50 rounded-lg">
-            <p className="font-medium">Correct Matching:</p>
-            <div className="mt-2 space-y-2">
-              {question.matchPairs?.map((pair, index) => (
-                <div key={`answer-${index}`} className="flex items-center justify-between">
-                  <span className="font-medium">{pair.hanzi}</span>
-                  <span className="text-gray-600">→</span>
-                  <span className="font-medium">{pair.pinyin}</span>
-                </div>
               ))}
             </div>
           </div>
-        )}
+          
+          {/* Show matching instructions */}
+          <div className="mt-4 text-center text-gray-500">
+            Click a character on the left, then click its matching pronunciation on the right
+          </div>
+
+          {/* Show current matches */}
+          <div className="mt-4 space-y-2">
+            {matchingPairs.map((pair, index) => (
+              pair.selectedAnswer && (
+                <div key={`match-${index}`} className="text-sm text-gray-600 text-center">
+                  {`${index + 1}. ${pair.hanzi} → ${pair.selectedAnswer}`}
+                </div>
+              )
+            ))}
+          </div>
+          
+          {showAnswer && (
+            <div className="mt-6 p-4 bg-blue-50 rounded-lg">
+              <p className="font-medium text-center">Correct Matches:</p>
+              <div className="mt-2 space-y-2">
+                {matchingPairs.map((pair, index) => (
+                  <div key={`answer-${index}`} className="flex items-center justify-center gap-4">
+                    <span className="font-medium">{`${index + 1}. ${pair.hanzi}`}</span>
+                    <span className="text-gray-600">→</span>
+                    <span className={`font-medium ${pair.selectedAnswer === pair.pinyin ? 'text-green-600' : 'text-red-600'}`}>
+                      {pair.pinyin}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   const renderTranslationQuestion = (question: ExamQuestion) => (
     <div className="bg-white rounded-xl shadow-md overflow-hidden">
@@ -419,17 +543,19 @@ export default function ExamPage() {
         
         <div className="space-y-3">
           {question.options?.map((option, index) => (
-            <div
+            <button
               key={index}
-              className={`border rounded-lg p-3 cursor-pointer transition-colors
+              type="button"
+              className={`w-full border rounded-lg p-3 cursor-pointer transition-colors text-left
                 ${selectedAnswer === option ? 'border-blue-500 bg-blue-50' : 'hover:bg-gray-50'} 
-                ${showAnswer && option === question.correctAnswer ? 'border-green-500 bg-green-50 !text-green-800' : ''}
-                ${showAnswer && selectedAnswer === option && option !== question.correctAnswer ? 'border-red-500 bg-red-50 !text-red-800' : ''}
+                ${showAnswer && option === question.correctAnswer ? 'correct-answer' : ''}
+                ${showAnswer && selectedAnswer === option && option !== question.correctAnswer ? 'incorrect-answer' : ''}
               `}
               onClick={() => !showAnswer && handleAnswerSelect(option)}
+              disabled={showAnswer}
             >
               {option}
-            </div>
+            </button>
           ))}
         </div>
         
@@ -635,7 +761,7 @@ export default function ExamPage() {
                   <Button
                     variant="primary"
                     onClick={checkAnswer}
-                    disabled={!selectedAnswer}
+                    disabled={!isMatchingComplete()}
                   >
                     Check Answer
                   </Button>
