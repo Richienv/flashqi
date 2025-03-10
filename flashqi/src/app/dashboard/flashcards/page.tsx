@@ -7,177 +7,13 @@ import { Tabs } from "@/components/ui/tabs";
 // Commented out because it's not being used in this file
 // import Link from "next/link";
 // import { useRouter } from "next/navigation";
+import { 
+  LESSON_FLASHCARDS, 
+  LESSON_PROGRESS, 
+  STUDY_MODE_TABS, 
+  PRACTICE_CATEGORIES 
+} from "@/data/flashcardData";
 import './flashcards.css';
-
-// Mock data for flashcards organized by lessons
-const LESSON_FLASHCARDS = {
-  "lesson1": [
-    {
-      id: "1",
-      lesson_id: "lesson1",
-      hanzi: "你好",
-      pinyin: "nǐ hǎo",
-      english: "Hello",
-      difficulty_level: 1,
-    },
-    {
-      id: "2",
-      lesson_id: "lesson1",
-      hanzi: "谢谢",
-      pinyin: "xiè xiè",
-      english: "Thank you",
-      difficulty_level: 1,
-    },
-    {
-      id: "3",
-      lesson_id: "lesson1",
-      hanzi: "再见",
-      pinyin: "zài jiàn",
-      english: "Goodbye",
-      difficulty_level: 1,
-    },
-    {
-      id: "4",
-      lesson_id: "lesson1",
-      hanzi: "对不起",
-      pinyin: "duì bù qǐ",
-      english: "I'm sorry",
-      difficulty_level: 2,
-    },
-    {
-      id: "5",
-      lesson_id: "lesson1",
-      hanzi: "没关系",
-      pinyin: "méi guān xì",
-      english: "It's okay/No problem",
-      difficulty_level: 2,
-    },
-  ],
-  "lesson2": [
-    {
-      id: "6",
-      lesson_id: "lesson2",
-      hanzi: "一",
-      pinyin: "yī",
-      english: "One",
-      difficulty_level: 1,
-    },
-    {
-      id: "7",
-      lesson_id: "lesson2",
-      hanzi: "二",
-      pinyin: "èr",
-      english: "Two",
-      difficulty_level: 1,
-    },
-    {
-      id: "8",
-      lesson_id: "lesson2",
-      hanzi: "三",
-      pinyin: "sān",
-      english: "Three",
-      difficulty_level: 1,
-    },
-  ],
-  "lesson3": [
-    {
-      id: "9",
-      lesson_id: "lesson3",
-      hanzi: "妈妈",
-      pinyin: "mā ma",
-      english: "Mother",
-      difficulty_level: 1,
-    },
-    {
-      id: "10",
-      lesson_id: "lesson3",
-      hanzi: "爸爸",
-      pinyin: "bà ba",
-      english: "Father",
-      difficulty_level: 1,
-    },
-    {
-      id: "11",
-      lesson_id: "lesson3",
-      hanzi: "哥哥",
-      pinyin: "gē ge",
-      english: "Older brother",
-      difficulty_level: 2,
-    },
-  ],
-  "lesson4": [
-    {
-      id: "12",
-      lesson_id: "lesson4",
-      hanzi: "米饭",
-      pinyin: "mǐ fàn",
-      english: "Rice",
-      difficulty_level: 1,
-    },
-    {
-      id: "13",
-      lesson_id: "lesson4",
-      hanzi: "水",
-      pinyin: "shuǐ",
-      english: "Water",
-      difficulty_level: 1,
-    },
-    {
-      id: "14",
-      lesson_id: "lesson4",
-      hanzi: "茶",
-      pinyin: "chá",
-      english: "Tea",
-      difficulty_level: 1,
-    },
-  ],
-};
-
-// Mock lesson progress
-const LESSON_PROGRESS = {
-  "lesson1": 75,
-  "lesson2": 40,
-  "lesson3": 10,
-  "lesson4": 0
-};
-
-// Study mode tabs
-const STUDY_MODE_TABS = [
-  { id: "new", label: "New Cards" },
-  { id: "review", label: "Review" },
-  { id: "custom", label: "Custom" },
-];
-
-// Practice categories
-const PRACTICE_CATEGORIES = [
-  {
-    id: 'tutorial',
-    title: 'Tutorial',
-    color: 'from-[#EEF1FF] to-white',
-    hoverColor: 'from-[#E6EBFF] to-white',
-    textColor: 'text-[#2D41D1]',
-    lessons: 3,
-    flashcards: 54
-  },
-  {
-    id: 'listening',
-    title: 'Listening',
-    color: 'from-[#EEF1FF] to-white',
-    hoverColor: 'from-[#E6EBFF] to-white',
-    textColor: 'text-[#2D41D1]',
-    lessons: 3,
-    flashcards: 38
-  },
-  {
-    id: 'speaking',
-    title: 'Speaking',
-    color: 'from-[#EEF1FF] to-white',
-    hoverColor: 'from-[#E6EBFF] to-white',
-    textColor: 'text-[#2D41D1]',
-    lessons: 3,
-    flashcards: 45
-  }
-];
 
 // Animation styles
 const AnimationStyles = () => (
@@ -192,6 +28,17 @@ const AnimationStyles = () => (
     }
   `}</style>
 );
+
+// Shuffles an array using Fisher-Yates algorithm
+const shuffleArray = <T,>(array: T[]): T[] => {
+  // Create a copy to avoid mutating the original array
+  const shuffled = [...array];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+};
 
 export default function FlashcardsPage() {
   // const router = useRouter();
@@ -208,6 +55,8 @@ export default function FlashcardsPage() {
   const [stackPosition, setStackPosition] = useState<number>(3); // Track stack appearance (1, 2, or 3 cards)
   const [completedCardIds, setCompletedCardIds] = useState<string[]>([]); // Track which cards have been completed
   const [isCompletionPopupVisible, setIsCompletionPopupVisible] = useState(false);
+  const [currentFlashcards, setCurrentFlashcards] = useState<any[]>([]);
+  const [isCardFlipped, setIsCardFlipped] = useState(false);
 
   // Handle scroll events for Back to Top button
   useEffect(() => {
@@ -267,10 +116,24 @@ export default function FlashcardsPage() {
   };
 
   // Start study session
-  const startStudySession = (lessonId = activeLesson) => {
-    setActiveLesson(lessonId);
-    setIsStudyMode(true);
+  const enterStudyMode = (lessonId?: string) => {
+    if (lessonId) {
+      setActiveLesson(lessonId);
+    }
+    
+    // Get the cards and shuffle them
+    const cardsToStudy = lessonId 
+      ? LESSON_FLASHCARDS[lessonId as keyof typeof LESSON_FLASHCARDS] || []
+      : getAllFlashcards();
+    
+    // Shuffle the cards
+    const shuffledCards = shuffleArray(cardsToStudy);
+    
+    // Set the shuffled cards for the study session
+    setCurrentFlashcards(shuffledCards);
     setCurrentCardIndex(0);
+    setIsCardFlipped(false);
+    setIsStudyMode(true);
   };
 
   // Exit study session
@@ -438,8 +301,8 @@ export default function FlashcardsPage() {
     );
   };
 
-  // Calculate current flashcards to display
-  const currentFlashcards = filterFlashcardsBySearch(getAllFlashcards());
+  // For display in the card grid (not study mode)
+  const displayFlashcards = filterFlashcardsBySearch(getAllFlashcards());
 
   // Get lessons for the preview if one is selected
   const previewFlashcards = previewLessonId 
@@ -453,36 +316,90 @@ export default function FlashcardsPage() {
     console.log('Playing audio for word');
   };
 
-  // Get category-specific lessons
+  // Get category-specific lessons with accurate card counts
   const getCategoryLessons = (categoryId: string) => {
-    // This is a mock implementation - in a real app, you would filter lessons by category
-    // For now, we'll just return the first 3 lessons for any category
-    return [
-      {
-        id: "lesson1",
-        number: 1,
-        title: categoryId === 'tutorial' ? "Chinese Characters Basics" : 
-               categoryId === 'listening' ? "Daily Conversations" : "Basic Greetings",
-        cards: categoryId === 'tutorial' ? 20 : 
-               categoryId === 'listening' ? 14 : 12
-      },
-      {
-        id: "lesson2",
-        number: 2,
-        title: categoryId === 'tutorial' ? "Pinyin Pronunciation" : 
-               categoryId === 'listening' ? "Weather Reports" : "Ordering Food",
-        cards: categoryId === 'tutorial' ? 16 : 
-               categoryId === 'listening' ? 8 : 15
-      },
-      {
-        id: "lesson3",
-        number: 3,
-        title: categoryId === 'tutorial' ? "Basic Grammar Rules" : 
-               categoryId === 'listening' ? "Phone Conversations" : "Asking Directions",
-        cards: categoryId === 'tutorial' ? 18 : 
-               categoryId === 'listening' ? 12 : 10
-      }
-    ];
+    // Helper function to get the actual card count for a lesson
+    const getCardCount = (lessonId: string) => {
+      return LESSON_FLASHCARDS[lessonId as keyof typeof LESSON_FLASHCARDS]?.length || 0;
+    };
+
+    if (categoryId === 'tutorial') {
+      return [
+        {
+          id: "lesson1",
+          number: 1,
+          title: "Lesson 1",
+          cards: getCardCount("lesson1")
+        },
+        {
+          id: "lesson2",
+          number: 2,
+          title: "Lesson 2",
+          cards: getCardCount("lesson2")
+        },
+        {
+          id: "lesson3",
+          number: 3,
+          title: "Lesson 3",
+          cards: getCardCount("lesson3")
+        },
+        {
+          id: "lesson4",
+          number: 4,
+          title: "Lesson 4",
+          cards: getCardCount("lesson4")
+        },
+        {
+          id: "lesson5",
+          number: 5,
+          title: "Lesson 5",
+          cards: getCardCount("lesson5")
+        }
+      ];
+    } else if (categoryId === 'listening') {
+      return [
+        {
+          id: "lesson1",
+          number: 1,
+          title: "Daily Conversations",
+          cards: getCardCount("lesson1")
+        },
+        {
+          id: "lesson2",
+          number: 2,
+          title: "Weather Reports",
+          cards: getCardCount("lesson2")
+        },
+        {
+          id: "lesson3",
+          number: 3,
+          title: "Phone Conversations",
+          cards: getCardCount("lesson3")
+        }
+      ];
+    } else {
+      // speaking category
+      return [
+        {
+          id: "lesson1",
+          number: 1,
+          title: "Basic Greetings",
+          cards: getCardCount("lesson1")
+        },
+        {
+          id: "lesson2",
+          number: 2,
+          title: "Ordering Food",
+          cards: getCardCount("lesson2")
+        },
+        {
+          id: "lesson3",
+          number: 3,
+          title: "Asking Directions",
+          cards: getCardCount("lesson3")
+        }
+      ];
+    }
   };
 
   // Get the currently selected category title
@@ -662,10 +579,15 @@ export default function FlashcardsPage() {
                                 {currentFlashcards[currentCardIndex].example_sentence ? (
                                   <>
                                     <p className="mb-1 italic">Example:</p>
-                                    <p className="mb-2">
-                                      <span className="font-medium">[{currentFlashcards[currentCardIndex].hanzi} • {currentFlashcards[currentCardIndex].pinyin}]</span>
+                                    <p className="mb-2 text-gray-800 font-medium">
+                                      {currentFlashcards[currentCardIndex].example_sentence.hanzi}
                                     </p>
-                                    <p className="text-gray-500">{currentFlashcards[currentCardIndex].example_sentence}</p>
+                                    <p className="mb-2 text-gray-500">
+                                      {currentFlashcards[currentCardIndex].example_sentence.pinyin}
+                                    </p>
+                                    <p className="text-gray-500">
+                                      {currentFlashcards[currentCardIndex].example_sentence.english}
+                                    </p>
                                   </>
                                 ) : (
                                   <>
@@ -751,7 +673,7 @@ export default function FlashcardsPage() {
                   <h2 className="text-xl font-bold text-black">All Flashcards</h2>
                   <Button 
                     variant="primary"
-                    onClick={() => startStudySession(previewLessonId)}
+                    onClick={() => enterStudyMode(previewLessonId)}
                     className="w-12 h-12 rounded-full flex items-center justify-center"
                     title="Start Study Session"
                   >
@@ -767,7 +689,7 @@ export default function FlashcardsPage() {
                       key={card.id} 
                       className="rounded-xl overflow-hidden bg-gradient-to-r from-[#F8FAFF] to-white border border-blue-100 hover:border-blue-300 hover:shadow-sm transition-all p-3 cursor-pointer"
                       onClick={() => {
-                        startStudySession(previewLessonId);
+                        enterStudyMode(previewLessonId);
                         const index = previewFlashcards.findIndex(c => c.id === card.id);
                         if (index !== -1) {
                           setCurrentCardIndex(index);
@@ -836,7 +758,7 @@ export default function FlashcardsPage() {
                           className="p-2.5 rounded-full bg-blue-600 text-white hover:bg-blue-700 transition-colors"
                           onClick={(e) => {
                             e.stopPropagation();
-                            startStudySession(lesson.id);
+                            enterStudyMode(lesson.id);
                           }}
                           title="Start Lesson"
                         >
@@ -900,7 +822,7 @@ export default function FlashcardsPage() {
                       </div>
                       <Button 
                         variant="primary" 
-                        onClick={() => startStudySession()}
+                        onClick={() => enterStudyMode()}
                         disabled={currentFlashcards.length === 0}
                       >
                         Start Session
@@ -918,7 +840,7 @@ export default function FlashcardsPage() {
                       </div>
                       <Button 
                         variant="primary" 
-                        onClick={() => startStudySession()}
+                        onClick={() => enterStudyMode()}
                       >
                         Start Review
                       </Button>
@@ -935,7 +857,7 @@ export default function FlashcardsPage() {
                       </div>
                       <Button 
                         variant="primary" 
-                        onClick={() => startStudySession()}
+                        onClick={() => enterStudyMode()}
                       >
                         Create Session
                       </Button>
