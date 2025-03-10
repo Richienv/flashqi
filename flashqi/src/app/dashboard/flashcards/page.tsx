@@ -14,6 +14,7 @@ import {
   PRACTICE_CATEGORIES 
 } from "@/data/flashcardData";
 import './flashcards.css';
+import { useRouter } from 'next/navigation';
 
 // Animation styles
 const AnimationStyles = () => (
@@ -41,7 +42,7 @@ const shuffleArray = <T,>(array: T[]): T[] => {
 };
 
 export default function FlashcardsPage() {
-  // const router = useRouter();
+  const router = useRouter();
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [previewLessonId, setPreviewLessonId] = useState<string | null>(null); 
   const [activeStudyTab, setActiveStudyTab] = useState<string | number>("new");
@@ -801,69 +802,24 @@ export default function FlashcardsPage() {
                 </div>
               </div>
 
-              {/* Study mode selection */}
-              <div className="rounded-xl overflow-hidden bg-gradient-to-r from-blue-50 to-white border border-blue-200 p-6 mb-8">
-                <h2 className="text-xl font-bold text-black mb-4">Study Mode</h2>
+              {/* Exam Preparation Section */}
+              <div className="bg-[#F8FAFF] rounded-xl p-6 mb-6">
+                <h2 className="text-2xl font-bold text-black mb-4">Exam Preparation</h2>
                 
-                <Tabs 
-                  tabs={STUDY_MODE_TABS} 
-                  activeTab={activeStudyTab} 
-                  onChange={handleStudyTabChange} 
-                  variant="underline"
-                  className="mb-6"
-                />
-  
-                {activeStudyTab === "new" && (
-                  <div className="bg-white rounded-lg p-5 border border-blue-100">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h3 className="font-medium text-black mb-1">New Cards</h3>
-                        <p className="text-black">{currentFlashcards.length} cards available</p>
-                      </div>
-                      <Button 
-                        variant="primary" 
-                        onClick={() => enterStudyMode()}
-                        disabled={currentFlashcards.length === 0}
-                      >
-                        Start Session
-                      </Button>
+                <div className="bg-white rounded-lg p-5 border border-blue-100">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="font-medium text-black mb-1">Practice Exam</h3>
+                      <p className="text-black">30 random questions from all lessons</p>
                     </div>
+                    <Button 
+                      variant="primary" 
+                      onClick={() => router.push('/dashboard/exam')}
+                    >
+                      Start Exam
+                    </Button>
                   </div>
-                )}
-  
-                {activeStudyTab === "review" && (
-                  <div className="bg-white rounded-lg p-5 border border-blue-100">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h3 className="font-medium text-black mb-1">Review Cards</h3>
-                        <p className="text-black">8 cards due for review</p>
-                      </div>
-                      <Button 
-                        variant="primary" 
-                        onClick={() => enterStudyMode()}
-                      >
-                        Start Review
-                      </Button>
-                    </div>
-                  </div>
-                )}
-  
-                {activeStudyTab === "custom" && (
-                  <div className="bg-white rounded-lg p-5 border border-blue-100">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h3 className="font-medium text-black mb-1">Custom Study</h3>
-                        <p className="text-black">Create your own session</p>
-                      </div>
-                      <Button 
-                        variant="primary" 
-                        onClick={() => enterStudyMode()}
-                      >
-                        Create Session
-                      </Button>
-                    </div>
-                  </div>
-                )}
+                </div>
               </div>
   
               {/* Lesson Progress (when a lesson is selected) */}
