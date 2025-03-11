@@ -44,6 +44,60 @@ const TUTORIAL_LESSONS = [
     completion_percentage: 0,
     teacher_notes: "Create associations to remember which measure words go with which objects"
   },
+  {
+    id: "t5",
+    lesson_number: 5,
+    title: "Common Expressions",
+    description: "Essential everyday Chinese expressions.",
+    total_cards: 18,
+    completion_percentage: 0,
+    teacher_notes: "Practice these expressions in context with different speakers"
+  },
+  {
+    id: "t6",
+    lesson_number: 6,
+    title: "Introductions & Greetings",
+    description: "Learn how to introduce yourself and greet others formally.",
+    total_cards: 20,
+    completion_percentage: 0,
+    teacher_notes: "Pay attention to the different levels of formality in introductions"
+  },
+  {
+    id: "t7",
+    lesson_number: 7,
+    title: "Food & Dining",
+    description: "Essential vocabulary for ordering food and dining out.",
+    total_cards: 21,
+    completion_percentage: 0,
+    teacher_notes: "Practice the different ways of asking for food items and specifying quantities"
+  },
+  {
+    id: "t8",
+    lesson_number: 8,
+    title: "Shopping & Currency",
+    description: "Learn to shop and handle money transactions in Chinese.",
+    total_cards: 25,
+    completion_percentage: 0,
+    teacher_notes: "Pay attention to numbers and measure words used with different items"
+  },
+  {
+    id: "t9",
+    lesson_number: 9,
+    title: "Time & Places",
+    description: "Vocabulary for time periods and common locations.",
+    total_cards: 19,
+    completion_percentage: 0,
+    teacher_notes: "Practice the different time expressions and location words in conversations"
+  },
+  {
+    id: "t10",
+    lesson_number: 10,
+    title: "Office & Contact Information",
+    description: "Learn vocabulary related to workplaces and contact details.",
+    total_cards: 20,
+    completion_percentage: 0,
+    teacher_notes: "Focus on the correct pronunciation of numbers in phone numbers and addresses"
+  }
 ];
 
 // Category information

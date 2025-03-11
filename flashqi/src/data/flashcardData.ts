@@ -1415,6 +1415,1132 @@ export const LESSON_FLASHCARDS = {
         english: "I like to read magazines."
       }
     }
+  ],
+  "lesson7": [
+    {
+      id: "7-1",
+      lesson_id: "lesson7",
+      hanzi: "中午",
+      pinyin: "zhōngwǔ",
+      english: "Noon",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "中午我们一起吃饭。",
+        pinyin: "Zhōngwǔ wǒmen yīqǐ chīfàn.",
+        english: "Let's have lunch together at noon."
+      }
+    },
+    {
+      id: "7-2",
+      lesson_id: "lesson7",
+      hanzi: "吃",
+      pinyin: "chī",
+      english: "To eat",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "我想吃中国菜。",
+        pinyin: "Wǒ xiǎng chī Zhōngguó cài.",
+        english: "I want to eat Chinese food."
+      }
+    },
+    {
+      id: "7-3",
+      lesson_id: "lesson7",
+      hanzi: "饭",
+      pinyin: "fàn",
+      english: "Rice/Meal",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "我们吃饭吧。",
+        pinyin: "Wǒmen chīfàn ba.",
+        english: "Let's eat a meal."
+      }
+    },
+    {
+      id: "7-4",
+      lesson_id: "lesson7",
+      hanzi: "食堂",
+      pinyin: "shítáng",
+      english: "Cafeteria/Dining hall",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "学校食堂的饭很好吃。",
+        pinyin: "Xuéxiào shítáng de fàn hěn hǎochī.",
+        english: "The food in the school cafeteria is delicious."
+      }
+    },
+    {
+      id: "7-5",
+      lesson_id: "lesson7",
+      hanzi: "馒头",
+      pinyin: "mántou",
+      english: "Steamed bun",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "我喜欢吃馒头。",
+        pinyin: "Wǒ xǐhuan chī mántou.",
+        english: "I like to eat steamed buns."
+      }
+    },
+    {
+      id: "7-6",
+      lesson_id: "lesson7",
+      hanzi: "要",
+      pinyin: "yào",
+      english: "To want",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "你要什么？",
+        pinyin: "Nǐ yào shénme?",
+        english: "What do you want?"
+      }
+    },
+    {
+      id: "7-7",
+      lesson_id: "lesson7",
+      hanzi: "米饭",
+      pinyin: "mǐfàn",
+      english: "Cooked rice",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "我要一碗米饭。",
+        pinyin: "Wǒ yào yī wǎn mǐfàn.",
+        english: "I want a bowl of rice."
+      }
+    },
+    {
+      id: "7-8",
+      lesson_id: "lesson7",
+      hanzi: "米",
+      pinyin: "mǐ",
+      english: "Rice (uncooked)",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "我们买了一袋米。",
+        pinyin: "Wǒmen mǎile yī dài mǐ.",
+        english: "We bought a bag of rice."
+      }
+    },
+    {
+      id: "7-9",
+      lesson_id: "lesson7",
+      hanzi: "碗",
+      pinyin: "wǎn",
+      english: "Bowl",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "这是一个碗。",
+        pinyin: "Zhè shì yī gè wǎn.",
+        english: "This is a bowl."
+      }
+    },
+    {
+      id: "7-10",
+      lesson_id: "lesson7",
+      hanzi: "鸡蛋",
+      pinyin: "jīdàn",
+      english: "Egg",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "我早上吃了两个鸡蛋。",
+        pinyin: "Wǒ zǎoshang chīle liǎng gè jīdàn.",
+        english: "I ate two eggs this morning."
+      }
+    },
+    {
+      id: "7-11",
+      lesson_id: "lesson7",
+      hanzi: "鸡",
+      pinyin: "jī",
+      english: "Chicken",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "我想吃鸡肉。",
+        pinyin: "Wǒ xiǎng chī jīròu.",
+        english: "I want to eat chicken."
+      }
+    },
+    {
+      id: "7-12",
+      lesson_id: "lesson7",
+      hanzi: "蛋",
+      pinyin: "dàn",
+      english: "Egg",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "这个蛋很新鲜。",
+        pinyin: "Zhège dàn hěn xīnxiān.",
+        english: "This egg is very fresh."
+      }
+    },
+    {
+      id: "7-13",
+      lesson_id: "lesson7",
+      hanzi: "汤",
+      pinyin: "tāng",
+      english: "Soup",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "这个汤很好喝。",
+        pinyin: "Zhège tāng hěn hǎo hē.",
+        english: "This soup is delicious."
+      }
+    },
+    {
+      id: "7-14",
+      lesson_id: "lesson7",
+      hanzi: "啤酒",
+      pinyin: "píjiǔ",
+      english: "Beer",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "我不喝啤酒。",
+        pinyin: "Wǒ bù hē píjiǔ.",
+        english: "I don't drink beer."
+      }
+    },
+    {
+      id: "7-15",
+      lesson_id: "lesson7",
+      hanzi: "酒",
+      pinyin: "jiǔ",
+      english: "Alcohol",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "中国有很多种酒。",
+        pinyin: "Zhōngguó yǒu hěn duō zhǒng jiǔ.",
+        english: "China has many kinds of alcohol."
+      }
+    },
+    {
+      id: "7-16",
+      lesson_id: "lesson7",
+      hanzi: "这些",
+      pinyin: "zhèxiē",
+      english: "These",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "这些菜都很好吃。",
+        pinyin: "Zhèxiē cài dōu hěn hǎochī.",
+        english: "All these dishes are delicious."
+      }
+    },
+    {
+      id: "7-17",
+      lesson_id: "lesson7",
+      hanzi: "些",
+      pinyin: "xiē",
+      english: "Some",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "我想吃些水果。",
+        pinyin: "Wǒ xiǎng chī xiē shuǐguǒ.",
+        english: "I want to eat some fruit."
+      }
+    },
+    {
+      id: "7-18",
+      lesson_id: "lesson7",
+      hanzi: "一些",
+      pinyin: "yìxiē",
+      english: "Some/A few",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "我买了一些苹果。",
+        pinyin: "Wǒ mǎile yìxiē píngguǒ.",
+        english: "I bought some apples."
+      }
+    },
+    {
+      id: "7-19",
+      lesson_id: "lesson7",
+      hanzi: "那些",
+      pinyin: "nàxiē",
+      english: "Those",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "那些菜很辣。",
+        pinyin: "Nàxiē cài hěn là.",
+        english: "Those dishes are very spicy."
+      }
+    },
+    {
+      id: "7-20",
+      lesson_id: "lesson7",
+      hanzi: "饺子",
+      pinyin: "jiǎozi",
+      english: "Dumplings",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "我会包饺子。",
+        pinyin: "Wǒ huì bāo jiǎozi.",
+        english: "I can make dumplings."
+      }
+    },
+    {
+      id: "7-21",
+      lesson_id: "lesson7",
+      hanzi: "包子",
+      pinyin: "bāozi",
+      english: "Steamed stuffed bun",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "这个包子很好吃。",
+        pinyin: "Zhège bāozi hěn hǎochī.",
+        english: "This bun is very delicious."
+      }
+    },
+    {
+      id: "7-22",
+      lesson_id: "lesson7",
+      hanzi: "面条儿",
+      pinyin: "miàntiáor",
+      english: "Noodles",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "我喜欢吃面条儿。",
+        pinyin: "Wǒ xǐhuan chī miàntiáor.",
+        english: "I like to eat noodles."
+      }
+    }
+  ],
+  "lesson8": [
+    {
+      id: "8-1",
+      lesson_id: "lesson8",
+      hanzi: "买",
+      pinyin: "mǎi",
+      english: "To buy",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "我想买一本书。",
+        pinyin: "Wǒ xiǎng mǎi yī běn shū.",
+        english: "I want to buy a book."
+      }
+    },
+    {
+      id: "8-2",
+      lesson_id: "lesson8",
+      hanzi: "水果",
+      pinyin: "shuǐguǒ",
+      english: "Fruit",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "我喜欢吃水果。",
+        pinyin: "Wǒ xǐhuan chī shuǐguǒ.",
+        english: "I like to eat fruit."
+      }
+    },
+    {
+      id: "8-3",
+      lesson_id: "lesson8",
+      hanzi: "苹果",
+      pinyin: "píngguǒ",
+      english: "Apple",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "这个苹果很甜。",
+        pinyin: "Zhège píngguǒ hěn tián.",
+        english: "This apple is very sweet."
+      }
+    },
+    {
+      id: "8-4",
+      lesson_id: "lesson8",
+      hanzi: "斤",
+      pinyin: "jīn",
+      english: "Weight unit (500g)",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "我买了两斤苹果。",
+        pinyin: "Wǒ mǎile liǎng jīn píngguǒ.",
+        english: "I bought two jin of apples."
+      }
+    },
+    {
+      id: "8-5",
+      lesson_id: "lesson8",
+      hanzi: "公斤",
+      pinyin: "gōngjīn",
+      english: "Kilogram",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "这个西瓜有五公斤重。",
+        pinyin: "Zhège xīguā yǒu wǔ gōngjīn zhòng.",
+        english: "This watermelon weighs five kilograms."
+      }
+    },
+    {
+      id: "8-6",
+      lesson_id: "lesson8",
+      hanzi: "多少",
+      pinyin: "duōshao",
+      english: "How much/How many",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "这本书多少钱？",
+        pinyin: "Zhè běn shū duōshao qián?",
+        english: "How much is this book?"
+      }
+    },
+    {
+      id: "8-7",
+      lesson_id: "lesson8",
+      hanzi: "多",
+      pinyin: "duō",
+      english: "Many/Much",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "这里有很多人。",
+        pinyin: "Zhèlǐ yǒu hěn duō rén.",
+        english: "There are many people here."
+      }
+    },
+    {
+      id: "8-8",
+      lesson_id: "lesson8",
+      hanzi: "少",
+      pinyin: "shǎo",
+      english: "Few/Little",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "我吃得很少。",
+        pinyin: "Wǒ chī de hěn shǎo.",
+        english: "I eat very little."
+      }
+    },
+    {
+      id: "8-9",
+      lesson_id: "lesson8",
+      hanzi: "块",
+      pinyin: "kuài",
+      english: "Yuan (currency unit)",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "这个苹果五块钱。",
+        pinyin: "Zhège píngguǒ wǔ kuài qián.",
+        english: "This apple is five yuan."
+      }
+    },
+    {
+      id: "8-10",
+      lesson_id: "lesson8",
+      hanzi: "毛",
+      pinyin: "máo",
+      english: "Jiao (1/10 of yuan)",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "这个只要五毛钱。",
+        pinyin: "Zhège zhǐ yào wǔ máo qián.",
+        english: "This only costs 0.5 yuan."
+      }
+    },
+    {
+      id: "8-11",
+      lesson_id: "lesson8",
+      hanzi: "分",
+      pinyin: "fēn",
+      english: "Cent (1/100 of yuan)",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "现在很少有东西只要几分钱了。",
+        pinyin: "Xiànzài hěn shǎo yǒu dōngxi zhǐ yào jǐ fēn qián le.",
+        english: "Now very few things cost only a few cents."
+      }
+    },
+    {
+      id: "8-12",
+      lesson_id: "lesson8",
+      hanzi: "贵",
+      pinyin: "guì",
+      english: "Expensive",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "这个餐厅很贵。",
+        pinyin: "Zhège cāntīng hěn guì.",
+        english: "This restaurant is very expensive."
+      }
+    },
+    {
+      id: "8-13",
+      lesson_id: "lesson8",
+      hanzi: "太...了",
+      pinyin: "tài...le",
+      english: "Too...",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "这个太贵了。",
+        pinyin: "Zhège tài guì le.",
+        english: "This is too expensive."
+      }
+    },
+    {
+      id: "8-14",
+      lesson_id: "lesson8",
+      hanzi: "便宜",
+      pinyin: "piányi",
+      english: "Cheap",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "这个很便宜。",
+        pinyin: "Zhège hěn piányi.",
+        english: "This is very cheap."
+      }
+    },
+    {
+      id: "8-15",
+      lesson_id: "lesson8",
+      hanzi: "点儿",
+      pinyin: "diǎnr",
+      english: "A little bit",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "便宜一点儿。",
+        pinyin: "Piányi yī diǎnr.",
+        english: "A little cheaper."
+      }
+    },
+    {
+      id: "8-16",
+      lesson_id: "lesson8",
+      hanzi: "来",
+      pinyin: "lái",
+      english: "To come",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "他来自中国。",
+        pinyin: "Tā lái zì Zhōngguó.",
+        english: "He comes from China."
+      }
+    },
+    {
+      id: "8-17",
+      lesson_id: "lesson8",
+      hanzi: "吧",
+      pinyin: "ba",
+      english: "Particle indicating suggestion",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "我们走吧。",
+        pinyin: "Wǒmen zǒu ba.",
+        english: "Let's go."
+      }
+    },
+    {
+      id: "8-18",
+      lesson_id: "lesson8",
+      hanzi: "还",
+      pinyin: "hái",
+      english: "Still/Yet",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "我还要买东西。",
+        pinyin: "Wǒ hái yào mǎi dōngxi.",
+        english: "I still need to buy things."
+      }
+    },
+    {
+      id: "8-19",
+      lesson_id: "lesson8",
+      hanzi: "别的",
+      pinyin: "biéde",
+      english: "Other",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "你还要别的东西吗？",
+        pinyin: "Nǐ hái yào biéde dōngxi ma?",
+        english: "Do you want anything else?"
+      }
+    },
+    {
+      id: "8-20",
+      lesson_id: "lesson8",
+      hanzi: "橘子",
+      pinyin: "júzi",
+      english: "Orange/Tangerine",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "我想买一些橘子。",
+        pinyin: "Wǒ xiǎng mǎi yìxiē júzi.",
+        english: "I want to buy some oranges."
+      }
+    },
+    {
+      id: "8-21",
+      lesson_id: "lesson8",
+      hanzi: "怎么",
+      pinyin: "zěnme",
+      english: "How",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "这个怎么卖？",
+        pinyin: "Zhège zěnme mài?",
+        english: "How much is this sold for?"
+      }
+    },
+    {
+      id: "8-22",
+      lesson_id: "lesson8",
+      hanzi: "卖",
+      pinyin: "mài",
+      english: "To sell",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "这个商店卖水果。",
+        pinyin: "Zhège shāngdiàn mài shuǐguǒ.",
+        english: "This shop sells fruit."
+      }
+    },
+    {
+      id: "8-23",
+      lesson_id: "lesson8",
+      hanzi: "两",
+      pinyin: "liǎng",
+      english: "Two (before measure word)",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "我买了两个苹果。",
+        pinyin: "Wǒ mǎile liǎng gè píngguǒ.",
+        english: "I bought two apples."
+      }
+    },
+    {
+      id: "8-24",
+      lesson_id: "lesson8",
+      hanzi: "一共",
+      pinyin: "yígòng",
+      english: "In total/Altogether",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "一共是二十块钱。",
+        pinyin: "Yígòng shì èrshí kuài qián.",
+        english: "It's twenty yuan in total."
+      }
+    },
+    {
+      id: "8-25",
+      lesson_id: "lesson8",
+      hanzi: "给",
+      pinyin: "gěi",
+      english: "To give",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "请给我一个苹果。",
+        pinyin: "Qǐng gěi wǒ yí gè píngguǒ.",
+        english: "Please give me an apple."
+      }
+    },
+    {
+      id: "8-26",
+      lesson_id: "lesson8",
+      hanzi: "找",
+      pinyin: "zhǎo",
+      english: "To give change",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "找你五块钱。",
+        pinyin: "Zhǎo nǐ wǔ kuài qián.",
+        english: "Here's your five yuan change."
+      }
+    }
+  ],
+  "lesson9": [
+    {
+      id: "9-1",
+      lesson_id: "lesson9",
+      hanzi: "下午",
+      pinyin: "xiàwǔ",
+      english: "Afternoon",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "下午我去图书馆。",
+        pinyin: "Xiàwǔ wǒ qù túshūguǎn.",
+        english: "I'm going to the library this afternoon."
+      }
+    },
+    {
+      id: "9-2",
+      lesson_id: "lesson9",
+      hanzi: "上午",
+      pinyin: "shàngwǔ",
+      english: "Morning",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "上午我有课。",
+        pinyin: "Shàngwǔ wǒ yǒu kè.",
+        english: "I have class in the morning."
+      }
+    },
+    {
+      id: "9-3",
+      lesson_id: "lesson9",
+      hanzi: "图书馆",
+      pinyin: "túshūguǎn",
+      english: "Library",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "图书馆里很安静。",
+        pinyin: "Túshūguǎn lǐ hěn ānjìng.",
+        english: "The library is very quiet."
+      }
+    },
+    {
+      id: "9-4",
+      lesson_id: "lesson9",
+      hanzi: "换",
+      pinyin: "huàn",
+      english: "To exchange/change",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "我想换一百美元。",
+        pinyin: "Wǒ xiǎng huàn yībǎi měiyuán.",
+        english: "I want to exchange one hundred US dollars."
+      }
+    },
+    {
+      id: "9-5",
+      lesson_id: "lesson9",
+      hanzi: "下街",
+      pinyin: "xiàjiē",
+      english: "To go downtown",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "我想下街买东西。",
+        pinyin: "Wǒ xiǎng xiàjiē mǎi dōngxi.",
+        english: "I want to go downtown to shop."
+      }
+    },
+    {
+      id: "9-6",
+      lesson_id: "lesson9",
+      hanzi: "营业员",
+      pinyin: "yíngyèyuán",
+      english: "Shop assistant",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "请问营业员在哪里？",
+        pinyin: "Qǐngwèn yíngyèyuán zài nǎlǐ?",
+        english: "Excuse me, where is the shop assistant?"
+      }
+    },
+    {
+      id: "9-7",
+      lesson_id: "lesson9",
+      hanzi: "人民币",
+      pinyin: "rénmínbì",
+      english: "Chinese currency (RMB)",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "这件衣服多少人民币？",
+        pinyin: "Zhè jiàn yīfu duōshao rénmínbì?",
+        english: "How much RMB is this clothing?"
+      }
+    },
+    {
+      id: "9-8",
+      lesson_id: "lesson9",
+      hanzi: "百",
+      pinyin: "bǎi",
+      english: "Hundred",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "一百块钱。",
+        pinyin: "Yī bǎi kuài qián.",
+        english: "One hundred yuan."
+      }
+    },
+    {
+      id: "9-9",
+      lesson_id: "lesson9",
+      hanzi: "千",
+      pinyin: "qiān",
+      english: "Thousand",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "这个手机一千多块钱。",
+        pinyin: "Zhège shǒujī yī qiān duō kuài qián.",
+        english: "This mobile phone is over one thousand yuan."
+      }
+    },
+    {
+      id: "9-10",
+      lesson_id: "lesson9",
+      hanzi: "万",
+      pinyin: "wàn",
+      english: "Ten thousand",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "这辆车十万块钱。",
+        pinyin: "Zhè liàng chē shí wàn kuài qián.",
+        english: "This car is one hundred thousand yuan."
+      }
+    },
+    {
+      id: "9-11",
+      lesson_id: "lesson9",
+      hanzi: "美元",
+      pinyin: "měiyuán",
+      english: "US dollar",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "这个多少美元？",
+        pinyin: "Zhège duōshao měiyuán?",
+        english: "How many US dollars is this?"
+      }
+    },
+    {
+      id: "9-12",
+      lesson_id: "lesson9",
+      hanzi: "港币",
+      pinyin: "gǎngbì",
+      english: "Hong Kong dollar",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "我想换一些港币。",
+        pinyin: "Wǒ xiǎng huàn yìxiē gǎngbì.",
+        english: "I want to exchange some Hong Kong dollars."
+      }
+    },
+    {
+      id: "9-13",
+      lesson_id: "lesson9",
+      hanzi: "日元",
+      pinyin: "rìyuán",
+      english: "Japanese yen",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "他用日元付钱。",
+        pinyin: "Tā yòng rìyuán fù qián.",
+        english: "He paid with Japanese yen."
+      }
+    },
+    {
+      id: "9-14",
+      lesson_id: "lesson9",
+      hanzi: "韩元",
+      pinyin: "hányuán",
+      english: "Korean won",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "这家商店接受韩元。",
+        pinyin: "Zhè jiā shāngdiàn jiēshòu hányuán.",
+        english: "This store accepts Korean won."
+      }
+    },
+    {
+      id: "9-15",
+      lesson_id: "lesson9",
+      hanzi: "欧元",
+      pinyin: "ōuyuán",
+      english: "Euro",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "你有欧元吗？",
+        pinyin: "Nǐ yǒu ōuyuán ma?",
+        english: "Do you have Euros?"
+      }
+    },
+    {
+      id: "9-16",
+      lesson_id: "lesson9",
+      hanzi: "等",
+      pinyin: "děng",
+      english: "To wait",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "请等一下。",
+        pinyin: "Qǐng děng yíxià.",
+        english: "Please wait a moment."
+      }
+    },
+    {
+      id: "9-17",
+      lesson_id: "lesson9",
+      hanzi: "一会儿",
+      pinyin: "yíhuìr",
+      english: "A little while",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "我一会儿回来。",
+        pinyin: "Wǒ yíhuìr huílái.",
+        english: "I'll be back in a little while."
+      }
+    },
+    {
+      id: "9-18",
+      lesson_id: "lesson9",
+      hanzi: "先生",
+      pinyin: "xiānsheng",
+      english: "Mister/Sir",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "王先生是我的老师。",
+        pinyin: "Wáng xiānsheng shì wǒ de lǎoshī.",
+        english: "Mr. Wang is my teacher."
+      }
+    },
+    {
+      id: "9-19",
+      lesson_id: "lesson9",
+      hanzi: "书",
+      pinyin: "shū",
+      english: "Book",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "这是一本汉语书。",
+        pinyin: "Zhè shì yī běn Hànyǔ shū.",
+        english: "This is a Chinese language book."
+      }
+    }
+  ],
+  "lesson10": [
+    {
+      id: "10-1",
+      lesson_id: "lesson10",
+      hanzi: "办公室",
+      pinyin: "bàngōngshì",
+      english: "Office",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "老师的办公室在哪里？",
+        pinyin: "Lǎoshī de bàngōngshì zài nǎlǐ?",
+        english: "Where is the teacher's office?"
+      }
+    },
+    {
+      id: "10-2",
+      lesson_id: "lesson10",
+      hanzi: "办公",
+      pinyin: "bàngōng",
+      english: "To work in an office",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "我在这里办公。",
+        pinyin: "Wǒ zài zhèlǐ bàngōng.",
+        english: "I work in this office."
+      }
+    },
+    {
+      id: "10-3",
+      lesson_id: "lesson10",
+      hanzi: "找",
+      pinyin: "zhǎo",
+      english: "To look for",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "我在找王老师。",
+        pinyin: "Wǒ zài zhǎo Wáng lǎoshī.",
+        english: "I'm looking for Teacher Wang."
+      }
+    },
+    {
+      id: "10-4",
+      lesson_id: "lesson10",
+      hanzi: "在",
+      pinyin: "zài",
+      english: "To be at/in",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "他在学校。",
+        pinyin: "Tā zài xuéxiào.",
+        english: "He is at school."
+      }
+    },
+    {
+      id: "10-5",
+      lesson_id: "lesson10",
+      hanzi: "家",
+      pinyin: "jiā",
+      english: "Home/Family",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "我的家在北京。",
+        pinyin: "Wǒ de jiā zài Běijīng.",
+        english: "My home is in Beijing."
+      }
+    },
+    {
+      id: "10-6",
+      lesson_id: "lesson10",
+      hanzi: "呢",
+      pinyin: "ne",
+      english: "Question particle",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "你呢？",
+        pinyin: "Nǐ ne?",
+        english: "And you?"
+      }
+    },
+    {
+      id: "10-7",
+      lesson_id: "lesson10",
+      hanzi: "数",
+      pinyin: "shù",
+      english: "Number",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "电话号码是什么数字？",
+        pinyin: "Diànhuà hàomǎ shì shénme shùzì?",
+        english: "What are the numbers in the phone number?"
+      }
+    },
+    {
+      id: "10-8",
+      lesson_id: "lesson10",
+      hanzi: "号",
+      pinyin: "hào",
+      english: "Number/Date",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "今天是几号？",
+        pinyin: "Jīntiān shì jǐ hào?",
+        english: "What's the date today?"
+      }
+    },
+    {
+      id: "10-9",
+      lesson_id: "lesson10",
+      hanzi: "楼",
+      pinyin: "lóu",
+      english: "Floor/Building",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "办公室在三楼。",
+        pinyin: "Bàngōngshì zài sān lóu.",
+        english: "The office is on the third floor."
+      }
+    },
+    {
+      id: "10-10",
+      lesson_id: "lesson10",
+      hanzi: "门",
+      pinyin: "mén",
+      english: "Door",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "请关门。",
+        pinyin: "Qǐng guān mén.",
+        english: "Please close the door."
+      }
+    },
+    {
+      id: "10-11",
+      lesson_id: "lesson10",
+      hanzi: "零",
+      pinyin: "líng",
+      english: "Zero",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "我的电话号码是一零零三。",
+        pinyin: "Wǒ de diànhuà hàomǎ shì yī líng líng sān.",
+        english: "My phone number is 1003."
+      }
+    },
+    {
+      id: "10-12",
+      lesson_id: "lesson10",
+      hanzi: "房间",
+      pinyin: "fángjiān",
+      english: "Room",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "这个房间很大。",
+        pinyin: "Zhège fángjiān hěn dà.",
+        english: "This room is very big."
+      }
+    },
+    {
+      id: "10-13",
+      lesson_id: "lesson10",
+      hanzi: "知道",
+      pinyin: "zhīdào",
+      english: "To know",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "我不知道他的电话号码。",
+        pinyin: "Wǒ bù zhīdào tā de diànhuà hàomǎ.",
+        english: "I don't know his phone number."
+      }
+    },
+    {
+      id: "10-14",
+      lesson_id: "lesson10",
+      hanzi: "电话",
+      pinyin: "diànhuà",
+      english: "Telephone",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "这是我的电话号码。",
+        pinyin: "Zhè shì wǒ de diànhuà hàomǎ.",
+        english: "This is my phone number."
+      }
+    },
+    {
+      id: "10-15",
+      lesson_id: "lesson10",
+      hanzi: "电",
+      pinyin: "diàn",
+      english: "Electricity",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "这里没有电。",
+        pinyin: "Zhèlǐ méiyǒu diàn.",
+        english: "There's no electricity here."
+      }
+    },
+    {
+      id: "10-16",
+      lesson_id: "lesson10",
+      hanzi: "话",
+      pinyin: "huà",
+      english: "Speech/Talk",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "我想和你说话。",
+        pinyin: "Wǒ xiǎng hé nǐ shuōhuà.",
+        english: "I want to talk with you."
+      }
+    },
+    {
+      id: "10-17",
+      lesson_id: "lesson10",
+      hanzi: "号码",
+      pinyin: "hàomǎ",
+      english: "Number",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "你的手机号码是多少？",
+        pinyin: "Nǐ de shǒujī hàomǎ shì duōshao?",
+        english: "What is your mobile phone number?"
+      }
+    },
+    {
+      id: "10-18",
+      lesson_id: "lesson10",
+      hanzi: "手机",
+      pinyin: "shǒujī",
+      english: "Mobile phone",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "这是我的新手机。",
+        pinyin: "Zhè shì wǒ de xīn shǒujī.",
+        english: "This is my new mobile phone."
+      }
+    },
+    {
+      id: "10-19",
+      lesson_id: "lesson10",
+      hanzi: "手",
+      pinyin: "shǒu",
+      english: "Hand",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "请洗手。",
+        pinyin: "Qǐng xǐ shǒu.",
+        english: "Please wash your hands."
+      }
+    }
   ]
 };
 
@@ -1425,7 +2551,11 @@ export const LESSON_PROGRESS = {
   "lesson3": 10,
   "lesson4": 0,
   "lesson5": 0,
-  "lesson6": 0
+  "lesson6": 0,
+  "lesson7": 0,
+  "lesson8": 0,
+  "lesson9": 0,
+  "lesson10": 0
 };
 
 // Study mode tabs
@@ -1443,7 +2573,11 @@ const calculateTotalFlashcards = () => {
     (LESSON_FLASHCARDS.lesson3?.length || 0) +
     (LESSON_FLASHCARDS.lesson4?.length || 0) +
     (LESSON_FLASHCARDS.lesson5?.length || 0) +
-    (LESSON_FLASHCARDS.lesson6?.length || 0);
+    (LESSON_FLASHCARDS.lesson6?.length || 0) +
+    (LESSON_FLASHCARDS.lesson7?.length || 0) +
+    (LESSON_FLASHCARDS.lesson8?.length || 0) +
+    (LESSON_FLASHCARDS.lesson9?.length || 0) +
+    (LESSON_FLASHCARDS.lesson10?.length || 0);
   
   return tutorialCount;
 };
@@ -1456,7 +2590,7 @@ export const PRACTICE_CATEGORIES = [
     color: 'from-[#EEF1FF] to-white',
     hoverColor: 'from-[#E6EBFF] to-white',
     textColor: 'text-[#2D41D1]',
-    lessons: 6,
+    lessons: 10,
     flashcards: calculateTotalFlashcards()
   },
   {

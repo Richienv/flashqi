@@ -47,10 +47,25 @@ const convertToNumberedTone = (pinyin: string): string => {
   return pinyin.split('').map(char => toneMarks[char as keyof typeof toneMarks] || char).join('');
 };
 
+// Add proper types for the state
+interface ExamState {
+  questions: ExamQuestion[];
+  currentQuestionIndex: number;
+  selectedAnswer: string | null;
+  userAnswers: (string | null)[];
+  examCompleted: boolean;
+  examStarted: boolean;
+  score: number;
+  showAnswer: boolean;
+  timeRemaining: number;
+  matchingPairs: MatchingPair[];
+  selectedPair: {hanzi?: string; pinyin?: string};
+}
+
 export default function ExamPage() {
   const router = useRouter();
   
-  // Group all state declarations together
+  // Group all state declarations together with proper types
   const [questions, setQuestions] = useState<ExamQuestion[]>([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
@@ -62,6 +77,52 @@ export default function ExamPage() {
   const [timeRemaining, setTimeRemaining] = useState(30 * 60);
   const [matchingPairs, setMatchingPairs] = useState<MatchingPair[]>([]);
   const [selectedPair, setSelectedPair] = useState<{hanzi?: string; pinyin?: string}>({});
+
+  // Add proper type for the current question
+  const getCurrentQuestion = useCallback((): ExamQuestion | undefined => {
+    return questions[currentQuestionIndex];
+  }, [questions, currentQuestionIndex]);
+
+  // Update isMatchingComplete with proper typing
+  const isMatchingComplete = useCallback((): boolean => {
+    const currentQuestion = getCurrentQuestion();
+    if (currentQuestion?.type === 'matching') {
+      return matchingPairs.every(pair => pair.matched);
+    }
+    return !!selectedAnswer;
+  }, [getCurrentQuestion, matchingPairs, selectedAnswer]);
+
+  // Update checkAnswer with proper typing
+  const checkAnswer = useCallback(() => {
+    const currentQuestion = getCurrentQuestion();
+    if (!currentQuestion) return;
+
+    if (currentQuestion.type === 'matching') {
+      const allMatched = matchingPairs.every(pair => pair.matched);
+      if (!allMatched) return;
+    }
+
+    setShowAnswer(true);
+    let isCorrect = false;
+
+    if (currentQuestion.type === 'matching') {
+      isCorrect = matchingPairs.every(pair => pair.selectedAnswer === pair.pinyin);
+      setSelectedAnswer(JSON.stringify(matchingPairs.map(p => p.selectedAnswer)));
+    } else {
+      isCorrect = selectedAnswer === currentQuestion.correctAnswer;
+    }
+
+    if (isCorrect) {
+      const messageDiv = document.createElement('div');
+      messageDiv.className = 'fixed top-20 right-4 bg-green-100 border border-green-500 text-green-800 rounded-lg px-4 py-2 z-50 animate-fadeIn';
+      messageDiv.textContent = 'Correct! ✓';
+      document.body.appendChild(messageDiv);
+      
+      setTimeout(() => {
+        messageDiv.remove();
+      }, 2000);
+    }
+  }, [getCurrentQuestion, matchingPairs, selectedAnswer]);
 
   // Define handlers before useEffect
   const handleExamCompletion = useCallback(() => {
@@ -184,50 +245,6 @@ export default function ExamPage() {
       .replace(/[\u0300-\u036f]/g, '')
       .toLowerCase()
       .trim();
-  };
-
-  // Add this helper function to check if all matches are complete
-  const isMatchingComplete = () => {
-    const currentQuestion = questions[currentQuestionIndex];
-    if (currentQuestion?.type === 'matching') {
-      return matchingPairs.every(pair => pair.matched);
-    }
-    return !!selectedAnswer;
-  };
-
-  const checkAnswer = () => {
-    const currentQuestion = questions[currentQuestionIndex];
-    
-    // For matching questions, verify all pairs are matched before proceeding
-    if (currentQuestion.type === 'matching') {
-      const allMatched = matchingPairs.every(pair => pair.matched);
-      if (!allMatched) {
-        return; // Don't proceed if not all pairs are matched
-      }
-    }
-    
-    setShowAnswer(true);
-    let isCorrect = false;
-    
-    if (currentQuestion.type === 'matching') {
-      isCorrect = matchingPairs.every(pair => pair.selectedAnswer === pair.pinyin);
-      setSelectedAnswer(JSON.stringify(matchingPairs.map(p => p.selectedAnswer)));
-    } else if (currentQuestion.type === 'tone-selection') {
-      isCorrect = selectedAnswer === currentQuestion.correctAnswer;
-    } else {
-      isCorrect = selectedAnswer === currentQuestion.correctAnswer;
-    }
-    
-    if (isCorrect) {
-      const messageDiv = document.createElement('div');
-      messageDiv.className = 'fixed top-20 right-4 bg-green-100 border border-green-500 text-green-800 rounded-lg px-4 py-2 z-50 animate-fadeIn';
-      messageDiv.textContent = 'Correct! ✓';
-      document.body.appendChild(messageDiv);
-      
-      setTimeout(() => {
-        messageDiv.remove();
-      }, 2000);
-    }
   };
 
   const restartExam = () => {
@@ -471,26 +488,31 @@ export default function ExamPage() {
             {/* Right column - Pinyin */}
             <div className="space-y-3">
               <div className="text-center mb-2 text-gray-500">Pronunciation</div>
-              {question.options?.map((option, index) => (
-                <button
-                  key={`pinyin-${index}`}
-                  type="button"
-                  className={`w-full border rounded-lg p-3 text-center transition-colors relative
-                    ${selectedPair.pinyin === option ? 'bg-blue-50 border-blue-500' : 'hover:bg-gray-50'}
-                    ${matchingPairs.find(p => p.selectedAnswer === option && p.pinyin === option) ? 'border-green-500 bg-green-50' : ''}
-                    ${matchingPairs.find(p => p.selectedAnswer === option && p.pinyin !== option) ? 'border-red-500 bg-red-50' : ''}
-                    ${matchingPairs.find(p => p.selectedAnswer === option) ? 'opacity-50' : ''}
-                  `}
-                  onClick={() => handleMatch('pinyin', option)}
-                  disabled={matchingPairs.find(p => p.selectedAnswer === option) || showAnswer}
-                >
-                  {/* Add letter indicator */}
-                  <span className="absolute left-2 top-2 text-sm text-gray-500">
-                    {String.fromCharCode(65 + index)}.
-                  </span>
-                  {option}
-                </button>
-              ))}
+              {question.options?.map((option, index) => {
+                // Check if option is already matched
+                const isMatched = matchingPairs.some(p => p.selectedAnswer === option);
+                
+                return (
+                  <button
+                    key={`pinyin-${index}`}
+                    type="button"
+                    className={`w-full border rounded-lg p-3 text-center transition-colors relative
+                      ${selectedPair.pinyin === option ? 'bg-blue-50 border-blue-500' : 'hover:bg-gray-50'} 
+                      ${matchingPairs.find(p => p.selectedAnswer === option && p.pinyin === option) ? 'border-green-500 bg-green-50' : ''}
+                      ${matchingPairs.find(p => p.selectedAnswer === option && p.pinyin !== option) ? 'border-red-500 bg-red-50' : ''}
+                      ${isMatched ? 'opacity-50' : ''}
+                    `}
+                    onClick={() => !showAnswer && handleMatch('pinyin', option)}
+                    disabled={isMatched || showAnswer}
+                  >
+                    {/* Add letter indicator */}
+                    <span className="absolute left-2 top-2 text-sm text-gray-500">
+                      {String.fromCharCode(65 + index)}.
+                    </span>
+                    {option}
+                  </button>
+                );
+              })}
             </div>
           </div>
           

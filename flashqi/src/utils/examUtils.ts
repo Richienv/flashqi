@@ -129,8 +129,42 @@ const generateMultipleChoiceQuestion = (card: any, allCards: any[]): ExamQuestio
     };
   }
 
-  // Handle non-tone multiple choice questions...
-  // (rest of the original function for other types of multiple choice questions)
+  // Handle non-tone multiple choice questions
+  const questionTypes = [
+    {
+      prompt: `Choose the correct Hanzi for "${card.english}":`,
+      options: shuffleArray([
+        card.hanzi,
+        ...shuffleArray(allCards.filter(c => c.id !== card.id))
+          .slice(0, 3)
+          .map(c => c.hanzi)
+      ]),
+      correctAnswer: card.hanzi
+    },
+    {
+      prompt: `Choose the correct meaning for "${card.hanzi}":`,
+      options: shuffleArray([
+        card.english,
+        ...shuffleArray(allCards.filter(c => c.id !== card.id))
+          .slice(0, 3)
+          .map(c => c.english)
+      ]),
+      correctAnswer: card.english
+    }
+  ];
+
+  const selectedQuestion = questionTypes[Math.floor(Math.random() * questionTypes.length)];
+
+  return {
+    id: `multiple-choice-${card.id}`,
+    type: 'multiple-choice',
+    prompt: selectedQuestion.prompt,
+    options: selectedQuestion.options,
+    correctAnswer: selectedQuestion.correctAnswer,
+    hanzi: card.hanzi,
+    pinyin: card.pinyin,
+    english: card.english
+  };
 };
 
 // Generate a complete sentence question

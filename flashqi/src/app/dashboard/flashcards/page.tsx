@@ -118,6 +118,9 @@ export default function FlashcardsPage() {
 
   // Start study session
   const enterStudyMode = (lessonId?: string) => {
+    // Log for debugging
+    console.log(`[DEBUG] enterStudyMode - Starting session for lesson: ${lessonId || 'all'}`);
+    
     if (lessonId) {
       setActiveLesson(lessonId);
     }
@@ -127,169 +130,292 @@ export default function FlashcardsPage() {
       ? LESSON_FLASHCARDS[lessonId as keyof typeof LESSON_FLASHCARDS] || []
       : getAllFlashcards();
     
+    console.log(`[DEBUG] enterStudyMode - Cards to study count: ${cardsToStudy.length}`);
+    
+    if (cardsToStudy.length === 0) {
+      console.error(`[ERROR] enterStudyMode - No cards found for lesson ID: ${lessonId}`);
+      return; // Prevent entering study mode with no cards
+    }
+    
     // Shuffle the cards
     const shuffledCards = shuffleArray(cardsToStudy);
     
+    // IMPORTANT: Reset all study session state in a single batch
+    // to prevent race conditions and ensure clean state
+    setCompletedCardIds([]); // Clear completed cards tracking
+    setCurrentCardIndex(0); // Reset to first card
+    setIsCardFlipped(false); // Ensure card starts unflipped
+    setStackPosition(3); // Reset stack appearance
+    setIsCompletionPopupVisible(false); // Hide completion popup if visible
+    
     // Set the shuffled cards for the study session
+    // This should be done last to ensure other state is reset first
     setCurrentFlashcards(shuffledCards);
-    setCurrentCardIndex(0);
-    setIsCardFlipped(false);
+    
+    // Finally, enter study mode
     setIsStudyMode(true);
   };
 
-  // Exit study session
+  // Exit study session with proper cleanup
   const exitStudySession = () => {
+    console.log(`[DEBUG] exitStudySession called`);
+    
+    // Clean up study session state
+    setCompletedCardIds([]);
+    setIsCompletionPopupVisible(false);
     setIsStudyMode(false);
   };
 
   // Handle next card with circular navigation and improved stack animation
   const handleNextCard = () => {
+    console.log(`[DEBUG] handleNextCard - Current index: ${currentCardIndex}, Total cards: ${currentFlashcards.length}`);
+    
+    if (currentFlashcards.length === 0) {
+      console.error("[ERROR] handleNextCard - No flashcards available");
+      return;
+    }
+
     const topCard = document.querySelector('.top-card') as HTMLElement;
-    if (topCard && currentFlashcards.length > 0) {
+    if (topCard) {
       // Keep stack cards visible but adjust their positions
       setStackPosition(1);
       
       // Add slide-out animation only to the top card
       topCard.classList.add('slide-out-left');
       
+      // Calculate next index with circular navigation outside of the timeout
+      const nextIndex = (currentCardIndex + 1) % currentFlashcards.length;
+      console.log(`[DEBUG] handleNextCard - Next index will be: ${nextIndex}`);
+      
       // Wait for animation to complete
       setTimeout(() => {
-        // Calculate next index with circular navigation
-        const nextIndex = (currentCardIndex + 1) % currentFlashcards.length;
+        // Update the index first, then handle animation cleanup
         setCurrentCardIndex(nextIndex);
         
         // Reset animation class
+        topCard.classList.remove('slide-out-left');
+        topCard.classList.add('slide-in-right');
+        
+        // Start rebuilding the stack gradually
+        setStackPosition(2);
+        
         setTimeout(() => {
-          topCard.classList.remove('slide-out-left');
-          topCard.classList.add('slide-in-right');
-          
-          // Start rebuilding the stack gradually
-          setStackPosition(2);
-          
-          setTimeout(() => {
-            topCard.classList.remove('slide-in-right');
-            // Fully restore stack
-            setStackPosition(3);
-          }, 300);
-        }, 50);
+          topCard.classList.remove('slide-in-right');
+          // Fully restore stack
+          setStackPosition(3);
+        }, 300);
       }, 250);
+    } else {
+      console.error(`[ERROR] handleNextCard - topCard element not found`);
+      
+      // Fallback: Just change the index even if animation isn't possible
+      const nextIndex = (currentCardIndex + 1) % currentFlashcards.length;
+      setCurrentCardIndex(nextIndex);
     }
   };
 
   // Handle previous card with circular navigation and improved stack animation
   const handlePrevCard = () => {
+    console.log(`[DEBUG] handlePrevCard - Current index: ${currentCardIndex}, Total cards: ${currentFlashcards.length}`);
+    
+    if (currentFlashcards.length === 0) {
+      console.error("[ERROR] handlePrevCard - No flashcards available");
+      return;
+    }
+
     const topCard = document.querySelector('.top-card') as HTMLElement;
-    if (topCard && currentFlashcards.length > 0) {
+    if (topCard) {
       // Keep stack cards visible but adjust their positions
       setStackPosition(1);
       
       // Add slide-out animation only to the top card
       topCard.classList.add('slide-out-right');
       
+      // Calculate previous index with circular navigation outside of timeout
+      const prevIndex = currentCardIndex === 0 
+        ? currentFlashcards.length - 1 
+        : currentCardIndex - 1;
+      
+      console.log(`[DEBUG] handlePrevCard - Prev index will be: ${prevIndex}`);
+      
       // Wait for animation to complete
       setTimeout(() => {
-        // Calculate previous index with circular navigation
-        const prevIndex = currentCardIndex === 0 
-          ? currentFlashcards.length - 1 
-          : currentCardIndex - 1;
-        
+        // Update the index first, then handle animation cleanup  
         setCurrentCardIndex(prevIndex);
         
         // Reset animation class
+        topCard.classList.remove('slide-out-right');
+        topCard.classList.add('slide-in-left');
+        
+        // Start rebuilding the stack gradually
+        setStackPosition(2);
+        
         setTimeout(() => {
-          topCard.classList.remove('slide-out-right');
-          topCard.classList.add('slide-in-left');
-          
-          // Start rebuilding the stack gradually
-          setStackPosition(2);
-          
-          setTimeout(() => {
-            topCard.classList.remove('slide-in-left');
-            // Fully restore stack
-            setStackPosition(3);
-          }, 300);
-        }, 50);
+          topCard.classList.remove('slide-in-left');
+          // Fully restore stack
+          setStackPosition(3);
+        }, 300);
       }, 250);
+    } else {
+      console.error(`[ERROR] handlePrevCard - topCard element not found`);
+      
+      // Fallback: Just change the index even if animation isn't possible
+      const prevIndex = currentCardIndex === 0 
+        ? currentFlashcards.length - 1 
+        : currentCardIndex - 1;
+      setCurrentCardIndex(prevIndex);
     }
   };
 
-  // Handle known/unknown card with improved stack animation
+  // Handle known/unknown card with improved stack animation and robust completion detection
   const handleCardResult = (known: boolean) => {
+    if (currentFlashcards.length === 0) {
+      console.error(`[ERROR] handleCardResult - currentFlashcards array is empty`);
+      return;
+    }
+    
+    if (currentCardIndex >= currentFlashcards.length) {
+      console.error(`[ERROR] handleCardResult - currentCardIndex (${currentCardIndex}) is out of bounds for currentFlashcards array (length: ${currentFlashcards.length})`);
+      return;
+    }
+    
     const currentCard = currentFlashcards[currentCardIndex];
-    console.log(`Card ${currentCard.id} marked as ${known ? 'known' : 'unknown'}`);
+    console.log(`[DEBUG] handleCardResult - Card ${currentCard.id} marked as ${known ? 'known' : 'unknown'}`);
+    console.log(`[DEBUG] handleCardResult - Current completedCardIds length: ${completedCardIds.length}`);
     
-    // Add to completed cards (use functional update to ensure we have the latest state)
-    const newCompletedIds = [...completedCardIds, currentCard.id];
-    setCompletedCardIds(newCompletedIds);
-    
-    // Move to next card with animation
-    const card = document.querySelector('.top-card') as HTMLElement;
-    if (card) {
-      // Keep stack cards visible but adjust their positions
-      setStackPosition(1);
+    // Add to completed cards using functional update to ensure we're working with latest state
+    setCompletedCardIds(prevCompletedIds => {
+      const newCompletedIds = [...prevCompletedIds, currentCard.id];
+      console.log(`[DEBUG] handleCardResult - New completedCardIds length: ${newCompletedIds.length}`);
       
-      // Add slide-out animation only to the top card
-      card.classList.add(known ? 'slide-out-right' : 'slide-out-left');
+      // Store the updated IDs for use in this function's closure
+      const updatedCompletedIds = newCompletedIds;
       
-      // Check if all cards are completed
-      if (newCompletedIds.length >= currentFlashcards.length) {
-        // All cards have been answered - show completion popup with delay
-        setTimeout(() => {
-          setIsCompletionPopupVisible(true);
+      // Move to next card with animation
+      const card = document.querySelector('.top-card') as HTMLElement;
+      if (card) {
+        // Keep stack cards visible but adjust their positions
+        setStackPosition(1);
+        
+        // Add slide-out animation only to the top card
+        card.classList.add(known ? 'slide-out-right' : 'slide-out-left');
+        
+        // Check if all cards are completed - compare with exact equality for safety
+        // Also use currentFlashcards.length directly as it won't change during this execution
+        if (updatedCompletedIds.length >= currentFlashcards.length) {
+          console.log(`[DEBUG] handleCardResult - All cards completed (${updatedCompletedIds.length}/${currentFlashcards.length}), showing completion popup`);
           
-          // Auto-hide after 5 seconds
+          // All cards have been answered - show completion popup with delay
+          setTimeout(() => {
+            setIsCompletionPopupVisible(true);
+            
+            // Auto-hide after 5 seconds
+            setTimeout(() => {
+              console.log(`[DEBUG] handleCardResult - Auto-hiding completion popup and exiting study mode`);
+              setIsCompletionPopupVisible(false);
+              setIsStudyMode(false);
+            }, 5000);
+          }, 500);
+        } else {
+          // Cards remaining - find next uncompleted card
+          console.log(`[DEBUG] handleCardResult - Cards remaining: ${currentFlashcards.length - updatedCompletedIds.length}`);
+          
+          // Wait for animation to complete
+          setTimeout(() => {
+            // Find next uncompleted card
+            let nextIndex = (currentCardIndex + 1) % currentFlashcards.length;
+            console.log(`[DEBUG] handleCardResult - Initial next index: ${nextIndex}`);
+            
+            let loopCount = 0;
+            const maxLoops = currentFlashcards.length;
+            
+            // Skip cards that are already completed
+            while (
+              updatedCompletedIds.includes(currentFlashcards[nextIndex].id) && 
+              updatedCompletedIds.length < currentFlashcards.length &&
+              loopCount < maxLoops
+            ) {
+              console.log(`[DEBUG] handleCardResult - Card at index ${nextIndex} (ID: ${currentFlashcards[nextIndex].id}) is already completed, trying next`);
+              nextIndex = (nextIndex + 1) % currentFlashcards.length;
+              loopCount++;
+            }
+            
+            if (loopCount >= maxLoops) {
+              console.error(`[ERROR] handleCardResult - Infinite loop detected while finding next uncompleted card`);
+              // Force completion as a fallback
+              setIsCompletionPopupVisible(true);
+              setTimeout(() => {
+                setIsCompletionPopupVisible(false);
+                setIsStudyMode(false);
+              }, 5000);
+              return;
+            }
+            
+            console.log(`[DEBUG] handleCardResult - Final next index: ${nextIndex}`);
+            
+            // Reset animation classes
+            card.classList.remove('slide-out-right', 'slide-out-left');
+            
+            // Start rebuilding the stack
+            setStackPosition(2);
+            
+            // Update to the next card
+            setCurrentCardIndex(nextIndex);
+            
+            // Fully restore stack after animation completes
+            setTimeout(() => {
+              setStackPosition(3);
+            }, 300);
+          }, 300);
+        }
+      } else {
+        console.error(`[ERROR] handleCardResult - card element not found`);
+        
+        // Even without animations, we still need to update the session state
+        if (updatedCompletedIds.length >= currentFlashcards.length) {
+          // All cards complete - show completion popup
+          setIsCompletionPopupVisible(true);
           setTimeout(() => {
             setIsCompletionPopupVisible(false);
             setIsStudyMode(false);
           }, 5000);
-        }, 500);
-        return;
+        } else {
+          // Find next uncompleted card (without animation)
+          let nextIndex = (currentCardIndex + 1) % currentFlashcards.length;
+          while (
+            updatedCompletedIds.includes(currentFlashcards[nextIndex].id) && 
+            updatedCompletedIds.length < currentFlashcards.length
+          ) {
+            nextIndex = (nextIndex + 1) % currentFlashcards.length;
+          }
+          setCurrentCardIndex(nextIndex);
+        }
       }
       
-      // Wait for animation to complete
-      setTimeout(() => {
-        // Find next uncompleted card
-        let nextIndex = (currentCardIndex + 1) % currentFlashcards.length;
-        
-        // Skip cards that are already completed
-        while (
-          newCompletedIds.includes(currentFlashcards[nextIndex].id) && 
-          newCompletedIds.length < currentFlashcards.length
-        ) {
-          nextIndex = (nextIndex + 1) % currentFlashcards.length;
-        }
-        
-        // Reset animation classes
-        card.classList.remove('slide-out-right', 'slide-out-left');
-        
-        // Start rebuilding the stack
-        setStackPosition(2);
-        
-        // Update to the next card
-        setCurrentCardIndex(nextIndex);
-        
-        // Fully restore stack after animation completes
-        setTimeout(() => {
-          setStackPosition(3);
-        }, 300);
-      }, 300);
-    }
+      return newCompletedIds;
+    });
   };
 
   // Get all flashcards based on active lesson
   const getAllFlashcards = () => {
     if (activeLesson === "all") {
       // Combine all lessons' flashcards
-      return Object.values(LESSON_FLASHCARDS).flat();
+      const allCards = Object.values(LESSON_FLASHCARDS).flat();
+      console.log(`[DEBUG] getAllFlashcards - Retrieved ${allCards.length} cards from all lessons`);
+      return allCards;
     } else {
       // Return specific lesson's flashcards
-      return LESSON_FLASHCARDS[activeLesson as keyof typeof LESSON_FLASHCARDS] || [];
+      const lessonCards = LESSON_FLASHCARDS[activeLesson as keyof typeof LESSON_FLASHCARDS] || [];
+      console.log(`[DEBUG] getAllFlashcards - Retrieved ${lessonCards.length} cards from lesson ${activeLesson}`);
+      return lessonCards;
     }
   };
 
   // Get flashcards for a specific lesson ID
   const getLessonFlashcards = (lessonId: string) => {
-    return LESSON_FLASHCARDS[lessonId as keyof typeof LESSON_FLASHCARDS] || [];
+    const cards = LESSON_FLASHCARDS[lessonId as keyof typeof LESSON_FLASHCARDS] || [];
+    console.log(`[DEBUG] getLessonFlashcards - Retrieved ${cards.length} cards from lesson ${lessonId}`);
+    return cards;
   };
 
   // Filter flashcards by search query
@@ -355,6 +481,36 @@ export default function FlashcardsPage() {
           number: 5,
           title: "Lesson 5",
           cards: getCardCount("lesson5")
+        },
+        {
+          id: "lesson6",
+          number: 6,
+          title: "Lesson 6",
+          cards: getCardCount("lesson6")
+        },
+        {
+          id: "lesson7",
+          number: 7,
+          title: "Lesson 7",
+          cards: getCardCount("lesson7")
+        },
+        {
+          id: "lesson8",
+          number: 8,
+          title: "Lesson 8",
+          cards: getCardCount("lesson8")
+        },
+        {
+          id: "lesson9",
+          number: 9,
+          title: "Lesson 9",
+          cards: getCardCount("lesson9")
+        },
+        {
+          id: "lesson10",
+          number: 10,
+          title: "Lesson 10",
+          cards: getCardCount("lesson10")
         }
       ];
     } else if (categoryId === 'listening') {
@@ -508,24 +664,11 @@ export default function FlashcardsPage() {
                       >
                         {/* Card content - both front and back */}
                         <div className="card-content relative h-full w-full smooth-transform transform-style-3d">
-                          {/* Front of card - English */}
+                          {/* Front of card - Pinyin (previously English) */}
                           <div className="absolute inset-0 backface-hidden rounded-3xl bg-white shadow-md border border-gray-200 flex flex-col">
-                            {/* Audio icon */}
-                            <div className="absolute top-4 right-4 text-gray-400 cursor-pointer hover:text-blue-500" onClick={handleAudioClick}>
-                              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                <path d="M11 5L6 9H2v6h4l5 4V5z"></path>
-                                <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
-                                <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
-                              </svg>
-                            </div>
-                            
-                            {/* Word content - English on front */}
                             <div className="flex-grow flex flex-col items-center justify-center p-6">
                               <div className="text-3xl text-gray-900 font-medium mb-2">
-                                {currentFlashcards[currentCardIndex].english}
-                              </div>
-                              <div className="text-gray-500 text-center max-w-xs text-sm mt-4">
-                                Tap to see Chinese
+                                {currentFlashcards[currentCardIndex].pinyin}
                               </div>
                             </div>
                             
@@ -559,22 +702,10 @@ export default function FlashcardsPage() {
                           
                           {/* Back of card - Chinese */}
                           <div className="absolute inset-0 backface-hidden rounded-3xl bg-white shadow-md border border-gray-200 flex flex-col rotate-y-180">
-                            {/* Audio icon */}
-                            <div className="absolute top-4 right-4 text-gray-400 cursor-pointer hover:text-blue-500" onClick={handleAudioClick}>
-                              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                <path d="M11 5L6 9H2v6h4l5 4V5z"></path>
-                                <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
-                                <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
-                              </svg>
-                            </div>
-                            
                             {/* Word content - Chinese characters on back */}
                             <div className="flex-grow flex flex-col items-center justify-center p-6">
-                              <div className="text-5xl text-gray-900 font-medium mb-3">
+                              <div className="text-7xl text-gray-900 font-medium mb-3">
                                 {currentFlashcards[currentCardIndex].hanzi}
-                              </div>
-                              <div className="text-xl text-gray-400 mb-4">
-                                {currentFlashcards[currentCardIndex].pinyin}
                               </div>
                               <div className="text-gray-600 text-center max-w-xs text-sm mt-5 border-t border-gray-100 pt-5">
                                 {currentFlashcards[currentCardIndex].example_sentence ? (
@@ -594,7 +725,7 @@ export default function FlashcardsPage() {
                                   <>
                                     <p className="mb-1 italic">Example:</p>
                                     <p className="mb-2">
-                                      <span className="font-medium">[{currentFlashcards[currentCardIndex].hanzi} • {currentFlashcards[currentCardIndex].pinyin}]</span>
+                                      <span className="font-medium">[{currentFlashcards[currentCardIndex].hanzi}]</span>
                                     </p>
                                     <p className="text-gray-500">
                                       {currentFlashcards[currentCardIndex].english.toLowerCase().includes('hello') ? 
