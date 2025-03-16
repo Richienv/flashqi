@@ -1,7 +1,10 @@
 "use client";
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+// @ts-ignore
 import type { CSSProperties } from "react";
-import React, { useEffect, useRef } from "react";
+// @ts-ignore
+import React, { useEffect, useRef, useState, useMemo } from "react";
 
 interface AuroraTextProps {
   children: React.ReactNode;
@@ -25,6 +28,31 @@ export function AuroraText({
   const [textStyle, setTextStyle] = React.useState<
     Partial<CSSStyleDeclaration>
   >({});
+  
+  // Generate a stable unique ID for the mask
+  const maskId = useMemo(() => 
+    `aurora-mask-${Math.random().toString(36).substring(2, 11)}`,
+    []
+  );
+
+  // Force initialization on mobile with a timeout
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (!isReady && textRef.current) {
+        // Force dimension calculation after a delay
+        const bbox = textRef.current.getBBox();
+        if (bbox.width > 0 && bbox.height > 0) {
+          setDimensions({
+            width: bbox.width,
+            height: bbox.height,
+          });
+          setIsReady(true);
+        }
+      }
+    }, 300);
+    
+    return () => clearTimeout(timer);
+  }, [isReady]);
 
   // Updated effect to compute all text styles from parent
   useEffect(() => {
@@ -75,15 +103,20 @@ export function AuroraText({
     const updateDimensions = () => {
       if (textRef.current) {
         const bbox = textRef.current.getBBox();
-        setDimensions({
-          width: bbox.width,
-          height: bbox.height,
-        });
-        setIsReady(true);
+        if (bbox.width > 0 && bbox.height > 0) {
+          setDimensions({
+            width: bbox.width,
+            height: bbox.height,
+          });
+          setIsReady(true);
+        }
       }
     };
 
+    // Try immediately and also on next frame to ensure SVG is rendered
     updateDimensions();
+    requestAnimationFrame(updateDimensions);
+    
     window.addEventListener("resize", updateDimensions);
 
     return () => window.removeEventListener("resize", updateDimensions);
@@ -97,11 +130,12 @@ export function AuroraText({
     if (!ctx) return;
 
     // Set canvas size
-    canvas.width = dimensions.width;
-    canvas.height = dimensions.height;
+    canvas.width = Math.max(dimensions.width, 10); // Ensure minimum size
+    canvas.height = Math.max(dimensions.height, 10); // Ensure minimum size
 
     let time = 0;
     const baseSpeed = 0.008; // Original speed as base unit
+    let animationFrame: number;
 
     function animate() {
       if (!ctx || !canvas) return;
@@ -109,6 +143,7 @@ export function AuroraText({
 
       time += baseSpeed * speed;
 
+      // First pass - create base glow with larger radius
       colors.forEach((color, i) => {
         const x =
           canvas.width *
@@ -121,27 +156,77 @@ export function AuroraText({
             Math.sin(time * 0.7 + i * 1.5) * 0.4 +
             Math.cos(time * 0.6 + i * 0.8) * 0.2);
 
+        // Increased spread for wider glow
+        const radius = canvas.width * 0.6; // Further increased from 0.5 to 0.6
+        
         const gradient = ctx.createRadialGradient(
           x,
           y,
           0,
           x,
           y,
-          canvas.width * 0.4,
+          radius,
         );
 
-        gradient.addColorStop(0, `${color}99`);
-        gradient.addColorStop(0.5, `${color}33`);
+        // Increased opacity values for maximum visibility
+        gradient.addColorStop(0, `${color}FF`); // Full opacity at center
+        gradient.addColorStop(0.4, `${color}BB`); // 73% opacity at 40% radius
+        gradient.addColorStop(0.8, `${color}44`); // 27% opacity at 80% radius
         gradient.addColorStop(1, "#00000000");
 
         ctx.fillStyle = gradient;
         ctx.fillRect(0, 0, canvas.width, canvas.height);
       });
 
-      requestAnimationFrame(animate);
+      // Second pass - add intense central glow with smaller radius
+      colors.forEach((color, i) => {
+        const x =
+          canvas.width *
+          (0.5 +
+            Math.cos(time * 0.8 + i * 1.3) * 0.4 +
+            Math.sin(time * 0.5 + i * 0.7) * 0.2);
+        const y =
+          canvas.height *
+          (0.5 +
+            Math.sin(time * 0.7 + i * 1.5) * 0.4 +
+            Math.cos(time * 0.6 + i * 0.8) * 0.2);
+
+        // Smaller radius for concentrated central glow
+        const innerRadius = canvas.width * 0.2;
+        
+        const innerGradient = ctx.createRadialGradient(
+          x,
+          y,
+          0,
+          x,
+          y,
+          innerRadius,
+        );
+
+        // High intensity central glow
+        innerGradient.addColorStop(0, `${color}FF`); // Full opacity
+        innerGradient.addColorStop(0.7, `${color}88`); // Fade out
+        innerGradient.addColorStop(1, "#00000000");
+
+        // Use lighter composite operation for additive glow effect
+        ctx.globalCompositeOperation = "lighter";
+        ctx.fillStyle = innerGradient;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.globalCompositeOperation = "source-over"; // Reset composite operation
+      });
+
+      animationFrame = requestAnimationFrame(animate);
     }
+    
     animate();
+    
+    return () => {
+      cancelAnimationFrame(animationFrame);
+    };
   }, [dimensions, colors, speed]);
+
+  // String content for more reliable SVG rendering
+  const childrenString = typeof children === 'string' ? children : String(children);
 
   return (
     <span
@@ -178,12 +263,16 @@ export function AuroraText({
         aria-hidden="true"
       >
         <svg
-          width={dimensions.width}
-          height={dimensions.height}
+          width={Math.max(dimensions.width, 10)}
+          height={Math.max(dimensions.height, 10)}
           className="absolute inset-0"
+          style={{
+            overflow: "visible",
+            pointerEvents: "none",
+          }}
         >
           <defs>
-            <mask id={`text-mask-${children}`}>
+            <mask id={maskId}>
               <rect width="100%" height="100%" fill="black" />
               <text
                 ref={textRef}
@@ -194,7 +283,7 @@ export function AuroraText({
                 fill="white"
                 style={textStyle as CSSProperties}
               >
-                {children}
+                {childrenString}
               </text>
             </mask>
           </defs>
@@ -203,8 +292,9 @@ export function AuroraText({
         <canvas
           ref={canvasRef}
           style={{
-            maskImage: `url(#text-mask-${children})`,
-            WebkitMaskImage: `url(#text-mask-${children})`,
+            maskImage: `url(#${maskId})`,
+            WebkitMaskImage: `url(#${maskId})`,
+            mixBlendMode: "normal",
           }}
           className="h-full w-full"
         />
