@@ -13,7 +13,7 @@ export default function Home() {
           animation: 'slowZoom 20s ease-in-out infinite alternate'
         }}
       >
-        <div className="absolute inset-0 bg-black/70" /> {/* Increased overlay opacity for better text visibility */}
+        <div className="absolute inset-0 bg-black/85" /> {/* Increased overlay opacity from 70% to 85% for a dimmer background */}
       </div>
       
       {/* Navbar - Minimalist with fade-in animation */}
@@ -37,10 +37,10 @@ export default function Home() {
       <main className="relative z-10 flex items-center justify-center h-[calc(100vh-80px)]">
         <div className="text-center px-4 max-w-2xl">
           <h1 className="text-5xl font-bold tracking-tight text-white md:text-6xl mb-6 animate-slide-up opacity-0" style={{ animationDelay: '0.3s', animationFillMode: 'forwards' }}>
-            Master Chinese <AuroraText className="text-5xl font-bold md:text-6xl" colors={["#38bdf8", "#a855f7", "#2dd4bf", "#0070F3", "#6366f1"]}>Effortlessly</AuroraText>
+            Zhejiang Level 1 <AuroraText className="text-5xl font-bold md:text-6xl" colors={["#38bdf8", "#a855f7", "#2dd4bf", "#0070F3", "#6366f1"]}>Blueprint</AuroraText>
           </h1>
           <p className="text-xl text-white/90 mb-10 animate-slide-up opacity-0" style={{ animationDelay: '0.6s', animationFillMode: 'forwards' }}>
-            Learn Mandarin Chinese with our intelligent flashcard system powered by spaced repetition
+              Crush your Zhejiang Level 1 dictation test with our flashcard - Powered by spaced repetition
           </p>
           <div className="flex justify-center animate-slide-up opacity-0" style={{ animationDelay: '0.9s', animationFillMode: 'forwards' }}>
             <Link href="/dashboard/flashcards">
