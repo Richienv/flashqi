@@ -1,0 +1,59 @@
+Below, I’ve reframed the features into concise, actionable items suitable for a sprint backlog in an Agile development process. These are written as user stories with high-level descriptions, avoiding specific code details while providing enough clarity for a software engineer to implement. Each feature aligns with your requested adjustments for reading, speaking, and listening in your Mandarin learning web app. I’ll assume a two-week sprint, but you can adjust the scope based on your team’s capacity.
+
+---
+
+### Sprint Backlog: Mandarin Learning Web App Features
+
+#### Feature 1: Reading - Paragraph Generation with Highlight Toggle
+- **User Story**: As a Mandarin learner, I want to read a paragraph made from lesson words with a toggle to highlight grammar parts, so I can understand sentence structure better.
+- **Description**: 
+  - Generate a short paragraph (3–5 sentences) using words from a specific lesson.
+  - Include a toggle button in the UI to enable/disable highlighting.
+  - When highlighting is on, color-code parts of speech: subject (e.g., red), object (green), verb (blue), noun (yellow).
+- **Acceptance Criteria**:
+  - Paragraph uses at least 5 lesson words and is grammatically correct.
+  - Toggle button switches highlighting on/off instantly.
+  - Colors are distinct and visible, with a legend explaining them.
+- **Effort Estimate**: 3 story points (medium complexity: text generation + UI toggle).
+
+#### Feature 2: Speaking - Practice Sentence List
+- **User Story**: As a Mandarin learner, I want a list of sentences using lesson words to practice speaking, so I can improve my fluency with relevant vocabulary.
+- **Description**: 
+  - Create a list of 5–10 unique sentences incorporating lesson words.
+  - Display each sentence with Mandarin text, pinyin, and English translation.
+  - Present the list in a scrollable, user-friendly format.
+- **Acceptance Criteria**:
+  - Sentences are varied (e.g., statements, questions) and use at least 3 lesson words each.
+  - Pinyin and translations are accurate and aligned with the Mandarin text.
+  - List is easy to read on both desktop and mobile.
+- **Effort Estimate**: 2 story points (low complexity: basic generation + display).
+
+#### Feature 3: Listening - Song Recommendations with Toned Lyrics
+- **User Story**: As a Mandarin learner, I want song recommendations with lyrics showing tones, so I can practice listening and pronunciation enjoyably.
+- **Description**: 
+  - Recommend 2–3 Chinese songs (pre-selected or matched to lesson words).
+  - Display song titles, artists, and lyrics line-by-line with pinyin including tone marks.
+  - Present in an expandable format (e.g., click song to see lyrics).
+- **Acceptance Criteria**:
+  - Songs are beginner-friendly (e.g., “月亮代表我的心”) or use lesson words.
+  - Lyrics show correct pinyin with tone marks (e.g., “nǐ” for tone 3).
+  - UI allows easy navigation between songs and lyrics.
+- **Effort Estimate**: 3 story points (medium complexity: content sourcing + tone formatting).
+
+---
+
+### Sprint Goal
+**Goal**: Deliver an initial set of interactive learning tools (reading, speaking, listening) to enhance Mandarin vocabulary practice for users.
+
+### Notes for the Team
+- **Dependencies**: Requires a database of lesson words (Mandarin, pinyin, meaning, part of speech) and a small song library with lyrics.
+- **Tech Stack**: Use existing frontend (e.g., React) and backend (e.g., Node.js) frameworks; leverage a pinyin library for tone marks.
+- **Prioritization**: Start with Speaking (simplest), then Reading, then Listening.
+- **Stretch Goal**: Add audio playback for sentences/songs if time allows.
+
+### Total Effort
+- **8 story points**: Fits a small team (2–3 developers) for a two-week sprint, assuming other tasks (bug fixes, testing) are included.
+
+---
+
+These features are bite-sized, testable, and deliver immediate value to learners, aligning with your vision of helping students master Mandarin effectively. Let me know if you’d like to tweak the scope or add more details for your sprint planning!
