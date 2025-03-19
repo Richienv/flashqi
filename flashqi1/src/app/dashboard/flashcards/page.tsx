@@ -977,8 +977,42 @@ export default function FlashcardsPage() {
                   {/* Hint section */}
                   <div className="text-center py-4 bg-blue-50 border-y border-blue-100 mb-4 drawing-hint">
                     <p className="text-lg font-medium text-blue-800">Try to draw:</p>
-                    <p className="text-5xl font-bold text-blue-900 mt-2 mb-2">{currentFlashcards[currentCardIndex]?.hanzi}</p>
-                    <p className="text-sm text-blue-700 mt-1">({currentFlashcards[currentCardIndex]?.pinyin} - {currentFlashcards[currentCardIndex]?.english})</p>
+                    <p className="text-2xl font-bold text-blue-900 mt-2 mb-1">{currentFlashcards[currentCardIndex]?.pinyin}</p>
+                    <p className="text-lg text-blue-700 mt-1">"{currentFlashcards[currentCardIndex]?.english}"</p>
+                    
+                    {/* Check button to reveal hanzi if needed */}
+                    <button 
+                      className="mt-3 px-3 py-1 text-sm bg-blue-200 text-blue-800 rounded-full hover:bg-blue-300 transition-colors"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        // Find the target element by a data attribute
+                        const target = document.querySelector('[data-hanzi-reveal]');
+                        if (target) {
+                          // Toggle visibility
+                          if (target.classList.contains('opacity-0')) {
+                            target.classList.remove('opacity-0');
+                            target.classList.add('opacity-100');
+                            e.currentTarget.textContent = "Hide Character";
+                          } else {
+                            target.classList.remove('opacity-100');
+                            target.classList.add('opacity-0');
+                            e.currentTarget.textContent = "Show Character";
+                          }
+                        }
+                      }}
+                    >
+                      Show Character
+                    </button>
+                    
+                    {/* Hidden hanzi that can be revealed on demand */}
+                    <div 
+                      data-hanzi-reveal 
+                      className="mt-3 opacity-0 transition-opacity duration-300"
+                    >
+                      <div className="inline-block p-3 bg-white rounded-lg border border-blue-200">
+                        <p className="text-5xl font-bold text-blue-900">{currentFlashcards[currentCardIndex]?.hanzi}</p>
+                      </div>
+                    </div>
                   </div>
                   
                   {/* Canvas area */}
