@@ -78,6 +78,44 @@ const AnimationStyles = () => (
     .drawing-controls-button:active {
       transform: scale(0.95);
     }
+
+    .action-button {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 10px;
+      border-radius: 50%;
+      transition: all 0.15s ease;
+    }
+
+    .action-button:active {
+      transform: scale(0.95);
+    }
+
+    .action-button-text {
+      border-radius: 8px;
+      padding: 8px 12px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s ease;
+    }
+
+    .action-button-text:active {
+      transform: scale(0.97);
+    }
+
+    .drawing-footer {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 12px 16px;
+      background-color: white;
+      box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+      z-index: 10;
+    }
   `}</style>
 );
 
@@ -127,6 +165,9 @@ export default function FlashcardsPage() {
   const [strokeHistory, setStrokeHistory] = useState<ImageData[]>([]);
   const [currentStroke, setCurrentStroke] = useState<{x: number, y: number}[]>([]);
   const [ctx, setCtx] = useState<CanvasRenderingContext2D | null>(null);
+  // Multiple canvas pages for drawing
+  const [currentDrawingPage, setCurrentDrawingPage] = useState(0);
+  const [drawingPages, setDrawingPages] = useState<{ strokes: ImageData[] }[]>([{ strokes: [] }]);
 
   // Get all flashcards based on active lesson
   const getAllFlashcards = () => {
@@ -803,12 +844,38 @@ export default function FlashcardsPage() {
         
         setCtx(context);
         
-        // Save initial blank canvas for undo history
-        const initialState = context.getImageData(0, 0, canvas.width, canvas.height);
-        setStrokeHistory([initialState]);
+        // Initialize drawing pages if empty
+        if (drawingPages.length === 0 || drawingPages[currentDrawingPage]?.strokes.length === 0) {
+          const initialState = context.getImageData(0, 0, canvas.width, canvas.height);
+          
+          // Update the current page's strokes
+          setDrawingPages(prevPages => {
+            const newPages = [...prevPages];
+            if (!newPages[currentDrawingPage]) {
+              newPages[currentDrawingPage] = { strokes: [initialState] };
+            } else {
+              newPages[currentDrawingPage].strokes = [initialState];
+            }
+            return newPages;
+          });
+          
+          setStrokeHistory([initialState]);
+        } else {
+          // Restore the existing drawing for the current page
+          const existingStrokes = drawingPages[currentDrawingPage]?.strokes || [];
+          if (existingStrokes.length > 0) {
+            const lastStroke = existingStrokes[existingStrokes.length - 1];
+            context.putImageData(lastStroke, 0, 0);
+            setStrokeHistory(existingStrokes);
+          } else {
+            // Just in case, initialize with blank canvas
+            const initialState = context.getImageData(0, 0, canvas.width, canvas.height);
+            setStrokeHistory([initialState]);
+          }
+        }
       }
     }
-  }, [isDrawingMode]);
+  }, [isDrawingMode, currentDrawingPage]);
 
   // Add window resize handler to adjust canvas size
   useEffect(() => {
@@ -892,7 +959,22 @@ export default function FlashcardsPage() {
     // Save current state to history for undo
     const canvas = canvasRef.current;
     const newState = ctx.getImageData(0, 0, canvas.width, canvas.height);
-    setStrokeHistory(prev => [...prev, newState]);
+    
+    // Update both the stroke history and the drawing pages
+    setStrokeHistory(prev => {
+      const newHistory = [...prev, newState];
+      
+      // Also update the drawing pages
+      setDrawingPages(prevPages => {
+        const newPages = [...prevPages];
+        newPages[currentDrawingPage] = { 
+          strokes: newHistory 
+        };
+        return newPages;
+      });
+      
+      return newHistory;
+    });
   };
 
   const clearCanvas = () => {
@@ -903,7 +985,16 @@ export default function FlashcardsPage() {
     
     // Reset history but keep the initial blank canvas state
     const initialState = strokeHistory[0];
-    setStrokeHistory([initialState]);
+    const newHistory = [initialState];
+    
+    setStrokeHistory(newHistory);
+    
+    // Update the drawing pages
+    setDrawingPages(prevPages => {
+      const newPages = [...prevPages];
+      newPages[currentDrawingPage] = { strokes: newHistory };
+      return newPages;
+    });
   };
 
   const undoStroke = () => {
@@ -916,6 +1007,58 @@ export default function FlashcardsPage() {
     
     ctx.putImageData(previousState, 0, 0);
     setStrokeHistory(newHistory);
+    
+    // Update the drawing pages
+    setDrawingPages(prevPages => {
+      const newPages = [...prevPages];
+      newPages[currentDrawingPage].strokes = newHistory;
+      return newPages;
+    });
+  };
+
+  const addNewDrawingPage = () => {
+    if (!canvasRef.current || !ctx) return;
+    
+    // Save current page first
+    const currentPageStrokes = [...strokeHistory];
+    
+    // Get a reference to the canvas to ensure it's not null during the operation
+    const canvas = canvasRef.current;
+    
+    // Add a new blank page
+    setDrawingPages(prevPages => {
+      const newPages = [...prevPages];
+      newPages[currentDrawingPage] = { strokes: currentPageStrokes };
+      
+      // Create a new blank page if it doesn't exist
+      if (!newPages[currentDrawingPage + 1]) {
+        const initialState = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        newPages.push({ strokes: [initialState] });
+      }
+      
+      return newPages;
+    });
+    
+    // Switch to the new page
+    setCurrentDrawingPage(prevPage => prevPage + 1);
+  };
+
+  const goToPreviousDrawingPage = () => {
+    if (currentDrawingPage <= 0) return;
+    
+    // Save current page first
+    if (canvasRef.current && ctx) {
+      const currentPageStrokes = [...strokeHistory];
+      
+      setDrawingPages(prevPages => {
+        const newPages = [...prevPages];
+        newPages[currentDrawingPage] = { strokes: currentPageStrokes };
+        return newPages;
+      });
+    }
+    
+    // Switch to the previous page
+    setCurrentDrawingPage(prevPage => prevPage - 1);
   };
 
   const exitDrawingMode = () => {
@@ -924,6 +1067,23 @@ export default function FlashcardsPage() {
     setStrokeHistory([]);
     setCurrentStroke([]);
     setIsDrawing(false);
+    setCurrentDrawingPage(0);
+    setDrawingPages([{ strokes: [] }]);
+  };
+
+  const goToNextCard = () => {
+    // Move to next card
+    handleNextCard();
+    // Reset drawing pages for the new card
+    setCurrentDrawingPage(0);
+    setDrawingPages([{ strokes: [] }]);
+    // Clear the canvas
+    if (ctx && canvasRef.current) {
+      const canvas = canvasRef.current;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      const initialState = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      setStrokeHistory([initialState]);
+    }
   };
 
   return (
@@ -960,29 +1120,45 @@ export default function FlashcardsPage() {
             <div className="fixed inset-0 bg-gradient-to-b from-[#001060] via-[#2D41D1] to-[#5E72E4] z-50 overflow-hidden flex flex-col">
               {/* Drawing overlay - shown when drawing mode is active */}
               {isDrawingMode && (
-                <div className="fixed inset-0 bg-white z-[100] flex flex-col drawing-overlay">
-                  <div className="px-4 pt-6 pb-2 flex justify-between items-center">
-                    <h1 className="text-2xl font-bold text-black">Draw the Character</h1>
-                    <button 
-                      className="p-2 bg-red-500 text-white rounded-full"
-                      onClick={exitDrawingMode}
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <line x1="18" y1="6" x2="6" y2="18"></line>
-                        <line x1="6" y1="6" x2="18" y2="18"></line>
-                      </svg>
-                    </button>
+                <div className="fixed inset-0 bg-white z-[100] flex flex-col">
+                  {/* Header */}
+                  <div className="px-4 pt-4 pb-2 flex justify-between items-center border-b border-gray-100">
+                    <div className="flex items-center">
+                      <button 
+                        className="action-button mr-3 text-gray-500"
+                        onClick={exitDrawingMode}
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M19 12H5M12 19l-7-7 7-7"></path>
+                        </svg>
+                      </button>
+                      <h1 className="text-xl font-medium text-gray-800">Draw the Character</h1>
+                    </div>
+
+                    {/* Card navigation */}
+                    <div className="flex items-center gap-2">
+                      <button 
+                        className="action-button-text bg-blue-50 text-blue-700"
+                        onClick={goToNextCard}
+                        title="Go to next card"
+                      >
+                        <span>Next Card</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M9 18l6-6-6-6"></path>
+                        </svg>
+                      </button>
+                    </div>
                   </div>
                   
                   {/* Hint section */}
-                  <div className="text-center py-4 bg-blue-50 border-y border-blue-100 mb-4 drawing-hint">
-                    <p className="text-lg font-medium text-blue-800">Try to draw:</p>
-                    <p className="text-2xl font-bold text-blue-900 mt-2 mb-1">{currentFlashcards[currentCardIndex]?.pinyin}</p>
-                    <p className="text-lg text-blue-700 mt-1">"{currentFlashcards[currentCardIndex]?.english}"</p>
+                  <div className="text-center py-3 bg-blue-50 border-b border-blue-100 drawing-hint">
+                    <p className="text-sm font-medium text-blue-700 mb-1">Try to draw:</p>
+                    <p className="text-2xl font-bold text-blue-900">{currentFlashcards[currentCardIndex]?.pinyin}</p>
+                    <p className="text-sm text-blue-700 mt-1">"{currentFlashcards[currentCardIndex]?.english}"</p>
                     
-                    {/* Check button to reveal hanzi if needed */}
+                    {/* Show Character button */}
                     <button 
-                      className="mt-3 px-3 py-1 text-sm bg-blue-200 text-blue-800 rounded-full hover:bg-blue-300 transition-colors"
+                      className="mt-2 px-3 py-1 text-xs bg-blue-200 text-blue-800 rounded-full hover:bg-blue-300 transition-colors inline-flex items-center"
                       onClick={(e) => {
                         e.preventDefault();
                         // Find the target element by a data attribute
@@ -1001,18 +1177,27 @@ export default function FlashcardsPage() {
                         }
                       }}
                     >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-1">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                        <circle cx="12" cy="12" r="3"></circle>
+                      </svg>
                       Show Character
                     </button>
                     
                     {/* Hidden hanzi that can be revealed on demand */}
                     <div 
                       data-hanzi-reveal 
-                      className="mt-3 opacity-0 transition-opacity duration-300"
+                      className="mt-2 opacity-0 transition-opacity duration-300"
                     >
-                      <div className="inline-block p-3 bg-white rounded-lg border border-blue-200">
-                        <p className="text-5xl font-bold text-blue-900">{currentFlashcards[currentCardIndex]?.hanzi}</p>
+                      <div className="inline-block p-2 bg-white rounded-lg border border-blue-200">
+                        <p className="text-4xl font-bold text-blue-900">{currentFlashcards[currentCardIndex]?.hanzi}</p>
                       </div>
                     </div>
+                  </div>
+                  
+                  {/* Drawing page indicator */}
+                  <div className="mx-auto mt-2 mb-2 px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-xs flex items-center">
+                    <span>Page {currentDrawingPage + 1} of {drawingPages.length}</span>
                   </div>
                   
                   {/* Canvas area */}
@@ -1027,40 +1212,73 @@ export default function FlashcardsPage() {
                     />
                   </div>
                   
-                  {/* Drawing controls */}
-                  <div className="p-4 flex justify-center items-center space-x-4 drawing-controls">
-                    <button 
-                      className="drawing-controls-button bg-gray-200 text-gray-800"
-                      onClick={undoStroke}
-                      disabled={strokeHistory.length <= 1}
-                      style={{opacity: strokeHistory.length <= 1 ? 0.5 : 1}}
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
-                        <path d="M3 7v6h6"></path>
-                        <path d="M3 13c0-4.4 3.6-8 8-8h10"></path>
-                      </svg>
-                      <span>Undo</span>
-                    </button>
-                    <button 
-                      className="drawing-controls-button bg-gray-200 text-gray-800"
-                      onClick={clearCanvas}
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
-                        <path d="M3 3h18v18H3z"></path>
-                        <path d="M8 8l8 8"></path>
-                        <path d="M16 8l-8 8"></path>
-                      </svg>
-                      <span>Clear</span>
-                    </button>
-                    <button 
-                      className="drawing-controls-button bg-blue-600 text-white"
-                      onClick={exitDrawingMode}
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
-                        <polyline points="20 6 9 17 4 12"></polyline>
-                      </svg>
-                      <span>Done</span>
-                    </button>
+                  {/* Drawing toolbar */}
+                  <div className="drawing-footer">
+                    <div className="flex justify-between items-center">
+                      {/* Left side - Undo/Clear */}
+                      <div className="flex gap-2">
+                        <button 
+                          className="action-button-text bg-gray-100 text-gray-800"
+                          onClick={undoStroke}
+                          disabled={strokeHistory.length <= 1}
+                          style={{opacity: strokeHistory.length <= 1 ? 0.5 : 1}}
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M3 7v6h6"></path>
+                            <path d="M3 13c0-4.4 3.6-8 8-8h10"></path>
+                          </svg>
+                          <span>Undo</span>
+                        </button>
+                        <button 
+                          className="action-button-text bg-gray-100 text-gray-800"
+                          onClick={clearCanvas}
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M3 6h18"></path>
+                            <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
+                            <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
+                          </svg>
+                          <span>Clear</span>
+                        </button>
+                      </div>
+                      
+                      {/* Right side - Page Navigation */}
+                      <div className="flex gap-2">
+                        <button 
+                          className="action-button-text bg-gray-100 text-gray-800"
+                          onClick={goToPreviousDrawingPage}
+                          disabled={currentDrawingPage === 0}
+                          style={{opacity: currentDrawingPage === 0 ? 0.5 : 1}}
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M15 18l-6-6 6-6"></path>
+                          </svg>
+                          <span>Prev</span>
+                        </button>
+                        <button 
+                          className="action-button-text bg-gray-100 text-gray-800"
+                          onClick={addNewDrawingPage}
+                        >
+                          <span>Next</span>
+                          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M9 18l6-6-6-6"></path>
+                          </svg>
+                        </button>
+                      </div>
+                    </div>
+                    
+                    {/* Done button */}
+                    <div className="mt-3">
+                      <button 
+                        className="w-full py-3 bg-blue-600 text-white rounded-lg font-medium flex items-center justify-center"
+                        onClick={exitDrawingMode}
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
+                          <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
+                        <span>Done</span>
+                      </button>
+                    </div>
                   </div>
                 </div>
               )}
