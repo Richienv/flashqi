@@ -176,12 +176,10 @@ export default function FlashcardsPage() {
       const allCards = Object.values(LESSON_FLASHCARDS)
         .map(cards => safeGetFlashcards(cards))
         .flat();
-      console.log(`[DEBUG] getAllFlashcards - Retrieved ${allCards.length} cards from all lessons`);
       return allCards;
     } else {
       // Return specific lesson's flashcards
       const lessonCards = safeGetFlashcards(LESSON_FLASHCARDS[activeLesson as keyof typeof LESSON_FLASHCARDS]);
-      console.log(`[DEBUG] getAllFlashcards - Retrieved ${lessonCards.length} cards from lesson ${activeLesson}`);
       return lessonCards;
     }
   };
@@ -196,7 +194,6 @@ export default function FlashcardsPage() {
     }
     
     const cards = safeGetFlashcards(LESSON_FLASHCARDS[mappedLessonId as keyof typeof LESSON_FLASHCARDS]);
-    console.log(`[DEBUG] getLessonFlashcards - Retrieved ${cards.length} cards from lesson ${lessonId} (mapped to ${mappedLessonId})`);
     return cards;
   };
 
@@ -303,7 +300,6 @@ export default function FlashcardsPage() {
   const handleCategorySelect = (categoryId: string) => {
     // If reading category is selected, navigate to reading practice page
     if (categoryId === 'reading') {
-      console.log('[DEBUG] Navigating to reading page');
       router.push('/dashboard/flashcards/reading');
       return;
     }
@@ -342,15 +338,11 @@ export default function FlashcardsPage() {
 
   // Start study session
   const enterStudyMode = (lessonId?: string) => {
-    // Log for debugging
-    console.log(`[DEBUG] enterStudyMode - Starting session for lesson: ${lessonId || 'all'}`);
-    
     // Map reading lesson IDs to tutorial lesson IDs if needed
     let mappedLessonId = lessonId;
     if (lessonId && lessonId.startsWith('r')) {
       const lessonNumber = lessonId.substring(1); // Get the number after 'r'
       mappedLessonId = `lesson${lessonNumber}`; // Convert r1 to lesson1, r2 to lesson2, etc.
-      console.log(`[DEBUG] enterStudyMode - Mapped reading lesson ${lessonId} to ${mappedLessonId}`);
     }
     
     if (mappedLessonId) {
@@ -362,10 +354,7 @@ export default function FlashcardsPage() {
       ? safeGetFlashcards(LESSON_FLASHCARDS[mappedLessonId as keyof typeof LESSON_FLASHCARDS])
       : getAllFlashcards();
     
-    console.log(`[DEBUG] enterStudyMode - Cards to study count: ${cardsToStudy.length}`);
-    
     if (cardsToStudy.length === 0) {
-      console.error(`[ERROR] enterStudyMode - No cards found for lesson ID: ${lessonId}${mappedLessonId !== lessonId ? ` (mapped to ${mappedLessonId})` : ''}`);
       return; // Prevent entering study mode with no cards
     }
     
@@ -390,8 +379,6 @@ export default function FlashcardsPage() {
 
   // Exit study session with proper cleanup
   const exitStudySession = () => {
-    console.log(`[DEBUG] exitStudySession called`);
-    
     // Clean up study session state
     setCompletedCardIds([]);
     setIsCompletionPopupVisible(false);
@@ -400,10 +387,7 @@ export default function FlashcardsPage() {
 
   // Handle next card with circular navigation and improved stack animation
   const handleNextCard = () => {
-    console.log(`[DEBUG] handleNextCard - Current index: ${currentCardIndex}, Total cards: ${currentFlashcards.length}`);
-    
     if (currentFlashcards.length === 0) {
-      console.error("[ERROR] handleNextCard - No flashcards available");
       return;
     }
 
@@ -417,7 +401,6 @@ export default function FlashcardsPage() {
       
       // Calculate next index with circular navigation outside of the timeout
       const nextIndex = (currentCardIndex + 1) % currentFlashcards.length;
-      console.log(`[DEBUG] handleNextCard - Next index will be: ${nextIndex}`);
       
       // Wait for animation to complete
       setTimeout(() => {
@@ -438,8 +421,6 @@ export default function FlashcardsPage() {
         }, 300);
       }, 250);
     } else {
-      console.error(`[ERROR] handleNextCard - topCard element not found`);
-      
       // Fallback: Just change the index even if animation isn't possible
       const nextIndex = (currentCardIndex + 1) % currentFlashcards.length;
       setCurrentCardIndex(nextIndex);
@@ -448,10 +429,7 @@ export default function FlashcardsPage() {
 
   // Handle previous card with circular navigation and improved stack animation
   const handlePrevCard = () => {
-    console.log(`[DEBUG] handlePrevCard - Current index: ${currentCardIndex}, Total cards: ${currentFlashcards.length}`);
-    
     if (currentFlashcards.length === 0) {
-      console.error("[ERROR] handlePrevCard - No flashcards available");
       return;
     }
 
@@ -467,8 +445,6 @@ export default function FlashcardsPage() {
       const prevIndex = currentCardIndex === 0 
         ? currentFlashcards.length - 1 
         : currentCardIndex - 1;
-      
-      console.log(`[DEBUG] handlePrevCard - Prev index will be: ${prevIndex}`);
       
       // Wait for animation to complete
       setTimeout(() => {
@@ -489,8 +465,6 @@ export default function FlashcardsPage() {
         }, 300);
       }, 250);
     } else {
-      console.error(`[ERROR] handlePrevCard - topCard element not found`);
-      
       // Fallback: Just change the index even if animation isn't possible
       const prevIndex = currentCardIndex === 0 
         ? currentFlashcards.length - 1 
@@ -502,23 +476,18 @@ export default function FlashcardsPage() {
   // Handle known/unknown card with improved stack animation and robust completion detection
   const handleCardResult = (known: boolean) => {
     if (currentFlashcards.length === 0) {
-      console.error(`[ERROR] handleCardResult - currentFlashcards array is empty`);
       return;
     }
     
     if (currentCardIndex >= currentFlashcards.length) {
-      console.error(`[ERROR] handleCardResult - currentCardIndex (${currentCardIndex}) is out of bounds for currentFlashcards array (length: ${currentFlashcards.length})`);
       return;
     }
     
     const currentCard = currentFlashcards[currentCardIndex];
-    console.log(`[DEBUG] handleCardResult - Card ${currentCard.id} marked as ${known ? 'known' : 'unknown'}`);
-    console.log(`[DEBUG] handleCardResult - Current completedCardIds length: ${completedCardIds.length}`);
     
     // Add to completed cards using functional update to ensure we're working with latest state
     setCompletedCardIds(prevCompletedIds => {
       const newCompletedIds = [...prevCompletedIds, currentCard.id];
-      console.log(`[DEBUG] handleCardResult - New completedCardIds length: ${newCompletedIds.length}`);
       
       // Store the updated IDs for use in this function's closure
       const updatedCompletedIds = newCompletedIds;
@@ -535,28 +504,23 @@ export default function FlashcardsPage() {
         // Check if all cards are completed - compare with exact equality for safety
         // Also use currentFlashcards.length directly as it won't change during this execution
         if (updatedCompletedIds.length >= currentFlashcards.length) {
-          console.log(`[DEBUG] handleCardResult - All cards completed (${updatedCompletedIds.length}/${currentFlashcards.length}), showing completion popup`);
-          
           // All cards have been answered - show completion popup with delay
           setTimeout(() => {
             setIsCompletionPopupVisible(true);
             
             // Auto-hide after 5 seconds
             setTimeout(() => {
-              console.log(`[DEBUG] handleCardResult - Auto-hiding completion popup and exiting study mode`);
               setIsCompletionPopupVisible(false);
               setIsStudyMode(false);
             }, 5000);
           }, 500);
         } else {
           // Cards remaining - find next uncompleted card
-          console.log(`[DEBUG] handleCardResult - Cards remaining: ${currentFlashcards.length - updatedCompletedIds.length}`);
           
           // Wait for animation to complete
           setTimeout(() => {
             // Find next uncompleted card
             let nextIndex = (currentCardIndex + 1) % currentFlashcards.length;
-            console.log(`[DEBUG] handleCardResult - Initial next index: ${nextIndex}`);
             
             let loopCount = 0;
             const maxLoops = currentFlashcards.length;
@@ -567,13 +531,11 @@ export default function FlashcardsPage() {
               updatedCompletedIds.length < currentFlashcards.length &&
               loopCount < maxLoops
             ) {
-              console.log(`[DEBUG] handleCardResult - Card at index ${nextIndex} (ID: ${currentFlashcards[nextIndex].id}) is already completed, trying next`);
               nextIndex = (nextIndex + 1) % currentFlashcards.length;
               loopCount++;
             }
             
             if (loopCount >= maxLoops) {
-              console.error(`[ERROR] handleCardResult - Infinite loop detected while finding next uncompleted card`);
               // Force completion as a fallback
               setIsCompletionPopupVisible(true);
               setTimeout(() => {
@@ -582,8 +544,6 @@ export default function FlashcardsPage() {
               }, 5000);
               return;
             }
-            
-            console.log(`[DEBUG] handleCardResult - Final next index: ${nextIndex}`);
             
             // Reset animation classes
             card.classList.remove('slide-out-right', 'slide-out-left');
@@ -601,8 +561,6 @@ export default function FlashcardsPage() {
           }, 300);
         }
       } else {
-        console.error(`[ERROR] handleCardResult - card element not found`);
-        
         // Even without animations, we still need to update the session state
         if (updatedCompletedIds.length >= currentFlashcards.length) {
           // All cards complete - show completion popup
@@ -632,7 +590,6 @@ export default function FlashcardsPage() {
   const handleAudioClick = (e: React.MouseEvent) => {
     e.stopPropagation(); // Prevent card flip
     // In a real app, this would play the audio for the word
-    console.log('Playing audio for word');
   };
 
   // Get category-specific lessons with accurate card counts
@@ -1025,6 +982,9 @@ export default function FlashcardsPage() {
     // Get a reference to the canvas to ensure it's not null during the operation
     const canvas = canvasRef.current;
     
+    // Save the current canvas state (for restoring later)
+    const currentCanvasState = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    
     // Add a new blank page
     setDrawingPages(prevPages => {
       const newPages = [...prevPages];
@@ -1032,8 +992,15 @@ export default function FlashcardsPage() {
       
       // Create a new blank page if it doesn't exist
       if (!newPages[currentDrawingPage + 1]) {
-        const initialState = ctx.getImageData(0, 0, canvas.width, canvas.height);
-        newPages.push({ strokes: [initialState] });
+        // Clear the canvas temporarily to get a blank state
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        const blankState = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        
+        // Add the new blank page
+        newPages.push({ strokes: [blankState] });
+        
+        // Restore the canvas to its previous state for the current view
+        ctx.putImageData(currentCanvasState, 0, 0);
       }
       
       return newPages;
