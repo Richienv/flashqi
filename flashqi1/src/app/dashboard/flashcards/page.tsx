@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Navbar, MobileNav } from "@/components/ui/navbar";
 import { Button } from "@/components/ui/button";
 import { Tabs } from "@/components/ui/tabs";
@@ -27,6 +27,56 @@ const AnimationStyles = () => (
     }
     .animate-bounce-in {
       animation: bounce-in 0.5s ease-out forwards;
+    }
+    
+    /* Drawing mode styles */
+    .drawing-canvas {
+      touch-action: none; /* Prevent browser handling of touch gestures */
+      width: 100%;
+      max-width: 600px;
+      height: 60vh;
+      max-height: 500px;
+      background-color: #f9f9f9;
+      border-radius: 12px;
+      box-shadow: inset 0 0 10px rgba(0,0,0,0.1);
+    }
+    
+    .drawing-button {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      z-index: 10;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      background-color: #4f46e5;
+      color: white;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      border: none;
+      outline: none;
+      transition: all 0.2s ease;
+    }
+    
+    .drawing-button:active {
+      transform: scale(0.95);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .drawing-controls-button {
+      padding: 12px 16px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 500;
+      transition: all 0.2s ease;
+    }
+    
+    .drawing-controls-button:active {
+      transform: scale(0.95);
     }
   `}</style>
 );
@@ -69,6 +119,14 @@ export default function FlashcardsPage() {
   const [visibleCardsCount, setVisibleCardsCount] = useState(20); // For infinite scrolling
   const [isExactMatchFound, setIsExactMatchFound] = useState(false); // Track if an exact match was found
   const [matchedCardId, setMatchedCardId] = useState<string | null>(null); // Track the ID of an exact match
+  
+  // Drawing feature states
+  const [isDrawingMode, setIsDrawingMode] = useState(false);
+  const [isDrawing, setIsDrawing] = useState(false);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [strokeHistory, setStrokeHistory] = useState<ImageData[]>([]);
+  const [currentStroke, setCurrentStroke] = useState<{x: number, y: number}[]>([]);
+  const [ctx, setCtx] = useState<CanvasRenderingContext2D | null>(null);
 
   // Get all flashcards based on active lesson
   const getAllFlashcards = () => {
@@ -725,6 +783,149 @@ export default function FlashcardsPage() {
     ? getCategoryLessons(selectedCategory).find(l => l.id === previewLessonId)?.title
     : null;
 
+  // Initialize canvas context on drawing mode activation
+  useEffect(() => {
+    if (isDrawingMode && canvasRef.current) {
+      const canvas = canvasRef.current;
+      const context = canvas.getContext('2d');
+      
+      if (context) {
+        // Set canvas dimensions to match its display size
+        const rect = canvas.getBoundingClientRect();
+        canvas.width = rect.width;
+        canvas.height = rect.height;
+        
+        // Set drawing style
+        context.strokeStyle = '#000';
+        context.lineWidth = 4;
+        context.lineCap = 'round';
+        context.lineJoin = 'round';
+        
+        setCtx(context);
+        
+        // Save initial blank canvas for undo history
+        const initialState = context.getImageData(0, 0, canvas.width, canvas.height);
+        setStrokeHistory([initialState]);
+      }
+    }
+  }, [isDrawingMode]);
+
+  // Add window resize handler to adjust canvas size
+  useEffect(() => {
+    const handleResize = () => {
+      if (isDrawingMode && canvasRef.current && ctx) {
+        // Save current drawing
+        const imageData = ctx.getImageData(0, 0, canvasRef.current.width, canvasRef.current.height);
+        
+        // Update canvas size
+        const rect = canvasRef.current.getBoundingClientRect();
+        canvasRef.current.width = rect.width;
+        canvasRef.current.height = rect.height;
+        
+        // Restore previous drawing style
+        ctx.strokeStyle = '#000';
+        ctx.lineWidth = 4;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        
+        // Try to restore the drawing, but only if dimensions match
+        // Otherwise, just start with a clean canvas
+        if (imageData.width === canvasRef.current.width && imageData.height === canvasRef.current.height) {
+          ctx.putImageData(imageData, 0, 0);
+        } else {
+          // If dimensions changed, reset history with new blank canvas
+          const newInitialState = ctx.getImageData(0, 0, canvasRef.current.width, canvasRef.current.height);
+          setStrokeHistory([newInitialState]);
+        }
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, [isDrawingMode, ctx]);
+
+  // Drawing functions
+  const startDrawing = (e: React.TouchEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (!ctx || !canvasRef.current) return;
+    
+    setIsDrawing(true);
+    
+    const touch = e.touches[0];
+    const rect = canvasRef.current.getBoundingClientRect();
+    
+    const x = touch.clientX - rect.left;
+    const y = touch.clientY - rect.top;
+    
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    setCurrentStroke([{x, y}]);
+  };
+
+  const draw = (e: React.TouchEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (!isDrawing || !ctx || !canvasRef.current) return;
+    
+    const touch = e.touches[0];
+    const rect = canvasRef.current.getBoundingClientRect();
+    
+    const x = touch.clientX - rect.left;
+    const y = touch.clientY - rect.top;
+    
+    ctx.lineTo(x, y);
+    ctx.stroke();
+    setCurrentStroke(prev => [...prev, {x, y}]);
+  };
+
+  const endDrawing = () => {
+    if (!isDrawing || !ctx || !canvasRef.current) return;
+    
+    setIsDrawing(false);
+    ctx.closePath();
+    
+    // Save current state to history for undo
+    const canvas = canvasRef.current;
+    const newState = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    setStrokeHistory(prev => [...prev, newState]);
+  };
+
+  const clearCanvas = () => {
+    if (!ctx || !canvasRef.current) return;
+    
+    const canvas = canvasRef.current;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    // Reset history but keep the initial blank canvas state
+    const initialState = strokeHistory[0];
+    setStrokeHistory([initialState]);
+  };
+
+  const undoStroke = () => {
+    if (!ctx || !canvasRef.current || strokeHistory.length <= 1) return;
+    
+    // Pop the last state and apply the previous one
+    const newHistory = [...strokeHistory];
+    newHistory.pop();
+    const previousState = newHistory[newHistory.length - 1];
+    
+    ctx.putImageData(previousState, 0, 0);
+    setStrokeHistory(newHistory);
+  };
+
+  const exitDrawingMode = () => {
+    setIsDrawingMode(false);
+    // Reset drawing state
+    setStrokeHistory([]);
+    setCurrentStroke([]);
+    setIsDrawing(false);
+  };
+
   return (
     <div className="flex flex-col min-h-screen bg-white">
       <AnimationStyles />
@@ -757,6 +958,79 @@ export default function FlashcardsPage() {
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           {isStudyMode ? (
             <div className="fixed inset-0 bg-gradient-to-b from-[#001060] via-[#2D41D1] to-[#5E72E4] z-50 overflow-hidden flex flex-col">
+              {/* Drawing overlay - shown when drawing mode is active */}
+              {isDrawingMode && (
+                <div className="fixed inset-0 bg-white z-[100] flex flex-col drawing-overlay">
+                  <div className="px-4 pt-6 pb-2 flex justify-between items-center">
+                    <h1 className="text-2xl font-bold text-black">Draw the Character</h1>
+                    <button 
+                      className="p-2 bg-red-500 text-white rounded-full"
+                      onClick={exitDrawingMode}
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                      </svg>
+                    </button>
+                  </div>
+                  
+                  {/* Hint section */}
+                  <div className="text-center py-4 bg-blue-50 border-y border-blue-100 mb-4 drawing-hint">
+                    <p className="text-lg font-medium text-blue-800">Try to draw:</p>
+                    <p className="text-5xl font-bold text-blue-900 mt-2 mb-2">{currentFlashcards[currentCardIndex]?.hanzi}</p>
+                    <p className="text-sm text-blue-700 mt-1">({currentFlashcards[currentCardIndex]?.pinyin} - {currentFlashcards[currentCardIndex]?.english})</p>
+                  </div>
+                  
+                  {/* Canvas area */}
+                  <div className="flex-1 flex flex-col items-center justify-center px-4">
+                    <canvas
+                      ref={canvasRef}
+                      className="drawing-canvas"
+                      onTouchStart={startDrawing}
+                      onTouchMove={draw}
+                      onTouchEnd={endDrawing}
+                      onTouchCancel={endDrawing}
+                    />
+                  </div>
+                  
+                  {/* Drawing controls */}
+                  <div className="p-4 flex justify-center items-center space-x-4 drawing-controls">
+                    <button 
+                      className="drawing-controls-button bg-gray-200 text-gray-800"
+                      onClick={undoStroke}
+                      disabled={strokeHistory.length <= 1}
+                      style={{opacity: strokeHistory.length <= 1 ? 0.5 : 1}}
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
+                        <path d="M3 7v6h6"></path>
+                        <path d="M3 13c0-4.4 3.6-8 8-8h10"></path>
+                      </svg>
+                      <span>Undo</span>
+                    </button>
+                    <button 
+                      className="drawing-controls-button bg-gray-200 text-gray-800"
+                      onClick={clearCanvas}
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
+                        <path d="M3 3h18v18H3z"></path>
+                        <path d="M8 8l8 8"></path>
+                        <path d="M16 8l-8 8"></path>
+                      </svg>
+                      <span>Clear</span>
+                    </button>
+                    <button 
+                      className="drawing-controls-button bg-blue-600 text-white"
+                      onClick={exitDrawingMode}
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                      </svg>
+                      <span>Done</span>
+                    </button>
+                  </div>
+                </div>
+              )}
+              
               <div className="px-4 pt-6 pb-2 flex-1 flex flex-col">
                 <div className="flex justify-between items-center mb-6">
                   <div className="flex items-center">
@@ -840,6 +1114,23 @@ export default function FlashcardsPage() {
                           }
                         }}
                       >
+                        {/* Drawing mode button */}
+                        <button
+                          className="drawing-button"
+                          onClick={(e) => {
+                            e.stopPropagation(); // Prevent card flip
+                            setIsDrawingMode(true);
+                          }}
+                          title="Practice writing"
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M12 19l7-7 3 3-7 7-3-3z"></path>
+                            <path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"></path>
+                            <path d="M2 2l7.586 7.586"></path>
+                            <circle cx="11" cy="11" r="2"></circle>
+                          </svg>
+                        </button>
+                        
                         {/* Card content - both front and back */}
                         <div className="card-content relative h-full w-full smooth-transform transform-style-3d">
                           {/* Front of card - Pinyin (previously English) */}
