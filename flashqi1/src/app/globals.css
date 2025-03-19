@@ -52,7 +52,7 @@
 
   /* Hero page animations */
   .animate-fade-in {
-    animation: fadeIn 1s ease-out forwards;
+    animation: fadeIn 1s ease-in-out forwards;
   }
 
   .animate-slide-up {
@@ -63,31 +63,43 @@
     animation: slowZoom 20s ease-in-out infinite alternate;
   }
 
+  @keyframes glow {
+    0% {
+      text-shadow: 0 0 5px rgba(255, 255, 255, 0.8), 0 0 10px rgba(255, 255, 255, 0.5);
+    }
+    50% {
+      text-shadow: 0 0 20px rgba(255, 255, 255, 0.8), 0 0 30px rgba(255, 255, 255, 0.6);
+    }
+    100% {
+      text-shadow: 0 0 5px rgba(255, 255, 255, 0.8), 0 0 10px rgba(255, 255, 255, 0.5);
+    }
+  }
+
   @keyframes fadeIn {
-    from {
+    0% {
       opacity: 0;
     }
-    to {
+    100% {
       opacity: 1;
     }
   }
 
   @keyframes slideUp {
-    from {
+    0% {
+      transform: translateY(20px);
       opacity: 0;
-      transform: translateY(30px);
     }
-    to {
-      opacity: 1;
+    100% {
       transform: translateY(0);
+      opacity: 1;
     }
   }
 
   @keyframes slowZoom {
-    from {
+    0% {
       transform: scale(1);
     }
-    to {
+    100% {
       transform: scale(1.1);
     }
   }
@@ -196,6 +208,55 @@
     to {
       transform: translateX(0) translateY(0);
       opacity: 1;
+    }
+  }
+
+  .glow-text {
+    animation: glow 3s ease-in-out infinite;
+    color: white;
+  }
+
+  .neon-text {
+    position: relative;
+    color: white;
+  }
+
+  .neon-text::before {
+    content: attr(data-text);
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: -1;
+    color: #ff00de;
+    filter: blur(15px);
+    opacity: 0.8;
+    animation: neonPulse 2s infinite alternate;
+  }
+
+  .neon-text::after {
+    content: attr(data-text);
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: -2;
+    color: #00ffff;
+    filter: blur(25px);
+    opacity: 0.5;
+    animation: neonPulse 3s infinite alternate-reverse;
+  }
+
+  @keyframes neonPulse {
+    0% {
+      filter: blur(15px);
+      opacity: 0.5;
+    }
+    50% {
+      filter: blur(25px);
+      opacity: 0.8;
+    }
+    100% {
+      filter: blur(15px);
+      opacity: 0.5;
     }
   }
 }

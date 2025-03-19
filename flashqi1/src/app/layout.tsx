@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "FlashQi - Chinese Flashcard App",
+  title: " - Chinese Flashcard App",
   description: "Learn Chinese with spaced repetition flashcards",
   keywords: ["Chinese", "Mandarin", "flashcards", "language learning", "spaced repetition"],
 };

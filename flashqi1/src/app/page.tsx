@@ -21,7 +21,7 @@ export default function Home() {
         <div className="flex justify-between items-center">
           {/* Brand Logo/Name */}
           <Link href="/" className="flex items-center group">
-            <span className="text-2xl font-bold text-white group-hover:text-blue-300 transition-colors duration-300">FlashQi</span>
+            <span className="text-2xl font-bold text-white group-hover:text-blue-300 transition-colors duration-300">快玉</span>
           </Link>
           
           {/* Sign In Button - Top Right */}
@@ -36,11 +36,17 @@ export default function Home() {
       {/* Hero Content - Centered with staggered animations */}
       <main className="relative z-10 flex items-center justify-center h-[calc(100vh-80px)]">
         <div className="text-center px-4 max-w-2xl">
-          <h1 className="text-5xl font-bold tracking-tight text-white md:text-6xl mb-6 animate-slide-up opacity-0" style={{ animationDelay: '0.3s', animationFillMode: 'forwards' }}>
-            Zhejiang Level 1 <AuroraText className="text-5xl font-bold md:text-6xl" colors={["#38bdf8", "#a855f7", "#2dd4bf", "#0070F3", "#6366f1"]}>Blueprint</AuroraText>
+          <h1 className="mb-6 animate-slide-up opacity-0" style={{ animationDelay: '0.3s', animationFillMode: 'forwards' }}>
+            <AuroraText 
+              colors={["#FF0080", "#FF3D00", "#FFFF00", "#00FF00", "#00FFFF", "#7928CA"]} 
+              speed={2} 
+              className="text-5xl font-bold tracking-tight md:text-6xl"
+            >
+              再读一遍
+            </AuroraText>
           </h1>
           <p className="text-xl text-white/90 mb-10 animate-slide-up opacity-0" style={{ animationDelay: '0.6s', animationFillMode: 'forwards' }}>
-              Crush your Zhejiang Level 1 dictation test with our flashcard - Powered by spaced repetition
+              Dictation preperation for Zhejiang Level 1 - Powered by spaced repetition
           </p>
           <div className="flex justify-center animate-slide-up opacity-0" style={{ animationDelay: '0.9s', animationFillMode: 'forwards' }}>
             <Link href="/dashboard/flashcards">
@@ -49,7 +55,7 @@ export default function Home() {
                 size="lg" 
                 className="px-10 py-6 text-lg shadow-xl hover:shadow-2xl hover:scale-105 transform transition-all duration-300 ease-in-out"
               >
-                Get Started
+                开始
               </Button>
             </Link>
           </div>
