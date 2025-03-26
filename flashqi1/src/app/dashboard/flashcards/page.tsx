@@ -1601,8 +1601,8 @@ export default function FlashcardsPage() {
                 <h2 className="text-xl font-bold text-black mb-4">Practice</h2>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   {PRACTICE_CATEGORIES.map(category => {
-                    // Check if the category is disabled (Listening and Speaking for now)
-                    const isDisabled = category.id === 'listening' || category.id === 'speaking';
+                    // Check if the category is disabled (only Listening is disabled now, Speaking is enabled)
+                    const isDisabled = category.id === 'listening';
                     
                     return (
                       <div 
@@ -1615,7 +1615,12 @@ export default function FlashcardsPage() {
                         onClick={() => {
                           // Only navigate if the category is not disabled
                           if (!isDisabled) {
-                            handleCategorySelect(category.id);
+                            // Special handling for Speaking - direct to Speaking page
+                            if (category.id === 'speaking') {
+                              router.push('/dashboard/flashcards/speaking');
+                            } else {
+                              handleCategorySelect(category.id);
+                            }
                           }
                         }}
                       >

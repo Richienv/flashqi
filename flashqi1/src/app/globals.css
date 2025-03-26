@@ -259,6 +259,69 @@
       opacity: 0.5;
     }
   }
+
+  /* Swipe-to-delete animations */
+  @keyframes slideOutLeft {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(-100%);
+    }
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  .swipe-to-delete-container {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .swipe-to-delete-content {
+    transform: translateX(0);
+    transition: transform 0.3s ease;
+  }
+
+  .swipe-to-delete-background {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 80px;
+    background-color: #ef4444; /* red-500 */
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.3s ease;
+    transform: translateX(100%);
+  }
+
+  .swipe-action-active .swipe-to-delete-content {
+    transform: translateX(-80px);
+  }
+
+  .swipe-action-active .swipe-to-delete-background {
+    transform: translateX(0);
+  }
+
+  .swipe-delete-confirm {
+    position: absolute;
+    inset: 0;
+    background-color: rgba(255, 255, 255, 0.9);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    animation: fadeIn 0.2s ease forwards;
+  }
 }
 
 @layer base {
@@ -479,4 +542,21 @@ body {
   body {
     @apply bg-background text-foreground;
   }
+}
+
+/* Speaking Flashcard styles */
+.perspective-1000 {
+  perspective: 1000px;
+}
+
+.preserve-3d {
+  transform-style: preserve-3d;
+}
+
+.backface-hidden {
+  backface-visibility: hidden;
+}
+
+.rotate-y-180 {
+  transform: rotateY(180deg);
 }
