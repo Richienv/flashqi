@@ -16,6 +16,8 @@ import {
 import './flashcards.css';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { PlusCircle, X } from "lucide-react";
+import { supabase } from '@/lib/supabase/client'; // Import supabase client
 
 // Animation styles
 const AnimationStyles = () => (
@@ -158,6 +160,16 @@ export default function FlashcardsPage() {
   const [isExactMatchFound, setIsExactMatchFound] = useState(false); // Track if an exact match was found
   const [matchedCardId, setMatchedCardId] = useState<string | null>(null); // Track the ID of an exact match
   
+  // Add new state variables for the add card modal
+  const [isAddCardModalOpen, setIsAddCardModalOpen] = useState(false);
+  const [speakingCategories, setSpeakingCategories] = useState<any[]>([]);
+  const [selectedSpeakingCategory, setSelectedSpeakingCategory] = useState<string>("");
+  const [newCardHanzi, setNewCardHanzi] = useState<string>("");
+  const [newCardPinyin, setNewCardPinyin] = useState<string>("");
+  const [newCardEnglish, setNewCardEnglish] = useState<string>("");
+  const [isAddingCard, setIsAddingCard] = useState(false);
+  const [addCardSuccess, setAddCardSuccess] = useState(false);
+
   // Drawing feature states
   const [isDrawingMode, setIsDrawingMode] = useState(false);
   const [isDrawing, setIsDrawing] = useState(false);
@@ -1113,6 +1125,88 @@ export default function FlashcardsPage() {
     }
   };
 
+  // Fetch speaking categories for the dropdown
+  useEffect(() => {
+    const fetchSpeakingCategories = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('speaking_categories')
+          .select('id, title')
+          .order('title', { ascending: true });
+          
+        if (error) {
+          console.error('Error fetching speaking categories:', error);
+        } else {
+          setSpeakingCategories(data || []);
+        }
+      } catch (error) {
+        console.error('Error in fetchSpeakingCategories:', error);
+      }
+    };
+    
+    // Only fetch categories when the modal is opened
+    if (isAddCardModalOpen) {
+      fetchSpeakingCategories();
+    }
+  }, [isAddCardModalOpen]);
+  
+  // Function to handle adding a new card
+  const handleAddCard = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    // Validate inputs
+    if (!selectedSpeakingCategory || !newCardHanzi || !newCardPinyin || !newCardEnglish) {
+      alert('Please fill in all fields');
+      return;
+    }
+    
+    try {
+      setIsAddingCard(true);
+      
+      // Add the new phrase to the speaking_phrases table
+      const { data, error } = await supabase
+        .from('speaking_phrases')
+        .insert([
+          {
+            category_id: selectedSpeakingCategory,
+            hanzi: newCardHanzi,
+            pinyin: newCardPinyin,
+            english: newCardEnglish,
+            priority: 0, // Default priority
+            is_favorite: false // Default not favorite
+          }
+        ])
+        .select();
+      
+      if (error) {
+        console.error('Error adding new card:', error);
+        alert('Failed to add card. Please try again.');
+      } else {
+        console.log('Card added successfully:', data);
+        
+        // Reset form fields
+        setNewCardHanzi("");
+        setNewCardPinyin("");
+        setNewCardEnglish("");
+        
+        // Show success message
+        setAddCardSuccess(true);
+        
+        // Hide success message after 3 seconds
+        setTimeout(() => {
+          setAddCardSuccess(false);
+          // Close the modal after showing success message
+          setIsAddCardModalOpen(false);
+        }, 3000);
+      }
+    } catch (error) {
+      console.error('Error in handleAddCard:', error);
+      alert('An error occurred. Please try again.');
+    } finally {
+      setIsAddingCard(false);
+    }
+  };
+
   return (
     <div className="flex flex-col min-h-screen bg-white">
       <AnimationStyles />
@@ -1863,6 +1957,125 @@ export default function FlashcardsPage() {
             <path d="M12 19V5M5 12l7-7 7 7"/>
           </svg>
         </button>
+      )}
+      
+      {/* Add New Card Floating Button */}
+      <button
+        onClick={() => setIsAddCardModalOpen(true)}
+        className="fixed bottom-20 right-16 md:bottom-6 md:right-20 p-4 rounded-full bg-blue-600 text-white shadow-lg hover:bg-blue-700 transition-all z-50"
+        aria-label="Add new card"
+      >
+        <PlusCircle size={24} />
+      </button>
+      
+      {/* Add Card Modal */}
+      {isAddCardModalOpen && (
+        <div className="fixed inset-0 flex items-center justify-center z-50 bg-black/50 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl p-6 shadow-xl max-w-md w-full animate-bounce-in m-4">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-xl font-bold text-black">Add Speaking Card</h2>
+              <button 
+                onClick={() => setIsAddCardModalOpen(false)}
+                className="p-1 rounded-full hover:bg-gray-100"
+              >
+                <X size={20} className="text-gray-500" />
+              </button>
+            </div>
+            
+            {addCardSuccess ? (
+              <div className="text-center py-8">
+                <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-green-600">
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                    <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                  </svg>
+                </div>
+                <h3 className="text-lg font-medium text-gray-900 mb-2">Card Added Successfully!</h3>
+                <p className="text-gray-600">Your new card has been added.</p>
+              </div>
+            ) : (
+              <form onSubmit={handleAddCard} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Category
+                  </label>
+                  <select
+                    value={selectedSpeakingCategory}
+                    onChange={(e) => setSelectedSpeakingCategory(e.target.value)}
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    required
+                  >
+                    <option value="">Select a category</option>
+                    {speakingCategories.map((category) => (
+                      <option key={category.id} value={category.id}>
+                        {category.title}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Chinese Characters (Hanzi)
+                  </label>
+                  <input
+                    type="text"
+                    value={newCardHanzi}
+                    onChange={(e) => setNewCardHanzi(e.target.value)}
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="你好"
+                    required
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Pinyin
+                  </label>
+                  <input
+                    type="text"
+                    value={newCardPinyin}
+                    onChange={(e) => setNewCardPinyin(e.target.value)}
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="nǐ hǎo"
+                    required
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    English Translation
+                  </label>
+                  <input
+                    type="text"
+                    value={newCardEnglish}
+                    onChange={(e) => setNewCardEnglish(e.target.value)}
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="Hello"
+                    required
+                  />
+                </div>
+                
+                <div className="pt-2">
+                  <button
+                    type="submit"
+                    className="w-full p-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-all"
+                    disabled={isAddingCard}
+                  >
+                    {isAddingCard ? (
+                      <div className="flex justify-center items-center">
+                        <div className="w-5 h-5 border-t-2 border-b-2 border-white rounded-full animate-spin mr-2"></div>
+                        Adding...
+                      </div>
+                    ) : (
+                      'Add Card'
+                    )}
+                  </button>
+                </div>
+              </form>
+            )}
+          </div>
+        </div>
       )}
       
       <MobileNav />

@@ -87,9 +87,6 @@ export default function SpeakingFlashcardsPage() {
   const [setupComplete, setSetupComplete] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
   const [isDeletingCategory, setIsDeletingCategory] = useState<string | null>(null);
-  const [swipingCategoryId, setSwipingCategoryId] = useState<string | null>(null);
-  const [swipeOffset, setSwipeOffset] = useState(0);
-  const [touchStart, setTouchStart] = useState<{ x: number, y: number } | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<string | null>(null);
   
   // Define fetchCategories at component level so it's accessible everywhere
@@ -501,118 +498,64 @@ export default function SpeakingFlashcardsPage() {
     }
   };
   
-  // Add function to delete a category
+  // Keep the handleDeleteCategory function
   const handleDeleteCategory = async (categoryId: string, e: React.MouseEvent) => {
-    // Prevent navigating to the category when delete is clicked
     e.stopPropagation();
     
     try {
-      // Confirm deletion
-      if (!window.confirm('Are you sure you want to delete this category? All phrases will be permanently deleted.')) {
-        return;
-      }
-      
-      // Set deleting state
       setIsDeletingCategory(categoryId);
       
-      // Delete category from database
-      const { error } = await supabase
+      // First delete all phrases in this category
+      console.log(`Deleting phrases for category ${categoryId}...`);
+      const { error: phrasesError } = await supabase
+        .from('speaking_phrases')
+        .delete()
+        .eq('category_id', categoryId);
+        
+      if (phrasesError) {
+        console.error('Error deleting phrases:', phrasesError);
+      }
+      
+      // Then delete the category
+      console.log(`Deleting category ${categoryId}...`);
+      const { error: categoryError } = await supabase
         .from('speaking_categories')
         .delete()
         .eq('id', categoryId);
         
-      if (error) {
-        console.error('Error deleting category:', error);
-        setSuccessMessage('Failed to delete category. Please try again.');
+      if (categoryError) {
+        console.error('Error deleting category:', categoryError);
       } else {
-        // Remove category from local state
-        setCategories(categories.filter(cat => cat.id !== categoryId));
-        setSuccessMessage('Category deleted successfully!');
+        // Update local state to remove the category
+        setCategories(prev => prev.filter(cat => cat.id !== categoryId));
+        setSuccessMessage('Category deleted successfully');
         
-        // Clear message after 3 seconds
+        // Hide success message after 3 seconds
         setTimeout(() => {
           setSuccessMessage('');
         }, 3000);
       }
     } catch (error) {
-      console.error('Error in delete operation:', error);
+      console.error('Error in handleDeleteCategory:', error);
     } finally {
       setIsDeletingCategory(null);
     }
   };
-
-  // Add touch handling for swipe-to-delete categories
-  const handleCategoryTouchStart = (e: React.TouchEvent, categoryId: string) => {
-    // Prevent the event from propagating to the Link
-    e.stopPropagation();
-    
-    // Only set up swipe for custom categories
-    const category = categories.find(c => c.id === categoryId);
-    if (!category?.custom) return;
-    
-    // Only handle horizontal swiping for delete functionality
-    const touch = e.touches[0];
-    setSwipingCategoryId(categoryId);
-    setSwipeOffset(0);
-    setTouchStart({ x: touch.clientX, y: touch.clientY });
-  };
   
-  const handleCategoryTouchMove = (e: React.TouchEvent) => {
-    if (!touchStart || !swipingCategoryId) return;
-    
-    const touch = e.touches[0];
-    const deltaX = touch.clientX - touchStart.x;
-    const deltaY = Math.abs(touch.clientY - touchStart.y);
-    
-    // Only process horizontal swipes, and only left swipes (negative deltaX)
-    if (deltaY < 30 && deltaX < 0) {
-      // Limit the swipe offset to avoid swiping too far
-      const newOffset = Math.max(-150, deltaX);
-      setSwipeOffset(newOffset);
-      
-      // Prevent default to avoid scrolling while swiping
-      if (Math.abs(deltaX) > 10) {
-        e.preventDefault();
-      }
-    }
-  };
-  
-  const handleCategoryTouchEnd = (categoryId: string) => {
-    // Only proceed with custom categories
-    const category = categories.find(c => c.id === categoryId);
-    if (!category?.custom) {
-      setSwipingCategoryId(null);
-      setTouchStart(null);
-      return;
-    }
-    
-    // If swiped more than halfway, show delete confirmation
-    if (swipeOffset < -75) {
-      setShowDeleteConfirm(categoryId);
-    } else {
-      // Reset the swipe
-      setSwipeOffset(0);
-    }
-    
-    setSwipingCategoryId(null);
-    setTouchStart(null);
-  };
-  
+  // Keep the cancel and confirm functions for the delete confirmation modal
   const cancelDelete = () => {
-    setSwipeOffset(0);
     setShowDeleteConfirm(null);
   };
   
   const confirmDelete = (categoryId: string, e: React.MouseEvent) => {
     handleDeleteCategory(categoryId, e);
-    setSwipeOffset(0);
     setShowDeleteConfirm(null);
   };
   
-  // Function to handle delete click (non-swipe)
-  const handleDeleteClick = (categoryId: string, e: React.MouseEvent) => {
+  // Function to show delete confirmation modal
+  const showDeleteConfirmation = (categoryId: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    handleDeleteCategory(categoryId, e);
+    setShowDeleteConfirm(categoryId);
   };
 
   return (
@@ -735,8 +678,6 @@ export default function SpeakingFlashcardsPage() {
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {filteredCategories.map(category => {
-                    // Determine if this category is being swiped or has delete confirmation showing
-                    const isBeingSwiped = swipingCategoryId === category.id;
                     const hasDeleteConfirm = showDeleteConfirm === category.id;
                     
                     return (
@@ -744,7 +685,7 @@ export default function SpeakingFlashcardsPage() {
                         key={category.id} 
                         className="relative overflow-hidden"
                       >
-                        {/* Delete confirmation that shows after swipe */}
+                        {/* Delete confirmation modal */}
                         {hasDeleteConfirm && (
                           <div className="absolute inset-0 z-10 bg-white bg-opacity-90 flex items-center justify-center">
                             <div className="text-center">
@@ -767,16 +708,9 @@ export default function SpeakingFlashcardsPage() {
                           </div>
                         )}
                         
-                        {/* Main category card with swipe animation */}
+                        {/* Main category card without swipe animation */}
                         <div 
                           className="bg-white border border-gray-100 rounded-2xl p-6 transition-all hover:shadow-sm hover:translate-y-[-2px] relative group"
-                          style={{
-                            transform: isBeingSwiped ? `translateX(${swipeOffset}px)` : 'translateX(0)',
-                            transition: isBeingSwiped ? 'none' : 'transform 0.3s ease'
-                          }}
-                          onTouchStart={(e) => handleCategoryTouchStart(e, category.id)}
-                          onTouchMove={handleCategoryTouchMove}
-                          onTouchEnd={() => handleCategoryTouchEnd(category.id)}
                         >
                           <Link href={`/dashboard/flashcards/speaking/${category.id}`} className="block">
                             <div className="flex items-center justify-between">
@@ -791,11 +725,13 @@ export default function SpeakingFlashcardsPage() {
                             </div>
                           </Link>
                           
-                          {/* Delete category button - only show for custom categories */}
+                          {/* Always visible delete button for custom categories */}
                           {category.custom && (
                             <button
-                              onClick={(e) => handleDeleteClick(category.id, e)}
-                              className="absolute top-2 right-2 w-8 h-8 rounded-full bg-white border border-gray-200 text-gray-400 flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 hover:text-red-500 hover:border-red-200"
+                              onClick={(e) => showDeleteConfirmation(category.id, e)}
+                              className="absolute top-2 right-2 w-8 h-8 rounded-full bg-white border border-gray-200 
+                                        text-gray-400 flex items-center justify-center transition-all 
+                                        hover:text-red-500 hover:border-red-200"
                               disabled={isDeletingCategory === category.id}
                             >
                               {isDeletingCategory === category.id ? (
@@ -806,20 +742,6 @@ export default function SpeakingFlashcardsPage() {
                             </button>
                           )}
                         </div>
-                        
-                        {/* Delete background that shows during swipe (only for custom categories) */}
-                        {category.custom && (
-                          <div 
-                            className="absolute inset-y-0 right-0 bg-red-500 text-white flex items-center px-4 rounded-r-2xl"
-                            style={{
-                              width: '80px',
-                              transform: isBeingSwiped ? 'translateX(0)' : 'translateX(80px)',
-                              transition: isBeingSwiped ? 'none' : 'transform 0.3s ease'
-                            }}
-                          >
-                            <Trash2 className="mx-auto" size={24} />
-                          </div>
-                        )}
                       </div>
                     );
                   })}
