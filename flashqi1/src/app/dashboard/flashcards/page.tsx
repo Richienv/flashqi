@@ -660,6 +660,36 @@ export default function FlashcardsPage() {
           number: 10,
           title: "Lesson 10",
           cards: getCardCount("lesson10")
+        },
+        {
+          id: "lesson11",
+          number: 11,
+          title: "Lesson 11",
+          cards: getCardCount("lesson11")
+        },
+        {
+          id: "lesson12",
+          number: 12,
+          title: "Lesson 12",
+          cards: getCardCount("lesson12")
+        },
+        {
+          id: "lesson13",
+          number: 13,
+          title: "Lesson 13",
+          cards: getCardCount("lesson13")
+        },
+        {
+          id: "lesson14",
+          number: 14,
+          title: "Lesson 14",
+          cards: getCardCount("lesson14")
+        },
+        {
+          id: "lesson15",
+          number: 15,
+          title: "Lesson 15",
+          cards: getCardCount("lesson15")
         }
       ];
     } else if (categoryId === 'reading') {
@@ -723,6 +753,36 @@ export default function FlashcardsPage() {
           number: 10,
           title: "School and Education",
           cards: getCardCount("lesson10") // Reuse lesson10 cards
+        },
+        {
+          id: "r11",
+          number: 11,
+          title: "Common Expressions",
+          cards: getCardCount("lesson11") // Reuse lesson11 cards
+        },
+        {
+          id: "r12",
+          number: 12,
+          title: "Academic Discussions",
+          cards: getCardCount("lesson12") // Reuse lesson12 cards
+        },
+        {
+          id: "r13",
+          number: 13,
+          title: "Shopping Items",
+          cards: getCardCount("lesson13") // Reuse lesson13 cards
+        },
+        {
+          id: "r14",
+          number: 14,
+          title: "Transportation Talk",
+          cards: getCardCount("lesson14") // Reuse lesson14 cards
+        },
+        {
+          id: "r15",
+          number: 15,
+          title: "Professions and People",
+          cards: getCardCount("lesson15") // Reuse lesson15 cards
         }
       ];
     } else if (categoryId === 'listening') {
