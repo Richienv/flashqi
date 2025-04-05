@@ -1538,64 +1538,85 @@ export default function FlashcardsPage() {
 
   // Fallback recognition when HanziWriter fails
   const useFallbackRecognition = (dataUrl: string) => {
-    // For now, implement a more advanced pixel-based detection
-    // In a real app, we would use an API service like Google Cloud Vision API here
-    
-    console.log('Using fallback recognition method');
+    console.log('Using simplified recognition method');
     
     try {
-      // Enhanced recognition using pixel density analysis
+      // Basic shape analysis
       const analysis = analyzeDrawingComplexity();
       console.log('Drawing analysis:', analysis);
       
-      // Determine character category based on analysis
-      let similarChars;
+      // Check for basic shapes first - precise pattern detection
+      const isSquareOrBox = isBoxShape(analysis);
+      const hasHorizontalLine = analysis.horizontalLines > 0 && analysis.verticalLines < 2;
+      const hasVerticalLine = analysis.verticalLines > 0 && analysis.horizontalLines < 2;
       
-      // Simplified logic: we categorize based on total pixels and line patterns
-      if (analysis.pixelCount < 1000 || (analysis.horizontalLines + analysis.verticalLines <= 2)) {
-        // Simple characters with few strokes (一, 二, 人)
-        similarChars = ['一', '二', '三', '十', '人', '入', '大', '小', '山'];
+      // Set character pools based on detected patterns
+      let characterPool: string[] = [];
+      let topMatch = '';
+      
+      // Shape-based detection (more precise than complexity-based)
+      if (isSquareOrBox) {
+        // Square/box shapes
+        topMatch = '口';
+        characterPool = ['口', '田', '日', '目', '国', '回', '四'];
+        console.log('Detected square/box shape - likely 口 (kou/mouth) or similar');
+      } 
+      else if (hasHorizontalLine && analysis.pixelCount < 2000) {
+        // Horizontal line patterns
+        topMatch = '一';
+        characterPool = ['一', '二', '三', '十', '干', '工', '土'];
+        console.log('Detected horizontal line pattern');
+      } 
+      else if (hasVerticalLine && analysis.pixelCount < 2000) {
+        // Vertical line patterns
+        topMatch = '丨';
+        characterPool = ['丨', '丁', '十', '中', '上', '下'];
+        console.log('Detected vertical line pattern');
+      }
+      else if (analysis.pixelCount < 1500) {
+        // Simple characters
+        topMatch = '人';
+        characterPool = ['人', '入', '八', '大', '小', '刀', '力', '又', '女'];
         console.log('Detected simple character pattern');
-      } else if (analysis.pixelCount < 5000 || (analysis.horizontalLines + analysis.verticalLines <= 6)) {
-        // Medium complexity (口, 田, 木, 日)
-        similarChars = ['口', '田', '日', '月', '木', '目', '火', '水', '手'];
-        console.log('Detected medium complexity character pattern');
-      } else if (analysis.pixelCount < 10000) {
-        // High complexity (和, 国, 明)
-        similarChars = ['和', '国', '明', '好', '语', '中', '文', '学', '说'];
-        console.log('Detected high complexity character pattern');
-      } else {
-        // Very complex characters (龍, 鑫, 聽)
-        similarChars = ['龍', '鑫', '聽', '镜', '聲', '響', '類', '語', '藝'];
-        console.log('Detected very complex character pattern');
+      } 
+      else if (analysis.pixelCount < 4000) {
+        // Medium complexity
+        characterPool = ['我', '你', '好', '是', '的', '了', '在', '有', '和'];
+        topMatch = '好';
+        console.log('Detected medium complexity character');
+      } 
+      else {
+        // Complex characters
+        characterPool = ['爱', '语', '说', '话', '写', '读', '听', '看', '学'];
+        topMatch = '语';
+        console.log('Detected complex character');
       }
       
-      // Create artificial confidence scores based on how well each character fits our analysis
-      const scoredChars = similarChars.map(char => {
-        // In a real implementation, this would use a proper matching algorithm
-        // For now, just create random but consistent scores
-        const score = 0.85 - (Math.random() * 0.4); // Score between 0.45 and 0.85
+      // Create confidence scores - higher for the top match
+      const matches = characterPool.map((char, index) => {
+        // First character (top match) gets highest score
+        const score = char === topMatch 
+          ? 0.85
+          : Math.max(0.4, 0.8 - (index * 0.05)); // Descending scores
+        
         return { character: char, score };
       });
       
-      // Sort by score
-      const sortedChars = [...scoredChars].sort((a, b) => b.score - a.score);
-      console.log('Top character matches:', sortedChars.slice(0, 3));
+      // Sort by score (higher is better)
+      const sortedMatches = [...matches].sort((a, b) => b.score - a.score);
       
-      // Set the recognized character to the top match
-      setRecognizedCharacter(sortedChars[0].character);
+      console.log('Top character matches:', sortedMatches.slice(0, 3));
       
-      // Save top matches for display
-      setTopMatches(sortedChars.slice(0, 5));
-      
-      // Finally, set recognizing state to false
+      // Set results
+      setRecognizedCharacter(topMatch);
+      setTopMatches(sortedMatches);
       setIsRecognizing(false);
     } catch (error) {
       console.error('Error in fallback recognition:', error);
       setIsRecognizing(false);
       
-      // Still provide some results even if there's an error
-      const backupChars = ['你', '好', '我', '是', '人'].map((char, i) => ({
+      // Fallback to basic characters if error
+      const backupChars = ['口', '人', '大', '小', '我'].map((char, i) => ({
         character: char,
         score: 0.8 - (i * 0.1)
       }));
@@ -1603,6 +1624,35 @@ export default function FlashcardsPage() {
       setRecognizedCharacter(backupChars[0].character);
       setTopMatches(backupChars);
     }
+  };
+  
+  // Check if the drawing resembles a box/square shape like 口
+  const isBoxShape = (analysis: any) => {
+    // Get drawing bounds
+    if (!handwritingCtx || !handwritingCanvasRef.current) return false;
+    
+    const canvas = handwritingCanvasRef.current;
+    const imageData = handwritingCtx.getImageData(0, 0, canvas.width, canvas.height);
+    const bounds = findDrawingBounds(imageData, canvas.width, canvas.height);
+    
+    if (!bounds) return false;
+    
+    // Check if shape is roughly square
+    const widthHeightRatio = bounds.width / bounds.height;
+    const isSquarish = widthHeightRatio >= 0.7 && widthHeightRatio <= 1.3;
+    
+    // Check if there's a loop/enclosure (characteristic of 口)
+    const hasEnclosure = analysis.verticalLines >= 2 && analysis.horizontalLines >= 2;
+    
+    console.log('Box shape detection:', { 
+      isSquarish, 
+      hasEnclosure, 
+      widthHeightRatio,
+      verticalLines: analysis.verticalLines,
+      horizontalLines: analysis.horizontalLines 
+    });
+    
+    return isSquarish && hasEnclosure;
   };
 
   return (
@@ -2512,7 +2562,7 @@ export default function FlashcardsPage() {
       {/* Handwriting Search Modal */}
       {isHandwritingModalOpen && (
         <div className="fixed inset-0 flex items-center justify-center z-50 bg-black/50 backdrop-blur-sm handwriting-modal-container">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md md:max-w-lg m-4 flex flex-col h-[85vh] md:h-[80vh]">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md md:max-w-lg m-4 flex flex-col h-[85vh] md:h-[80vh] overflow-hidden">
             <div className="flex justify-between items-center p-4 border-b border-gray-100">
               <h2 className="text-xl font-bold text-black">Handwriting Search</h2>
               <button 
@@ -2537,43 +2587,34 @@ export default function FlashcardsPage() {
               </div>
             </div>
             
-            <div className="p-3 flex-grow flex flex-col items-center justify-center bg-gray-50">
-              <canvas
-                ref={handwritingCanvasRef}
-                className="w-full h-[60vh] max-h-[500px] handwriting-canvas bg-white rounded-lg shadow-inner border border-gray-200"
-                onTouchStart={handleHandwritingStart}
-                onTouchMove={handleHandwritingMove}
-                onTouchEnd={handleHandwritingEnd}
-                onMouseDown={(e) => {
-                  setIsHandwriting(true);
-                  if (handwritingCtx && handwritingCanvasRef.current) {
-                    const rect = handwritingCanvasRef.current.getBoundingClientRect();
-                    const x = e.clientX - rect.left;
-                    const y = e.clientY - rect.top;
-                    handwritingCtx.beginPath();
-                    handwritingCtx.moveTo(x, y);
-                  }
-                }}
-                onMouseMove={(e) => {
-                  if (isHandwriting && handwritingCtx && handwritingCanvasRef.current) {
-                    const rect = handwritingCanvasRef.current.getBoundingClientRect();
-                    const x = e.clientX - rect.left;
-                    const y = e.clientY - rect.top;
-                    handwritingCtx.lineTo(x, y);
-                    handwritingCtx.stroke();
-                  }
-                }}
-                onMouseUp={() => {
-                  setIsHandwriting(false);
-                  saveHandwritingState();
-                  
-                  // Automatically trigger recognition after a short delay
-                  setTimeout(() => {
-                    recognizeHandwriting();
-                  }, 800);
-                }}
-                onMouseLeave={() => {
-                  if (isHandwriting) {
+            <div className="flex-grow flex flex-col items-center p-3 bg-gray-50 overflow-y-auto handwriting-modal-content">
+              <div className="w-full h-[50vh] min-h-[250px] flex items-center justify-center mb-4">
+                <canvas
+                  ref={handwritingCanvasRef}
+                  className="w-full h-full max-h-[400px] handwriting-canvas bg-white rounded-lg shadow-inner border border-gray-200"
+                  onTouchStart={handleHandwritingStart}
+                  onTouchMove={handleHandwritingMove}
+                  onTouchEnd={handleHandwritingEnd}
+                  onMouseDown={(e) => {
+                    setIsHandwriting(true);
+                    if (handwritingCtx && handwritingCanvasRef.current) {
+                      const rect = handwritingCanvasRef.current.getBoundingClientRect();
+                      const x = e.clientX - rect.left;
+                      const y = e.clientY - rect.top;
+                      handwritingCtx.beginPath();
+                      handwritingCtx.moveTo(x, y);
+                    }
+                  }}
+                  onMouseMove={(e) => {
+                    if (isHandwriting && handwritingCtx && handwritingCanvasRef.current) {
+                      const rect = handwritingCanvasRef.current.getBoundingClientRect();
+                      const x = e.clientX - rect.left;
+                      const y = e.clientY - rect.top;
+                      handwritingCtx.lineTo(x, y);
+                      handwritingCtx.stroke();
+                    }
+                  }}
+                  onMouseUp={() => {
                     setIsHandwriting(false);
                     saveHandwritingState();
                     
@@ -2581,12 +2622,23 @@ export default function FlashcardsPage() {
                     setTimeout(() => {
                       recognizeHandwriting();
                     }, 800);
-                  }
-                }}
-              />
+                  }}
+                  onMouseLeave={() => {
+                    if (isHandwriting) {
+                      setIsHandwriting(false);
+                      saveHandwritingState();
+                      
+                      // Automatically trigger recognition after a short delay
+                      setTimeout(() => {
+                        recognizeHandwriting();
+                      }, 800);
+                    }
+                  }}
+                />
+              </div>
               
               {isRecognizing && (
-                <div className="mt-4 flex items-center justify-center text-blue-600">
+                <div className="mt-2 flex items-center justify-center text-blue-600">
                   <div className="w-5 h-5 border-t-2 border-blue-600 border-solid rounded-full animate-spin mr-2"></div>
                   <span>Recognizing...</span>
                 </div>
@@ -2594,7 +2646,7 @@ export default function FlashcardsPage() {
               
               {/* Display top matches */}
               {topMatches.length > 0 && !isRecognizing && (
-                <div className="mt-4 w-full px-2">
+                <div className="w-full px-2 mb-4">
                   <p className="text-sm text-gray-600 mb-2 text-center">Top matches - select one:</p>
                   <div className="flex flex-wrap justify-center gap-2">
                     {topMatches.map((match, index) => (
