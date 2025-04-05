@@ -2349,8 +2349,8 @@ export default function FlashcardsPage() {
       {/* Handwriting Search Modal */}
       {isHandwritingModalOpen && (
         <div className="fixed inset-0 flex items-center justify-center z-50 bg-black/50 backdrop-blur-sm handwriting-modal-container">
-          <div className="bg-white rounded-2xl shadow-xl max-w-md w-full animate-bounce-in m-4 flex flex-col h-[80vh]">
-            <div className="flex justify-between items-center p-6 border-b border-gray-100">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md md:max-w-lg m-4 flex flex-col h-[85vh] md:h-[80vh]">
+            <div className="flex justify-between items-center p-4 border-b border-gray-100">
               <h2 className="text-xl font-bold text-black">Handwriting Search</h2>
               <button 
                 onClick={() => setIsHandwritingModalOpen(false)}
@@ -2360,7 +2360,7 @@ export default function FlashcardsPage() {
               </button>
             </div>
             
-            <div className="p-4 border-b border-gray-100 bg-blue-50">
+            <div className="p-3 border-b border-gray-100 bg-blue-50">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-blue-800 font-medium">Draw a Chinese character to search</p>
@@ -2374,10 +2374,10 @@ export default function FlashcardsPage() {
               </div>
             </div>
             
-            <div className="flex-grow flex flex-col items-center justify-center p-4 bg-gray-50">
+            <div className="p-3 flex-grow flex flex-col items-center justify-center bg-gray-50">
               <canvas
                 ref={handwritingCanvasRef}
-                className="w-full max-w-xs aspect-square handwriting-canvas bg-white rounded-lg shadow-inner border border-gray-200"
+                className="w-full h-[60vh] max-h-[500px] handwriting-canvas bg-white rounded-lg shadow-inner border border-gray-200"
                 onTouchStart={handleHandwritingStart}
                 onTouchMove={handleHandwritingMove}
                 onTouchEnd={handleHandwritingEnd}
@@ -2430,7 +2430,7 @@ export default function FlashcardsPage() {
               )}
             </div>
             
-            <div className="p-4 border-t border-gray-100 flex justify-between">
+            <div className="p-3 border-t border-gray-100 flex justify-between items-center bg-gray-50">
               <button 
                 onClick={clearHandwritingCanvas}
                 className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-lg transition-colors handwriting-button"
