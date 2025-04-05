@@ -1,0 +1,44 @@
+/* Exam Test Page Styles */
+
+.exam-test-container {
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.exam-test-header {
+  position: relative;
+  overflow: hidden;
+}
+
+.exam-test-header::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(to right, #2D41D1, #5E72E4);
+}
+
+.exam-test-button {
+  transition: all 0.2s ease-in-out;
+}
+
+.exam-test-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.exam-test-info-card {
+  border-left: 4px solid #2D41D1;
+} 

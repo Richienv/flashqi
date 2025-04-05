@@ -170,6 +170,15 @@ export default function FlashcardsPage() {
   const [isAddingCard, setIsAddingCard] = useState(false);
   const [addCardSuccess, setAddCardSuccess] = useState(false);
 
+  // Handwriting search state variables
+  const [isHandwritingModalOpen, setIsHandwritingModalOpen] = useState(false);
+  const [recognizedCharacter, setRecognizedCharacter] = useState<string>("");
+  const [isRecognizing, setIsRecognizing] = useState(false);
+  const handwritingCanvasRef = useRef<HTMLCanvasElement>(null);
+  const [handwritingCtx, setHandwritingCtx] = useState<CanvasRenderingContext2D | null>(null);
+  const [isHandwriting, setIsHandwriting] = useState(false);
+  const [handwritingStrokeHistory, setHandwritingStrokeHistory] = useState<ImageData[]>([]);
+
   // Drawing feature states
   const [isDrawingMode, setIsDrawingMode] = useState(false);
   const [isDrawing, setIsDrawing] = useState(false);
@@ -1207,6 +1216,232 @@ export default function FlashcardsPage() {
     }
   };
 
+  // Initialize handwriting canvas when modal opens
+  useEffect(() => {
+    if (isHandwritingModalOpen && handwritingCanvasRef.current) {
+      const canvas = handwritingCanvasRef.current;
+      const context = canvas.getContext('2d');
+      
+      if (context) {
+        // Set canvas dimensions to match its display size with higher resolution for better recognition
+        const rect = canvas.getBoundingClientRect();
+        const dpr = window.devicePixelRatio || 1;
+        
+        // Set the canvas to be larger internally for better detail capture
+        canvas.width = rect.width * dpr;
+        canvas.height = rect.height * dpr;
+        
+        // Scale the context to ensure correct drawing
+        context.scale(dpr, dpr);
+        
+        // Set canvas CSS size
+        canvas.style.width = `${rect.width}px`;
+        canvas.style.height = `${rect.height}px`;
+        
+        // Set drawing style for handwriting with responsive line width
+        context.strokeStyle = '#000';
+        context.lineWidth = Math.max(8, Math.min(rect.width, rect.height) / 30); // Responsive line width
+        context.lineCap = 'round';
+        context.lineJoin = 'round';
+        
+        setHandwritingCtx(context);
+        
+        // Initialize with blank canvas
+        const initialState = context.getImageData(0, 0, canvas.width, canvas.height);
+        setHandwritingStrokeHistory([initialState]);
+      }
+    }
+  }, [isHandwritingModalOpen]);
+
+  // Touch event handlers for handwriting canvas
+  const handleHandwritingStart = (e: React.TouchEvent) => {
+    e.preventDefault();
+    
+    if (!handwritingCtx || !handwritingCanvasRef.current) return;
+    
+    setIsHandwriting(true);
+    
+    const touch = e.touches[0];
+    const rect = handwritingCanvasRef.current.getBoundingClientRect();
+    
+    const x = touch.clientX - rect.left;
+    const y = touch.clientY - rect.top;
+    
+    handwritingCtx.beginPath();
+    handwritingCtx.moveTo(x, y);
+  };
+
+  const handleHandwritingMove = (e: React.TouchEvent) => {
+    e.preventDefault();
+    
+    if (!isHandwriting || !handwritingCtx || !handwritingCanvasRef.current) return;
+    
+    const touch = e.touches[0];
+    const rect = handwritingCanvasRef.current.getBoundingClientRect();
+    
+    const x = touch.clientX - rect.left;
+    const y = touch.clientY - rect.top;
+    
+    handwritingCtx.lineTo(x, y);
+    handwritingCtx.stroke();
+  };
+
+  const handleHandwritingEnd = () => {
+    if (!isHandwriting || !handwritingCtx || !handwritingCanvasRef.current) return;
+    
+    setIsHandwriting(false);
+    handwritingCtx.closePath();
+    
+    saveHandwritingState();
+    
+    // Automatically trigger recognition after a short delay
+    setTimeout(() => {
+      recognizeHandwriting();
+    }, 800); // 800ms delay before recognizing
+  };
+
+  // Save current handwriting canvas state
+  const saveHandwritingState = () => {
+    if (!handwritingCtx || !handwritingCanvasRef.current) return;
+    
+    const canvas = handwritingCanvasRef.current;
+    const newState = handwritingCtx.getImageData(0, 0, canvas.width, canvas.height);
+    
+    setHandwritingStrokeHistory(prev => [...prev, newState]);
+  };
+
+  // Clear handwriting canvas
+  const clearHandwritingCanvas = () => {
+    if (!handwritingCtx || !handwritingCanvasRef.current) return;
+    
+    const canvas = handwritingCanvasRef.current;
+    handwritingCtx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    // Reset to initial blank state
+    const initialState = handwritingStrokeHistory[0];
+    setHandwritingStrokeHistory([initialState]);
+    
+    // Clear recognition result
+    setRecognizedCharacter("");
+  };
+
+  // Helper function to find the bounds of the drawing in the canvas
+  const findDrawingBounds = (imageData: ImageData, width: number, height: number) => {
+    const data = imageData.data;
+    let minX = width;
+    let minY = height;
+    let maxX = 0;
+    let maxY = 0;
+    let foundPixel = false;
+    
+    // Scan the image data to find the bounds of the drawing
+    for (let y = 0; y < height; y++) {
+      for (let x = 0; x < width; x++) {
+        const index = (y * width + x) * 4;
+        // Check if pixel is not transparent (alpha channel > 0)
+        if (data[index + 3] > 0) {
+          foundPixel = true;
+          minX = Math.min(minX, x);
+          minY = Math.min(minY, y);
+          maxX = Math.max(maxX, x);
+          maxY = Math.max(maxY, y);
+        }
+      }
+    }
+    
+    if (!foundPixel) {
+      return null;
+    }
+    
+    return {
+      minX,
+      minY,
+      width: maxX - minX + 1,
+      height: maxY - minY + 1
+    };
+  };
+
+  // Recognize handwritten character
+  const recognizeHandwriting = async () => {
+    if (!handwritingCanvasRef.current || !handwritingCtx) return;
+    
+    // Don't run recognition if already in progress
+    if (isRecognizing) return;
+    
+    setIsRecognizing(true);
+    
+    try {
+      const canvas = handwritingCanvasRef.current;
+      
+      // Find the actual bounds of the drawn content to properly crop
+      const imageData = handwritingCtx.getImageData(0, 0, canvas.width, canvas.height);
+      let bounds = findDrawingBounds(imageData, canvas.width, canvas.height);
+      
+      // If nothing was drawn, return early
+      if (!bounds) {
+        setIsRecognizing(false);
+        return;
+      }
+      
+      // Create a temporary canvas with just the drawing (cropped)
+      const tempCanvas = document.createElement('canvas');
+      const tempCtx = tempCanvas.getContext('2d');
+      if (!tempCtx) {
+        setIsRecognizing(false);
+        return;
+      }
+      
+      // Add padding around the drawing
+      const padding = 20 * (window.devicePixelRatio || 1);
+      tempCanvas.width = bounds.width + padding * 2;
+      tempCanvas.height = bounds.height + padding * 2;
+      
+      // Draw only the relevant portion of the canvas
+      tempCtx.drawImage(
+        canvas,
+        bounds.minX, bounds.minY, bounds.width, bounds.height,
+        padding, padding, bounds.width, bounds.height
+      );
+      
+      // Get the cropped data URL
+      const dataUrl = tempCanvas.toDataURL('image/png');
+      
+      // In a real implementation, you would send this image to a handwriting recognition API
+      // For demonstration purposes, we'll simulate recognition with a timeout
+      
+      // Simulate API call
+      setTimeout(() => {
+        // Example Chinese characters to randomly "recognize" for demonstration
+        const exampleCharacters = ['你', '好', '我', '是', '人', '中', '国', '大', '小', '学', '生', '日', '月', '水', '火', '山'];
+        const randomIndex = Math.floor(Math.random() * exampleCharacters.length);
+        const recognizedChar = exampleCharacters[randomIndex];
+        
+        setRecognizedCharacter(recognizedChar);
+        setIsRecognizing(false);
+        
+        // In a real implementation, you would call an API like:
+        /*
+        const response = await fetch('/api/recognize-handwriting', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ image: dataUrl })
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          setRecognizedCharacter(data.character);
+        } else {
+          console.error('Recognition failed');
+        }
+        */
+      }, 1500);
+      
+    } catch (error) {
+      console.error('Error recognizing handwriting:', error);
+      setIsRecognizing(false);
+    }
+  };
+
   return (
     <div className="flex flex-col min-h-screen bg-white">
       <AnimationStyles />
@@ -1772,6 +2007,8 @@ export default function FlashcardsPage() {
                             // Special handling for Speaking - direct to Speaking page
                             if (category.id === 'speaking') {
                               router.push('/dashboard/flashcards/speaking');
+                            } else if (category.id === 'examtest') {
+                              router.push('/dashboard/exam-test');
                             } else {
                               handleCategorySelect(category.id);
                             }
@@ -1858,26 +2095,57 @@ export default function FlashcardsPage() {
               <div className="mb-6">
                 <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4">
                   <h2 className="text-2xl font-bold text-black mb-3 sm:mb-0">All Flashcards</h2>
-                  <div className="relative w-full sm:w-64">
-                    <input 
-                      type="text" 
-                      placeholder="Search cards..."
-                      className="w-full p-2 pl-3 pr-10 border border-blue-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                    />
-                    {searchQuery && (
-                      <button
-                        className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                        onClick={() => setSearchQuery('')}
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <line x1="18" y1="6" x2="6" y2="18"></line>
-                          <line x1="6" y1="6" x2="18" y2="18"></line>
-                        </svg>
-                      </button>
-                    )}
+                  <div className="relative w-full sm:w-64 flex items-center gap-2">
+                    <div className="relative flex-grow">
+                      <input 
+                        type="text" 
+                        placeholder="Search cards..."
+                        className="w-full p-2 pl-3 pr-10 border border-blue-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                      />
+                      {searchQuery && (
+                        <button
+                          className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                          onClick={() => setSearchQuery('')}
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                          </svg>
+                        </button>
+                      )}
+                    </div>
+                    <button
+                      onClick={() => setIsHandwritingModalOpen(true)}
+                      className="p-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors flex-shrink-0 flex items-center justify-center handwriting-button"
+                      title="Handwriting Search"
+                      style={{ minWidth: '40px', height: '40px' }}
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M12 19l7-7 3 3-7 7-3-3z"></path>
+                        <path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"></path>
+                        <path d="M2 2l7.586 7.586"></path>
+                        <circle cx="11" cy="11" r="2"></circle>
+                      </svg>
+                    </button>
                   </div>
+                </div>
+                
+                {/* Handwriting Search CTA */}
+                <div className="mb-4 flex justify-center sm:justify-end">
+                  <button 
+                    onClick={() => setIsHandwritingModalOpen(true)}
+                    className="flex items-center gap-2 p-2 px-4 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg shadow-md hover:from-blue-600 hover:to-blue-700 transition-all"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M12 19l7-7 3 3-7 7-3-3z"></path>
+                      <path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"></path>
+                      <path d="M2 2l7.586 7.586"></path>
+                      <circle cx="11" cy="11" r="2"></circle>
+                    </svg>
+                    Search by Handwriting
+                  </button>
                 </div>
                 
                 {/* Display search info if there's an exact match */}
@@ -1931,6 +2199,15 @@ export default function FlashcardsPage() {
                   </div>
                 )}
               </div>
+              
+              {/* Add New Card Floating Button - Only visible on main view */}
+              <button
+                onClick={() => setIsAddCardModalOpen(true)}
+                className="fixed bottom-20 right-16 md:bottom-6 md:right-20 p-4 rounded-full bg-blue-600 text-white shadow-lg hover:bg-blue-700 transition-all z-50"
+                aria-label="Add new card"
+              >
+                <PlusCircle size={24} />
+              </button>
             </>
           )}
         </div>
@@ -1958,15 +2235,6 @@ export default function FlashcardsPage() {
           </svg>
         </button>
       )}
-      
-      {/* Add New Card Floating Button */}
-      <button
-        onClick={() => setIsAddCardModalOpen(true)}
-        className="fixed bottom-20 right-16 md:bottom-6 md:right-20 p-4 rounded-full bg-blue-600 text-white shadow-lg hover:bg-blue-700 transition-all z-50"
-        aria-label="Add new card"
-      >
-        <PlusCircle size={24} />
-      </button>
       
       {/* Add Card Modal */}
       {isAddCardModalOpen && (
@@ -2074,6 +2342,116 @@ export default function FlashcardsPage() {
                 </div>
               </form>
             )}
+          </div>
+        </div>
+      )}
+      
+      {/* Handwriting Search Modal */}
+      {isHandwritingModalOpen && (
+        <div className="fixed inset-0 flex items-center justify-center z-50 bg-black/50 backdrop-blur-sm handwriting-modal-container">
+          <div className="bg-white rounded-2xl shadow-xl max-w-md w-full animate-bounce-in m-4 flex flex-col h-[80vh]">
+            <div className="flex justify-between items-center p-6 border-b border-gray-100">
+              <h2 className="text-xl font-bold text-black">Handwriting Search</h2>
+              <button 
+                onClick={() => setIsHandwritingModalOpen(false)}
+                className="p-1 rounded-full hover:bg-gray-100"
+              >
+                <X size={20} className="text-gray-500" />
+              </button>
+            </div>
+            
+            <div className="p-4 border-b border-gray-100 bg-blue-50">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-blue-800 font-medium">Draw a Chinese character to search</p>
+                  <p className="text-xs text-blue-600">Write clearly in the box below - recognition happens automatically</p>
+                </div>
+                {recognizedCharacter && (
+                  <div className="p-3 bg-white rounded-lg border border-blue-200 recognized-character">
+                    <p className="text-3xl font-bold text-blue-900">{recognizedCharacter}</p>
+                  </div>
+                )}
+              </div>
+            </div>
+            
+            <div className="flex-grow flex flex-col items-center justify-center p-4 bg-gray-50">
+              <canvas
+                ref={handwritingCanvasRef}
+                className="w-full max-w-xs aspect-square handwriting-canvas bg-white rounded-lg shadow-inner border border-gray-200"
+                onTouchStart={handleHandwritingStart}
+                onTouchMove={handleHandwritingMove}
+                onTouchEnd={handleHandwritingEnd}
+                onMouseDown={(e) => {
+                  setIsHandwriting(true);
+                  if (handwritingCtx && handwritingCanvasRef.current) {
+                    const rect = handwritingCanvasRef.current.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+                    handwritingCtx.beginPath();
+                    handwritingCtx.moveTo(x, y);
+                  }
+                }}
+                onMouseMove={(e) => {
+                  if (isHandwriting && handwritingCtx && handwritingCanvasRef.current) {
+                    const rect = handwritingCanvasRef.current.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+                    handwritingCtx.lineTo(x, y);
+                    handwritingCtx.stroke();
+                  }
+                }}
+                onMouseUp={() => {
+                  setIsHandwriting(false);
+                  saveHandwritingState();
+                  
+                  // Automatically trigger recognition after a short delay
+                  setTimeout(() => {
+                    recognizeHandwriting();
+                  }, 800);
+                }}
+                onMouseLeave={() => {
+                  if (isHandwriting) {
+                    setIsHandwriting(false);
+                    saveHandwritingState();
+                    
+                    // Automatically trigger recognition after a short delay
+                    setTimeout(() => {
+                      recognizeHandwriting();
+                    }, 800);
+                  }
+                }}
+              />
+              
+              {isRecognizing && (
+                <div className="mt-4 flex items-center justify-center text-blue-600">
+                  <div className="w-5 h-5 border-t-2 border-blue-600 border-solid rounded-full animate-spin mr-2"></div>
+                  <span>Recognizing...</span>
+                </div>
+              )}
+            </div>
+            
+            <div className="p-4 border-t border-gray-100 flex justify-between">
+              <button 
+                onClick={clearHandwritingCanvas}
+                className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-lg transition-colors handwriting-button"
+              >
+                Clear
+              </button>
+              
+              <div className="flex gap-2">
+                {recognizedCharacter && (
+                  <button 
+                    onClick={() => {
+                      setSearchQuery(recognizedCharacter);
+                      setIsHandwritingModalOpen(false);
+                    }}
+                    className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors handwriting-button"
+                  >
+                    Search
+                  </button>
+                )}
+              </div>
+            </div>
           </div>
         </div>
       )}

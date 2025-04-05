@@ -3918,6 +3918,15 @@ export const PRACTICE_CATEGORIES = [
     textColor: 'text-[#2D41D1]',
     lessons: 3,
     flashcards: 45
+  },
+  {
+    id: 'examtest',
+    title: 'Exam Test',
+    color: 'from-[#EEF1FF] to-white',
+    hoverColor: 'from-[#E6EBFF] to-white',
+    textColor: 'text-[#2D41D1]',
+    lessons: 1,
+    flashcards: 30
   }
 ]; 
 
