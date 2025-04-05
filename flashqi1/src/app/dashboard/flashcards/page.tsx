@@ -1,18 +1,23 @@
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import { Navbar, MobileNav } from "@/components/ui/navbar";
+import { Button } from "@/components/ui/button";
+import { Tabs } from "@/components/ui/tabs";
+// Commented out because it's not being used in this file
+// import Link from "next/link";
+// import { useRouter } from "next/navigation";
+import { 
+  LESSON_FLASHCARDS, 
+  LESSON_PROGRESS, 
+  STUDY_MODE_TABS, 
+  PRACTICE_CATEGORIES 
+} from "@/data/flashcardData";
+import './flashcards.css';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Button } from "@/components/ui/button";
-import { Navbar, MobileNav } from "@/components/ui/navbar";
-import { PlusCircle, X } from 'lucide-react';
-import { supabase } from '@/lib/supabase/client';
-import {
-  LESSON_FLASHCARDS,
-  PRACTICE_CATEGORIES,
-  LESSON_PROGRESS
-} from '@/data/flashcardData';
-import './flashcards.css';
+import { PlusCircle, X } from "lucide-react";
+import { supabase } from '@/lib/supabase/client'; // Import supabase client
 
 // Animation styles
 const AnimationStyles = () => (
@@ -168,19 +173,11 @@ export default function FlashcardsPage() {
   // Handwriting search state variables
   const [isHandwritingModalOpen, setIsHandwritingModalOpen] = useState(false);
   const [recognizedCharacter, setRecognizedCharacter] = useState<string>("");
-  const [topMatches, setTopMatches] = useState<{character: string, score: number}[]>([]);
   const [isRecognizing, setIsRecognizing] = useState(false);
   const handwritingCanvasRef = useRef<HTMLCanvasElement>(null);
   const [handwritingCtx, setHandwritingCtx] = useState<CanvasRenderingContext2D | null>(null);
   const [isHandwriting, setIsHandwriting] = useState(false);
   const [handwritingStrokeHistory, setHandwritingStrokeHistory] = useState<ImageData[]>([]);
-  
-  // Common Chinese characters to match against
-  const [commonCharacters] = useState<string[]>([
-    '你', '好', '我', '是', '人', '中', '国', '大', '小', '学', '生', '日', '月', '水', '火',
-    '山', '木', '口', '田', '目', '心', '手', '足', '耳', '米', '女', '子', '门', '车', '书',
-    '东', '西', '南', '北', '上', '下', '左', '右', '前', '后', '家', '来', '去', '吃', '喝'
-  ]);
 
   // Drawing feature states
   const [isDrawingMode, setIsDrawingMode] = useState(false);
@@ -192,46 +189,6 @@ export default function FlashcardsPage() {
   // Multiple canvas pages for drawing
   const [currentDrawingPage, setCurrentDrawingPage] = useState(0);
   const [drawingPages, setDrawingPages] = useState<{ strokes: ImageData[] }[]>([{ strokes: [] }]);
-
-  // State for HanziWriter quiz manager
-  const [quizManager, setQuizManager] = useState<any>(null);
-  
-  // Initialize canvas when handwriting modal opens
-  useEffect(() => {
-    if (isHandwritingModalOpen && handwritingCanvasRef.current) {
-      const canvas = handwritingCanvasRef.current;
-      const context = canvas.getContext('2d');
-      
-      if (context) {
-        // Set canvas dimensions to match its display size with higher resolution for better recognition
-        const rect = canvas.getBoundingClientRect();
-        const dpr = window.devicePixelRatio || 1;
-        
-        // Set the canvas to be larger internally for better detail capture
-        canvas.width = rect.width * dpr;
-        canvas.height = rect.height * dpr;
-        
-        // Scale the context to ensure correct drawing
-        context.scale(dpr, dpr);
-        
-        // Set canvas CSS size
-        canvas.style.width = `${rect.width}px`;
-        canvas.style.height = `${rect.height}px`;
-        
-        // Set drawing style for handwriting with responsive line width
-        context.strokeStyle = '#000';
-        context.lineWidth = Math.max(8, Math.min(rect.width, rect.height) / 30); // Responsive line width
-        context.lineCap = 'round';
-        context.lineJoin = 'round';
-        
-        setHandwritingCtx(context);
-        
-        // Initialize with blank canvas
-        const initialState = context.getImageData(0, 0, canvas.width, canvas.height);
-        setHandwritingStrokeHistory([initialState]);
-      }
-    }
-  }, [isHandwritingModalOpen]);
 
   // Get all flashcards based on active lesson
   const getAllFlashcards = () => {
@@ -1259,6 +1216,43 @@ export default function FlashcardsPage() {
     }
   };
 
+  // Initialize handwriting canvas when modal opens
+  useEffect(() => {
+    if (isHandwritingModalOpen && handwritingCanvasRef.current) {
+      const canvas = handwritingCanvasRef.current;
+      const context = canvas.getContext('2d');
+      
+      if (context) {
+        // Set canvas dimensions to match its display size with higher resolution for better recognition
+        const rect = canvas.getBoundingClientRect();
+        const dpr = window.devicePixelRatio || 1;
+        
+        // Set the canvas to be larger internally for better detail capture
+        canvas.width = rect.width * dpr;
+        canvas.height = rect.height * dpr;
+        
+        // Scale the context to ensure correct drawing
+        context.scale(dpr, dpr);
+        
+        // Set canvas CSS size
+        canvas.style.width = `${rect.width}px`;
+        canvas.style.height = `${rect.height}px`;
+        
+        // Set drawing style for handwriting with responsive line width
+        context.strokeStyle = '#000';
+        context.lineWidth = Math.max(8, Math.min(rect.width, rect.height) / 30); // Responsive line width
+        context.lineCap = 'round';
+        context.lineJoin = 'round';
+        
+        setHandwritingCtx(context);
+        
+        // Initialize with blank canvas
+        const initialState = context.getImageData(0, 0, canvas.width, canvas.height);
+        setHandwritingStrokeHistory([initialState]);
+      }
+    }
+  }, [isHandwritingModalOpen]);
+
   // Touch event handlers for handwriting canvas
   const handleHandwritingStart = (e: React.TouchEvent) => {
     e.preventDefault();
@@ -1300,10 +1294,10 @@ export default function FlashcardsPage() {
     
     saveHandwritingState();
     
-    // Automatically trigger recognition after a shorter delay
+    // Automatically trigger recognition after a short delay
     setTimeout(() => {
       recognizeHandwriting();
-    }, 800); // Shorter delay before recognizing
+    }, 800); // 800ms delay before recognizing
   };
 
   // Save current handwriting canvas state
@@ -1329,7 +1323,6 @@ export default function FlashcardsPage() {
     
     // Clear recognition result
     setRecognizedCharacter("");
-    setTopMatches([]);
   };
 
   // Helper function to find the bounds of the drawing in the canvas
@@ -1375,22 +1368,10 @@ export default function FlashcardsPage() {
     // Don't run recognition if already in progress
     if (isRecognizing) return;
     
-    console.log('Starting handwriting recognition...');
     setIsRecognizing(true);
     
     try {
       const canvas = handwritingCanvasRef.current;
-      
-      // Check if anything has been drawn
-      const hasDrawing = handwritingCtx.getImageData(0, 0, canvas.width, canvas.height).data.some(
-        (val, index) => index % 4 === 3 && val > 0 // Check alpha channel for non-transparent pixels
-      );
-      
-      if (!hasDrawing) {
-        console.log('No drawing detected');
-        setIsRecognizing(false);
-        return;
-      }
       
       // Find the actual bounds of the drawn content to properly crop
       const imageData = handwritingCtx.getImageData(0, 0, canvas.width, canvas.height);
@@ -1398,18 +1379,14 @@ export default function FlashcardsPage() {
       
       // If nothing was drawn, return early
       if (!bounds) {
-        console.log('No drawing bounds detected');
         setIsRecognizing(false);
         return;
       }
-      
-      console.log('Drawing bounds detected:', bounds);
       
       // Create a temporary canvas with just the drawing (cropped)
       const tempCanvas = document.createElement('canvas');
       const tempCtx = tempCanvas.getContext('2d');
       if (!tempCtx) {
-        console.error('Failed to get 2D context for temp canvas');
         setIsRecognizing(false);
         return;
       }
@@ -1426,233 +1403,43 @@ export default function FlashcardsPage() {
         padding, padding, bounds.width, bounds.height
       );
       
-      // Get the cropped data URL for recognition
+      // Get the cropped data URL
       const dataUrl = tempCanvas.toDataURL('image/png');
-      console.log('Image prepared for recognition');
       
-      // Use our pixel-based approach for recognition
-      useFallbackRecognition(dataUrl);
+      // In a real implementation, you would send this image to a handwriting recognition API
+      // For demonstration purposes, we'll simulate recognition with a timeout
+      
+      // Simulate API call
+      setTimeout(() => {
+        // Example Chinese characters to randomly "recognize" for demonstration
+        const exampleCharacters = ['你', '好', '我', '是', '人', '中', '国', '大', '小', '学', '生', '日', '月', '水', '火', '山'];
+        const randomIndex = Math.floor(Math.random() * exampleCharacters.length);
+        const recognizedChar = exampleCharacters[randomIndex];
+        
+        setRecognizedCharacter(recognizedChar);
+        setIsRecognizing(false);
+        
+        // In a real implementation, you would call an API like:
+        /*
+        const response = await fetch('/api/recognize-handwriting', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ image: dataUrl })
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          setRecognizedCharacter(data.character);
+        } else {
+          console.error('Recognition failed');
+        }
+        */
+      }, 1500);
       
     } catch (error) {
       console.error('Error recognizing handwriting:', error);
-      setRecognizedCharacter("?");
       setIsRecognizing(false);
     }
-  };
-  
-  // Analyze the drawn character to determine its complexity
-  const analyzeDrawingComplexity = () => {
-    if (!handwritingCtx || !handwritingCanvasRef.current) return { 
-      pixelCount: 0, 
-      horizontalLines: 0, 
-      verticalLines: 0,
-      diagonalLines: 0,
-      intersections: 0,
-      complexity: 0
-    };
-    
-    const canvas = handwritingCanvasRef.current;
-    const imageData = handwritingCtx.getImageData(0, 0, canvas.width, canvas.height);
-    const data = imageData.data;
-    
-    // Count pixels and analyze stroke patterns
-    let pixelCount = 0;
-    let horizontalLines = 0;
-    let verticalLines = 0;
-    let diagonalLines = 0;
-    const pixelMap = new Array(canvas.height).fill(0).map(() => new Array(canvas.width).fill(0));
-    
-    // Fill pixel map
-    for (let y = 0; y < canvas.height; y++) {
-      for (let x = 0; x < canvas.width; x++) {
-        const index = (y * canvas.width + x) * 4;
-        if (data[index + 3] > 0) { // Non-transparent pixel
-          pixelCount++;
-          pixelMap[y][x] = 1;
-        }
-      }
-    }
-    
-    // Analyze horizontal/vertical line patterns
-    for (let y = 1; y < canvas.height - 1; y++) {
-      let inHorizontalLine = false;
-      for (let x = 1; x < canvas.width - 1; x++) {
-        // Check for horizontal line patterns
-        if (pixelMap[y][x] && pixelMap[y][x-1] && pixelMap[y][x+1]) {
-          if (!inHorizontalLine) {
-            horizontalLines++;
-            inHorizontalLine = true;
-          }
-        } else {
-          inHorizontalLine = false;
-        }
-      }
-    }
-    
-    // Analyze vertical line patterns
-    for (let x = 1; x < canvas.width - 1; x++) {
-      let inVerticalLine = false;
-      for (let y = 1; y < canvas.height - 1; y++) {
-        // Check for vertical line patterns
-        if (pixelMap[y][x] && pixelMap[y-1][x] && pixelMap[y+1][x]) {
-          if (!inVerticalLine) {
-            verticalLines++;
-            inVerticalLine = true;
-          }
-        } else {
-          inVerticalLine = false;
-        }
-      }
-    }
-    
-    // Count intersections and diagonals
-    let intersections = 0;
-    for (let y = 1; y < canvas.height - 1; y++) {
-      for (let x = 1; x < canvas.width - 1; x++) {
-        if (pixelMap[y][x]) {
-          // Count diagonal patterns
-          if (pixelMap[y-1][x-1] && pixelMap[y+1][x+1]) {
-            diagonalLines++;
-          }
-          if (pixelMap[y-1][x+1] && pixelMap[y+1][x-1]) {
-            diagonalLines++;
-          }
-          
-          // Count intersections (crossings)
-          if (pixelMap[y-1][x] && pixelMap[y+1][x] && pixelMap[y][x-1] && pixelMap[y][x+1]) {
-            intersections++;
-          }
-        }
-      }
-    }
-    
-    return {
-      pixelCount,
-      horizontalLines,
-      verticalLines,
-      diagonalLines,
-      intersections,
-      complexity: pixelCount + (horizontalLines * 5) + (verticalLines * 5) + (diagonalLines * 3) + (intersections * 10)
-    };
-  };
-
-  // Fallback recognition when HanziWriter fails
-  const useFallbackRecognition = (dataUrl: string) => {
-    console.log('Using simplified recognition method');
-    
-    try {
-      // Basic shape analysis
-      const analysis = analyzeDrawingComplexity();
-      console.log('Drawing analysis:', analysis);
-      
-      // Check for basic shapes first - precise pattern detection
-      const isSquareOrBox = isBoxShape(analysis);
-      const hasHorizontalLine = analysis.horizontalLines > 0 && analysis.verticalLines < 2;
-      const hasVerticalLine = analysis.verticalLines > 0 && analysis.horizontalLines < 2;
-      
-      // Set character pools based on detected patterns
-      let characterPool: string[] = [];
-      let topMatch = '';
-      
-      // Shape-based detection (more precise than complexity-based)
-      if (isSquareOrBox) {
-        // Square/box shapes
-        topMatch = '口';
-        characterPool = ['口', '田', '日', '目', '国', '回', '四'];
-        console.log('Detected square/box shape - likely 口 (kou/mouth) or similar');
-      } 
-      else if (hasHorizontalLine && analysis.pixelCount < 2000) {
-        // Horizontal line patterns
-        topMatch = '一';
-        characterPool = ['一', '二', '三', '十', '干', '工', '土'];
-        console.log('Detected horizontal line pattern');
-      } 
-      else if (hasVerticalLine && analysis.pixelCount < 2000) {
-        // Vertical line patterns
-        topMatch = '丨';
-        characterPool = ['丨', '丁', '十', '中', '上', '下'];
-        console.log('Detected vertical line pattern');
-      }
-      else if (analysis.pixelCount < 1500) {
-        // Simple characters
-        topMatch = '人';
-        characterPool = ['人', '入', '八', '大', '小', '刀', '力', '又', '女'];
-        console.log('Detected simple character pattern');
-      } 
-      else if (analysis.pixelCount < 4000) {
-        // Medium complexity
-        characterPool = ['我', '你', '好', '是', '的', '了', '在', '有', '和'];
-        topMatch = '好';
-        console.log('Detected medium complexity character');
-      } 
-      else {
-        // Complex characters
-        characterPool = ['爱', '语', '说', '话', '写', '读', '听', '看', '学'];
-        topMatch = '语';
-        console.log('Detected complex character');
-      }
-      
-      // Create confidence scores - higher for the top match
-      const matches = characterPool.map((char, index) => {
-        // First character (top match) gets highest score
-        const score = char === topMatch 
-          ? 0.85
-          : Math.max(0.4, 0.8 - (index * 0.05)); // Descending scores
-        
-        return { character: char, score };
-      });
-      
-      // Sort by score (higher is better)
-      const sortedMatches = [...matches].sort((a, b) => b.score - a.score);
-      
-      console.log('Top character matches:', sortedMatches.slice(0, 3));
-      
-      // Set results
-      setRecognizedCharacter(topMatch);
-      setTopMatches(sortedMatches);
-      setIsRecognizing(false);
-    } catch (error) {
-      console.error('Error in fallback recognition:', error);
-      setIsRecognizing(false);
-      
-      // Fallback to basic characters if error
-      const backupChars = ['口', '人', '大', '小', '我'].map((char, i) => ({
-        character: char,
-        score: 0.8 - (i * 0.1)
-      }));
-      
-      setRecognizedCharacter(backupChars[0].character);
-      setTopMatches(backupChars);
-    }
-  };
-  
-  // Check if the drawing resembles a box/square shape like 口
-  const isBoxShape = (analysis: any) => {
-    // Get drawing bounds
-    if (!handwritingCtx || !handwritingCanvasRef.current) return false;
-    
-    const canvas = handwritingCanvasRef.current;
-    const imageData = handwritingCtx.getImageData(0, 0, canvas.width, canvas.height);
-    const bounds = findDrawingBounds(imageData, canvas.width, canvas.height);
-    
-    if (!bounds) return false;
-    
-    // Check if shape is roughly square
-    const widthHeightRatio = bounds.width / bounds.height;
-    const isSquarish = widthHeightRatio >= 0.7 && widthHeightRatio <= 1.3;
-    
-    // Check if there's a loop/enclosure (characteristic of 口)
-    const hasEnclosure = analysis.verticalLines >= 2 && analysis.horizontalLines >= 2;
-    
-    console.log('Box shape detection:', { 
-      isSquarish, 
-      hasEnclosure, 
-      widthHeightRatio,
-      verticalLines: analysis.verticalLines,
-      horizontalLines: analysis.horizontalLines 
-    });
-    
-    return isSquarish && hasEnclosure;
   };
 
   return (
@@ -2562,7 +2349,7 @@ export default function FlashcardsPage() {
       {/* Handwriting Search Modal */}
       {isHandwritingModalOpen && (
         <div className="fixed inset-0 flex items-center justify-center z-50 bg-black/50 backdrop-blur-sm handwriting-modal-container">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md md:max-w-lg m-4 flex flex-col h-[85vh] md:h-[80vh] overflow-hidden">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md md:max-w-lg m-4 flex flex-col h-[85vh] md:h-[80vh]">
             <div className="flex justify-between items-center p-4 border-b border-gray-100">
               <h2 className="text-xl font-bold text-black">Handwriting Search</h2>
               <button 
@@ -2587,34 +2374,43 @@ export default function FlashcardsPage() {
               </div>
             </div>
             
-            <div className="flex-grow flex flex-col items-center p-3 bg-gray-50 overflow-y-auto handwriting-modal-content">
-              <div className="w-full h-[50vh] min-h-[250px] flex items-center justify-center mb-4">
-                <canvas
-                  ref={handwritingCanvasRef}
-                  className="w-full h-full max-h-[400px] handwriting-canvas bg-white rounded-lg shadow-inner border border-gray-200"
-                  onTouchStart={handleHandwritingStart}
-                  onTouchMove={handleHandwritingMove}
-                  onTouchEnd={handleHandwritingEnd}
-                  onMouseDown={(e) => {
-                    setIsHandwriting(true);
-                    if (handwritingCtx && handwritingCanvasRef.current) {
-                      const rect = handwritingCanvasRef.current.getBoundingClientRect();
-                      const x = e.clientX - rect.left;
-                      const y = e.clientY - rect.top;
-                      handwritingCtx.beginPath();
-                      handwritingCtx.moveTo(x, y);
-                    }
-                  }}
-                  onMouseMove={(e) => {
-                    if (isHandwriting && handwritingCtx && handwritingCanvasRef.current) {
-                      const rect = handwritingCanvasRef.current.getBoundingClientRect();
-                      const x = e.clientX - rect.left;
-                      const y = e.clientY - rect.top;
-                      handwritingCtx.lineTo(x, y);
-                      handwritingCtx.stroke();
-                    }
-                  }}
-                  onMouseUp={() => {
+            <div className="p-3 flex-grow flex flex-col items-center justify-center bg-gray-50">
+              <canvas
+                ref={handwritingCanvasRef}
+                className="w-full h-[60vh] max-h-[500px] handwriting-canvas bg-white rounded-lg shadow-inner border border-gray-200"
+                onTouchStart={handleHandwritingStart}
+                onTouchMove={handleHandwritingMove}
+                onTouchEnd={handleHandwritingEnd}
+                onMouseDown={(e) => {
+                  setIsHandwriting(true);
+                  if (handwritingCtx && handwritingCanvasRef.current) {
+                    const rect = handwritingCanvasRef.current.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+                    handwritingCtx.beginPath();
+                    handwritingCtx.moveTo(x, y);
+                  }
+                }}
+                onMouseMove={(e) => {
+                  if (isHandwriting && handwritingCtx && handwritingCanvasRef.current) {
+                    const rect = handwritingCanvasRef.current.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+                    handwritingCtx.lineTo(x, y);
+                    handwritingCtx.stroke();
+                  }
+                }}
+                onMouseUp={() => {
+                  setIsHandwriting(false);
+                  saveHandwritingState();
+                  
+                  // Automatically trigger recognition after a short delay
+                  setTimeout(() => {
+                    recognizeHandwriting();
+                  }, 800);
+                }}
+                onMouseLeave={() => {
+                  if (isHandwriting) {
                     setIsHandwriting(false);
                     saveHandwritingState();
                     
@@ -2622,58 +2418,21 @@ export default function FlashcardsPage() {
                     setTimeout(() => {
                       recognizeHandwriting();
                     }, 800);
-                  }}
-                  onMouseLeave={() => {
-                    if (isHandwriting) {
-                      setIsHandwriting(false);
-                      saveHandwritingState();
-                      
-                      // Automatically trigger recognition after a short delay
-                      setTimeout(() => {
-                        recognizeHandwriting();
-                      }, 800);
-                    }
-                  }}
-                />
-              </div>
+                  }
+                }}
+              />
               
               {isRecognizing && (
-                <div className="mt-2 flex items-center justify-center text-blue-600">
+                <div className="mt-4 flex items-center justify-center text-blue-600">
                   <div className="w-5 h-5 border-t-2 border-blue-600 border-solid rounded-full animate-spin mr-2"></div>
                   <span>Recognizing...</span>
-                </div>
-              )}
-              
-              {/* Display top matches */}
-              {topMatches.length > 0 && !isRecognizing && (
-                <div className="w-full px-2 mb-4">
-                  <p className="text-sm text-gray-600 mb-2 text-center">Top matches - select one:</p>
-                  <div className="flex flex-wrap justify-center gap-2">
-                    {topMatches.map((match, index) => (
-                      <button
-                        key={index}
-                        className={`p-3 border rounded-lg ${match.character === recognizedCharacter 
-                          ? 'bg-blue-100 border-blue-300' 
-                          : 'bg-white border-gray-200 hover:bg-gray-50'}`}
-                        onClick={() => setRecognizedCharacter(match.character)}
-                      >
-                        <div className="text-2xl">{match.character}</div>
-                        <div className="text-xs text-gray-500 text-center mt-1">
-                          {Math.round(match.score * 100)}%
-                        </div>
-                      </button>
-                    ))}
-                  </div>
                 </div>
               )}
             </div>
             
             <div className="p-3 border-t border-gray-100 flex justify-between items-center bg-gray-50">
               <button 
-                onClick={() => {
-                  clearHandwritingCanvas();
-                  setTopMatches([]);
-                }}
+                onClick={clearHandwritingCanvas}
                 className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-lg transition-colors handwriting-button"
               >
                 Clear
