@@ -179,6 +179,20 @@ export default function FlashcardsPage() {
   const [isHandwriting, setIsHandwriting] = useState(false);
   const [handwritingStrokeHistory, setHandwritingStrokeHistory] = useState<ImageData[]>([]);
 
+  // Define types for stroke analysis
+  type PixelPoint = [number, number];
+  interface StrokeComponent {
+    pixels: PixelPoint[];
+    minX: number;
+    maxX: number;
+    minY: number;
+    maxY: number;
+    width?: number;
+    height?: number;
+    aspectRatio?: number;
+    size?: number;
+  }
+
   // Drawing feature states
   const [isDrawingMode, setIsDrawingMode] = useState(false);
   const [isDrawing, setIsDrawing] = useState(false);
@@ -215,6 +229,20 @@ export default function FlashcardsPage() {
     }
     
     const cards = safeGetFlashcards(LESSON_FLASHCARDS[mappedLessonId as keyof typeof LESSON_FLASHCARDS]);
+    return cards;
+  };
+
+  // Get flashcards from lessons 1-11 for midterm prep
+  const getMidtermPrepFlashcards = () => {
+    const allowedLessons = ['lesson1', 'lesson2', 'lesson3', 'lesson4', 'lesson5', 
+                           'lesson6', 'lesson7', 'lesson8', 'lesson9', 'lesson10', 'lesson11'];
+    const cards: any[] = [];
+    
+    allowedLessons.forEach(lessonKey => {
+      const lessonCards = LESSON_FLASHCARDS[lessonKey as keyof typeof LESSON_FLASHCARDS] || [];
+      cards.push(...safeGetFlashcards(lessonCards));
+    });
+    
     return cards;
   };
 
@@ -395,6 +423,33 @@ export default function FlashcardsPage() {
     setCurrentFlashcards(shuffledCards);
     
     // Finally, enter study mode
+    setIsStudyMode(true);
+  };
+
+  // Start midterm prep session with cards from lessons 1-11
+  const enterMidtermPrepMode = () => {
+    // Get cards from lessons 1-11
+    const midtermCards = getMidtermPrepFlashcards();
+    
+    if (midtermCards.length === 0) {
+      return; // Prevent entering study mode with no cards
+    }
+    
+    // Shuffle the cards
+    const shuffledCards = shuffleArray(midtermCards);
+    
+    // Reset all study session state
+    setCompletedCardIds([]);
+    setCurrentCardIndex(0);
+    setIsCardFlipped(false);
+    setStackPosition(3);
+    setIsCompletionPopupVisible(false);
+    
+    // Set the shuffled cards and set active lesson to indicate midterm prep
+    setCurrentFlashcards(shuffledCards);
+    setActiveLesson("midterm-prep");
+    
+    // Enter study mode
     setIsStudyMode(true);
   };
 
@@ -857,6 +912,17 @@ export default function FlashcardsPage() {
     ? PRACTICE_CATEGORIES.find(cat => cat.id === selectedCategory)?.title
     : null;
 
+  // Calculate the total number of cards for midterm prep (lessons 1-11)
+  const getMidtermPrepCardCount = () => {
+    const lessonCount = ['lesson1', 'lesson2', 'lesson3', 'lesson4', 'lesson5', 
+                         'lesson6', 'lesson7', 'lesson8', 'lesson9', 'lesson10', 'lesson11']
+      .reduce((total, lessonKey) => {
+        return total + (LESSON_FLASHCARDS[lessonKey as keyof typeof LESSON_FLASHCARDS]?.length || 0);
+      }, 0);
+    
+    return lessonCount;
+  };
+  
   // Get the title of the lesson being previewed
   const previewLessonTitle = previewLessonId && selectedCategory
     ? getCategoryLessons(selectedCategory).find(l => l.id === previewLessonId)?.title
@@ -1406,15 +1472,15 @@ export default function FlashcardsPage() {
       // Get the cropped data URL
       const dataUrl = tempCanvas.toDataURL('image/png');
       
-      // In a real implementation, you would send this image to a handwriting recognition API
-      // For demonstration purposes, we'll simulate recognition with a timeout
+      // Analyze drawing characteristics for simulated recognition
+      const drawingAnalysis = analyzeDrawing(imageData, bounds, canvas.width, canvas.height);
       
-      // Simulate API call
+      // In a real implementation, you would send this image to a handwriting recognition API
+      // For demonstration purposes, we'll use our drawing analysis to simulate recognition
+      
       setTimeout(() => {
-        // Example Chinese characters to randomly "recognize" for demonstration
-        const exampleCharacters = ['你', '好', '我', '是', '人', '中', '国', '大', '小', '学', '生', '日', '月', '水', '火', '山'];
-        const randomIndex = Math.floor(Math.random() * exampleCharacters.length);
-        const recognizedChar = exampleCharacters[randomIndex];
+        // Get a character based on drawing characteristics
+        const recognizedChar = getCharacterFromDrawingAnalysis(drawingAnalysis);
         
         setRecognizedCharacter(recognizedChar);
         setIsRecognizing(false);
@@ -1440,6 +1506,364 @@ export default function FlashcardsPage() {
       console.error('Error recognizing handwriting:', error);
       setIsRecognizing(false);
     }
+  };
+  
+  // Analyze drawing characteristics (strokes, shape, etc.)
+  const analyzeDrawing = (imageData: ImageData, bounds: {minX: number, minY: number, width: number, height: number}, canvasWidth: number, canvasHeight: number) => {
+    const data = imageData.data;
+    
+    // Calculate stroke density - how many pixels are drawn
+    let pixelCount = 0;
+    let pixelSum = {x: 0, y: 0}; // For calculating center of mass
+    let horizontalLines = 0;
+    let verticalLines = 0;
+    let diagonalLines = 0;
+    
+    // For stroke detection
+    let strokes: number[][] = [];
+    let currentStroke: number[] = [];
+    let previousPixelFound = false;
+    
+    // Create a copy of the image data to track visited pixels
+    const visited = new Array(bounds.height * bounds.width).fill(false);
+    
+    // First pass: Count pixels and calculate basic metrics
+    for (let y = bounds.minY; y < bounds.minY + bounds.height; y++) {
+      let rowPixels = 0;
+      let rowContinuity = 0;
+      previousPixelFound = false;
+      
+      for (let x = bounds.minX; x < bounds.minX + bounds.width; x++) {
+        const index = (y * canvasWidth + x) * 4;
+        const localX = x - bounds.minX;
+        const localY = y - bounds.minY;
+        const visitedIndex = localY * bounds.width + localX;
+        
+        // Check if pixel is not transparent (alpha channel > 0)
+        if (data[index + 3] > 10) {
+          pixelCount++;
+          pixelSum.x += x;
+          pixelSum.y += y;
+          rowPixels++;
+          
+          // Mark this pixel as visited
+          visited[visitedIndex] = true;
+          
+          // Check surrounding pixels to identify line directions
+          if (x > bounds.minX && y > bounds.minY) {
+            const leftIndex = (y * canvasWidth + (x-1)) * 4;
+            const upIndex = ((y-1) * canvasWidth + x) * 4;
+            const diagIndex = ((y-1) * canvasWidth + (x-1)) * 4;
+            
+            if (data[leftIndex + 3] > 10) horizontalLines++;
+            if (data[upIndex + 3] > 10) verticalLines++;
+            if (data[diagIndex + 3] > 10) diagonalLines++;
+          }
+          
+          // Track stroke continuity in rows
+          if (previousPixelFound) {
+            rowContinuity++;
+          } else {
+            if (rowContinuity > 0) {
+              // End of a continuous segment
+              if (rowContinuity > 3) { // Minimum segment length to count
+                strokes.push([rowContinuity]);
+              }
+              rowContinuity = 1;
+            } else {
+              rowContinuity = 1;
+            }
+          }
+          
+          previousPixelFound = true;
+        } else {
+          previousPixelFound = false;
+        }
+      }
+      
+      // End of row - check final continuity
+      if (rowContinuity > 3) {
+        strokes.push([rowContinuity]);
+      }
+    }
+    
+    // Second pass: Detect connected components (strokes) using flood fill
+    const directions = [
+      [-1, 0], [1, 0], [0, -1], [0, 1], 
+      [-1, -1], [-1, 1], [1, -1], [1, 1]
+    ]; // 8 directions
+    
+    const connectedComponents: StrokeComponent[] = [];
+    
+    for (let y = 0; y < bounds.height; y++) {
+      for (let x = 0; x < bounds.width; x++) {
+        const visitedIndex = y * bounds.width + x;
+        
+        // If this pixel is part of the drawing and not visited yet
+        if (visited[visitedIndex]) {
+          // Start a new connected component with flood fill
+          const component: StrokeComponent = {
+            pixels: [],
+            minX: x,
+            maxX: x,
+            minY: y,
+            maxY: y
+          };
+          
+          // Use flood fill to find all connected pixels
+          const queue: PixelPoint[] = [[x, y]];
+          visited[visitedIndex] = false; // Mark as processed
+          
+          while (queue.length > 0) {
+            const [cx, cy] = queue.shift()!;
+            component.pixels.push([cx, cy]);
+            
+            // Update component bounds
+            component.minX = Math.min(component.minX, cx);
+            component.maxX = Math.max(component.maxX, cx);
+            component.minY = Math.min(component.minY, cy);
+            component.maxY = Math.max(component.maxY, cy);
+            
+            // Check all 8 directions
+            for (const [dx, dy] of directions) {
+              const nx = cx + dx;
+              const ny = cy + dy;
+              
+              // Check boundaries
+              if (nx >= 0 && nx < bounds.width && ny >= 0 && ny < bounds.height) {
+                const nIndex = ny * bounds.width + nx;
+                
+                // If this neighbor is part of the drawing and not visited
+                if (visited[nIndex]) {
+                  queue.push([nx, ny]);
+                  visited[nIndex] = false; // Mark as processed
+                }
+              }
+            }
+          }
+          
+          // Only add components with enough pixels (to filter out noise)
+          if (component.pixels.length > 10) {
+            // Calculate component properties
+            component.width = component.maxX - component.minX + 1;
+            component.height = component.maxY - component.minY + 1;
+            component.aspectRatio = component.width / component.height;
+            component.size = component.pixels.length;
+            
+            connectedComponents.push(component);
+          }
+        }
+      }
+    }
+    
+    // Sort components by size (largest first)
+    connectedComponents.sort((a, b) => (b.size || 0) - (a.size || 0));
+    
+    // Estimate number of strokes based on connected components
+    const estimatedStrokes = connectedComponents.length;
+    
+    // Calculate center of mass if pixels were found
+    let centerX = 0;
+    let centerY = 0;
+    if (pixelCount > 0) {
+      centerX = pixelSum.x / pixelCount;
+      centerY = pixelSum.y / pixelCount;
+    }
+    
+    // Calculate aspect ratio (width to height)
+    const aspectRatio = bounds.width / bounds.height;
+    
+    // Calculate pixel density (percentage of bounded area filled)
+    const boundArea = bounds.width * bounds.height;
+    const pixelDensity = pixelCount / boundArea;
+    
+    // Calculate complexity based on stroke count estimate
+    const strokeComplexity = estimatedStrokes > 0 
+      ? (horizontalLines + verticalLines + diagonalLines) / pixelCount 
+      : 0;
+    
+    // Calculate quadrant presence (dividing into 4 quadrants)
+    const midX = bounds.minX + bounds.width / 2;
+    const midY = bounds.minY + bounds.height / 2;
+    const quadrants = [0, 0, 0, 0]; // TL, TR, BL, BR
+    
+    for (let y = bounds.minY; y < bounds.minY + bounds.height; y++) {
+      for (let x = bounds.minX; x < bounds.minX + bounds.width; x++) {
+        const index = (y * canvasWidth + x) * 4;
+        if (data[index + 3] > 10) {
+          if (x < midX && y < midY) quadrants[0]++;
+          else if (x >= midX && y < midY) quadrants[1]++;
+          else if (x < midX && y >= midY) quadrants[2]++;
+          else quadrants[3]++;
+        }
+      }
+    }
+    
+    // Calculate quadrant distribution - higher means more evenly distributed
+    const totalQuadPixels = quadrants.reduce((acc, val) => acc + val, 0);
+    const quadrantDistribution = quadrants.map(q => q / totalQuadPixels);
+    
+    // Calculate component distribution (how much of drawing is in main components)
+    const topComponentPixels = connectedComponents.length > 0 
+      ? (connectedComponents[0].size || 0)
+      : 0;
+    const componentRatio = topComponentPixels / pixelCount;
+    
+    // Get a hash of the drawing for consistent recognition
+    const drawingHash = hashDrawing(
+      bounds, 
+      quadrantDistribution, 
+      aspectRatio, 
+      pixelDensity, 
+      estimatedStrokes,
+      connectedComponents
+    );
+    
+    return {
+      pixelCount,
+      aspectRatio,
+      pixelDensity,
+      centerX,
+      centerY,
+      quadrantDistribution,
+      strokeComplexity,
+      horizontalLines,
+      verticalLines,
+      diagonalLines,
+      estimatedStrokes,
+      connectedComponents,
+      componentRatio,
+      drawingHash
+    };
+  };
+  
+  // Create a simple hash of drawing characteristics for consistent recognition
+  const hashDrawing = (
+    bounds: any, 
+    quadrantDistribution: number[], 
+    aspectRatio: number, 
+    pixelDensity: number,
+    strokeCount: number = 0,
+    components: StrokeComponent[] = []
+  ) => {
+    const aspectStr = aspectRatio.toFixed(1);
+    const densityStr = pixelDensity.toFixed(2);
+    const quadStr = quadrantDistribution.map(q => q.toFixed(2)).join('');
+    const sizeStr = `${bounds.width.toFixed(0)}x${bounds.height.toFixed(0)}`;
+    const strokeStr = `s${strokeCount}`;
+    
+    // Add component shapes to the hash for more uniqueness
+    let compStr = '';
+    if (components.length > 0) {
+      // Use only the largest component for simplicity
+      const mainComp = components[0];
+      const compAspectRatio = mainComp.aspectRatio || 1;
+      const compSize = mainComp.size || 0;
+      compStr = `c${compAspectRatio.toFixed(1)}-${compSize}`;
+    }
+    
+    return `${aspectStr}-${densityStr}-${quadStr}-${strokeStr}-${compStr}-${sizeStr}`;
+  };
+  
+  // Map drawing analysis to specific characters
+  const getCharacterFromDrawingAnalysis = (analysis: any) => {
+    // Using a mapping approach for more consistent recognition
+    const {
+      aspectRatio, 
+      pixelDensity, 
+      quadrantDistribution, 
+      strokeComplexity,
+      estimatedStrokes,
+      connectedComponents,
+      drawingHash
+    } = analysis;
+    
+    // Common Chinese characters grouped by visual similarity and complexity
+    const horizontalCharacters = ['一', '二', '三', '七', '十'];
+    const simpleCharacters = ['八', '口', '日', '月', '山', '下', '上'];
+    const mediumCharacters = ['水', '火', '木', '大', '小', '中', '人', '手', '田', '女'];
+    const complexCharacters = ['我', '你', '好', '是', '国', '学', '生', '说', '道', '爱', '家', '朋'];
+    
+    // Simplified mapping based on complexity and aspect ratio
+    let recognizedChar = '';
+    
+    // Store character mappings based on drawing hash for consistent recognition
+    // This simulates the idea that the same drawing should produce the same character
+    if (typeof window !== 'undefined') {
+      const storedMappings = localStorage.getItem('handwritingMappings');
+      const handwritingMappings = storedMappings ? JSON.parse(storedMappings) : {};
+      
+      // If we've seen this drawing pattern before, return the same character
+      if (handwritingMappings[drawingHash]) {
+        return handwritingMappings[drawingHash];
+      }
+      
+      // Otherwise, determine a character based on drawing characteristics
+      let characterPool;
+      
+      // First, use stroke count to determine appropriate character pool
+      // Real Chinese characters have defined stroke counts - we're approximating here
+      if (estimatedStrokes <= 1) {
+        characterPool = horizontalCharacters;
+      } else if (estimatedStrokes <= 3) {
+        characterPool = simpleCharacters;
+      } else if (estimatedStrokes <= 5) {
+        characterPool = mediumCharacters;
+      } else {
+        characterPool = complexCharacters;
+      }
+      
+      // Adjust based on aspect ratio - wide characters vs. tall characters
+      if (aspectRatio > 1.5) { // Wide character
+        // Prefer horizontal characters like 一, 二, 三
+        characterPool = [...horizontalCharacters, ...characterPool];
+      } else if (aspectRatio < 0.7) { // Tall character
+        // Prefer vertical characters
+        characterPool = ['小', '中', '水', '火', ...characterPool];
+      }
+      
+      // Check quadrant distribution to determine character shape
+      const [topLeft, topRight, bottomLeft, bottomRight] = quadrantDistribution;
+      
+      // Characters with specific stroke patterns (simplified version)
+      if (topLeft > 0.5 && topRight < 0.2) {
+        // Left heavy characters
+        characterPool = ['月', '水', '火', '左', ...characterPool];
+      } else if (topRight > 0.5 && topLeft < 0.2) {
+        // Right heavy characters
+        characterPool = ['右', '有', '大', ...characterPool];
+      }
+      
+      // Characters with specific component distributions
+      if (connectedComponents.length > 0) {
+        const mainComponent = connectedComponents[0];
+        
+        // For simple character detection, check if the main component has a specific shape
+        if (mainComponent.aspectRatio > 1.8) {
+          // Very wide components - likely horizontal strokes
+          characterPool = horizontalCharacters;
+        } else if (mainComponent.aspectRatio < 0.6) {
+          // Very tall components
+          characterPool = ['小', '中', '上', '下', ...characterPool];
+        }
+      }
+      
+      // Get a consistent index based on the hash
+      const hashCode = drawingHash.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+      const index = hashCode % characterPool.length;
+      
+      recognizedChar = characterPool[index];
+      
+      // Store the mapping for future consistency
+      handwritingMappings[drawingHash] = recognizedChar;
+      localStorage.setItem('handwritingMappings', JSON.stringify(handwritingMappings));
+    } else {
+      // Fallback if localStorage is not available
+      const randomIndex = Math.floor(Math.random() * complexCharacters.length);
+      recognizedChar = complexCharacters[randomIndex];
+    }
+    
+    return recognizedChar;
   };
 
   return (
@@ -1640,21 +2064,37 @@ export default function FlashcardsPage() {
               )}
               
               <div className="px-4 pt-6 pb-2 flex-1 flex flex-col">
-                <div className="flex justify-between items-center mb-6">
-                  <div className="flex items-center">
-                    <Button 
-                      variant="outline" 
-                      className="mr-3 p-2 w-10 h-10 rounded-full bg-white text-[#5E72E4]"
-                      onClick={exitStudySession}
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M19 12H5M12 19l-7-7 7-7"></path>
-                      </svg>
-                    </Button>
-                    <h1 className="text-2xl font-bold text-white">Study Session</h1>
-                  </div>
-                  <div className="bg-white/20 px-3 py-1 rounded-full text-sm font-medium text-white">
-                    {currentCardIndex + 1} / {currentFlashcards.length}
+                {/* Study Mode Header */}
+                <div className="fixed inset-x-0 top-0 pt-4 pb-2 px-4 bg-white border-b border-slate-200 z-40">
+                  <div className="flex justify-between items-center">
+                    <div className="flex items-center">
+                      <Button 
+                        variant="outline" 
+                        className="p-2 mr-3 w-10 h-10 rounded-full"
+                        onClick={exitStudySession}
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M19 12H5M12 19l-7-7 7-7"></path>
+                        </svg>
+                      </Button>
+                      <div>
+                        <h2 className="text-lg font-semibold text-black">
+                          {activeLesson === "midterm-prep" 
+                            ? "Midterm Prep" 
+                            : activeLesson === "all" 
+                              ? "All Flashcards" 
+                              : `Lesson ${typeof activeLesson === 'string' ? activeLesson.replace("lesson", "") : activeLesson}`}
+                        </h2>
+                        <p className="text-sm text-slate-600">
+                          {activeLesson === "midterm-prep"
+                            ? `${getMidtermPrepCardCount()} cards from Lessons 1-11`
+                            : `${currentFlashcards.length} cards in total`}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="bg-white/20 px-3 py-1 rounded-full text-sm font-medium text-white">
+                      {currentCardIndex + 1} / {currentFlashcards.length}
+                    </div>
                   </div>
                 </div>
                 
@@ -1933,6 +2373,35 @@ export default function FlashcardsPage() {
               
               {/* Lessons List */}
               <div className="space-y-4 mb-8">
+                {/* Midterm Prep Button */}
+                <div 
+                  className="rounded-xl overflow-hidden bg-gradient-to-r from-purple-50 to-blue-50 border border-blue-200 p-4 hover:border-blue-300 hover:shadow-sm transition-all cursor-pointer"
+                  onClick={() => enterMidtermPrepMode()}
+                >
+                  <div className="flex justify-between items-center">
+                    <div className="flex items-center">
+                      <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white font-medium mr-3 text-sm">
+                        📚
+                      </div>
+                      <div>
+                        <h3 className="text-sm font-semibold text-blue-700">Midterm Prep</h3>
+                        <p className="text-xs text-blue-600">{getMidtermPrepCardCount()} cards from Lessons 1-11</p>
+                      </div>
+                    </div>
+                    <button 
+                      className="p-2.5 rounded-full bg-blue-600 text-white hover:bg-blue-700 transition-colors"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        enterMidtermPrepMode();
+                      }}
+                      title="Start Midterm Prep"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                      </svg>
+                    </button>
+                  </div>
+                </div>
                 {getCategoryLessons(selectedCategory).map((lesson) => (
                   <div 
                     key={lesson.id} 
