@@ -141,25 +141,35 @@ const safeGetFlashcards = (source: any): any[] => {
 
 export default function FlashcardsPage() {
   const router = useRouter();
+  
+  // State for UI navigation
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const [previewLessonId, setPreviewLessonId] = useState<string | null>(null); 
+  const [selectedLevel, setSelectedLevel] = useState<string | null>(null); // NEW: Track selected level
+  const [previewLessonId, setPreviewLessonId] = useState<string | null>(null);
   const [activeStudyTab, setActiveStudyTab] = useState<string | number>("new");
-  const [activeLesson, setActiveLesson] = useState<string | number>("all");
+  
+  // State for search functionality
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isSearchActive, setIsSearchActive] = useState(false);
+  const [isExactMatchFound, setIsExactMatchFound] = useState(false);
+  const [matchedCardId, setMatchedCardId] = useState<string | null>(null);
+  
+  // State for flashcards and study mode
   const [isStudyMode, setIsStudyMode] = useState(false);
+  const [activeLesson, setActiveLesson] = useState<string | number>('all');
+  const [currentFlashcards, setCurrentFlashcards] = useState<any[]>([]);
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
-  const [searchQuery, setSearchQuery] = useState("");
+  const [isCardFlipped, setIsCardFlipped] = useState(false);
+  const [completedCardIds, setCompletedCardIds] = useState<string[]>([]);
+  const [stackPosition, setStackPosition] = useState(3);
+  const [isCompletionPopupVisible, setIsCompletionPopupVisible] = useState(false);
+  
+  // Additional state for UI/UX
   const [showBackToTop, setShowBackToTop] = useState(false);
   const [touchStart, setTouchStart] = useState<{ x: number; y: number } | null>(null);
   const [touchPosition, setTouchPosition] = useState<{ x: number; y: number } | null>(null);
-  const [stackPosition, setStackPosition] = useState<number>(3); // Track stack appearance (1, 2, or 3 cards)
-  const [completedCardIds, setCompletedCardIds] = useState<string[]>([]); // Track which cards have been completed
-  const [isCompletionPopupVisible, setIsCompletionPopupVisible] = useState(false);
-  const [currentFlashcards, setCurrentFlashcards] = useState<any[]>([]);
-  const [isCardFlipped, setIsCardFlipped] = useState(false);
   const [visibleCardsCount, setVisibleCardsCount] = useState(20); // For infinite scrolling
-  const [isExactMatchFound, setIsExactMatchFound] = useState(false); // Track if an exact match was found
-  const [matchedCardId, setMatchedCardId] = useState<string | null>(null); // Track the ID of an exact match
-  
+
   // Add new state variables for the add card modal
   const [isAddCardModalOpen, setIsAddCardModalOpen] = useState(false);
   const [speakingCategories, setSpeakingCategories] = useState<any[]>([]);
@@ -236,6 +246,19 @@ export default function FlashcardsPage() {
   const getMidtermPrepFlashcards = () => {
     const allowedLessons = ['lesson1', 'lesson2', 'lesson3', 'lesson4', 'lesson5', 
                            'lesson6', 'lesson7', 'lesson8', 'lesson9', 'lesson10', 'lesson11'];
+    const cards: any[] = [];
+    
+    allowedLessons.forEach(lessonKey => {
+      const lessonCards = LESSON_FLASHCARDS[lessonKey as keyof typeof LESSON_FLASHCARDS] || [];
+      cards.push(...safeGetFlashcards(lessonCards));
+    });
+    
+    return cards;
+  };
+
+  // Get flashcards from level2 lessons 1-3 for Level 2 midterm prep
+  const getLevel2MidtermPrepFlashcards = () => {
+    const allowedLessons = ['level2_lesson1', 'level2_lesson2', 'level2_lesson3'];
     const cards: any[] = [];
     
     allowedLessons.forEach(lessonKey => {
@@ -362,6 +385,7 @@ export default function FlashcardsPage() {
   const clearSelectedCategory = () => {
     setSelectedCategory(null);
     setPreviewLessonId(null);
+    setSelectedLevel(null); // Also clear selected level
   };
 
   // Handle lesson preview
@@ -448,6 +472,33 @@ export default function FlashcardsPage() {
     // Set the shuffled cards and set active lesson to indicate midterm prep
     setCurrentFlashcards(shuffledCards);
     setActiveLesson("midterm-prep");
+    
+    // Enter study mode
+    setIsStudyMode(true);
+  };
+
+  // Start Level 2 midterm prep session with cards from level2 lessons 1-3
+  const enterLevel2MidtermPrepMode = () => {
+    // Get cards from level2 lessons 1-3
+    const midtermCards = getLevel2MidtermPrepFlashcards();
+    
+    if (midtermCards.length === 0) {
+      return; // Prevent entering study mode with no cards
+    }
+    
+    // Shuffle the cards
+    const shuffledCards = shuffleArray(midtermCards);
+    
+    // Reset all study session state
+    setCompletedCardIds([]);
+    setCurrentCardIndex(0);
+    setIsCardFlipped(false);
+    setStackPosition(3);
+    setIsCompletionPopupVisible(false);
+    
+    // Set the shuffled cards and set active lesson to indicate level2 midterm prep
+    setCurrentFlashcards(shuffledCards);
+    setActiveLesson("level2-midterm-prep");
     
     // Enter study mode
     setIsStudyMode(true);
@@ -676,234 +727,266 @@ export default function FlashcardsPage() {
     };
 
     if (categoryId === 'tutorial') {
-      return [
-        {
-          id: "lesson1",
-          number: 1,
-          title: "Lesson 1",
-          cards: getCardCount("lesson1")
-        },
-        {
-          id: "lesson2",
-          number: 2,
-          title: "Lesson 2",
-          cards: getCardCount("lesson2")
-        },
-        {
-          id: "lesson3",
-          number: 3,
-          title: "Lesson 3",
-          cards: getCardCount("lesson3")
-        },
-        {
-          id: "lesson4",
-          number: 4,
-          title: "Lesson 4",
-          cards: getCardCount("lesson4")
-        },
-        {
-          id: "lesson5",
-          number: 5,
-          title: "Lesson 5",
-          cards: getCardCount("lesson5")
-        },
-        {
-          id: "lesson6",
-          number: 6,
-          title: "Lesson 6",
-          cards: getCardCount("lesson6")
-        },
-        {
-          id: "lesson7",
-          number: 7,
-          title: "Lesson 7",
-          cards: getCardCount("lesson7")
-        },
-        {
-          id: "lesson8",
-          number: 8,
-          title: "Lesson 8",
-          cards: getCardCount("lesson8")
-        },
-        {
-          id: "lesson9",
-          number: 9,
-          title: "Lesson 9",
-          cards: getCardCount("lesson9")
-        },
-        {
-          id: "lesson10",
-          number: 10,
-          title: "Lesson 10",
-          cards: getCardCount("lesson10")
-        },
-        {
-          id: "lesson11",
-          number: 11,
-          title: "Lesson 11",
-          cards: getCardCount("lesson11")
-        },
-        {
-          id: "lesson12",
-          number: 12,
-          title: "Lesson 12",
-          cards: getCardCount("lesson12")
-        },
-        {
-          id: "lesson13",
-          number: 13,
-          title: "Lesson 13",
-          cards: getCardCount("lesson13")
-        },
-        {
-          id: "lesson14",
-          number: 14,
-          title: "Lesson 14",
-          cards: getCardCount("lesson14")
-        },
-        {
-          id: "lesson15",
-          number: 15,
-          title: "Lesson 15",
-          cards: getCardCount("lesson15")
-        }
-      ];
+      // Return lessons grouped by level
+      return {
+        level1: [
+          {
+            id: "lesson1",
+            number: 1,
+            title: "Lesson 1",
+            cards: getCardCount("lesson1")
+          },
+          {
+            id: "lesson2",
+            number: 2,
+            title: "Lesson 2",
+            cards: getCardCount("lesson2")
+          },
+          {
+            id: "lesson3",
+            number: 3,
+            title: "Lesson 3",
+            cards: getCardCount("lesson3")
+          },
+          {
+            id: "lesson4",
+            number: 4,
+            title: "Lesson 4",
+            cards: getCardCount("lesson4")
+          },
+          {
+            id: "lesson5",
+            number: 5,
+            title: "Lesson 5",
+            cards: getCardCount("lesson5")
+          },
+          {
+            id: "lesson6",
+            number: 6,
+            title: "Lesson 6",
+            cards: getCardCount("lesson6")
+          },
+          {
+            id: "lesson7",
+            number: 7,
+            title: "Lesson 7",
+            cards: getCardCount("lesson7")
+          },
+          {
+            id: "lesson8",
+            number: 8,
+            title: "Lesson 8",
+            cards: getCardCount("lesson8")
+          },
+          {
+            id: "lesson9",
+            number: 9,
+            title: "Lesson 9",
+            cards: getCardCount("lesson9")
+          },
+          {
+            id: "lesson10",
+            number: 10,
+            title: "Lesson 10",
+            cards: getCardCount("lesson10")
+          },
+          {
+            id: "lesson11",
+            number: 11,
+            title: "Lesson 11",
+            cards: getCardCount("lesson11")
+          },
+          {
+            id: "lesson12",
+            number: 12,
+            title: "Lesson 12",
+            cards: getCardCount("lesson12")
+          },
+          {
+            id: "lesson13",
+            number: 13,
+            title: "Lesson 13",
+            cards: getCardCount("lesson13")
+          },
+          {
+            id: "lesson14",
+            number: 14,
+            title: "Lesson 14",
+            cards: getCardCount("lesson14")
+          },
+          {
+            id: "lesson15",
+            number: 15,
+            title: "Lesson 15",
+            cards: getCardCount("lesson15")
+          }
+        ],
+        level2: [
+          {
+            id: "level2_lesson1",
+            number: 1,
+            title: "Lesson 1",
+            cards: getCardCount("level2_lesson1")
+          },
+          {
+            id: "level2_lesson2",
+            number: 2,
+            title: "Lesson 2",
+            cards: getCardCount("level2_lesson2")
+          },
+          {
+            id: "level2_lesson3",
+            number: 3,
+            title: "Lesson 3",
+            cards: getCardCount("level2_lesson3")
+          }
+        ]
+      };
     } else if (categoryId === 'reading') {
-      return [
-        {
-          id: "r1",
-          number: 1,
-          title: "Basic Sentences",
-          cards: getCardCount("lesson1") // Reuse lesson1 cards
-        },
-        {
-          id: "r2",
-          number: 2,
-          title: "Family Descriptions",
-          cards: getCardCount("lesson2") // Reuse lesson2 cards
-        },
-        {
-          id: "r3",
-          number: 3,
-          title: "Daily Activities",
-          cards: getCardCount("lesson3") // Reuse lesson3 cards
-        },
-        {
-          id: "r4",
-          number: 4,
-          title: "Home and Living",
-          cards: getCardCount("lesson4") // Reuse lesson4 cards
-        },
-        {
-          id: "r5",
-          number: 5,
-          title: "Food and Meals",
-          cards: getCardCount("lesson5") // Reuse lesson5 cards
-        },
-        {
-          id: "r6",
-          number: 6,
-          title: "Travel and Transportation",
-          cards: getCardCount("lesson6") // Reuse lesson6 cards
-        },
-        {
-          id: "r7",
-          number: 7,
-          title: "Shopping Scenarios",
-          cards: getCardCount("lesson7") // Reuse lesson7 cards
-        },
-        {
-          id: "r8",
-          number: 8,
-          title: "Weather and Seasons",
-          cards: getCardCount("lesson8") // Reuse lesson8 cards
-        },
-        {
-          id: "r9",
-          number: 9,
-          title: "Hobbies and Interests",
-          cards: getCardCount("lesson9") // Reuse lesson9 cards
-        },
-        {
-          id: "r10",
-          number: 10,
-          title: "School and Education",
-          cards: getCardCount("lesson10") // Reuse lesson10 cards
-        },
-        {
-          id: "r11",
-          number: 11,
-          title: "Common Expressions",
-          cards: getCardCount("lesson11") // Reuse lesson11 cards
-        },
-        {
-          id: "r12",
-          number: 12,
-          title: "Academic Discussions",
-          cards: getCardCount("lesson12") // Reuse lesson12 cards
-        },
-        {
-          id: "r13",
-          number: 13,
-          title: "Shopping Items",
-          cards: getCardCount("lesson13") // Reuse lesson13 cards
-        },
-        {
-          id: "r14",
-          number: 14,
-          title: "Transportation Talk",
-          cards: getCardCount("lesson14") // Reuse lesson14 cards
-        },
-        {
-          id: "r15",
-          number: 15,
-          title: "Professions and People",
-          cards: getCardCount("lesson15") // Reuse lesson15 cards
-        }
-      ];
+      return {
+        level1: [
+          {
+            id: "r1",
+            number: 1,
+            title: "Basic Sentences",
+            cards: getCardCount("lesson1") // Reuse lesson1 cards
+          },
+          {
+            id: "r2",
+            number: 2,
+            title: "Family Descriptions",
+            cards: getCardCount("lesson2") // Reuse lesson2 cards
+          },
+          {
+            id: "r3",
+            number: 3,
+            title: "Daily Activities",
+            cards: getCardCount("lesson3") // Reuse lesson3 cards
+          },
+          {
+            id: "r4",
+            number: 4,
+            title: "Home and Living",
+            cards: getCardCount("lesson4") // Reuse lesson4 cards
+          },
+          {
+            id: "r5",
+            number: 5,
+            title: "Food and Meals",
+            cards: getCardCount("lesson5") // Reuse lesson5 cards
+          },
+          {
+            id: "r6",
+            number: 6,
+            title: "Travel and Transportation",
+            cards: getCardCount("lesson6") // Reuse lesson6 cards
+          },
+          {
+            id: "r7",
+            number: 7,
+            title: "Shopping Scenarios",
+            cards: getCardCount("lesson7") // Reuse lesson7 cards
+          },
+          {
+            id: "r8",
+            number: 8,
+            title: "Weather and Seasons",
+            cards: getCardCount("lesson8") // Reuse lesson8 cards
+          },
+          {
+            id: "r9",
+            number: 9,
+            title: "Hobbies and Interests",
+            cards: getCardCount("lesson9") // Reuse lesson9 cards
+          },
+          {
+            id: "r10",
+            number: 10,
+            title: "School and Education",
+            cards: getCardCount("lesson10") // Reuse lesson10 cards
+          },
+          {
+            id: "r11",
+            number: 11,
+            title: "Common Expressions",
+            cards: getCardCount("lesson11") // Reuse lesson11 cards
+          },
+          {
+            id: "r12",
+            number: 12,
+            title: "Academic Discussions",
+            cards: getCardCount("lesson12") // Reuse lesson12 cards
+          },
+          {
+            id: "r13",
+            number: 13,
+            title: "Shopping Items",
+            cards: getCardCount("lesson13") // Reuse lesson13 cards
+          },
+          {
+            id: "r14",
+            number: 14,
+            title: "Transportation Talk",
+            cards: getCardCount("lesson14") // Reuse lesson14 cards
+          },
+          {
+            id: "r15",
+            number: 15,
+            title: "Professions and People",
+            cards: getCardCount("lesson15") // Reuse lesson15 cards
+          }
+        ],
+        level2: []
+      };
     } else if (categoryId === 'listening') {
-      return [
-        {
-          id: "lesson1",
-          number: 1,
-          title: "Daily Conversations",
-          cards: getCardCount("lesson1")
-        },
-        {
-          id: "lesson2",
-          number: 2,
-          title: "Weather Reports",
-          cards: getCardCount("lesson2")
-        },
-        {
-          id: "lesson3",
-          number: 3,
-          title: "Phone Conversations",
-          cards: getCardCount("lesson3")
-        }
-      ];
+      return {
+        level1: [
+          {
+            id: "lesson1",
+            number: 1,
+            title: "Daily Conversations",
+            cards: getCardCount("lesson1")
+          },
+          {
+            id: "lesson2",
+            number: 2,
+            title: "Weather Reports",
+            cards: getCardCount("lesson2")
+          },
+          {
+            id: "lesson3",
+            number: 3,
+            title: "Phone Conversations",
+            cards: getCardCount("lesson3")
+          }
+        ],
+        level2: []
+      };
     } else {
       // speaking category
-      return [
-        {
-          id: "lesson1",
-          number: 1,
-          title: "Basic Greetings",
-          cards: getCardCount("lesson1")
-        },
-        {
-          id: "lesson2",
-          number: 2,
-          title: "Ordering Food",
-          cards: getCardCount("lesson2")
-        },
-        {
-          id: "lesson3",
-          number: 3,
-          title: "Asking Directions",
-          cards: getCardCount("lesson3")
-        }
-      ];
+      return {
+        level1: [
+          {
+            id: "lesson1",
+            number: 1,
+            title: "Basic Greetings",
+            cards: getCardCount("lesson1")
+          },
+          {
+            id: "lesson2",
+            number: 2,
+            title: "Ordering Food",
+            cards: getCardCount("lesson2")
+          },
+          {
+            id: "lesson3",
+            number: 3,
+            title: "Asking Directions",
+            cards: getCardCount("lesson3")
+          }
+        ],
+        level2: []
+      };
     }
   };
 
@@ -925,7 +1008,8 @@ export default function FlashcardsPage() {
   
   // Get the title of the lesson being previewed
   const previewLessonTitle = previewLessonId && selectedCategory
-    ? getCategoryLessons(selectedCategory).find(l => l.id === previewLessonId)?.title
+    ? getCategoryLessons(selectedCategory).level1.find(l => l.id === previewLessonId)?.title || 
+      getCategoryLessons(selectedCategory).level2.find(l => l.id === previewLessonId)?.title
     : null;
 
   // Initialize canvas context on drawing mode activation
@@ -1866,6 +1950,33 @@ export default function FlashcardsPage() {
     return recognizedChar;
   };
 
+  // Calculate the total number of cards for Level 2 midterm prep (lessons 1-3)
+  const getLevel2MidtermPrepCardCount = () => {
+    const lessonCount = ['level2_lesson1', 'level2_lesson2', 'level2_lesson3']
+      .reduce((total, lessonKey) => {
+        return total + (LESSON_FLASHCARDS[lessonKey as keyof typeof LESSON_FLASHCARDS]?.length || 0);
+      }, 0);
+    
+    return lessonCount;
+  };
+  
+  // Select a category
+  const selectCategory = (categoryId: string) => {
+    setSelectedCategory(categoryId);
+    setPreviewLessonId(null);
+    setSelectedLevel(null); // Reset selected level when changing category
+  };
+  
+  // Select a level
+  const selectLevel = (level: string) => {
+    setSelectedLevel(level);
+  };
+  
+  // Clear selected level
+  const clearSelectedLevel = () => {
+    setSelectedLevel(null);
+  };
+  
   return (
     <div className="flex flex-col min-h-screen bg-white">
       <AnimationStyles />
@@ -2081,14 +2192,18 @@ export default function FlashcardsPage() {
                         <h2 className="text-lg font-semibold text-black">
                           {activeLesson === "midterm-prep" 
                             ? "Midterm Prep" 
-                            : activeLesson === "all" 
-                              ? "All Flashcards" 
-                              : `Lesson ${typeof activeLesson === 'string' ? activeLesson.replace("lesson", "") : activeLesson}`}
+                            : activeLesson === "level2-midterm-prep"
+                              ? "Level 2 Midterm Prep"
+                              : activeLesson === "all" 
+                                ? "All Flashcards" 
+                                : `Lesson ${typeof activeLesson === 'string' ? activeLesson.replace("lesson", "") : activeLesson}`}
                         </h2>
                         <p className="text-sm text-slate-600">
                           {activeLesson === "midterm-prep"
                             ? `${getMidtermPrepCardCount()} cards from Lessons 1-11`
-                            : `${currentFlashcards.length} cards in total`}
+                            : activeLesson === "level2-midterm-prep"
+                              ? `${getLevel2MidtermPrepCardCount()} cards from Level 2 Lessons 1-3`
+                              : `${currentFlashcards.length} cards in total`}
                         </p>
                       </div>
                     </div>
@@ -2354,91 +2469,49 @@ export default function FlashcardsPage() {
               </div>
             </>
           ) : selectedCategory ? (
-            // Category Lessons View
-            <>
-              <div className="mb-6">
-                <div className="flex items-center">
-                  <Button 
-                    variant="outline" 
-                    className="mr-3 p-2 w-10 h-10 rounded-full"
-                    onClick={clearSelectedCategory}
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M19 12H5M12 19l-7-7 7-7"></path>
-                    </svg>
-                  </Button>
-                  <h1 className="text-lg font-semibold text-black">{selectedCategoryTitle} Lessons</h1>
-                </div>
-              </div>
-              
-              {/* Lessons List */}
-              <div className="space-y-4 mb-8">
-                {/* Midterm Prep Button */}
-                <div 
-                  className="rounded-xl overflow-hidden bg-gradient-to-r from-purple-50 to-blue-50 border border-blue-200 p-4 hover:border-blue-300 hover:shadow-sm transition-all cursor-pointer"
-                  onClick={() => enterMidtermPrepMode()}
-                >
-                  <div className="flex justify-between items-center">
-                    <div className="flex items-center">
-                      <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white font-medium mr-3 text-sm">
-                        📚
-                      </div>
-                      <div>
-                        <h3 className="text-sm font-semibold text-blue-700">Midterm Prep</h3>
-                        <p className="text-xs text-blue-600">{getMidtermPrepCardCount()} cards from Lessons 1-11</p>
-                      </div>
-                    </div>
-                    <button 
-                      className="p-2.5 rounded-full bg-blue-600 text-white hover:bg-blue-700 transition-colors"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        enterMidtermPrepMode();
-                      }}
-                      title="Start Midterm Prep"
+            selectedLevel ? (
+              // Level-specific lessons view
+              <>
+                <div className="mb-6">
+                  <div className="flex items-center">
+                    <Button 
+                      variant="outline" 
+                      className="mr-3 p-2 w-10 h-10 rounded-full"
+                      onClick={clearSelectedLevel}
                     >
-                      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M19 12H5M12 19l-7-7 7-7"></path>
                       </svg>
-                    </button>
+                    </Button>
+                    <h1 className="text-lg font-semibold text-black">{selectedCategoryTitle} - {selectedLevel === 'level1' ? 'Level 1' : 'Level 2'}</h1>
                   </div>
                 </div>
-                {getCategoryLessons(selectedCategory).map((lesson) => (
-                  <div 
-                    key={lesson.id} 
-                    className="rounded-xl overflow-hidden bg-gradient-to-r from-blue-50 to-white border border-blue-100 p-4 hover:border-blue-300 hover:shadow-sm transition-all cursor-pointer"
-                    onClick={() => previewLessonCards(lesson.id)}
-                  >
-                    <div className="flex justify-between items-center">
-                      <div className="flex items-center">
-                        <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-black font-medium mr-3 text-sm">
-                          {lesson.number}
+                
+                {/* Lessons List */}
+                <div className="space-y-4 mb-8">
+                  {/* Midterm Prep Button - Only show for the appropriate level */}
+                  {selectedLevel === 'level1' && (
+                    <div 
+                      className="rounded-xl overflow-hidden bg-gradient-to-r from-purple-50 to-blue-50 border border-blue-200 p-4 hover:border-blue-300 hover:shadow-sm transition-all cursor-pointer"
+                      onClick={() => enterMidtermPrepMode()}
+                    >
+                      <div className="flex justify-between items-center">
+                        <div className="flex items-center">
+                          <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white font-medium mr-3 text-sm">
+                            📚
+                          </div>
+                          <div>
+                            <h3 className="text-sm font-semibold text-blue-700">Midterm Prep</h3>
+                            <p className="text-xs text-blue-600">{getMidtermPrepCardCount()} cards from Lessons 1-11</p>
+                          </div>
                         </div>
-                        <div>
-                          <h3 className="text-sm font-medium text-black">{lesson.title}</h3>
-                          <p className="text-xs text-black">{lesson.cards} cards</p>
-                        </div>
-                      </div>
-                      <div className="flex space-x-2">
-                        <button 
-                          className="p-2.5 rounded-full bg-blue-50 text-blue-700 hover:bg-blue-100 transition-colors"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            previewLessonCards(lesson.id);
-                          }}
-                          title="See All Cards"
-                        >
-                          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <rect x="2" y="2" width="20" height="8" rx="2" ry="2"></rect>
-                            <rect x="2" y="14" width="20" height="8" rx="2" ry="2"></rect>
-                          </svg>
-                        </button>
                         <button 
                           className="p-2.5 rounded-full bg-blue-600 text-white hover:bg-blue-700 transition-colors"
                           onClick={(e) => {
                             e.stopPropagation();
-                            enterStudyMode(lesson.id);
+                            enterMidtermPrepMode();
                           }}
-                          title="Start Lesson"
+                          title="Start Midterm Prep"
                         >
                           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                             <polygon points="5 3 19 12 5 21 5 3"></polygon>
@@ -2446,10 +2519,219 @@ export default function FlashcardsPage() {
                         </button>
                       </div>
                     </div>
+                  )}
+                  
+                  {selectedLevel === 'level2' && (
+                    <div 
+                      className="rounded-xl overflow-hidden bg-gradient-to-r from-purple-50 to-blue-50 border border-blue-200 p-4 hover:border-blue-300 hover:shadow-sm transition-all cursor-pointer"
+                      onClick={() => enterLevel2MidtermPrepMode()}
+                    >
+                      <div className="flex justify-between items-center">
+                        <div className="flex items-center">
+                          <div className="w-10 h-10 rounded-full bg-purple-600 flex items-center justify-center text-white font-medium mr-3 text-sm">
+                            📚
+                          </div>
+                          <div>
+                            <h3 className="text-sm font-semibold text-purple-700">Level 2 Midterm Prep</h3>
+                            <p className="text-xs text-purple-600">{getLevel2MidtermPrepCardCount()} cards from Level 2 Lessons 1-3</p>
+                          </div>
+                        </div>
+                        <button 
+                          className="p-2.5 rounded-full bg-purple-600 text-white hover:bg-purple-700 transition-colors"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            enterLevel2MidtermPrepMode();
+                          }}
+                          title="Start Level 2 Midterm Prep"
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                          </svg>
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {/* Lessons for the selected level */}
+                  {selectedLevel === 'level1' && getCategoryLessons(selectedCategory).level1.map((lesson) => (
+                    <div 
+                      key={lesson.id} 
+                      className="rounded-xl overflow-hidden bg-gradient-to-r from-blue-50 to-white border border-blue-100 p-4 hover:border-blue-300 hover:shadow-sm transition-all cursor-pointer"
+                      onClick={() => previewLessonCards(lesson.id)}
+                    >
+                      <div className="flex justify-between items-center">
+                        <div className="flex items-center">
+                          <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-black font-medium mr-3 text-sm">
+                            {lesson.number}
+                          </div>
+                          <div>
+                            <h3 className="text-sm font-medium text-black">{lesson.title}</h3>
+                            <p className="text-xs text-black">{lesson.cards} cards</p>
+                          </div>
+                        </div>
+                        <div className="flex space-x-2">
+                          <button 
+                            className="p-2.5 rounded-full bg-blue-50 text-blue-700 hover:bg-blue-100 transition-colors"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              previewLessonCards(lesson.id);
+                            }}
+                            title="See All Cards"
+                          >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <rect x="2" y="2" width="20" height="8" rx="2" ry="2"></rect>
+                              <rect x="2" y="14" width="20" height="8" rx="2" ry="2"></rect>
+                            </svg>
+                          </button>
+                          <button 
+                            className="p-2.5 rounded-full bg-blue-600 text-white hover:bg-blue-700 transition-colors"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              enterStudyMode(lesson.id);
+                            }}
+                            title="Start Lesson"
+                          >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                            </svg>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                  
+                  {selectedLevel === 'level2' && getCategoryLessons(selectedCategory).level2.map((lesson) => (
+                    <div 
+                      key={lesson.id} 
+                      className="rounded-xl overflow-hidden bg-gradient-to-r from-purple-50 to-blue-50 border border-blue-200 p-4 hover:border-blue-300 hover:shadow-sm transition-all cursor-pointer"
+                      onClick={() => previewLessonCards(lesson.id)}
+                    >
+                      <div className="flex justify-between items-center">
+                        <div className="flex items-center">
+                          <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-black font-medium mr-3 text-sm">
+                            {lesson.number}
+                          </div>
+                          <div>
+                            <h3 className="text-sm font-medium text-black">{lesson.title}</h3>
+                            <p className="text-xs text-black">{lesson.cards} cards</p>
+                          </div>
+                        </div>
+                        <div className="flex space-x-2">
+                          <button 
+                            className="p-2.5 rounded-full bg-blue-50 text-blue-700 hover:bg-blue-100 transition-colors"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              previewLessonCards(lesson.id);
+                            }}
+                            title="See All Cards"
+                          >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <rect x="2" y="2" width="20" height="8" rx="2" ry="2"></rect>
+                              <rect x="2" y="14" width="20" height="8" rx="2" ry="2"></rect>
+                            </svg>
+                          </button>
+                          <button 
+                            className="p-2.5 rounded-full bg-blue-600 text-white hover:bg-blue-700 transition-colors"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              enterStudyMode(lesson.id);
+                            }}
+                            title="Start Lesson"
+                          >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                            </svg>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </>
+            ) : (
+              // Category levels selection view
+              <>
+                <div className="mb-6">
+                  <div className="flex items-center">
+                    <Button 
+                      variant="outline" 
+                      className="mr-3 p-2 w-10 h-10 rounded-full"
+                      onClick={clearSelectedCategory}
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M19 12H5M12 19l-7-7 7-7"></path>
+                      </svg>
+                    </Button>
+                    <h1 className="text-lg font-semibold text-black">{selectedCategoryTitle} Levels</h1>
                   </div>
-                ))}
-              </div>
-            </>
+                </div>
+                
+                {/* Levels Selection */}
+                <div className="space-y-6 mb-8">
+                  {/* Level 1 Button */}
+                  {getCategoryLessons(selectedCategory).level1.length > 0 && (
+                    <div 
+                      className="rounded-xl overflow-hidden bg-gradient-to-r from-blue-100 to-blue-50 border border-blue-200 p-6 hover:border-blue-300 hover:shadow-md transition-all cursor-pointer"
+                      onClick={() => selectLevel('level1')}
+                    >
+                      <div className="flex justify-between items-center">
+                        <div className="flex items-center">
+                          <div className="w-12 h-12 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold mr-4">
+                            1
+                          </div>
+                          <div>
+                            <h3 className="text-xl font-semibold text-blue-900">Level 1</h3>
+                            <p className="text-sm text-blue-700">{getCategoryLessons(selectedCategory).level1.length} Lessons</p>
+                          </div>
+                        </div>
+                        <button 
+                          className="p-3 rounded-full bg-blue-600 text-white hover:bg-blue-700 transition-colors"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            selectLevel('level1');
+                          }}
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M9 18l6-6-6-6"></path>
+                          </svg>
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {/* Level 2 Button */}
+                  {getCategoryLessons(selectedCategory).level2.length > 0 && (
+                    <div 
+                      className="rounded-xl overflow-hidden bg-gradient-to-r from-purple-100 to-purple-50 border border-purple-200 p-6 hover:border-purple-300 hover:shadow-md transition-all cursor-pointer"
+                      onClick={() => selectLevel('level2')}
+                    >
+                      <div className="flex justify-between items-center">
+                        <div className="flex items-center">
+                          <div className="w-12 h-12 rounded-full bg-purple-600 flex items-center justify-center text-white font-bold mr-4">
+                            2
+                          </div>
+                          <div>
+                            <h3 className="text-xl font-semibold text-purple-900">Level 2</h3>
+                            <p className="text-sm text-purple-700">{getCategoryLessons(selectedCategory).level2.length} Lessons</p>
+                          </div>
+                        </div>
+                        <button 
+                          className="p-3 rounded-full bg-purple-600 text-white hover:bg-purple-700 transition-colors"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            selectLevel('level2');
+                          }}
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M9 18l6-6-6-6"></path>
+                          </svg>
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </>
+            )
           ) : (
             // Main View
             <>

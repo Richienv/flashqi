@@ -3840,7 +3840,403 @@ export const LESSON_FLASHCARDS = {
   "r12": function() { return LESSON_FLASHCARDS.lesson12; },
   "r13": function() { return LESSON_FLASHCARDS.lesson13; },
   "r14": function() { return LESSON_FLASHCARDS.lesson14; },
-  "r15": function() { return LESSON_FLASHCARDS.lesson15; }
+  "r15": function() { return LESSON_FLASHCARDS.lesson15; },
+  "level2_lesson1": [
+    {
+      id: "l2-1-1",
+      lesson_id: "level2_lesson1",
+      hanzi: "喂",
+      pinyin: "wèi",
+      english: "Hello (on phone)",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "喂，你好！",
+        pinyin: "Wèi, nǐ hǎo!",
+        english: "Hello! (phone greeting)"
+      }
+    },
+    {
+      id: "l2-1-2",
+      lesson_id: "level2_lesson1",
+      hanzi: "阿姨",
+      pinyin: "āyí",
+      english: "Aunt/maid",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "这是我的阿姨。",
+        pinyin: "Zhè shì wǒ de āyí.",
+        english: "This is my aunt."
+      }
+    },
+    {
+      id: "l2-1-3",
+      lesson_id: "level2_lesson1",
+      hanzi: "了",
+      pinyin: "le",
+      english: "Past tense particle",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "我吃了饭。",
+        pinyin: "Wǒ chī le fàn.",
+        english: "I ate."
+      }
+    },
+    {
+      id: "l2-1-4",
+      lesson_id: "level2_lesson1",
+      hanzi: "中学",
+      pinyin: "zhōngxué",
+      english: "Middle school",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "我在中学学习。",
+        pinyin: "Wǒ zài zhōngxué xuéxí.",
+        english: "I study at middle school."
+      }
+    },
+    {
+      id: "l2-1-5",
+      lesson_id: "level2_lesson1",
+      hanzi: "出国",
+      pinyin: "chū guó",
+      english: "To go abroad",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "我想出国留学。",
+        pinyin: "Wǒ xiǎng chū guó liúxué.",
+        english: "I want to go abroad to study."
+      }
+    },
+    {
+      id: "l2-1-6",
+      lesson_id: "level2_lesson1",
+      hanzi: "出",
+      pinyin: "chū",
+      english: "To go out",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "我们出去吧。",
+        pinyin: "Wǒmen chū qù ba.",
+        english: "Let's go out."
+      }
+    },
+    {
+      id: "l2-1-7",
+      lesson_id: "level2_lesson1",
+      hanzi: "打电话",
+      pinyin: "dǎ diànhuà",
+      english: "To make a phone call",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "我要打电话给你。",
+        pinyin: "Wǒ yào dǎ diànhuà gěi nǐ.",
+        english: "I will call you."
+      }
+    },
+    {
+      id: "l2-1-8",
+      lesson_id: "level2_lesson1",
+      hanzi: "关机",
+      pinyin: "guānjī",
+      english: "To turn off",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "请关机。",
+        pinyin: "Qǐng guānjī.",
+        english: "Please turn it off."
+      }
+    },
+    {
+      id: "l2-1-9",
+      lesson_id: "level2_lesson1",
+      hanzi: "关",
+      pinyin: "guān",
+      english: "To close/shut off",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "关门。",
+        pinyin: "Guān mén.",
+        english: "Close the door."
+      }
+    },
+    {
+      id: "l2-1-10",
+      lesson_id: "level2_lesson1",
+      hanzi: "饿",
+      pinyin: "è",
+      english: "Hungry",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "我很饿。",
+        pinyin: "Wǒ hěn è.",
+        english: "I am very hungry."
+      }
+    }
+  ],
+  "level2_lesson2": [
+    {
+      id: "l2-2-1",
+      lesson_id: "level2_lesson2",
+      hanzi: "病人",
+      pinyin: "bìngrén",
+      english: "Patient",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "这个病人需要休息。",
+        pinyin: "Zhège bìngrén xūyào xiūxi.",
+        english: "This patient needs to rest."
+      }
+    },
+    {
+      id: "l2-2-2",
+      lesson_id: "level2_lesson2",
+      hanzi: "肚子",
+      pinyin: "dùzi",
+      english: "Stomach/belly",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "我的肚子疼。",
+        pinyin: "Wǒ de dùzi téng.",
+        english: "My stomach hurts."
+      }
+    },
+    {
+      id: "l2-2-3",
+      lesson_id: "level2_lesson2",
+      hanzi: "厉害",
+      pinyin: "lìhai",
+      english: "Serious/severe",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "这个问题很厉害。",
+        pinyin: "Zhège wèntí hěn lìhai.",
+        english: "This problem is very serious."
+      }
+    },
+    {
+      id: "l2-2-4",
+      lesson_id: "level2_lesson2",
+      hanzi: "了",
+      pinyin: "le",
+      english: "Past tense particle",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "我看了医生。",
+        pinyin: "Wǒ kàn le yīshēng.",
+        english: "I saw the doctor."
+      }
+    },
+    {
+      id: "l2-2-5",
+      lesson_id: "level2_lesson2",
+      hanzi: "片",
+      pinyin: "piàn",
+      english: "Tablet/pill",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "吃一片药。",
+        pinyin: "Chī yí piàn yào.",
+        english: "Take one pill."
+      }
+    },
+    {
+      id: "l2-2-6",
+      lesson_id: "level2_lesson2",
+      hanzi: "拉肚子",
+      pinyin: "là dùzi",
+      english: "Diarrhea",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "他拉肚子了。",
+        pinyin: "Tā là dùzi le.",
+        english: "He has diarrhea."
+      }
+    },
+    {
+      id: "l2-2-7",
+      lesson_id: "level2_lesson2",
+      hanzi: "拉",
+      pinyin: "là",
+      english: "To pull/have bowel movement",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "拉门。",
+        pinyin: "Là mén.",
+        english: "Pull the door."
+      }
+    },
+    {
+      id: "l2-2-8",
+      lesson_id: "level2_lesson2",
+      hanzi: "牛肉",
+      pinyin: "yǒuniúròu",
+      english: "Beef",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "我喜欢吃牛肉。",
+        pinyin: "Wǒ xǐhuan chī niúròu.",
+        english: "I like to eat beef."
+      }
+    },
+    {
+      id: "l2-2-9",
+      lesson_id: "level2_lesson2",
+      hanzi: "化验",
+      pinyin: "huàyàn",
+      english: "To test/examination",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "医生给我做了化验。",
+        pinyin: "Yīshēng gěi wǒ zuò le huàyàn.",
+        english: "The doctor did a test for me."
+      }
+    },
+    {
+      id: "l2-2-10",
+      lesson_id: "level2_lesson2",
+      hanzi: "大便",
+      pinyin: "dàbiàn",
+      english: "Feces",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "需要大便的化验。",
+        pinyin: "Xūyào dàbiàn de huàyàn.",
+        english: "A stool test is needed."
+      }
+    }
+  ],
+  "level2_lesson3": [
+    {
+      id: "l2-3-1",
+      lesson_id: "level2_lesson3",
+      hanzi: "套",
+      pinyin: "tào",
+      english: "Set/suite",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "一套衣服。",
+        pinyin: "Yí tào yīfu.",
+        english: "A set of clothes."
+      }
+    },
+    {
+      id: "l2-3-2",
+      lesson_id: "level2_lesson3",
+      hanzi: "房子",
+      pinyin: "fángzi",
+      english: "House",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "这是我的房子。",
+        pinyin: "Zhè shì wǒ de fángzi.",
+        english: "This is my house."
+      }
+    },
+    {
+      id: "l2-3-3",
+      lesson_id: "level2_lesson3",
+      hanzi: "满意",
+      pinyin: "mǎnyì",
+      english: "Satisfied",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "我很满意这个房子。",
+        pinyin: "Wǒ hěn mǎnyì zhège fángzi.",
+        english: "I am very satisfied with this house."
+      }
+    },
+    {
+      id: "l2-3-4",
+      lesson_id: "level2_lesson3",
+      hanzi: "有人喜欢",
+      pinyin: "yǒu de rén xǐhuan",
+      english: "Some people like",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "有的人喜欢茶。",
+        pinyin: "Yǒu de rén xǐhuan chá.",
+        english: "Some people like tea."
+      }
+    },
+    {
+      id: "l2-3-5",
+      lesson_id: "level2_lesson3",
+      hanzi: "房子周围",
+      pinyin: "fángzi zhōuwéi",
+      english: "Around the house",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "房子周围有树。",
+        pinyin: "Fángzi zhōuwéi yǒu shù.",
+        english: "There are trees around the house."
+      }
+    },
+    {
+      id: "l2-3-6",
+      lesson_id: "level2_lesson3",
+      hanzi: "环境",
+      pinyin: "huánjìng",
+      english: "Environment",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "这里的环境很好。",
+        pinyin: "Zhèlǐ de huánjìng hěn hǎo.",
+        english: "The environment here is very good."
+      }
+    },
+    {
+      id: "l2-3-7",
+      lesson_id: "level2_lesson3",
+      hanzi: "乱",
+      pinyin: "luàn",
+      english: "Messy/chaotic",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "房间很乱。",
+        pinyin: "Fángjiān hěn luàn.",
+        english: "The room is very messy."
+      }
+    },
+    {
+      id: "l2-3-8",
+      lesson_id: "level2_lesson3",
+      hanzi: "厨房",
+      pinyin: "chúfáng",
+      english: "Kitchen",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "厨房在那里。",
+        pinyin: "Chúfáng zài nàlǐ.",
+        english: "The kitchen is over there."
+      }
+    },
+    {
+      id: "l2-3-9",
+      lesson_id: "level2_lesson3",
+      hanzi: "卧室",
+      pinyin: "wòshì",
+      english: "Bedroom",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "我的卧室很大。",
+        pinyin: "Wǒ de wòshì hěn dà.",
+        english: "My bedroom is very big."
+      }
+    },
+    {
+      id: "l2-3-10",
+      lesson_id: "level2_lesson3",
+      hanzi: "客厅",
+      pinyin: "kètīng",
+      english: "Living room",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "客厅里有沙发。",
+        pinyin: "Kètīng lǐ yǒu shāfā.",
+        english: "There is a sofa in the living room."
+      }
+    }
+  ]
 };
 
 // Mock lesson progress
