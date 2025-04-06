@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { Navbar, MobileNav } from "@/components/ui/navbar";
 import { Button } from "@/components/ui/button";
 import { Tabs } from "@/components/ui/tabs";
@@ -18,6 +18,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { PlusCircle, X } from "lucide-react";
 import { supabase } from '@/lib/supabase/client'; // Import supabase client
+import { v4 as uuidv4 } from 'uuid';
 
 // Animation styles
 const AnimationStyles = () => (
@@ -139,6 +140,25 @@ const safeGetFlashcards = (source: any): any[] => {
   return source;
 };
 
+// Function to calculate total flashcards
+const calculateTotalFlashcards = () => {
+  let total = 0;
+  
+  // Count regular lessons
+  for (let i = 1; i <= 15; i++) {
+    const lessonKey = `lesson${i}` as keyof typeof LESSON_FLASHCARDS;
+    total += LESSON_FLASHCARDS[lessonKey]?.length || 0;
+  }
+  
+  // Count level 2 lessons
+  for (let i = 1; i <= 7; i++) {
+    const lessonKey = `level2_lesson${i}` as keyof typeof LESSON_FLASHCARDS;
+    total += LESSON_FLASHCARDS[lessonKey]?.length || 0;
+  }
+  
+  return total;
+};
+
 export default function FlashcardsPage() {
   const router = useRouter();
   
@@ -256,17 +276,36 @@ export default function FlashcardsPage() {
     return cards;
   };
 
-  // Get flashcards from level2 lessons 1-3 for Level 2 midterm prep
+  // Get Level 2 Midterm Prep flashcards (combines Level 2 Lessons 1-10)
   const getLevel2MidtermPrepFlashcards = () => {
-    const allowedLessons = ['level2_lesson1', 'level2_lesson2', 'level2_lesson3'];
-    const cards: any[] = [];
+    // Combine flashcards from Level 2 Lessons 1-10
+    const lesson1Cards = safeGetFlashcards(LESSON_FLASHCARDS.level2_lesson1);
+    const lesson2Cards = safeGetFlashcards(LESSON_FLASHCARDS.level2_lesson2);
+    const lesson3Cards = safeGetFlashcards(LESSON_FLASHCARDS.level2_lesson3);
+    const lesson4Cards = safeGetFlashcards(LESSON_FLASHCARDS.level2_lesson4);
+    const lesson5Cards = safeGetFlashcards(LESSON_FLASHCARDS.level2_lesson5);
+    const lesson6Cards = safeGetFlashcards(LESSON_FLASHCARDS.level2_lesson6);
+    const lesson7Cards = safeGetFlashcards(LESSON_FLASHCARDS.level2_lesson7);
+    const lesson8Cards = safeGetFlashcards(LESSON_FLASHCARDS.level2_lesson8);
+    const lesson9Cards = safeGetFlashcards(LESSON_FLASHCARDS.level2_lesson9);
+    const lesson10Cards = safeGetFlashcards(LESSON_FLASHCARDS.level2_lesson10);
     
-    allowedLessons.forEach(lessonKey => {
-      const lessonCards = LESSON_FLASHCARDS[lessonKey as keyof typeof LESSON_FLASHCARDS] || [];
-      cards.push(...safeGetFlashcards(lessonCards));
-    });
+    // Combine all cards
+    let allCards = [
+      ...lesson1Cards,
+      ...lesson2Cards,
+      ...lesson3Cards,
+      ...lesson4Cards,
+      ...lesson5Cards,
+      ...lesson6Cards,
+      ...lesson7Cards,
+      ...lesson8Cards,
+      ...lesson9Cards,
+      ...lesson10Cards
+    ];
     
-    return cards;
+    // Shuffle the cards
+    return shuffleArray(allCards);
   };
 
   // Filter flashcards by search query with enhanced matching
@@ -368,17 +407,23 @@ export default function FlashcardsPage() {
     });
   };
 
-  // Handle category selection
-  const handleCategorySelect = (categoryId: string) => {
-    // If reading category is selected, navigate to reading practice page
-    if (categoryId === 'reading') {
-      router.push('/dashboard/flashcards/reading');
-      return;
-    }
+  // Update the selectedCategoryTitle based on the selected category
+  const selectedCategoryTitle = useMemo(() => {
+    if (!selectedCategory) return '';
     
-    // For other categories, keep the existing behavior
+    switch(selectedCategory) {
+      case 'chinese':
+        return 'Chinese Flashcards';
+      default:
+        return 'Flashcards';
+    }
+  }, [selectedCategory]);
+  
+  // Select a category
+  const handleCategorySelect = (categoryId: string) => {
     setSelectedCategory(categoryId);
     setPreviewLessonId(null);
+    setSelectedLevel(null); // Reset level when changing category
   };
 
   // Clear selected category
@@ -477,31 +522,39 @@ export default function FlashcardsPage() {
     setIsStudyMode(true);
   };
 
-  // Start Level 2 midterm prep session with cards from level2 lessons 1-3
+  // Enter Level 2 Midterm Prep Mode (combines Level 2 Lessons 1-10)
   const enterLevel2MidtermPrepMode = () => {
-    // Get cards from level2 lessons 1-3
-    const midtermCards = getLevel2MidtermPrepFlashcards();
+    // Get all Level 2 midterm prep flashcards
+    const midtermPrepCards = getLevel2MidtermPrepFlashcards();
     
-    if (midtermCards.length === 0) {
-      return; // Prevent entering study mode with no cards
-    }
-    
-    // Shuffle the cards
-    const shuffledCards = shuffleArray(midtermCards);
-    
-    // Reset all study session state
-    setCompletedCardIds([]);
+    // Set up study mode with Level 2 midterm prep cards
+    setCurrentFlashcards(midtermPrepCards);
     setCurrentCardIndex(0);
+    setIsStudyMode(true);
+    setActiveLesson("level2-midterm-prep");
     setIsCardFlipped(false);
     setStackPosition(3);
-    setIsCompletionPopupVisible(false);
+    setIsDrawingMode(false);
+    setCompletedCardIds([]); // Reset completed cards
     
-    // Set the shuffled cards and set active lesson to indicate level2 midterm prep
-    setCurrentFlashcards(shuffledCards);
-    setActiveLesson("level2-midterm-prep");
+    // Reset drawing pages with proper initialization
+    if (canvasRef.current) {
+      const canvas = canvasRef.current;
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        const blankImageData = ctx.createImageData(canvas.width, canvas.height);
+        setDrawingPages([{ strokes: [blankImageData] }]);
+      } else {
+        setDrawingPages([{ strokes: [] }]);
+      }
+    } else {
+      setDrawingPages([{ strokes: [] }]);
+    }
     
-    // Enter study mode
-    setIsStudyMode(true);
+    setCurrentDrawingPage(0);
+    
+    // Update the header to indicate Level 2 midterm prep mode
+    document.title = "Level 2 Midterm Prep | FlashQi";
   };
 
   // Exit study session with proper cleanup
@@ -721,279 +774,56 @@ export default function FlashcardsPage() {
 
   // Get category-specific lessons with accurate card counts
   const getCategoryLessons = (categoryId: string) => {
-    // Helper function to get the actual card count for a lesson
+    let level1Lessons: any[] = [];
+    let level2Lessons: any[] = [];
+    
     const getCardCount = (lessonId: string) => {
+      // If it's a level2 lesson
+      if (lessonId.startsWith('level2_')) {
+        const key = lessonId.replace('level2_', '');
+        return LESSON_FLASHCARDS[key as keyof typeof LESSON_FLASHCARDS]?.length || 0;
+      }
+      // Regular lesson
       return LESSON_FLASHCARDS[lessonId as keyof typeof LESSON_FLASHCARDS]?.length || 0;
     };
-
-    if (categoryId === 'tutorial') {
-      // Return lessons grouped by level
-      return {
-        level1: [
-          {
-            id: "lesson1",
-            number: 1,
-            title: "Lesson 1",
-            cards: getCardCount("lesson1")
-          },
-          {
-            id: "lesson2",
-            number: 2,
-            title: "Lesson 2",
-            cards: getCardCount("lesson2")
-          },
-          {
-            id: "lesson3",
-            number: 3,
-            title: "Lesson 3",
-            cards: getCardCount("lesson3")
-          },
-          {
-            id: "lesson4",
-            number: 4,
-            title: "Lesson 4",
-            cards: getCardCount("lesson4")
-          },
-          {
-            id: "lesson5",
-            number: 5,
-            title: "Lesson 5",
-            cards: getCardCount("lesson5")
-          },
-          {
-            id: "lesson6",
-            number: 6,
-            title: "Lesson 6",
-            cards: getCardCount("lesson6")
-          },
-          {
-            id: "lesson7",
-            number: 7,
-            title: "Lesson 7",
-            cards: getCardCount("lesson7")
-          },
-          {
-            id: "lesson8",
-            number: 8,
-            title: "Lesson 8",
-            cards: getCardCount("lesson8")
-          },
-          {
-            id: "lesson9",
-            number: 9,
-            title: "Lesson 9",
-            cards: getCardCount("lesson9")
-          },
-          {
-            id: "lesson10",
-            number: 10,
-            title: "Lesson 10",
-            cards: getCardCount("lesson10")
-          },
-          {
-            id: "lesson11",
-            number: 11,
-            title: "Lesson 11",
-            cards: getCardCount("lesson11")
-          },
-          {
-            id: "lesson12",
-            number: 12,
-            title: "Lesson 12",
-            cards: getCardCount("lesson12")
-          },
-          {
-            id: "lesson13",
-            number: 13,
-            title: "Lesson 13",
-            cards: getCardCount("lesson13")
-          },
-          {
-            id: "lesson14",
-            number: 14,
-            title: "Lesson 14",
-            cards: getCardCount("lesson14")
-          },
-          {
-            id: "lesson15",
-            number: 15,
-            title: "Lesson 15",
-            cards: getCardCount("lesson15")
-          }
-        ],
-        level2: [
-          {
-            id: "level2_lesson1",
-            number: 1,
-            title: "Lesson 1",
-            cards: getCardCount("level2_lesson1")
-          },
-          {
-            id: "level2_lesson2",
-            number: 2,
-            title: "Lesson 2",
-            cards: getCardCount("level2_lesson2")
-          },
-          {
-            id: "level2_lesson3",
-            number: 3,
-            title: "Lesson 3",
-            cards: getCardCount("level2_lesson3")
-          }
-        ]
-      };
-    } else if (categoryId === 'reading') {
-      return {
-        level1: [
-          {
-            id: "r1",
-            number: 1,
-            title: "Basic Sentences",
-            cards: getCardCount("lesson1") // Reuse lesson1 cards
-          },
-          {
-            id: "r2",
-            number: 2,
-            title: "Family Descriptions",
-            cards: getCardCount("lesson2") // Reuse lesson2 cards
-          },
-          {
-            id: "r3",
-            number: 3,
-            title: "Daily Activities",
-            cards: getCardCount("lesson3") // Reuse lesson3 cards
-          },
-          {
-            id: "r4",
-            number: 4,
-            title: "Home and Living",
-            cards: getCardCount("lesson4") // Reuse lesson4 cards
-          },
-          {
-            id: "r5",
-            number: 5,
-            title: "Food and Meals",
-            cards: getCardCount("lesson5") // Reuse lesson5 cards
-          },
-          {
-            id: "r6",
-            number: 6,
-            title: "Travel and Transportation",
-            cards: getCardCount("lesson6") // Reuse lesson6 cards
-          },
-          {
-            id: "r7",
-            number: 7,
-            title: "Shopping Scenarios",
-            cards: getCardCount("lesson7") // Reuse lesson7 cards
-          },
-          {
-            id: "r8",
-            number: 8,
-            title: "Weather and Seasons",
-            cards: getCardCount("lesson8") // Reuse lesson8 cards
-          },
-          {
-            id: "r9",
-            number: 9,
-            title: "Hobbies and Interests",
-            cards: getCardCount("lesson9") // Reuse lesson9 cards
-          },
-          {
-            id: "r10",
-            number: 10,
-            title: "School and Education",
-            cards: getCardCount("lesson10") // Reuse lesson10 cards
-          },
-          {
-            id: "r11",
-            number: 11,
-            title: "Common Expressions",
-            cards: getCardCount("lesson11") // Reuse lesson11 cards
-          },
-          {
-            id: "r12",
-            number: 12,
-            title: "Academic Discussions",
-            cards: getCardCount("lesson12") // Reuse lesson12 cards
-          },
-          {
-            id: "r13",
-            number: 13,
-            title: "Shopping Items",
-            cards: getCardCount("lesson13") // Reuse lesson13 cards
-          },
-          {
-            id: "r14",
-            number: 14,
-            title: "Transportation Talk",
-            cards: getCardCount("lesson14") // Reuse lesson14 cards
-          },
-          {
-            id: "r15",
-            number: 15,
-            title: "Professions and People",
-            cards: getCardCount("lesson15") // Reuse lesson15 cards
-          }
-        ],
-        level2: []
-      };
-    } else if (categoryId === 'listening') {
-      return {
-        level1: [
-          {
-            id: "lesson1",
-            number: 1,
-            title: "Daily Conversations",
-            cards: getCardCount("lesson1")
-          },
-          {
-            id: "lesson2",
-            number: 2,
-            title: "Weather Reports",
-            cards: getCardCount("lesson2")
-          },
-          {
-            id: "lesson3",
-            number: 3,
-            title: "Phone Conversations",
-            cards: getCardCount("lesson3")
-          }
-        ],
-        level2: []
-      };
-    } else {
-      // speaking category
-      return {
-        level1: [
-          {
-            id: "lesson1",
-            number: 1,
-            title: "Basic Greetings",
-            cards: getCardCount("lesson1")
-          },
-          {
-            id: "lesson2",
-            number: 2,
-            title: "Ordering Food",
-            cards: getCardCount("lesson2")
-          },
-          {
-            id: "lesson3",
-            number: 3,
-            title: "Asking Directions",
-            cards: getCardCount("lesson3")
-          }
-        ],
-        level2: []
-      };
+    
+    if (categoryId === 'chinese') {
+      // Level 1 Lessons
+      level1Lessons = [
+        { id: 'lesson1', title: 'Lesson 1', number: 1, cards: getCardCount('lesson1') },
+        { id: 'lesson2', title: 'Lesson 2', number: 2, cards: getCardCount('lesson2') },
+        { id: 'lesson3', title: 'Lesson 3', number: 3, cards: getCardCount('lesson3') },
+        { id: 'lesson4', title: 'Lesson 4', number: 4, cards: getCardCount('lesson4') },
+        { id: 'lesson5', title: 'Lesson 5', number: 5, cards: getCardCount('lesson5') },
+        { id: 'lesson6', title: 'Lesson 6', number: 6, cards: getCardCount('lesson6') },
+        { id: 'lesson7', title: 'Lesson 7', number: 7, cards: getCardCount('lesson7') },
+        { id: 'lesson8', title: 'Lesson 8', number: 8, cards: getCardCount('lesson8') },
+        { id: 'lesson9', title: 'Lesson 9', number: 9, cards: getCardCount('lesson9') },
+        { id: 'lesson10', title: 'Lesson 10', number: 10, cards: getCardCount('lesson10') },
+        { id: 'lesson11', title: 'Lesson 11', number: 11, cards: getCardCount('lesson11') },
+        { id: 'lesson12', title: 'Lesson 12', number: 12, cards: getCardCount('lesson12') },
+        { id: 'lesson13', title: 'Lesson 13', number: 13, cards: getCardCount('lesson13') },
+        { id: 'lesson14', title: 'Lesson 14', number: 14, cards: getCardCount('lesson14') },
+        { id: 'lesson15', title: 'Lesson 15', number: 15, cards: getCardCount('lesson15') },
+      ];
+      
+      // Level 2 Lessons
+      level2Lessons = [
+        { id: 'level2_lesson1', title: 'Lesson 1', number: 1, cards: getCardCount('level2_lesson1') },
+        { id: 'level2_lesson2', title: 'Lesson 2', number: 2, cards: getCardCount('level2_lesson2') },
+        { id: 'level2_lesson3', title: 'Lesson 3', number: 3, cards: getCardCount('level2_lesson3') },
+        { id: 'level2_lesson4', title: 'Lesson 4', number: 4, cards: getCardCount('level2_lesson4') },
+        { id: 'level2_lesson5', title: 'Lesson 5', number: 5, cards: getCardCount('level2_lesson5') },
+        { id: 'level2_lesson6', title: 'Lesson 6', number: 6, cards: getCardCount('level2_lesson6') },
+        { id: 'level2_lesson7', title: 'Lesson 7', number: 7, cards: getCardCount('level2_lesson7') },
+        { id: 'level2_lesson8', title: 'Lesson 8', number: 8, cards: getCardCount('level2_lesson8') },
+        { id: 'level2_lesson9', title: 'Lesson 9', number: 9, cards: getCardCount('level2_lesson9') },
+        { id: 'level2_lesson10', title: 'Lesson 10', number: 10, cards: getCardCount('level2_lesson10') },
+      ];
     }
+    
+    return { level1: level1Lessons, level2: level2Lessons };
   };
-
-  // Get the currently selected category title
-  const selectedCategoryTitle = selectedCategory 
-    ? PRACTICE_CATEGORIES.find(cat => cat.id === selectedCategory)?.title
-    : null;
 
   // Calculate the total number of cards for midterm prep (lessons 1-11)
   const getMidtermPrepCardCount = () => {
@@ -1950,21 +1780,27 @@ export default function FlashcardsPage() {
     return recognizedChar;
   };
 
-  // Calculate the total number of cards for Level 2 midterm prep (lessons 1-3)
+  // Calculate the total number of cards for Level 2 midterm prep (lessons 1-10)
   const getLevel2MidtermPrepCardCount = () => {
-    const lessonCount = ['level2_lesson1', 'level2_lesson2', 'level2_lesson3']
-      .reduce((total, lessonKey) => {
-        return total + (LESSON_FLASHCARDS[lessonKey as keyof typeof LESSON_FLASHCARDS]?.length || 0);
-      }, 0);
+    const lesson1Count = LESSON_FLASHCARDS.level2_lesson1?.length || 0;
+    const lesson2Count = LESSON_FLASHCARDS.level2_lesson2?.length || 0;
+    const lesson3Count = LESSON_FLASHCARDS.level2_lesson3?.length || 0;
+    const lesson4Count = LESSON_FLASHCARDS.level2_lesson4?.length || 0;
+    const lesson5Count = LESSON_FLASHCARDS.level2_lesson5?.length || 0;
+    const lesson6Count = LESSON_FLASHCARDS.level2_lesson6?.length || 0;
+    const lesson7Count = LESSON_FLASHCARDS.level2_lesson7?.length || 0;
+    const lesson8Count = LESSON_FLASHCARDS.level2_lesson8?.length || 0;
+    const lesson9Count = LESSON_FLASHCARDS.level2_lesson9?.length || 0;
+    const lesson10Count = LESSON_FLASHCARDS.level2_lesson10?.length || 0;
     
-    return lessonCount;
+    return lesson1Count + lesson2Count + lesson3Count + lesson4Count + lesson5Count + lesson6Count + lesson7Count + lesson8Count + lesson9Count + lesson10Count;
   };
   
   // Select a category
   const selectCategory = (categoryId: string) => {
     setSelectedCategory(categoryId);
     setPreviewLessonId(null);
-    setSelectedLevel(null); // Reset selected level when changing category
+    setSelectedLevel(null); // Reset level when changing category
   };
   
   // Select a level
@@ -2202,7 +2038,7 @@ export default function FlashcardsPage() {
                           {activeLesson === "midterm-prep"
                             ? `${getMidtermPrepCardCount()} cards from Lessons 1-11`
                             : activeLesson === "level2-midterm-prep"
-                              ? `${getLevel2MidtermPrepCardCount()} cards from Level 2 Lessons 1-3`
+                              ? `${getLevel2MidtermPrepCardCount()} cards from Level 2 Lessons 1-7`
                               : `${currentFlashcards.length} cards in total`}
                         </p>
                       </div>
@@ -2533,7 +2369,7 @@ export default function FlashcardsPage() {
                           </div>
                           <div>
                             <h3 className="text-sm font-semibold text-purple-700">Level 2 Midterm Prep</h3>
-                            <p className="text-xs text-purple-600">{getLevel2MidtermPrepCardCount()} cards from Level 2 Lessons 1-3</p>
+                            <p className="text-xs text-purple-600">{getLevel2MidtermPrepCardCount()} cards from Level 2 Lessons 1-7</p>
                           </div>
                         </div>
                         <button 
@@ -2739,68 +2575,199 @@ export default function FlashcardsPage() {
               {/* Practice Categories */}
               <div className="mb-8">
                 <h2 className="text-xl font-bold text-black mb-4">Practice</h2>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  {PRACTICE_CATEGORIES.map(category => {
-                    // Check if the category is disabled (only Listening is disabled now, Speaking is enabled)
-                    const isDisabled = category.id === 'listening';
+                {/* Main Categories */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
+                  {/* Chinese Category */}
+                  <div 
+                    className="bg-gradient-to-br from-blue-50 to-white rounded-xl p-5 border border-blue-100 hover:border-blue-300 hover:shadow-sm transition-all cursor-pointer"
+                    onClick={() => handleCategorySelect('chinese')}
+                  >
+                    <div className="flex items-center mb-3">
+                      <div className="w-12 h-12 rounded-full bg-blue-600 flex items-center justify-center text-white mr-3">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <line x1="4" y1="19" x2="20" y2="19"></line>
+                          <line x1="4" y1="15" x2="14" y2="15"></line>
+                          <line x1="4" y1="11" x2="20" y2="11"></line>
+                          <line x1="4" y1="7" x2="14" y2="7"></line>
+                        </svg>
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-semibold">Flashcards</h3>
+                        <p className="text-sm text-blue-600">Regular Flashcards</p>
+                      </div>
+                    </div>
                     
-                    return (
-                      <div 
-                        key={category.id} 
-                        className={`rounded-xl p-6 bg-gradient-to-r ${category.color} border border-blue-200 
-                          ${isDisabled 
-                            ? 'opacity-60 grayscale cursor-not-allowed relative' 
-                            : `hover:bg-gradient-to-r ${category.hoverColor} cursor-pointer hover-pulse`} 
-                          transition-all shadow-sm relative`}
-                        onClick={() => {
-                          // Only navigate if the category is not disabled
-                          if (!isDisabled) {
-                            // Special handling for Speaking - direct to Speaking page
-                            if (category.id === 'speaking') {
-                              router.push('/dashboard/flashcards/speaking');
-                            } else if (category.id === 'examtest') {
-                              router.push('/dashboard/exam-test');
-                            } else {
-                              handleCategorySelect(category.id);
-                            }
-                          }
-                        }}
-                      >
-                        {/* Semi-transparent overlay for disabled categories */}
-                        {isDisabled && (
-                          <div className="absolute inset-0 bg-gray-100 bg-opacity-40 rounded-xl pointer-events-none"></div>
-                        )}
-                        
-                        {/* Lock icon overlay for disabled categories */}
-                        {isDisabled && (
-                          <div className="absolute top-0 right-0 mt-2 mr-2 z-10">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-blue-600/70">
-                              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-                              <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-                            </svg>
-                          </div>
-                        )}
-                        
-                        <div className="flex flex-col h-full relative z-10">
-                          {/* Title */}
-                          <h3 className={`text-xl font-bold ${isDisabled ? 'text-gray-600' : category.textColor} mb-2`}>{category.title}</h3>
-                          
-                          {/* Coming Soon label for disabled categories */}
-                          {isDisabled && (
-                            <div className="bg-blue-500/80 text-white text-xs font-semibold px-3 py-1 rounded-full inline-block w-fit mb-2">
-                              Coming Soon
-                            </div>
-                          )}
-                          
-                          {/* Stats */}
-                          <div className="flex justify-between text-sm mt-auto">
-                            <span className={isDisabled ? "text-blue-600/50" : "text-blue-600/80"}>{category.lessons} Lessons</span>
-                            <span className={isDisabled ? "text-blue-600/50" : "text-blue-600/80"}>{category.flashcards} Cards</span>
-                          </div>
+                    <div className="mt-3 pt-3 border-t border-blue-100">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs text-blue-600">{calculateTotalFlashcards()} cards total</span>
+                        <button 
+                          className="p-2 rounded-full bg-blue-600 text-white hover:bg-blue-700 transition-colors"
+                          onClick={(e) => {
+                            e.stopPropagation(); // Prevent triggering the parent onclick
+                            handleCategorySelect('chinese');
+                          }}
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M9 18l6-6-6-6"></path>
+                          </svg>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Reading Category */}
+                  <div 
+                    className="bg-gradient-to-br from-green-50 to-white rounded-xl p-5 border border-green-100 hover:border-green-300 hover:shadow-sm transition-all cursor-pointer"
+                    onClick={() => router.push('/dashboard/flashcards/reading')}
+                  >
+                    <div className="flex items-center mb-3">
+                      <div className="w-12 h-12 rounded-full bg-green-600 flex items-center justify-center text-white mr-3">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
+                          <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
+                        </svg>
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-semibold">Reading</h3>
+                        <p className="text-sm text-green-600">Reading Practice</p>
+                      </div>
+                    </div>
+                    
+                    <div className="mt-3 pt-3 border-t border-green-100">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs text-green-600">15 reading exercises</span>
+                        <button 
+                          className="p-2 rounded-full bg-green-600 text-white hover:bg-green-700 transition-colors"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            router.push('/dashboard/flashcards/reading');
+                          }}
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M9 18l6-6-6-6"></path>
+                          </svg>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Speaking Category */}
+                  <div 
+                    className="bg-gradient-to-br from-purple-50 to-white rounded-xl p-5 border border-purple-100 hover:border-purple-300 hover:shadow-sm transition-all cursor-pointer"
+                    onClick={() => router.push('/dashboard/flashcards/speaking')}
+                  >
+                    <div className="flex items-center mb-3">
+                      <div className="w-12 h-12 rounded-full bg-purple-600 flex items-center justify-center text-white mr-3">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+                          <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                          <line x1="12" y1="19" x2="12" y2="23"></line>
+                          <line x1="8" y1="23" x2="16" y2="23"></line>
+                        </svg>
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-semibold">Speaking</h3>
+                        <p className="text-sm text-purple-600">Practice Conversations</p>
+                      </div>
+                    </div>
+                    
+                    <div className="mt-3 pt-3 border-t border-purple-100">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs text-purple-600">45 speaking phrases</span>
+                        <button 
+                          className="p-2 rounded-full bg-purple-600 text-white hover:bg-purple-700 transition-colors"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            router.push('/dashboard/flashcards/speaking');
+                          }}
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M9 18l6-6-6-6"></path>
+                          </svg>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Listening Category - Coming Soon */}
+                  <div className="bg-gradient-to-br from-gray-50 to-white rounded-xl p-5 border border-gray-100 opacity-60 grayscale cursor-not-allowed relative">
+                    <div className="absolute inset-0 bg-gray-100 bg-opacity-40 rounded-xl pointer-events-none"></div>
+                    <div className="absolute top-0 right-0 mt-2 mr-2 z-10">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-blue-600/70">
+                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                      </svg>
+                    </div>
+                    
+                    <div className="flex items-center mb-3">
+                      <div className="w-12 h-12 rounded-full bg-blue-400 flex items-center justify-center text-white mr-3">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                          <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                          <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
+                        </svg>
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-medium text-gray-600">Listening</h3>
+                        <div className="bg-blue-500/80 text-white text-xs font-semibold px-3 py-1 rounded-full inline-block w-fit mb-2 mt-1">
+                          Coming Soon
                         </div>
                       </div>
-                    );
-                  })}
+                    </div>
+                    
+                    <div className="mt-3 pt-3 border-t border-gray-100">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs text-blue-600/50">Audio exercises</span>
+                        <button 
+                          className="p-2 rounded-full bg-blue-400 text-white opacity-50"
+                          disabled
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M9 18l6-6-6-6"></path>
+                          </svg>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Exam Test Category */}
+                  <div 
+                    className="bg-gradient-to-br from-orange-50 to-white rounded-xl p-5 border border-orange-100 hover:border-orange-300 hover:shadow-sm transition-all cursor-pointer"
+                    onClick={() => router.push('/dashboard/exam-test')}
+                  >
+                    <div className="flex items-center mb-3">
+                      <div className="w-12 h-12 rounded-full bg-orange-500 flex items-center justify-center text-white mr-3">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M18 8h1a4 4 0 0 1 0 8h-1"></path>
+                          <path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"></path>
+                          <line x1="6" y1="1" x2="6" y2="4"></line>
+                          <line x1="10" y1="1" x2="10" y2="4"></line>
+                          <line x1="14" y1="1" x2="14" y2="4"></line>
+                        </svg>
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-semibold">Exam Test</h3>
+                        <p className="text-sm text-orange-600">Practice Exams</p>
+                      </div>
+                    </div>
+                    
+                    <div className="mt-3 pt-3 border-t border-orange-100">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs text-orange-600">30 test questions</span>
+                        <button 
+                          className="p-2 rounded-full bg-orange-500 text-white hover:bg-orange-600 transition-colors"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            router.push('/dashboard/exam-test');
+                          }}
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M9 18l6-6-6-6"></path>
+                          </svg>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
 
