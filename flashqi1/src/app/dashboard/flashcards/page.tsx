@@ -165,7 +165,7 @@ export default function FlashcardsPage() {
   // State for UI navigation
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [selectedLevel, setSelectedLevel] = useState<string | null>(null); // NEW: Track selected level
-  const [previewLessonId, setPreviewLessonId] = useState<string | null>(null);
+  const [previewLessonId, setPreviewLessonId] = useState<string | null>(null); 
   const [activeStudyTab, setActiveStudyTab] = useState<string | number>("new");
   
   // State for search functionality
@@ -189,7 +189,7 @@ export default function FlashcardsPage() {
   const [touchStart, setTouchStart] = useState<{ x: number; y: number } | null>(null);
   const [touchPosition, setTouchPosition] = useState<{ x: number; y: number } | null>(null);
   const [visibleCardsCount, setVisibleCardsCount] = useState(20); // For infinite scrolling
-
+  
   // Add new state variables for the add card modal
   const [isAddCardModalOpen, setIsAddCardModalOpen] = useState(false);
   const [speakingCategories, setSpeakingCategories] = useState<any[]>([]);
@@ -786,7 +786,7 @@ export default function FlashcardsPage() {
       // Regular lesson
       return LESSON_FLASHCARDS[lessonId as keyof typeof LESSON_FLASHCARDS]?.length || 0;
     };
-    
+
     if (categoryId === 'chinese') {
       // Level 1 Lessons
       level1Lessons = [
@@ -835,7 +835,7 @@ export default function FlashcardsPage() {
     
     return lessonCount;
   };
-  
+
   // Get the title of the lesson being previewed
   const previewLessonTitle = previewLessonId && selectedCategory
     ? getCategoryLessons(selectedCategory).level1.find(l => l.id === previewLessonId)?.title || 
@@ -1812,7 +1812,13 @@ export default function FlashcardsPage() {
   const clearSelectedLevel = () => {
     setSelectedLevel(null);
   };
-  
+
+  // Enter Midterm Prep 2 Mode (links to our new midterm prep test)
+  const enterMidtermPrep2Mode = () => {
+    // Navigate to the midterm prep test page
+    window.location.href = '/tests/midterm-prep';
+  };
+
   return (
     <div className="flex flex-col min-h-screen bg-white">
       <AnimationStyles />
@@ -2014,16 +2020,16 @@ export default function FlashcardsPage() {
                 {/* Study Mode Header */}
                 <div className="fixed inset-x-0 top-0 pt-4 pb-2 px-4 bg-white border-b border-slate-200 z-40">
                   <div className="flex justify-between items-center">
-                    <div className="flex items-center">
-                      <Button 
-                        variant="outline" 
+                  <div className="flex items-center">
+                    <Button 
+                      variant="outline" 
                         className="p-2 mr-3 w-10 h-10 rounded-full"
-                        onClick={exitStudySession}
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <path d="M19 12H5M12 19l-7-7 7-7"></path>
-                        </svg>
-                      </Button>
+                      onClick={exitStudySession}
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M19 12H5M12 19l-7-7 7-7"></path>
+                      </svg>
+                    </Button>
                       <div>
                         <h2 className="text-lg font-semibold text-black">
                           {activeLesson === "midterm-prep" 
@@ -2042,9 +2048,9 @@ export default function FlashcardsPage() {
                               : `${currentFlashcards.length} cards in total`}
                         </p>
                       </div>
-                    </div>
-                    <div className="bg-white/20 px-3 py-1 rounded-full text-sm font-medium text-white">
-                      {currentCardIndex + 1} / {currentFlashcards.length}
+                  </div>
+                  <div className="bg-white/20 px-3 py-1 rounded-full text-sm font-medium text-white">
+                    {currentCardIndex + 1} / {currentFlashcards.length}
                     </div>
                   </div>
                 </div>
@@ -2307,24 +2313,24 @@ export default function FlashcardsPage() {
           ) : selectedCategory ? (
             selectedLevel ? (
               // Level-specific lessons view
-              <>
-                <div className="mb-6">
-                  <div className="flex items-center">
-                    <Button 
-                      variant="outline" 
-                      className="mr-3 p-2 w-10 h-10 rounded-full"
+            <>
+              <div className="mb-6">
+                <div className="flex items-center">
+                  <Button 
+                    variant="outline" 
+                    className="mr-3 p-2 w-10 h-10 rounded-full"
                       onClick={clearSelectedLevel}
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M19 12H5M12 19l-7-7 7-7"></path>
-                      </svg>
-                    </Button>
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M19 12H5M12 19l-7-7 7-7"></path>
+                    </svg>
+                  </Button>
                     <h1 className="text-lg font-semibold text-black">{selectedCategoryTitle} - {selectedLevel === 'level1' ? 'Level 1' : 'Level 2'}</h1>
-                  </div>
                 </div>
-                
-                {/* Lessons List */}
-                <div className="space-y-4 mb-8">
+              </div>
+              
+              {/* Lessons List */}
+              <div className="space-y-4 mb-8">
                   {/* Midterm Prep Button - Only show for the appropriate level */}
                   {selectedLevel === 'level1' && (
                     <div 
@@ -2348,6 +2354,38 @@ export default function FlashcardsPage() {
                             enterMidtermPrepMode();
                           }}
                           title="Start Midterm Prep"
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                          </svg>
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {/* Midterm Prep 2 Button - Only show for level 1 */}
+                  {selectedLevel === 'level1' && (
+                    <div 
+                      className="rounded-xl overflow-hidden bg-gradient-to-r from-indigo-50 to-purple-50 border border-indigo-200 p-4 hover:border-indigo-300 hover:shadow-sm transition-all cursor-pointer"
+                      onClick={() => enterMidtermPrep2Mode()}
+                    >
+                      <div className="flex justify-between items-center">
+                        <div className="flex items-center">
+                          <div className="w-10 h-10 rounded-full bg-indigo-600 flex items-center justify-center text-white font-medium mr-3 text-sm">
+                            🧠
+                          </div>
+                          <div>
+                            <h3 className="text-sm font-semibold text-indigo-700">Midterm Prep 2</h3>
+                            <p className="text-xs text-indigo-600">Interactive exercises for Lessons 1-11</p>
+                          </div>
+                        </div>
+                        <button 
+                          className="p-2.5 rounded-full bg-indigo-600 text-white hover:bg-indigo-700 transition-colors"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            enterMidtermPrep2Mode();
+                          }}
+                          title="Start Midterm Prep 2"
                         >
                           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                             <polygon points="5 3 19 12 5 21 5 3"></polygon>
@@ -2390,51 +2428,51 @@ export default function FlashcardsPage() {
                   
                   {/* Lessons for the selected level */}
                   {selectedLevel === 'level1' && getCategoryLessons(selectedCategory).level1.map((lesson) => (
-                    <div 
-                      key={lesson.id} 
-                      className="rounded-xl overflow-hidden bg-gradient-to-r from-blue-50 to-white border border-blue-100 p-4 hover:border-blue-300 hover:shadow-sm transition-all cursor-pointer"
-                      onClick={() => previewLessonCards(lesson.id)}
-                    >
-                      <div className="flex justify-between items-center">
-                        <div className="flex items-center">
-                          <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-black font-medium mr-3 text-sm">
-                            {lesson.number}
-                          </div>
-                          <div>
-                            <h3 className="text-sm font-medium text-black">{lesson.title}</h3>
-                            <p className="text-xs text-black">{lesson.cards} cards</p>
-                          </div>
+                  <div 
+                    key={lesson.id} 
+                    className="rounded-xl overflow-hidden bg-gradient-to-r from-blue-50 to-white border border-blue-100 p-4 hover:border-blue-300 hover:shadow-sm transition-all cursor-pointer"
+                    onClick={() => previewLessonCards(lesson.id)}
+                  >
+                    <div className="flex justify-between items-center">
+                      <div className="flex items-center">
+                        <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-black font-medium mr-3 text-sm">
+                          {lesson.number}
                         </div>
-                        <div className="flex space-x-2">
-                          <button 
-                            className="p-2.5 rounded-full bg-blue-50 text-blue-700 hover:bg-blue-100 transition-colors"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              previewLessonCards(lesson.id);
-                            }}
-                            title="See All Cards"
-                          >
-                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                              <rect x="2" y="2" width="20" height="8" rx="2" ry="2"></rect>
-                              <rect x="2" y="14" width="20" height="8" rx="2" ry="2"></rect>
-                            </svg>
-                          </button>
-                          <button 
-                            className="p-2.5 rounded-full bg-blue-600 text-white hover:bg-blue-700 transition-colors"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              enterStudyMode(lesson.id);
-                            }}
-                            title="Start Lesson"
-                          >
-                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                              <polygon points="5 3 19 12 5 21 5 3"></polygon>
-                            </svg>
-                          </button>
+                        <div>
+                          <h3 className="text-sm font-medium text-black">{lesson.title}</h3>
+                          <p className="text-xs text-black">{lesson.cards} cards</p>
                         </div>
                       </div>
+                      <div className="flex space-x-2">
+                        <button 
+                          className="p-2.5 rounded-full bg-blue-50 text-blue-700 hover:bg-blue-100 transition-colors"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            previewLessonCards(lesson.id);
+                          }}
+                          title="See All Cards"
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <rect x="2" y="2" width="20" height="8" rx="2" ry="2"></rect>
+                            <rect x="2" y="14" width="20" height="8" rx="2" ry="2"></rect>
+                          </svg>
+                        </button>
+                        <button 
+                          className="p-2.5 rounded-full bg-blue-600 text-white hover:bg-blue-700 transition-colors"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            enterStudyMode(lesson.id);
+                          }}
+                          title="Start Lesson"
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                          </svg>
+                        </button>
+                      </div>
                     </div>
-                  ))}
+                  </div>
+                ))}
                   
                   {selectedLevel === 'level2' && getCategoryLessons(selectedCategory).level2.map((lesson) => (
                     <div 
@@ -2482,8 +2520,8 @@ export default function FlashcardsPage() {
                       </div>
                     </div>
                   ))}
-                </div>
-              </>
+              </div>
+            </>
             ) : (
               // Category levels selection view
               <>
@@ -2678,7 +2716,7 @@ export default function FlashcardsPage() {
                           className="p-2 rounded-full bg-purple-600 text-white hover:bg-purple-700 transition-colors"
                           onClick={(e) => {
                             e.stopPropagation();
-                            router.push('/dashboard/flashcards/speaking');
+                              router.push('/dashboard/flashcards/speaking');
                           }}
                         >
                           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -2692,12 +2730,12 @@ export default function FlashcardsPage() {
                   {/* Listening Category - Coming Soon */}
                   <div className="bg-gradient-to-br from-gray-50 to-white rounded-xl p-5 border border-gray-100 opacity-60 grayscale cursor-not-allowed relative">
                     <div className="absolute inset-0 bg-gray-100 bg-opacity-40 rounded-xl pointer-events-none"></div>
-                    <div className="absolute top-0 right-0 mt-2 mr-2 z-10">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-blue-600/70">
-                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-                        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-                      </svg>
-                    </div>
+                          <div className="absolute top-0 right-0 mt-2 mr-2 z-10">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-blue-600/70">
+                              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                              <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                            </svg>
+                          </div>
                     
                     <div className="flex items-center mb-3">
                       <div className="w-12 h-12 rounded-full bg-blue-400 flex items-center justify-center text-white mr-3">
@@ -2710,8 +2748,8 @@ export default function FlashcardsPage() {
                       <div>
                         <h3 className="text-lg font-medium text-gray-600">Listening</h3>
                         <div className="bg-blue-500/80 text-white text-xs font-semibold px-3 py-1 rounded-full inline-block w-fit mb-2 mt-1">
-                          Coming Soon
-                        </div>
+                              Coming Soon
+                            </div>
                       </div>
                     </div>
                     
@@ -2726,9 +2764,9 @@ export default function FlashcardsPage() {
                             <path d="M9 18l6-6-6-6"></path>
                           </svg>
                         </button>
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                  </div>
                   
                   {/* Exam Test Category */}
                   <div 
