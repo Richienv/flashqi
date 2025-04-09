@@ -2979,35 +2979,9 @@ export const LESSON_FLASHCARDS = {
     {
       id: "13-1",
       lesson_id: "lesson13",
-      hanzi: "美",
-      pinyin: "měi",
-      english: "Beautiful/Pretty",
-      difficulty_level: 1,
-      example_sentence: {
-        hanzi: "这朵花很美。",
-        pinyin: "Zhè duǒ huā hěn měi.",
-        english: "This flower is very beautiful."
-      }
-    },
-    {
-      id: "13-2",
-      lesson_id: "lesson13",
-      hanzi: "箱子",
-      pinyin: "xiāngzi",
-      english: "Box/Suitcase",
-      difficulty_level: 1,
-      example_sentence: {
-        hanzi: "我的箱子很重。",
-        pinyin: "Wǒ de xiāngzi hěn zhòng.",
-        english: "My suitcase is very heavy."
-      }
-    },
-    {
-      id: "13-3",
-      lesson_id: "lesson13",
       hanzi: "有",
       pinyin: "yǒu",
-      english: "To have",
+      english: "To have/Need",
       difficulty_level: 1,
       example_sentence: {
         hanzi: "我有两本书。",
@@ -3016,215 +2990,20 @@ export const LESSON_FLASHCARDS = {
       }
     },
     {
-      id: "13-4",
+      id: "13-2",
       lesson_id: "lesson13",
-      hanzi: "这儿",
-      pinyin: "zhèr",
-      english: "Here",
+      hanzi: "词",
+      pinyin: "cí",
+      english: "Words",
       difficulty_level: 1,
       example_sentence: {
-        hanzi: "请坐在这儿。",
-        pinyin: "Qǐng zuò zài zhèr.",
-        english: "Please sit here."
+        hanzi: "我在学习新的中文词。",
+        pinyin: "Wǒ zài xuéxí xīn de Zhōngwén cí.",
+        english: "I am learning new Chinese words."
       }
     },
     {
-      id: "13-5",
-      lesson_id: "lesson13",
-      hanzi: "种",
-      pinyin: "zhǒng",
-      english: "Type/Kind",
-      difficulty_level: 1,
-      example_sentence: {
-        hanzi: "这种茶很好喝。",
-        pinyin: "Zhè zhǒng chá hěn hǎo hē.",
-        english: "This kind of tea is very tasty."
-      }
-    },
-    {
-      id: "13-6",
-      lesson_id: "lesson13",
-      hanzi: "黑",
-      pinyin: "hēi",
-      english: "Black",
-      difficulty_level: 1,
-      example_sentence: {
-        hanzi: "我喜欢穿黑色的衣服。",
-        pinyin: "Wǒ xǐhuan chuān hēi sè de yīfu.",
-        english: "I like to wear black clothes."
-      }
-    },
-    {
-      id: "13-7",
-      lesson_id: "lesson13",
-      hanzi: "红",
-      pinyin: "hóng",
-      english: "Red",
-      difficulty_level: 1,
-      example_sentence: {
-        hanzi: "这是一朵红花。",
-        pinyin: "Zhè shì yī duǒ hóng huā.",
-        english: "This is a red flower."
-      }
-    },
-    {
-      id: "13-8",
-      lesson_id: "lesson13",
-      hanzi: "青",
-      pinyin: "qīng",
-      english: "Green/Blue",
-      difficulty_level: 1,
-      example_sentence: {
-        hanzi: "青山绿水",
-        pinyin: "Qīng shān lǜ shuǐ",
-        english: "Green mountains and clear waters."
-      }
-    },
-    {
-      id: "13-9",
-      lesson_id: "lesson13",
-      hanzi: "酒",
-      pinyin: "jiǔ",
-      english: "Alcohol/Wine",
-      difficulty_level: 1,
-      example_sentence: {
-        hanzi: "我不喝酒。",
-        pinyin: "Wǒ bù hē jiǔ.",
-        english: "I don't drink alcohol."
-      }
-    },
-    {
-      id: "13-10",
-      lesson_id: "lesson13",
-      hanzi: "药",
-      pinyin: "yào",
-      english: "Medicine",
-      difficulty_level: 1,
-      example_sentence: {
-        hanzi: "我需要去买药。",
-        pinyin: "Wǒ xūyào qù mǎi yào.",
-        english: "I need to go buy medicine."
-      }
-    },
-    {
-      id: "13-11",
-      lesson_id: "lesson13",
-      hanzi: "中药",
-      pinyin: "zhōngyào",
-      english: "Chinese medicine",
-      difficulty_level: 2,
-      example_sentence: {
-        hanzi: "中药很苦。",
-        pinyin: "Zhōngyào hěn kǔ.",
-        english: "Chinese medicine is very bitter."
-      }
-    },
-    {
-      id: "13-12",
-      lesson_id: "lesson13",
-      hanzi: "西药",
-      pinyin: "xīyào",
-      english: "Western medicine",
-      difficulty_level: 2,
-      example_sentence: {
-        hanzi: "医生给我开了西药。",
-        pinyin: "Yīshēng gěi wǒ kāi le xīyào.",
-        english: "The doctor prescribed Western medicine for me."
-      }
-    },
-    {
-      id: "13-13",
-      lesson_id: "lesson13",
-      hanzi: "茶叶",
-      pinyin: "cháyè",
-      english: "Tea leaves",
-      difficulty_level: 1,
-      example_sentence: {
-        hanzi: "中国的茶叶很有名。",
-        pinyin: "Zhōngguó de cháyè hěn yǒumíng.",
-        english: "Chinese tea leaves are famous."
-      }
-    },
-    {
-      id: "13-14",
-      lesson_id: "lesson13",
-      hanzi: "里",
-      pinyin: "lǐ",
-      english: "Inside",
-      difficulty_level: 1,
-      example_sentence: {
-        hanzi: "书在包里。",
-        pinyin: "Shū zài bāo lǐ.",
-        english: "The book is inside the bag."
-      }
-    },
-    {
-      id: "13-15",
-      lesson_id: "lesson13",
-      hanzi: "日用品",
-      pinyin: "rìyòngpǐn",
-      english: "Daily necessities",
-      difficulty_level: 2,
-      example_sentence: {
-        hanzi: "我需要买一些日用品。",
-        pinyin: "Wǒ xūyào mǎi yìxiē rìyòngpǐn.",
-        english: "I need to buy some daily necessities."
-      }
-    },
-    {
-      id: "13-16",
-      lesson_id: "lesson13",
-      hanzi: "件",
-      pinyin: "jiàn",
-      english: "Measure word for clothes, items",
-      difficulty_level: 1,
-      example_sentence: {
-        hanzi: "我买了三件衣服。",
-        pinyin: "Wǒ mǎi le sān jiàn yīfu.",
-        english: "I bought three pieces of clothing."
-      }
-    },
-    {
-      id: "13-17",
-      lesson_id: "lesson13",
-      hanzi: "衣服",
-      pinyin: "yīfu",
-      english: "Clothes",
-      difficulty_level: 1,
-      example_sentence: {
-        hanzi: "这件衣服很漂亮。",
-        pinyin: "Zhè jiàn yīfu hěn piàoliang.",
-        english: "This piece of clothing is very pretty."
-      }
-    },
-    {
-      id: "13-18",
-      lesson_id: "lesson13",
-      hanzi: "把",
-      pinyin: "bǎ",
-      english: "Handle/To take",
-      difficulty_level: 1,
-      example_sentence: {
-        hanzi: "请把书给我。",
-        pinyin: "Qǐng bǎ shū gěi wǒ.",
-        english: "Please give the book to me."
-      }
-    },
-    {
-      id: "13-19",
-      lesson_id: "lesson13",
-      hanzi: "雨伞",
-      pinyin: "yǔsǎn",
-      english: "Umbrella",
-      difficulty_level: 1,
-      example_sentence: {
-        hanzi: "今天下雨，我带了雨伞。",
-        pinyin: "Jīntiān xià yǔ, wǒ dài le yǔsǎn.",
-        english: "It's raining today, I brought an umbrella."
-      }
-    },
-    {
-      id: "13-20",
+      id: "13-3",
       lesson_id: "lesson13",
       hanzi: "雨",
       pinyin: "yǔ",
@@ -3237,33 +3016,85 @@ export const LESSON_FLASHCARDS = {
       }
     },
     {
-      id: "13-21",
+      id: "13-4",
       lesson_id: "lesson13",
-      hanzi: "平板",
-      pinyin: "píngbǎn",
-      english: "Tablet (computer)",
-      difficulty_level: 2,
-      example_sentence: {
-        hanzi: "我喜欢用平板看书。",
-        pinyin: "Wǒ xǐhuan yòng píngbǎn kàn shū.",
-        english: "I like to read books on a tablet."
-      }
-    },
-    {
-      id: "13-22",
-      lesson_id: "lesson13",
-      hanzi: "电脑",
-      pinyin: "diànnǎo",
-      english: "Computer",
+      hanzi: "伞",
+      pinyin: "sǎn",
+      english: "Umbrella",
       difficulty_level: 1,
       example_sentence: {
-        hanzi: "我用电脑写作业。",
-        pinyin: "Wǒ yòng diànnǎo xiě zuòyè.",
-        english: "I use the computer to do homework."
+        hanzi: "下雨了，请带伞。",
+        pinyin: "Xià yǔ le, qǐng dài sǎn.",
+        english: "It's raining, please bring an umbrella."
       }
     },
     {
-      id: "13-23",
+      id: "13-5",
+      lesson_id: "lesson13",
+      hanzi: "衣服",
+      pinyin: "yīfu",
+      english: "Clothes",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "这件衣服很漂亮。",
+        pinyin: "Zhè jiàn yīfu hěn piàoliang.",
+        english: "This piece of clothing is very pretty."
+      }
+    },
+    {
+      id: "13-6",
+      lesson_id: "lesson13",
+      hanzi: "重",
+      pinyin: "zhòng",
+      english: "Heavy",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "这个箱子很重。",
+        pinyin: "Zhège xiāngzi hěn zhòng.",
+        english: "This suitcase is very heavy."
+      }
+    },
+    {
+      id: "13-7",
+      lesson_id: "lesson13",
+      hanzi: "轻",
+      pinyin: "qīng",
+      english: "Light",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "这个包很轻。",
+        pinyin: "Zhège bāo hěn qīng.",
+        english: "This bag is very light."
+      }
+    },
+    {
+      id: "13-8",
+      lesson_id: "lesson13",
+      hanzi: "新",
+      pinyin: "xīn",
+      english: "New",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "这是一件新衣服。",
+        pinyin: "Zhè shì yí jiàn xīn yīfu.",
+        english: "This is a new piece of clothing."
+      }
+    },
+    {
+      id: "13-9",
+      lesson_id: "lesson13",
+      hanzi: "旧",
+      pinyin: "jiù",
+      english: "Old",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "这本书很旧了。",
+        pinyin: "Zhè běn shū hěn jiù le.",
+        english: "This book is very old."
+      }
+    },
+    {
+      id: "13-10",
       lesson_id: "lesson13",
       hanzi: "本",
       pinyin: "běn",
@@ -3276,59 +3107,33 @@ export const LESSON_FLASHCARDS = {
       }
     },
     {
-      id: "13-24",
+      id: "13-11",
       lesson_id: "lesson13",
-      hanzi: "词典",
-      pinyin: "cídiǎn",
-      english: "Dictionary",
+      hanzi: "件",
+      pinyin: "jiàn",
+      english: "Measure word for clothes",
       difficulty_level: 1,
       example_sentence: {
-        hanzi: "我有一本汉语词典。",
-        pinyin: "Wǒ yǒu yì běn Hànyǔ cídiǎn.",
-        english: "I have a Chinese dictionary."
+        hanzi: "我买了三件衣服。",
+        pinyin: "Wǒ mǎi le sān jiàn yīfu.",
+        english: "I bought three pieces of clothing."
       }
     },
     {
-      id: "13-25",
+      id: "13-12",
       lesson_id: "lesson13",
-      hanzi: "U盘",
-      pinyin: "U pán",
-      english: "USB drive",
+      hanzi: "红",
+      pinyin: "hóng",
+      english: "Red",
       difficulty_level: 1,
       example_sentence: {
-        hanzi: "我的文件在U盘里。",
-        pinyin: "Wǒ de wénjiàn zài U pán lǐ.",
-        english: "My files are in the USB drive."
+        hanzi: "这是一朵红花。",
+        pinyin: "Zhè shì yī duǒ hóng huā.",
+        english: "This is a red flower."
       }
     },
     {
-      id: "13-26",
-      lesson_id: "lesson13",
-      hanzi: "纸",
-      pinyin: "zhǐ",
-      english: "Paper",
-      difficulty_level: 1,
-      example_sentence: {
-        hanzi: "请给我一张纸。",
-        pinyin: "Qǐng gěi wǒ yì zhāng zhǐ.",
-        english: "Please give me a sheet of paper."
-      }
-    },
-    {
-      id: "13-27",
-      lesson_id: "lesson13",
-      hanzi: "毛笔",
-      pinyin: "máobǐ",
-      english: "Writing brush",
-      difficulty_level: 2,
-      example_sentence: {
-        hanzi: "我用毛笔写汉字。",
-        pinyin: "Wǒ yòng máobǐ xiě hànzì.",
-        english: "I use a writing brush to write Chinese characters."
-      }
-    },
-    {
-      id: "13-28",
+      id: "13-13",
       lesson_id: "lesson13",
       hanzi: "笔",
       pinyin: "bǐ",
