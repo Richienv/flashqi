@@ -1227,6 +1227,372 @@ export const LEVEL2_FLASHCARDS = {
         english: "The gymnasium is next to the school."
       }
     }
+  ],
+  "level2_lesson4": [
+    {
+      id: "l2-4-1",
+      lesson_id: "level2_lesson4",
+      hanzi: "考试",
+      pinyin: "kǎoshì",
+      english: "Take an exam",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "明天我要考试。",
+        pinyin: "Míngtiān wǒ yào kǎoshì.",
+        english: "I have an exam tomorrow."
+      }
+    },
+    {
+      id: "l2-4-2",
+      lesson_id: "level2_lesson4",
+      hanzi: "题",
+      pinyin: "tí",
+      english: "Question/problem",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "这个题很难。",
+        pinyin: "Zhège tí hěn nán.",
+        english: "This question is very difficult."
+      }
+    },
+    {
+      id: "l2-4-3",
+      lesson_id: "level2_lesson4",
+      hanzi: "完",
+      pinyin: "wán",
+      english: "To finish",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "我已经完成了作业。",
+        pinyin: "Wǒ yǐjīng wánchéng le zuòyè.",
+        english: "I have finished my homework."
+      }
+    },
+    {
+      id: "l2-4-4",
+      lesson_id: "level2_lesson4",
+      hanzi: "到",
+      pinyin: "dào",
+      english: "To arrive",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "我到家了。",
+        pinyin: "Wǒ dào jiā le.",
+        english: "I have arrived home."
+      }
+    },
+    {
+      id: "l2-4-5",
+      lesson_id: "level2_lesson4",
+      hanzi: "成绩",
+      pinyin: "chéngjì",
+      english: "Score/grade",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "我的考试成绩很好。",
+        pinyin: "Wǒ de kǎoshì chéngjì hěn hǎo.",
+        english: "My exam score is very good."
+      }
+    },
+    {
+      id: "l2-4-6",
+      lesson_id: "level2_lesson4",
+      hanzi: "句子",
+      pinyin: "jùzi",
+      english: "Sentence",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "请写一个句子。",
+        pinyin: "Qǐng xiě yí gè jùzi.",
+        english: "Please write a sentence."
+      }
+    },
+    {
+      id: "l2-4-7",
+      lesson_id: "level2_lesson4",
+      hanzi: "看见",
+      pinyin: "kànjiàn",
+      english: "To see",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "我看见他了。",
+        pinyin: "Wǒ kànjiàn tā le.",
+        english: "I saw him."
+      }
+    },
+    {
+      id: "l2-4-8",
+      lesson_id: "level2_lesson4",
+      hanzi: "见",
+      pinyin: "jiàn",
+      english: "To see/meet",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "很高兴见到你。",
+        pinyin: "Hěn gāoxìng jiàn dào nǐ.",
+        english: "Nice to meet you."
+      }
+    },
+    {
+      id: "l2-4-9",
+      lesson_id: "level2_lesson4",
+      hanzi: "干什么",
+      pinyin: "gàn shénme",
+      english: "What are you doing",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "你在干什么？",
+        pinyin: "Nǐ zài gàn shénme?",
+        english: "What are you doing?"
+      }
+    },
+    {
+      id: "l2-4-10",
+      lesson_id: "level2_lesson4",
+      hanzi: "干",
+      pinyin: "gàn",
+      english: "To do",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "我在干活。",
+        pinyin: "Wǒ zài gàn huó.",
+        english: "I'm working."
+      }
+    },
+    {
+      id: "l2-4-11",
+      lesson_id: "level2_lesson4",
+      hanzi: "词",
+      pinyin: "cí",
+      english: "Word",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "这个词怎么读？",
+        pinyin: "Zhège cí zěnme dú?",
+        english: "How do you pronounce this word?"
+      }
+    },
+    {
+      id: "l2-4-12",
+      lesson_id: "level2_lesson4",
+      hanzi: "糟糕",
+      pinyin: "zāogāo",
+      english: "Too bad/Terrible",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "糟糕，我忘带钥匙了。",
+        pinyin: "Zāogāo, wǒ wàng dài yàoshi le.",
+        english: "Oh no, I forgot to bring my keys."
+      }
+    },
+    {
+      id: "l2-4-13",
+      lesson_id: "level2_lesson4",
+      hanzi: "成",
+      pinyin: "chéng",
+      english: "To become",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "他已经成为了老师。",
+        pinyin: "Tā yǐjīng chéngwéi le lǎoshī.",
+        english: "He has already become a teacher."
+      }
+    },
+    {
+      id: "l2-4-14",
+      lesson_id: "level2_lesson4",
+      hanzi: "回信",
+      pinyin: "huíxìn",
+      english: "Reply letter",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "我还没有收到他的回信。",
+        pinyin: "Wǒ hái méiyǒu shōudào tā de huíxìn.",
+        english: "I haven't received his reply letter yet."
+      }
+    },
+    {
+      id: "l2-4-15",
+      lesson_id: "level2_lesson4",
+      hanzi: "故事",
+      pinyin: "gùshi",
+      english: "Story",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "他讲了一个有趣的故事。",
+        pinyin: "Tā jiǎng le yí gè yǒuqù de gùshi.",
+        english: "He told an interesting story."
+      }
+    },
+    {
+      id: "l2-4-16",
+      lesson_id: "level2_lesson4",
+      hanzi: "有意思",
+      pinyin: "yǒu yìsi",
+      english: "Interesting",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "这本书很有意思。",
+        pinyin: "Zhè běn shū hěn yǒu yìsi.",
+        english: "This book is very interesting."
+      }
+    },
+    {
+      id: "l2-4-17",
+      lesson_id: "level2_lesson4",
+      hanzi: "页",
+      pinyin: "yè",
+      english: "Page",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "请翻到第十页。",
+        pinyin: "Qǐng fān dào dì shí yè.",
+        english: "Please turn to page ten."
+      }
+    },
+    {
+      id: "l2-4-18",
+      lesson_id: "level2_lesson4",
+      hanzi: "笑",
+      pinyin: "xiào",
+      english: "To laugh/smile",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "他听了笑起来。",
+        pinyin: "Tā tīng le xiào qǐlai.",
+        english: "He heard it and started laughing."
+      }
+    },
+    {
+      id: "l2-4-19",
+      lesson_id: "level2_lesson4",
+      hanzi: "会话",
+      pinyin: "huìhuà",
+      english: "Conversation",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "我们进行了一次会话练习。",
+        pinyin: "Wǒmen jìnxíng le yí cì huìhuà liànxí.",
+        english: "We did a conversation practice."
+      }
+    },
+    {
+      id: "l2-4-20",
+      lesson_id: "level2_lesson4",
+      hanzi: "念",
+      pinyin: "niàn",
+      english: "To read aloud",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "请念这个句子。",
+        pinyin: "Qǐng niàn zhège jùzi.",
+        english: "Please read this sentence aloud."
+      }
+    },
+    {
+      id: "l2-4-21",
+      lesson_id: "level2_lesson4",
+      hanzi: "打",
+      pinyin: "dǎ",
+      english: "To hit/play",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "我喜欢打网球。",
+        pinyin: "Wǒ xǐhuan dǎ wǎngqiú.",
+        english: "I like to play tennis."
+      }
+    },
+    {
+      id: "l2-4-22",
+      lesson_id: "level2_lesson4",
+      hanzi: "办法",
+      pinyin: "bànfǎ",
+      english: "Way/method",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "我想不出好办法。",
+        pinyin: "Wǒ xiǎng bù chū hǎo bànfǎ.",
+        english: "I can't think of a good solution."
+      }
+    },
+    {
+      id: "l2-4-23",
+      lesson_id: "level2_lesson4",
+      hanzi: "和尚",
+      pinyin: "héshang",
+      english: "Buddhist monk",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "寺庙里的和尚在念经。",
+        pinyin: "Sìmiào lǐ de héshang zài niàn jīng.",
+        english: "The monk in the temple is chanting scriptures."
+      }
+    },
+    {
+      id: "l2-4-24",
+      lesson_id: "level2_lesson4",
+      hanzi: "上",
+      pinyin: "shàng",
+      english: "Up/on",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "书在桌子上。",
+        pinyin: "Shū zài zhuōzi shàng.",
+        english: "The book is on the table."
+      }
+    },
+    {
+      id: "l2-4-25",
+      lesson_id: "level2_lesson4",
+      hanzi: "打开",
+      pinyin: "dǎkāi",
+      english: "To open",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "请打开窗户。",
+        pinyin: "Qǐng dǎkāi chuānghu.",
+        english: "Please open the window."
+      }
+    },
+    {
+      id: "l2-4-26",
+      lesson_id: "level2_lesson4",
+      hanzi: "听见",
+      pinyin: "tīngjiàn",
+      english: "To hear",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "我听见有人敲门。",
+        pinyin: "Wǒ tīngjiàn yǒu rén qiāo mén.",
+        english: "I heard someone knocking on the door."
+      }
+    },
+    {
+      id: "l2-4-27",
+      lesson_id: "level2_lesson4",
+      hanzi: "作业",
+      pinyin: "zuòyè",
+      english: "Homework",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "我正在做作业。",
+        pinyin: "Wǒ zhèngzài zuò zuòyè.",
+        english: "I am doing my homework."
+      }
+    },
+    {
+      id: "l2-4-28",
+      lesson_id: "level2_lesson4",
+      hanzi: "输",
+      pinyin: "shū",
+      english: "To lose",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "他在比赛中输了。",
+        pinyin: "Tā zài bǐsài zhōng shū le.",
+        english: "He lost in the competition."
+      }
+    }
   ]
 };
 
@@ -1234,7 +1600,8 @@ export const LEVEL2_FLASHCARDS = {
 export const LEVEL2_HELPERS = {
   "level2_r1": function() { return LEVEL2_FLASHCARDS.level2_lesson1; },
   "level2_r2": function() { return LEVEL2_FLASHCARDS.level2_lesson2; },
-  "level2_r3": function() { return LEVEL2_FLASHCARDS.level2_lesson3; }
+  "level2_r3": function() { return LEVEL2_FLASHCARDS.level2_lesson3; },
+  "level2_r4": function() { return LEVEL2_FLASHCARDS.level2_lesson4; }
 };
 
 // Export functions for use in the main application

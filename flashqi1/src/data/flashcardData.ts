@@ -3768,12 +3768,13 @@ Object.assign(LESSON_FLASHCARDS, {
   "level2_lesson1": INTEGRATED_LEVEL2_FLASHCARDS.level2_lesson1,
   "level2_lesson2": INTEGRATED_LEVEL2_FLASHCARDS.level2_lesson2,
   "level2_lesson3": INTEGRATED_LEVEL2_FLASHCARDS.level2_lesson3,
+  "level2_lesson4": INTEGRATED_LEVEL2_FLASHCARDS.level2_lesson4,
   
   // Level 2 helper functions
   "level2_r1": INTEGRATED_LEVEL2_HELPERS.level2_r1,
   "level2_r2": INTEGRATED_LEVEL2_HELPERS.level2_r2,
   "level2_r3": INTEGRATED_LEVEL2_HELPERS.level2_r3,
-  "level2_r4": function() { return LESSON_FLASHCARDS.level2_lesson4; },
+  "level2_r4": INTEGRATED_LEVEL2_HELPERS.level2_r4,
   "level2_r5": function() { return LESSON_FLASHCARDS.level2_lesson5; },
   "level2_r6": function() { return LESSON_FLASHCARDS.level2_lesson6; },
   "level2_r7": function() { return LESSON_FLASHCARDS.level2_lesson7; },
