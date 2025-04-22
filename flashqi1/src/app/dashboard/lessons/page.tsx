@@ -46,6 +46,102 @@ const LESSONS = [
     total_cards: 16,
     completion_percentage: 0,
     last_updated: "Updated last month"
+  },
+  {
+    id: "6",
+    lesson_number: 6,
+    title: "Personal Information",
+    total_cards: 20,
+    completion_percentage: 0,
+    last_updated: "Updated last month"
+  },
+  {
+    id: "7",
+    lesson_number: 7,
+    title: "Food and Restaurants",
+    total_cards: 22,
+    completion_percentage: 0,
+    last_updated: "Updated last month"
+  },
+  {
+    id: "8",
+    lesson_number: 8,
+    title: "Shopping and Money",
+    total_cards: 26,
+    completion_percentage: 0,
+    last_updated: "Updated last month"
+  },
+  {
+    id: "9",
+    lesson_number: 9,
+    title: "Time and Places",
+    total_cards: 19,
+    completion_percentage: 0,
+    last_updated: "Updated last month"
+  },
+  {
+    id: "10",
+    lesson_number: 10,
+    title: "Office and Communication",
+    total_cards: 19,
+    completion_percentage: 0,
+    last_updated: "Updated last month"
+  },
+  {
+    id: "11",
+    lesson_number: 11,
+    title: "People and Relationships",
+    total_cards: 17,
+    completion_percentage: 0,
+    last_updated: "Updated last month"
+  },
+  {
+    id: "12",
+    lesson_number: 12,
+    title: "Education and Language",
+    total_cards: 16,
+    completion_percentage: 0,
+    last_updated: "Updated last month"
+  },
+  {
+    id: "13",
+    lesson_number: 13,
+    title: "Weather and Clothing",
+    total_cards: 13,
+    completion_percentage: 0,
+    last_updated: "Updated last month"
+  },
+  {
+    id: "14",
+    lesson_number: 14,
+    title: "Transportation",
+    total_cards: 20,
+    completion_percentage: 0,
+    last_updated: "Updated last month"
+  },
+  {
+    id: "15",
+    lesson_number: 15,
+    title: "Work and Professions",
+    total_cards: 17,
+    completion_percentage: 0,
+    last_updated: "Updated last month"
+  },
+  {
+    id: "16",
+    lesson_number: 16,
+    title: "Daily Activities and Communication",
+    total_cards: 35,
+    completion_percentage: 0,
+    last_updated: "Updated just now"
+  },
+  {
+    id: "17",
+    lesson_number: 17,
+    title: "Education and Activities",
+    total_cards: 26,
+    completion_percentage: 0,
+    last_updated: "Updated just now"
   }
 ];
 
