@@ -1,21 +1,14 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+import { AuthProvider } from "@/contexts/auth-context";
+import { GameRoomProvider } from "@/contexts/game-room-context";
 
 export const metadata: Metadata = {
-  title: " - Chinese Flashcard App",
-  description: "Learn Chinese with spaced repetition flashcards",
-  keywords: ["Chinese", "Mandarin", "flashcards", "language learning", "spaced repetition"],
+  title: "FlashQi - Learn Chinese with Flashcards",
+  description: "Practice Chinese with spaced repetition flashcards, pronunciation, and writing",
+  icons: {
+    icon: "/favicon.ico",
+  },
 };
 
 export default function RootLayout({
@@ -24,13 +17,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="h-full">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-slate-50 min-h-full`}
-      >
-        <div className="flex min-h-full flex-col">
-          {children}
-        </div>
+    <html lang="en">
+      <body className="min-h-screen font-sans antialiased">
+        <AuthProvider>
+          <GameRoomProvider>
+            {children}
+          </GameRoomProvider>
+        </AuthProvider>
       </body>
     </html>
   );
