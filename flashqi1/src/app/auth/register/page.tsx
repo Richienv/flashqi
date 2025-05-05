@@ -3,8 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-// Commented out because it's not being used
-// import { supabase } from '@/lib/supabase/client';
+import { useAuth } from '@/contexts/auth-context';
 import { useRouter } from 'next/navigation';
 
 export default function RegisterPage() {
@@ -14,12 +13,15 @@ export default function RegisterPage() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [debugInfo, setDebugInfo] = useState<any>(null);
   const router = useRouter();
+  const { signUp } = useAuth();
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
+    setDebugInfo(null);
 
     // Validate form
     if (password !== confirmPassword) {
@@ -35,29 +37,46 @@ export default function RegisterPage() {
     }
 
     try {
-      // For demo purposes, we'll just log the values
-      console.log('Registering with:', { name, email, password });
+      console.log('Attempting to register with:', { email, name });
       
-      // In a real implementation, we would register with Supabase
-      // const { data, error } = await supabase.auth.signUp({
-      //   email,
-      //   password,
-      //   options: {
-      //     data: {
-      //       name,
-      //     }
-      //   }
-      // });
+      // Add a network check before attempting authentication
+      try {
+        const networkTest = await fetch('https://www.google.com', { 
+          method: 'HEAD',
+          mode: 'no-cors',
+          cache: 'no-cache',
+        });
+        console.log('Network connectivity check passed');
+      } catch (netError) {
+        console.error('Network connectivity issue detected:', netError);
+        throw new Error('Network connectivity issue detected. Please check your internet connection.');
+      }
       
-      // if (error) throw error;
+      const { error: signUpError } = await signUp(email, password, name);
       
-      // For demo, we'll just redirect
-      setTimeout(() => {
-        router.push('/dashboard');
-      }, 1000);
-    } catch (error) {
+      if (signUpError) {
+        // Collect additional information about the error
+        setDebugInfo({
+          errorType: signUpError.name,
+          errorMessage: signUpError.message,
+          timestamp: new Date().toISOString(),
+        });
+        
+        throw signUpError;
+      }
+    } catch (error: any) {
       console.error('Registration error:', error);
-      setError('Failed to register. Please try again.');
+      
+      // Provide more user-friendly error messages based on the error type
+      if (error.message?.includes('Failed to fetch')) {
+        setError('Unable to connect to authentication service. Please check your internet connection and try again.');
+      } else if (error.message?.includes('User already registered')) {
+        setError('This email is already registered. Please use a different email or try logging in.');
+      } else if (error.message?.includes('Invalid email')) {
+        setError('Please enter a valid email address.');
+      } else {
+        setError(error.message || 'Failed to register. Please try again.');
+      }
     } finally {
       setLoading(false);
     }
@@ -85,6 +104,15 @@ export default function RegisterPage() {
           {error && (
             <div className="mb-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
               {error}
+            </div>
+          )}
+          
+          {debugInfo && (
+            <div className="mb-4 bg-yellow-50 border border-yellow-200 text-yellow-700 px-4 py-3 rounded text-xs">
+              <details>
+                <summary>Debug Information (for support)</summary>
+                <pre className="mt-2 whitespace-pre-wrap">{JSON.stringify(debugInfo, null, 2)}</pre>
+              </details>
             </div>
           )}
           
@@ -192,6 +220,28 @@ export default function RegisterPage() {
               </Button>
             </div>
           </form>
+          
+          {/* Temporary offline mode for development/testing */}
+          <div className="mt-6">
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-slate-300" />
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="bg-white px-2 text-slate-500">Development options</span>
+              </div>
+            </div>
+            
+            <div className="mt-6">
+              <button
+                type="button"
+                className="w-full inline-flex justify-center py-2 px-4 border border-slate-300 rounded-md shadow-sm bg-yellow-50 text-sm font-medium text-yellow-700 hover:bg-yellow-100"
+                onClick={() => router.push('/dashboard/flashcards')}
+              >
+                <span>Skip Registration (Dev Only)</span>
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>

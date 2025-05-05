@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { supabase } from '@/lib/supabase/client';
+import { useAuth } from '@/contexts/auth-context';
 import { useRouter } from 'next/navigation';
 
 export default function LoginPage() {
@@ -11,36 +11,93 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [debugInfo, setDebugInfo] = useState<any>(null);
+  const [resendEmailLoading, setResendEmailLoading] = useState(false);
+  const [resendEmailSuccess, setResendEmailSuccess] = useState(false);
   const router = useRouter();
+  const { signIn, resendConfirmationEmail } = useAuth();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
+    setDebugInfo(null);
+    setResendEmailSuccess(false);
 
     try {
-      // For demo purposes, we'll just log the values
-      console.log('Logging in with:', { email, password });
+      console.log('Attempting to sign in with:', { email });
       
-      // In a real implementation, we would authenticate with Supabase
-      // const { data, error } = await supabase.auth.signInWithPassword({
-      //   email,
-      //   password,
-      // });
+      // Add a network check before attempting authentication
+      try {
+        const networkTest = await fetch('https://www.google.com', { 
+          method: 'HEAD',
+          mode: 'no-cors',
+          cache: 'no-cache',
+        });
+        console.log('Network connectivity check passed');
+      } catch (netError) {
+        console.error('Network connectivity issue detected:', netError);
+        throw new Error('Network connectivity issue detected. Please check your internet connection.');
+      }
       
-      // if (error) throw error;
+      const { error: signInError } = await signIn(email, password);
       
-      // For demo, we'll just redirect
-      setTimeout(() => {
-        router.push('/dashboard');
-      }, 1000);
-    } catch (error) {
+      if (signInError) {
+        // Collect additional information about the error
+        setDebugInfo({
+          errorType: signInError.name,
+          errorMessage: signInError.message,
+          timestamp: new Date().toISOString(),
+        });
+        
+        throw signInError;
+      }
+    } catch (error: any) {
       console.error('Login error:', error);
-      setError('Failed to login. Please check your credentials.');
+      
+      // Provide more user-friendly error messages based on the error type
+      if (error.message?.includes('Failed to fetch')) {
+        setError('Unable to connect to authentication service. Please check your internet connection and try again.');
+      } else if (error.message?.includes('Invalid login credentials')) {
+        setError('Invalid email or password. Please check your credentials and try again.');
+      } else if (error.message?.includes('Email not confirmed')) {
+        setError('Your email has not been confirmed. Please check your inbox for a confirmation email or click the button below to request a new one.');
+      } else {
+        setError(error.message || 'Failed to login. Please check your credentials and try again.');
+      }
     } finally {
       setLoading(false);
     }
   };
+
+  const handleResendConfirmationEmail = async () => {
+    if (!email) {
+      setError('Please enter your email address first');
+      return;
+    }
+
+    setResendEmailLoading(true);
+    setResendEmailSuccess(false);
+    
+    try {
+      const { error } = await resendConfirmationEmail(email);
+      
+      if (error) {
+        throw error;
+      }
+      
+      setResendEmailSuccess(true);
+      setError(null);
+    } catch (error: any) {
+      console.error('Error resending confirmation email:', error);
+      setError(`Failed to resend confirmation email: ${error.message}`);
+    } finally {
+      setResendEmailLoading(false);
+    }
+  };
+
+  // Check if error message contains "email not confirmed"
+  const isEmailNotConfirmedError = error?.toLowerCase().includes('email has not been confirmed');
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-slate-50">
@@ -64,6 +121,34 @@ export default function LoginPage() {
           {error && (
             <div className="mb-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
               {error}
+              
+              {isEmailNotConfirmedError && (
+                <div className="mt-3 pt-3 border-t border-red-200">
+                  <button
+                    type="button"
+                    onClick={handleResendConfirmationEmail}
+                    disabled={resendEmailLoading}
+                    className="flex items-center justify-center w-full bg-red-100 hover:bg-red-200 text-red-700 font-medium py-2 px-4 rounded transition-colors"
+                  >
+                    {resendEmailLoading ? 'Sending...' : 'Resend confirmation email'}
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+          
+          {resendEmailSuccess && (
+            <div className="mb-4 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded">
+              Confirmation email has been sent! Please check your inbox for the new activation link.
+            </div>
+          )}
+          
+          {debugInfo && (
+            <div className="mb-4 bg-yellow-50 border border-yellow-200 text-yellow-700 px-4 py-3 rounded text-xs">
+              <details>
+                <summary>Debug Information (for support)</summary>
+                <pre className="mt-2 whitespace-pre-wrap">{JSON.stringify(debugInfo, null, 2)}</pre>
+              </details>
             </div>
           )}
           
@@ -150,8 +235,23 @@ export default function LoginPage() {
               <button
                 type="button"
                 className="w-full inline-flex justify-center py-2 px-4 border border-slate-300 rounded-md shadow-sm bg-white text-sm font-medium text-slate-500 hover:bg-slate-50"
+                onClick={() => {
+                  setEmail('demo@example.com');
+                  setPassword('demopassword');
+                }}
               >
                 <span>Demo Account</span>
+              </button>
+            </div>
+            
+            {/* Temporary offline mode for development/testing */}
+            <div className="mt-2">
+              <button
+                type="button"
+                className="w-full inline-flex justify-center py-2 px-4 border border-slate-300 rounded-md shadow-sm bg-yellow-50 text-sm font-medium text-yellow-700 hover:bg-yellow-100"
+                onClick={() => router.push('/dashboard/flashcards')}
+              >
+                <span>Offline Mode (Dev Only)</span>
               </button>
             </div>
           </div>

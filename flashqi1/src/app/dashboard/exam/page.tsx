@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { Navbar, MobileNav } from "@/components/ui/navbar";
+import { MobileNav } from "@/components/ui/navbar";
 import { Button } from "@/components/ui/button";
 import { LESSON_FLASHCARDS } from "@/data/flashcardData";
 import { generateExamQuestions } from "@/utils/examUtils";
@@ -732,8 +732,6 @@ export default function ExamPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navbar />
-      
       <main className="container max-w-4xl mx-auto px-4 py-8">
         {!examStarted ? (
           renderExamStartScreen()

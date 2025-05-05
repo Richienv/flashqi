@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef, useMemo } from 'react';
-import { Navbar, MobileNav } from "@/components/ui/navbar";
+import { MobileNav } from "@/components/ui/navbar";
 import { Button } from "@/components/ui/button";
 import { Tabs } from "@/components/ui/tabs";
 // Commented out because it's not being used in this file
@@ -1824,8 +1824,6 @@ export default function FlashcardsPage() {
     <div className="flex flex-col min-h-screen bg-white">
       <AnimationStyles />
       
-      <Navbar />
-      
       {/* Homework Reminder Banner */}
       <div className="w-full py-3 px-4 sm:px-6 lg:px-8 bg-blue-50 border-b border-blue-100">
         <div className="container mx-auto flex items-center justify-between">
@@ -2718,6 +2716,44 @@ export default function FlashcardsPage() {
                           onClick={(e) => {
                             e.stopPropagation();
                               router.push('/dashboard/flashcards/speaking');
+                          }}
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M9 18l6-6-6-6"></path>
+                          </svg>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Battle Mode Category - NEW */}
+                  <div 
+                    className="bg-gradient-to-br from-indigo-50 to-white rounded-xl p-5 border border-indigo-100 hover:border-indigo-300 hover:shadow-sm transition-all cursor-pointer"
+                    onClick={() => router.push('/dashboard/battle')}
+                  >
+                    <div className="flex items-center mb-3">
+                      <div className="w-12 h-12 rounded-full bg-indigo-600 flex items-center justify-center text-white mr-3">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M13.5 21v-7.5a.75.75 0 01.75-.75h3a.75.75 0 01.75.75V21m-4.5 0H2.36m11.14 0H18m0 0h3.64m-1.39 0V9.349m-16.5 11.65V9.35m0 0a3.001 3.001 0 003.75-.615A2.993 2.993 0 009.75 9.75c.896 0 1.7-.393 2.25-1.016a2.993 2.993 0 002.25 1.016c.896 0 1.7-.393 2.25-1.016a3.001 3.001 0 003.75.614m-16.5 0a3.004 3.004 0 01-.621-4.72L4.318 3.44A1.5 1.5 0 015.378 3h13.243a1.5 1.5 0 011.06.44l1.19 1.189a3 3 0 01-.621 4.72m-13.5 8.65h3.75a.75.75 0 00.75-.75V13.5a.75.75 0 00-.75-.75H6.75a.75.75 0 00-.75.75v3.75c0 .415.336.75.75.75z" />
+                        </svg>
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-semibold">Battle Mode</h3>
+                        <div className="flex items-center">
+                          <p className="text-sm text-indigo-600">1v1 Drawing Battles</p>
+                          <span className="ml-2 bg-indigo-100 text-indigo-800 text-xs px-2 py-0.5 rounded-full font-semibold">New!</span>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="mt-3 pt-3 border-t border-indigo-100">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs text-indigo-600">Live Competition</span>
+                        <button 
+                          className="p-2 rounded-full bg-indigo-600 text-white hover:bg-indigo-700 transition-colors"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            router.push('/dashboard/battle');
                           }}
                         >
                           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
