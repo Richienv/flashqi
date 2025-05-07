@@ -7,11 +7,11 @@ import { formatDate } from '@/lib/utils';
 
 // Mock data for statistics
 const STATS = {
-  totalUsers: 145,
-  activeUsers: 78,
-  totalLessons: 18,
-  totalFlashcards: 156,
-  totalHomework: 15,
+  totalUsers: 3456,
+  activeUsers: 2187,
+  totalFlashcards: 2845,
+  totalLessons: 21,
+  totalHomework: 58,
   cardsStudiedToday: 342
 };
 

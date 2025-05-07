@@ -4690,6 +4690,844 @@ export const LESSON_FLASHCARDS = {
       }
     }
   ],
+  "lesson19": [
+    {
+      id: "19-1",
+      lesson_id: "lesson19",
+      hanzi: "光临",
+      pinyin: "guāng lín",
+      english: "To visit/patronize (a store)",
+      difficulty_level: 2,
+      example_sentence: {
+        hanzi: "欢迎光临我们的商店。",
+        pinyin: "Huānyíng guānglín wǒmen de shāngdiàn.",
+        english: "Welcome to our store."
+      }
+    },
+    {
+      id: "19-2",
+      lesson_id: "lesson19",
+      hanzi: "羽绒服",
+      pinyin: "yǔ róng fú",
+      english: "Down jacket",
+      difficulty_level: 2,
+      example_sentence: {
+        hanzi: "冬天我需要穿羽绒服。",
+        pinyin: "Dōngtiān wǒ xūyào chuān yǔróngfú.",
+        english: "I need to wear a down jacket in winter."
+      }
+    },
+    {
+      id: "19-3",
+      lesson_id: "lesson19",
+      hanzi: "好看",
+      pinyin: "hǎo kàn",
+      english: "Good-looking/attractive",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "这件衣服很好看。",
+        pinyin: "Zhè jiàn yīfu hěn hǎokàn.",
+        english: "This piece of clothing looks very nice."
+      }
+    },
+    {
+      id: "19-4",
+      lesson_id: "lesson19",
+      hanzi: "一点儿",
+      pinyin: "yī diǎnr",
+      english: "A little bit",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "这件衣服大一点儿。",
+        pinyin: "Zhè jiàn yīfu dà yī diǎnr.",
+        english: "This clothing is a bit too big."
+      }
+    },
+    {
+      id: "19-5",
+      lesson_id: "lesson19",
+      hanzi: "长",
+      pinyin: "cháng",
+      english: "Long",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "这条裤子太长了。",
+        pinyin: "Zhè tiáo kùzi tài cháng le.",
+        english: "These pants are too long."
+      }
+    },
+    {
+      id: "19-6",
+      lesson_id: "lesson19",
+      hanzi: "短",
+      pinyin: "duǎn",
+      english: "Short",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "我喜欢穿短裤。",
+        pinyin: "Wǒ xǐhuan chuān duǎn kù.",
+        english: "I like to wear shorts."
+      }
+    },
+    {
+      id: "19-7",
+      lesson_id: "lesson19",
+      hanzi: "深",
+      pinyin: "shēn",
+      english: "Deep/dark (color)",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "我喜欢深色的衣服。",
+        pinyin: "Wǒ xǐhuan shēn sè de yīfu.",
+        english: "I like dark-colored clothes."
+      }
+    },
+    {
+      id: "19-8",
+      lesson_id: "lesson19",
+      hanzi: "浅",
+      pinyin: "qiǎn",
+      english: "Light/pale (color)",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "这件衬衫是浅蓝色的。",
+        pinyin: "Zhè jiàn chènshān shì qiǎn lánsè de.",
+        english: "This shirt is light blue."
+      }
+    },
+    {
+      id: "19-9",
+      lesson_id: "lesson19",
+      hanzi: "试",
+      pinyin: "shì",
+      english: "To try on",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "我想试一下这件衣服。",
+        pinyin: "Wǒ xiǎng shì yíxià zhè jiàn yīfu.",
+        english: "I want to try on this piece of clothing."
+      }
+    },
+    {
+      id: "19-10",
+      lesson_id: "lesson19",
+      hanzi: "可以",
+      pinyin: "kě yǐ",
+      english: "Can/may",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "我可以试穿这件衣服吗？",
+        pinyin: "Wǒ kěyǐ shì chuān zhè jiàn yīfu ma?",
+        english: "May I try on this piece of clothing?"
+      }
+    },
+    {
+      id: "19-11",
+      lesson_id: "lesson19",
+      hanzi: "当然",
+      pinyin: "dāng rán",
+      english: "Of course",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "当然可以。",
+        pinyin: "Dāngrán kěyǐ.",
+        english: "Of course you can."
+      }
+    },
+    {
+      id: "19-12",
+      lesson_id: "lesson19",
+      hanzi: "肥",
+      pinyin: "féi",
+      english: "Loose/baggy (for clothes)",
+      difficulty_level: 2,
+      example_sentence: {
+        hanzi: "这件衣服太肥了。",
+        pinyin: "Zhè jiàn yīfu tài féi le.",
+        english: "This clothing is too loose."
+      }
+    },
+    {
+      id: "19-13",
+      lesson_id: "lesson19",
+      hanzi: "胖",
+      pinyin: "pàng",
+      english: "Fat",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "我觉得我太胖了。",
+        pinyin: "Wǒ juéde wǒ tài pàng le.",
+        english: "I think I'm too fat."
+      }
+    },
+    {
+      id: "19-14",
+      lesson_id: "lesson19",
+      hanzi: "瘦",
+      pinyin: "shòu",
+      english: "Thin/slim",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "这条裤子太瘦了。",
+        pinyin: "Zhè tiáo kùzi tài shòu le.",
+        english: "These pants are too slim."
+      }
+    },
+    {
+      id: "19-15",
+      lesson_id: "lesson19",
+      hanzi: "合适",
+      pinyin: "hé shì",
+      english: "Suitable/appropriate",
+      difficulty_level: 2,
+      example_sentence: {
+        hanzi: "这件衣服很合适。",
+        pinyin: "Zhè jiàn yīfu hěn héshì.",
+        english: "This clothing fits well."
+      }
+    },
+    {
+      id: "19-16",
+      lesson_id: "lesson19",
+      hanzi: "种",
+      pinyin: "zhǒng",
+      english: "Kind/type",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "这种衣服很时尚。",
+        pinyin: "Zhè zhǒng yīfu hěn shíshàng.",
+        english: "This kind of clothing is very fashionable."
+      }
+    },
+    {
+      id: "19-17",
+      lesson_id: "lesson19",
+      hanzi: "打折",
+      pinyin: "dǎ zhé",
+      english: "Discount/on sale",
+      difficulty_level: 2,
+      example_sentence: {
+        hanzi: "这件衣服正在打折。",
+        pinyin: "Zhè jiàn yīfu zhèngzài dǎzhé.",
+        english: "This clothing is on sale."
+      }
+    }
+  ],
+  "lesson20": [
+    {
+      id: "20-1",
+      lesson_id: "lesson20",
+      hanzi: "年",
+      pinyin: "nián",
+      english: "Year",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "今年是2024年。",
+        pinyin: "Jīnnián shì èr líng èr sì nián.",
+        english: "This year is 2024."
+      }
+    },
+    {
+      id: "20-2",
+      lesson_id: "lesson20",
+      hanzi: "毕业",
+      pinyin: "bì yè",
+      english: "To graduate",
+      difficulty_level: 2,
+      example_sentence: {
+        hanzi: "我去年从大学毕业了。",
+        pinyin: "Wǒ qùnián cóng dàxué bìyè le.",
+        english: "I graduated from university last year."
+      }
+    },
+    {
+      id: "20-3",
+      lesson_id: "lesson20",
+      hanzi: "岁",
+      pinyin: "suì",
+      english: "Age (years old)",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "他今年二十岁。",
+        pinyin: "Tā jīnnián èrshí suì.",
+        english: "He is twenty years old this year."
+      }
+    },
+    {
+      id: "20-4",
+      lesson_id: "lesson20",
+      hanzi: "属",
+      pinyin: "shǔ",
+      english: "To belong to/be born in the year of",
+      difficulty_level: 2,
+      example_sentence: {
+        hanzi: "我属龙。",
+        pinyin: "Wǒ shǔ lóng.",
+        english: "I was born in the year of the dragon."
+      }
+    },
+    {
+      id: "20-5",
+      lesson_id: "lesson20",
+      hanzi: "狗",
+      pinyin: "gǒu",
+      english: "Dog",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "我家有一只狗。",
+        pinyin: "Wǒ jiā yǒu yī zhī gǒu.",
+        english: "I have a dog at home."
+      }
+    },
+    {
+      id: "20-6",
+      lesson_id: "lesson20",
+      hanzi: "猪",
+      pinyin: "zhū",
+      english: "Pig",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "我弟弟属猪。",
+        pinyin: "Wǒ dìdi shǔ zhū.",
+        english: "My younger brother was born in the year of the pig."
+      }
+    },
+    {
+      id: "20-7",
+      lesson_id: "lesson20",
+      hanzi: "生日",
+      pinyin: "shēng rì",
+      english: "Birthday",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "明天是我的生日。",
+        pinyin: "Míngtiān shì wǒ de shēngrì.",
+        english: "Tomorrow is my birthday."
+      }
+    },
+    {
+      id: "20-8",
+      lesson_id: "lesson20",
+      hanzi: "月",
+      pinyin: "yuè",
+      english: "Month",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "我的生日是三月十五号。",
+        pinyin: "Wǒ de shēngrì shì sān yuè shíwǔ hào.",
+        english: "My birthday is March 15th."
+      }
+    },
+    {
+      id: "20-9",
+      lesson_id: "lesson20",
+      hanzi: "号",
+      pinyin: "hào",
+      english: "Date/number",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "今天是几号？",
+        pinyin: "Jīntiān shì jǐ hào?",
+        english: "What date is today?"
+      }
+    },
+    {
+      id: "20-10",
+      lesson_id: "lesson20",
+      hanzi: "正好",
+      pinyin: "zhèng hǎo",
+      english: "Just right/exactly",
+      difficulty_level: 2,
+      example_sentence: {
+        hanzi: "我们正好有两个小时的时间。",
+        pinyin: "Wǒmen zhènghǎo yǒu liǎng gè xiǎoshí de shíjiān.",
+        english: "We have exactly two hours of time."
+      }
+    },
+    {
+      id: "20-11",
+      lesson_id: "lesson20",
+      hanzi: "打算",
+      pinyin: "dǎ suàn",
+      english: "To plan",
+      difficulty_level: 2,
+      example_sentence: {
+        hanzi: "你打算怎么过生日？",
+        pinyin: "Nǐ dǎsuàn zěnme guò shēngrì?",
+        english: "How do you plan to spend your birthday?"
+      }
+    },
+    {
+      id: "20-12",
+      lesson_id: "lesson20",
+      hanzi: "过",
+      pinyin: "guò",
+      english: "To spend/celebrate (a holiday)",
+      difficulty_level: 2,
+      example_sentence: {
+        hanzi: "我们一起过新年。",
+        pinyin: "Wǒmen yīqǐ guò xīnnián.",
+        english: "We celebrate the New Year together."
+      }
+    },
+    {
+      id: "20-13",
+      lesson_id: "lesson20",
+      hanzi: "准备",
+      pinyin: "zhǔn bèi",
+      english: "To prepare",
+      difficulty_level: 2,
+      example_sentence: {
+        hanzi: "我在准备生日派对。",
+        pinyin: "Wǒ zài zhǔnbèi shēngrì pàiduì.",
+        english: "I am preparing for the birthday party."
+      }
+    },
+    {
+      id: "20-14",
+      lesson_id: "lesson20",
+      hanzi: "举行",
+      pinyin: "jǔ xíng",
+      english: "To hold (an event)",
+      difficulty_level: 2,
+      example_sentence: {
+        hanzi: "我们在餐厅举行生日晚会。",
+        pinyin: "Wǒmen zài cāntīng jǔxíng shēngrì wǎnhuì.",
+        english: "We are holding the birthday party at a restaurant."
+      }
+    },
+    {
+      id: "20-15",
+      lesson_id: "lesson20",
+      hanzi: "晚会",
+      pinyin: "wǎn huì",
+      english: "Evening party",
+      difficulty_level: 2,
+      example_sentence: {
+        hanzi: "新年晚会很热闹。",
+        pinyin: "Xīnnián wǎnhuì hěn rènào.",
+        english: "The New Year's party is very lively."
+      }
+    },
+    {
+      id: "20-16",
+      lesson_id: "lesson20",
+      hanzi: "参加",
+      pinyin: "cān jiā",
+      english: "To participate",
+      difficulty_level: 2,
+      example_sentence: {
+        hanzi: "你会参加我的生日派对吗？",
+        pinyin: "Nǐ huì cānjiā wǒ de shēngrì pàiduì ma?",
+        english: "Will you attend my birthday party?"
+      }
+    },
+    {
+      id: "20-17",
+      lesson_id: "lesson20",
+      hanzi: "时间",
+      pinyin: "shí jiān",
+      english: "Time",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "派对的时间是晚上七点。",
+        pinyin: "Pàiduì de shíjiān shì wǎnshàng qī diǎn.",
+        english: "The time of the party is 7 PM."
+      }
+    },
+    {
+      id: "20-18",
+      lesson_id: "lesson20",
+      hanzi: "点钟",
+      pinyin: "diǎn zhōng",
+      english: "O'clock",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "派对八点钟开始。",
+        pinyin: "Pàiduì bā diǎn zhōng kāishǐ.",
+        english: "The party starts at 8 o'clock."
+      }
+    },
+    {
+      id: "20-19",
+      lesson_id: "lesson20",
+      hanzi: "就",
+      pinyin: "jiù",
+      english: "Then/right away",
+      difficulty_level: 2,
+      example_sentence: {
+        hanzi: "我吃完饭就去派对。",
+        pinyin: "Wǒ chī wán fàn jiù qù pàiduì.",
+        english: "I'll go to the party right after I finish eating."
+      }
+    },
+    {
+      id: "20-20",
+      lesson_id: "lesson20",
+      hanzi: "一定",
+      pinyin: "yī dìng",
+      english: "Certainly/definitely",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "我一定会去你的生日派对。",
+        pinyin: "Wǒ yīdìng huì qù nǐ de shēngrì pàiduì.",
+        english: "I will definitely go to your birthday party."
+      }
+    },
+    {
+      id: "20-21",
+      lesson_id: "lesson20",
+      hanzi: "祝",
+      pinyin: "zhù",
+      english: "To wish",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "我祝你生日快乐！",
+        pinyin: "Wǒ zhù nǐ shēngrì kuàilè!",
+        english: "I wish you a happy birthday!"
+      }
+    },
+    {
+      id: "20-22",
+      lesson_id: "lesson20",
+      hanzi: "快乐",
+      pinyin: "kuài lè",
+      english: "Happy",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "祝你每天都快乐。",
+        pinyin: "Zhù nǐ měi tiān dōu kuàilè.",
+        english: "I wish you happiness every day."
+      }
+    }
+  ],
+  "lesson21": [
+    {
+      id: "21-1",
+      lesson_id: "lesson21",
+      hanzi: "每",
+      pinyin: "měi",
+      english: "Every",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "我每天都学习中文。",
+        pinyin: "Wǒ měi tiān dōu xuéxí Zhōngwén.",
+        english: "I study Chinese every day."
+      }
+    },
+    {
+      id: "21-2",
+      lesson_id: "lesson21",
+      hanzi: "早上",
+      pinyin: "zǎo shang",
+      english: "Morning",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "早上好！",
+        pinyin: "Zǎoshang hǎo!",
+        english: "Good morning!"
+      }
+    },
+    {
+      id: "21-3",
+      lesson_id: "lesson21",
+      hanzi: "半",
+      pinyin: "bàn",
+      english: "Half",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "现在是七点半。",
+        pinyin: "Xiànzài shì qī diǎn bàn.",
+        english: "It's seven thirty now."
+      }
+    },
+    {
+      id: "21-4",
+      lesson_id: "lesson21",
+      hanzi: "起床",
+      pinyin: "qǐ chuáng",
+      english: "To get up",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "我每天六点起床。",
+        pinyin: "Wǒ měi tiān liù diǎn qǐchuáng.",
+        english: "I get up at 6 o'clock every day."
+      }
+    },
+    {
+      id: "21-5",
+      lesson_id: "lesson21",
+      hanzi: "早饭",
+      pinyin: "zǎo fàn",
+      english: "Breakfast",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "我七点吃早饭。",
+        pinyin: "Wǒ qī diǎn chī zǎofàn.",
+        english: "I eat breakfast at 7 o'clock."
+      }
+    },
+    {
+      id: "21-6",
+      lesson_id: "lesson21",
+      hanzi: "分钟",
+      pinyin: "fēn zhōng",
+      english: "Minute",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "上课还有五分钟。",
+        pinyin: "Shàng kè hái yǒu wǔ fēnzhōng.",
+        english: "There are still five minutes until class starts."
+      }
+    },
+    {
+      id: "21-7",
+      lesson_id: "lesson21",
+      hanzi: "教室",
+      pinyin: "jiào shì",
+      english: "Classroom",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "我们在三楼的教室上课。",
+        pinyin: "Wǒmen zài sān lóu de jiàoshì shàng kè.",
+        english: "We have class in the classroom on the third floor."
+      }
+    },
+    {
+      id: "21-8",
+      lesson_id: "lesson21",
+      hanzi: "上课",
+      pinyin: "shàng kè",
+      english: "To attend class",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "上课的时候不要说话。",
+        pinyin: "Shàng kè de shíhou bùyào shuōhuà.",
+        english: "Don't talk during class."
+      }
+    },
+    {
+      id: "21-9",
+      lesson_id: "lesson21",
+      hanzi: "节",
+      pinyin: "jié",
+      english: "Section/class period",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "今天上午有四节课。",
+        pinyin: "Jīntiān shàngwǔ yǒu sì jié kè.",
+        english: "There are four classes this morning."
+      }
+    },
+    {
+      id: "21-10",
+      lesson_id: "lesson21",
+      hanzi: "下课",
+      pinyin: "xià kè",
+      english: "Class is over",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "下课后我们去吃午饭。",
+        pinyin: "Xià kè hòu wǒmen qù chī wǔfàn.",
+        english: "After class, we go to eat lunch."
+      }
+    },
+    {
+      id: "21-11",
+      lesson_id: "lesson21",
+      hanzi: "以后",
+      pinyin: "yǐ hòu",
+      english: "After/later",
+      difficulty_level: 2,
+      example_sentence: {
+        hanzi: "下课以后我要去图书馆。",
+        pinyin: "Xià kè yǐhòu wǒ yào qù túshūguǎn.",
+        english: "After class, I will go to the library."
+      }
+    },
+    {
+      id: "21-12",
+      lesson_id: "lesson21",
+      hanzi: "操场",
+      pinyin: "cāo chǎng",
+      english: "Playground/sports ground",
+      difficulty_level: 2,
+      example_sentence: {
+        hanzi: "学生们在操场上跑步。",
+        pinyin: "Xuéshēngmen zài cāochǎng shàng pǎobù.",
+        english: "The students are running on the playground."
+      }
+    },
+    {
+      id: "21-13",
+      lesson_id: "lesson21",
+      hanzi: "锻炼",
+      pinyin: "duàn liàn",
+      english: "To exercise",
+      difficulty_level: 2,
+      example_sentence: {
+        hanzi: "我每天都锻炼身体。",
+        pinyin: "Wǒ měi tiān dōu duànliàn shēntǐ.",
+        english: "I exercise every day."
+      }
+    },
+    {
+      id: "21-14",
+      lesson_id: "lesson21",
+      hanzi: "洗澡",
+      pinyin: "xǐ zǎo",
+      english: "To take a bath/shower",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "我每天晚上洗澡。",
+        pinyin: "Wǒ měi tiān wǎnshang xǐzǎo.",
+        english: "I take a shower every evening."
+      }
+    },
+    {
+      id: "21-15",
+      lesson_id: "lesson21",
+      hanzi: "然后",
+      pinyin: "rán hòu",
+      english: "Then/afterwards",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "我先吃早饭，然后去上课。",
+        pinyin: "Wǒ xiān chī zǎofàn, ránhòu qù shàng kè.",
+        english: "I eat breakfast first, then go to class."
+      }
+    },
+    {
+      id: "21-16",
+      lesson_id: "lesson21",
+      hanzi: "睡觉",
+      pinyin: "shuì jiào",
+      english: "To sleep",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "我晚上十一点睡觉。",
+        pinyin: "Wǒ wǎnshang shíyī diǎn shuìjiào.",
+        english: "I go to sleep at 11 PM."
+      }
+    },
+    {
+      id: "21-17",
+      lesson_id: "lesson21",
+      hanzi: "们",
+      pinyin: "men",
+      english: "Plural marker for pronouns",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "我们一起去上课。",
+        pinyin: "Wǒmen yīqǐ qù shàng kè.",
+        english: "We go to class together."
+      }
+    },
+    {
+      id: "21-18",
+      lesson_id: "lesson21",
+      hanzi: "爬山",
+      pinyin: "pá shān",
+      english: "To climb a mountain",
+      difficulty_level: 2,
+      example_sentence: {
+        hanzi: "周末我要去爬山。",
+        pinyin: "Zhōumò wǒ yào qù páshān.",
+        english: "I'm going to climb a mountain on the weekend."
+      }
+    },
+    {
+      id: "21-19",
+      lesson_id: "lesson21",
+      hanzi: "出发",
+      pinyin: "chū fā",
+      english: "To set off",
+      difficulty_level: 2,
+      example_sentence: {
+        hanzi: "我们早上六点出发。",
+        pinyin: "Wǒmen zǎoshang liù diǎn chūfā.",
+        english: "We set off at 6 AM."
+      }
+    },
+    {
+      id: "21-20",
+      lesson_id: "lesson21",
+      hanzi: "前",
+      pinyin: "qián",
+      english: "Before/ago",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "出发前准备好东西。",
+        pinyin: "Chūfā qián zhǔnbèi hǎo dōngxi.",
+        english: "Prepare things before setting off."
+      }
+    },
+    {
+      id: "21-21",
+      lesson_id: "lesson21",
+      hanzi: "集合",
+      pinyin: "jí hé",
+      english: "To gather/assemble",
+      difficulty_level: 2,
+      example_sentence: {
+        hanzi: "我们在学校门口集合。",
+        pinyin: "Wǒmen zài xuéxiào ménkǒu jíhé.",
+        english: "We gather at the school entrance."
+      }
+    },
+    {
+      id: "21-22",
+      lesson_id: "lesson21",
+      hanzi: "上车",
+      pinyin: "shàng chē",
+      english: "To board a vehicle",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "请快点上车，我们要出发了。",
+        pinyin: "Qǐng kuài diǎn shàng chē, wǒmen yào chūfā le.",
+        english: "Please get on the vehicle quickly, we're about to leave."
+      }
+    },
+    {
+      id: "21-23",
+      lesson_id: "lesson21",
+      hanzi: "刻",
+      pinyin: "kè",
+      english: "Quarter (of an hour)",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "现在是三点一刻。",
+        pinyin: "Xiànzài shì sān diǎn yī kè.",
+        english: "It's quarter past three now."
+      }
+    },
+    {
+      id: "21-24",
+      lesson_id: "lesson21",
+      hanzi: "准时",
+      pinyin: "zhǔn shí",
+      english: "On time",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "请准时到达。",
+        pinyin: "Qǐng zhǔnshí dàodá.",
+        english: "Please arrive on time."
+      }
+    },
+    {
+      id: "21-25",
+      lesson_id: "lesson21",
+      hanzi: "带",
+      pinyin: "dài",
+      english: "To bring/carry",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "记得带钱包。",
+        pinyin: "Jìde dài qiánbāo.",
+        english: "Remember to bring your wallet."
+      }
+    }
+  ],
   "r1": function() { return LESSON_FLASHCARDS.lesson1; },
   "r2": function() { return LESSON_FLASHCARDS.lesson2; },
   "r3": function() { return LESSON_FLASHCARDS.lesson3; },
@@ -4708,6 +5546,9 @@ export const LESSON_FLASHCARDS = {
   "r16": function() { return LESSON_FLASHCARDS.lesson16; },
   "r17": function() { return LESSON_FLASHCARDS.lesson17; },
   "r18": function() { return LESSON_FLASHCARDS.lesson18; },
+  "r19": function() { return LESSON_FLASHCARDS.lesson19; },
+  "r20": function() { return LESSON_FLASHCARDS.lesson20; },
+  "r21": function() { return LESSON_FLASHCARDS.lesson21; },
   "level2_lesson1": function() { return LESSON_FLASHCARDS.level2_lesson1; },
   "level2_lesson2": function() { return LESSON_FLASHCARDS.level2_lesson2; },
   "level2_lesson3": function() { return LESSON_FLASHCARDS.level2_lesson3; },
@@ -4722,24 +5563,30 @@ export const LESSON_FLASHCARDS = {
 
 // Mock lesson progress
 export const LESSON_PROGRESS = {
-  "lesson1": 75,
-  "lesson2": 40,
-  "lesson3": 10,
-  "lesson4": 0,
-  "lesson5": 0,
-  "lesson6": 0,
-  "lesson7": 0,
-  "lesson8": 0,
-  "lesson9": 0,
-  "lesson10": 0,
-  "lesson11": 0,
-  "lesson12": 0,
+  "lesson1": 100,
+  "lesson2": 93,
+  "lesson3": 85,
+  "lesson4": 76,
+  "lesson5": 65,
+  "lesson6": 52,
+  "lesson7": 45,
+  "lesson8": 32,
+  "lesson9": 27,
+  "lesson10": 20,
+  "lesson11": 15,
+  "lesson12": 10,
   "lesson13": 0,
   "lesson14": 0,
   "lesson15": 0,
   "lesson16": 0,
   "lesson17": 0,
-  "lesson18": 0
+  "lesson18": 0,
+  "lesson19": 0,
+  "lesson20": 0,
+  "lesson21": 0,
+  "level2_lesson1": 0,
+  "level2_lesson2": 0,
+  "level2_lesson3": 0
 };
 
 // Study mode tabs
@@ -4769,7 +5616,10 @@ const calculateTotalFlashcards = () => {
     (LESSON_FLASHCARDS.lesson15?.length || 0) +
     (LESSON_FLASHCARDS.lesson16?.length || 0) +
     (LESSON_FLASHCARDS.lesson17?.length || 0) +
-    (LESSON_FLASHCARDS.lesson18?.length || 0);
+    (LESSON_FLASHCARDS.lesson18?.length || 0) +
+    (LESSON_FLASHCARDS.lesson19?.length || 0) +
+    (LESSON_FLASHCARDS.lesson20?.length || 0) +
+    (LESSON_FLASHCARDS.lesson21?.length || 0);
   
   return tutorialCount;
 };
@@ -4782,7 +5632,7 @@ export const PRACTICE_CATEGORIES = [
     color: 'from-[#EEF1FF] to-white',
     hoverColor: 'from-[#E6EBFF] to-white',
     textColor: 'text-[#2D41D1]',
-    lessons: 18,
+    lessons: 21,
     flashcards: calculateTotalFlashcards()
   },
   {
@@ -4791,7 +5641,7 @@ export const PRACTICE_CATEGORIES = [
     color: 'from-[#EEF1FF] to-white',
     hoverColor: 'from-[#E6EBFF] to-white',
     textColor: 'text-[#2D41D1]',
-    lessons: 18, // Use the same number of lessons as tutorial
+    lessons: 21, // Use the same number of lessons as tutorial
     flashcards: calculateTotalFlashcards() // Same content as tutorial
   },
   {

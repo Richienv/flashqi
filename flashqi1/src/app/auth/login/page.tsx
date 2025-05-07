@@ -226,33 +226,6 @@ export default function LoginPage() {
               <div className="absolute inset-0 flex items-center">
                 <div className="w-full border-t border-slate-300" />
               </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="bg-white px-2 text-slate-500">Or continue with</span>
-              </div>
-            </div>
-
-            <div className="mt-6">
-              <button
-                type="button"
-                className="w-full inline-flex justify-center py-2 px-4 border border-slate-300 rounded-md shadow-sm bg-white text-sm font-medium text-slate-500 hover:bg-slate-50"
-                onClick={() => {
-                  setEmail('demo@example.com');
-                  setPassword('demopassword');
-                }}
-              >
-                <span>Demo Account</span>
-              </button>
-            </div>
-            
-            {/* Temporary offline mode for development/testing */}
-            <div className="mt-2">
-              <button
-                type="button"
-                className="w-full inline-flex justify-center py-2 px-4 border border-slate-300 rounded-md shadow-sm bg-yellow-50 text-sm font-medium text-yellow-700 hover:bg-yellow-100"
-                onClick={() => router.push('/dashboard/flashcards')}
-              >
-                <span>Offline Mode (Dev Only)</span>
-              </button>
             </div>
           </div>
         </div>

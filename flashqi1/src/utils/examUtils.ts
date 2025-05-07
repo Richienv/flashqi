@@ -18,19 +18,12 @@ interface ExamQuestion {
 }
 
 // Helper to get flashcards from all lessons
-const getAllFlashcards = () => {
-  const allowedLessons = ['lesson1', 'lesson2', 'lesson3', 'lesson4', 'lesson5', 'lesson6', 
-                          'lesson7', 'lesson8', 'lesson9', 'lesson10', 'lesson11', 'lesson12', 
-                          'lesson13', 'lesson14', 'lesson15', 'lesson16', 'lesson17', 'lesson18'];
-  const cards: any[] = [];
-  
-  allowedLessons.forEach(lessonKey => {
-    const lessonCards = LESSON_FLASHCARDS[lessonKey as keyof typeof LESSON_FLASHCARDS] || [];
-    cards.push(...lessonCards);
+export function getAllFlashcards() {
+  const allowedLessons = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21];
+  return allowedLessons.flatMap(lesson => {
+    return LESSON_FLASHCARDS[`lesson${lesson}`] || [];
   });
-  
-  return cards;
-};
+}
 
 // Shuffle array using Fisher-Yates algorithm
 const shuffleArray = <T,>(array: T[]): T[] => {
