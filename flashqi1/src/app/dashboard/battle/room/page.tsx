@@ -19,11 +19,25 @@ export default function GameRoomPage() {
     leaveRoom, 
     setReady, 
     startGame,
+    refreshRoomData,
     error: gameError 
   } = useGameRoom();
   
   const [error, setError] = useState<string | null>(null);
   const [isReady, setIsReady] = useState(false);
+  const [lastRefresh, setLastRefresh] = useState<number>(Date.now());
+  
+  // Debug logs for tracking state changes
+  useEffect(() => {
+    console.log('Room state updated:', { 
+      roomId, 
+      currentRoom, 
+      playersCount: players.length,
+      players,
+      isHost,
+      isInRoom 
+    });
+  }, [roomId, currentRoom, players, isHost, isInRoom]);
   
   // Redirect if not in a room
   useEffect(() => {
@@ -32,11 +46,58 @@ export default function GameRoomPage() {
     }
   }, [isInRoom, router, roomId]);
   
+  // Manual refresh of room data on mount and periodically
+  useEffect(() => {
+    // Initial refresh
+    const handleInitialRefresh = async () => {
+      if (currentRoom) {
+        console.log('Performing initial room data refresh');
+        await refreshRoomData();
+        setLastRefresh(Date.now());
+      }
+    };
+    
+    handleInitialRefresh();
+    
+    // Set up periodic refresh as a backup
+    const refreshInterval = setInterval(async () => {
+      // Only refresh if it's been more than 5 seconds since last refresh
+      if (Date.now() - lastRefresh > 5000) {
+        console.log('Performing periodic manual refresh');
+        await refreshRoomData();
+        setLastRefresh(Date.now());
+      }
+    }, 5000);
+    
+    return () => clearInterval(refreshInterval);
+  }, [currentRoom, refreshRoomData, lastRefresh]);
+  
+  // Handle connection/reconnection 
+  useEffect(() => {
+    // Force a refresh when we join a room or roomId changes
+    const handleRefreshOnRoomChange = async () => {
+      if (roomId && currentRoom) {
+        console.log('Room changed or joined, refreshing data');
+        await refreshRoomData();
+        setLastRefresh(Date.now());
+      }
+    };
+    
+    handleRefreshOnRoomChange();
+  }, [roomId, currentRoom, refreshRoomData]);
+  
   // Handle ready status toggle
   const handleReadyToggle = async () => {
     const newReadyStatus = !isReady;
     setIsReady(newReadyStatus);
-    await setReady(newReadyStatus);
+    console.log('Setting ready status:', newReadyStatus);
+    
+    const success = await setReady(newReadyStatus);
+    if (success) {
+      // Force refresh after status change
+      await refreshRoomData();
+      setLastRefresh(Date.now());
+    }
   };
   
   // Handle game start
@@ -46,6 +107,9 @@ export default function GameRoomPage() {
       return;
     }
     
+    // Force refresh before checking player status
+    await refreshRoomData();
+    
     const allPlayersReady = players.every(player => player.is_ready || player.is_host);
     if (!allPlayersReady) {
       setError('Not all players are ready');
@@ -53,10 +117,19 @@ export default function GameRoomPage() {
     }
     
     setError(null);
+    console.log('Attempting to start game with players:', players);
     const success = await startGame();
+    console.log('Start game result:', success, 'Error:', gameError);
     if (!success) {
       setError(gameError || 'Failed to start the game');
     }
+  };
+  
+  // Handle manual refresh button click
+  const handleManualRefresh = async () => {
+    console.log('Manual refresh requested by user');
+    await refreshRoomData();
+    setLastRefresh(Date.now());
   };
   
   // Handle leaving the room
@@ -77,8 +150,8 @@ export default function GameRoomPage() {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-gray-900 via-gray-800 to-black p-8 text-white">
         <div className="animate-pulse text-center">
-          <h1 className="mb-4 text-2xl font-bold">Connecting to game room...</h1>
-          <p className="text-gray-300">If you are not redirected, please return to the battle page.</p>
+          <h1 className="mb-4 text-2xl font-bold text-white">Connecting to game room...</h1>
+          <p className="text-white">If you are not redirected, please return to the battle page.</p>
           <Link 
             href="/dashboard/battle" 
             className="mt-8 block rounded-md bg-purple-600 px-4 py-2 text-white hover:bg-purple-700"
@@ -105,63 +178,77 @@ export default function GameRoomPage() {
             </p>
           </div>
           
-          <button
-            onClick={handleLeaveRoom}
-            className="rounded-md border border-gray-700 bg-gray-800 px-4 py-2 text-gray-300 hover:bg-gray-700"
-          >
-            Leave Room
-          </button>
+          <div className="flex space-x-2">
+            <button
+              onClick={handleManualRefresh}
+              className="rounded-md bg-indigo-700 px-4 py-2 text-white hover:bg-indigo-600"
+            >
+              Refresh
+            </button>
+            <button
+              onClick={handleLeaveRoom}
+              className="rounded-md border border-gray-700 bg-gray-800 px-4 py-2 text-gray-300 hover:bg-gray-700"
+            >
+              Leave Room
+            </button>
+          </div>
         </div>
         
         <div className="grid gap-6 md:grid-cols-2">
           {/* Player List */}
           <div className="rounded-xl border border-gray-800 bg-gray-900/70 p-6 backdrop-blur-sm">
-            <h2 className="mb-4 text-xl font-semibold text-white">Players</h2>
+            <h2 className="mb-4 text-xl font-semibold text-white">Players ({players.length} / {currentRoom?.max_players})</h2>
             
             <div className="space-y-3">
-              {players.map(player => (
-                <div 
-                  key={player.id} 
-                  className={`flex items-center justify-between rounded-lg bg-gray-800/80 p-3 ${
-                    player.user_id === (user?.id || '') ? 'border-l-4 border-purple-500' : ''
-                  }`}
-                >
-                  <div className="flex items-center">
-                    {player.avatar_url ? (
-                      <img 
-                        src={player.avatar_url} 
-                        alt={player.username} 
-                        className="mr-3 h-10 w-10 rounded-full object-cover"
-                      />
-                    ) : (
-                      <div className="mr-3 flex h-10 w-10 items-center justify-center rounded-full bg-gray-700 text-lg font-bold text-white">
-                        {player.username.charAt(0).toUpperCase()}
+              {players.length === 0 ? (
+                <div className="rounded-lg bg-gray-800/80 p-4 text-gray-400 italic">
+                  No players in room yet...
+                </div>
+              ) : (
+                players.map(player => (
+                  <div 
+                    key={player.id} 
+                    className={`flex items-center justify-between rounded-lg bg-gray-800/80 p-3 ${
+                      player.user_id === (user?.id || '') ? 'border-l-4 border-purple-500' : ''
+                    }`}
+                  >
+                    <div className="flex items-center">
+                      {player.avatar_url ? (
+                        <img 
+                          src={player.avatar_url} 
+                          alt={player.username} 
+                          className="mr-3 h-10 w-10 rounded-full object-cover"
+                        />
+                      ) : (
+                        <div className="mr-3 flex h-10 w-10 items-center justify-center rounded-full bg-gray-700 text-lg font-bold text-white">
+                          {player.username.charAt(0).toUpperCase()}
+                        </div>
+                      )}
+                      
+                      <div>
+                        <p className="font-medium">{player.username}</p>
+                        <p className="text-sm text-gray-400">{player.email || 'Guest'}</p>
                       </div>
-                    )}
+                    </div>
                     
-                    <div>
-                      <p className="font-medium">{player.username}</p>
-                      <p className="text-sm text-gray-400">{player.email || 'Guest'}</p>
+                    <div className="flex items-center">
+                      {player.is_host && (
+                        <span className="mr-2 rounded-md bg-amber-900/50 px-2 py-1 text-xs font-medium text-amber-300">
+                          Host
+                        </span>
+                      )}
+                      
+                      <span className={`rounded-md px-2 py-1 text-xs font-medium ${
+                        player.is_ready
+                          ? 'bg-green-900/50 text-green-300'
+                          : 'bg-gray-700/50 text-gray-400'
+                      }`}>
+                        {player.is_ready ? 'Ready' : 'Not Ready'}
+                      </span>
                     </div>
                   </div>
-                  
-                  <div className="flex items-center">
-                    {player.is_host && (
-                      <span className="mr-2 rounded-md bg-amber-900/50 px-2 py-1 text-xs font-medium text-amber-300">
-                        Host
-                      </span>
-                    )}
-                    
-                    <span className={`rounded-md px-2 py-1 text-xs font-medium ${
-                      player.is_ready
-                        ? 'bg-green-900/50 text-green-300'
-                        : 'bg-gray-700/50 text-gray-400'
-                    }`}>
-                      {player.is_ready ? 'Ready' : 'Not Ready'}
-                    </span>
-                  </div>
-                </div>
-              ))}
+                ))
+              )}
             </div>
           </div>
           

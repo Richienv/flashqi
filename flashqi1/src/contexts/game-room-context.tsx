@@ -29,6 +29,7 @@ interface GameRoomContextType {
   setReady: (isReady: boolean) => Promise<boolean>;
   startGame: () => Promise<boolean>;
   endGame: () => Promise<boolean>;
+  refreshRoomData: () => Promise<void>;
 }
 
 // Create context
@@ -60,11 +61,67 @@ export const GameRoomProvider = ({ children }: GameRoomProviderProps) => {
   const isInRoom = !!currentRoom;
   const isHost = !!currentRoom && !!user && currentRoom.host_id === user.id;
   
+  // Function to fetch players for the current room
+  const fetchPlayers = async () => {
+    if (!currentRoom) return;
+    
+    console.log('Fetching players for room:', currentRoom.id);
+    try {
+      const { data, error: playersError } = await supabase
+        .from('game_players')
+        .select('*')
+        .eq('room_id', currentRoom.id);
+        
+      if (playersError) {
+        console.error('Error fetching players:', playersError);
+        return;
+      }
+      
+      console.log('Fetched players:', data);
+      setPlayers(data as GamePlayer[]);
+    } catch (err) {
+      console.error('Error in fetchPlayers:', err);
+    }
+  };
+  
+  // Function to manually refresh room data
+  const refreshRoomData = async () => {
+    if (!currentRoom) return;
+    
+    console.log('Manually refreshing room data for room:', currentRoom.id);
+    try {
+      // Refresh room data
+      const { data: roomData, error: roomError } = await supabase
+        .from('game_rooms')
+        .select('*')
+        .eq('id', currentRoom.id)
+        .single();
+        
+      if (roomError) {
+        console.error('Error refreshing room data:', roomError);
+        return;
+      }
+      
+      setCurrentRoom(roomData as GameRoom);
+      
+      // Refresh player data
+      await fetchPlayers();
+    } catch (err) {
+      console.error('Error in refreshRoomData:', err);
+    }
+  };
+  
   // Cleanup subscriptions on unmount
   useEffect(() => {
     return () => {
-      if (roomChannel) roomChannel.unsubscribe();
-      if (playersChannel) playersChannel.unsubscribe();
+      if (roomChannel) {
+        console.log('Unsubscribing from room channel');
+        roomChannel.unsubscribe();
+      }
+      if (playersChannel) {
+        console.log('Unsubscribing from players channel');
+        playersChannel.unsubscribe();
+      }
     };
   }, [roomChannel, playersChannel]);
   
@@ -72,10 +129,14 @@ export const GameRoomProvider = ({ children }: GameRoomProviderProps) => {
   useEffect(() => {
     if (!currentRoom) return;
     
+    console.log('Setting up subscriptions for room:', currentRoom.id);
+    
     // Subscribe to room updates
     const room = gameRoomService.subscribeToRoom(
       currentRoom.id,
       (payload) => {
+        console.log('Room update received:', payload);
+        
         if (payload.eventType === 'DELETE') {
           // Room was deleted
           setCurrentRoom(null);
@@ -94,22 +155,14 @@ export const GameRoomProvider = ({ children }: GameRoomProviderProps) => {
       }
     );
     
-    // Subscribe to player updates
+    // Subscribe to player updates with improved handling
     const roomPlayers = gameRoomService.subscribeToPlayers(
       currentRoom.id,
       async (payload) => {
-        // Refresh the entire player list
-        const { data, error: playersError } = await supabase
-          .from('game_players')
-          .select('*')
-          .eq('room_id', currentRoom.id);
-          
-        if (playersError) {
-          console.error('Error fetching players:', playersError);
-          return;
-        }
+        console.log('Player update received:', payload);
         
-        setPlayers(data as GamePlayer[]);
+        // Fetch the latest player list on any player change
+        await fetchPlayers();
       }
     );
     
@@ -117,25 +170,19 @@ export const GameRoomProvider = ({ children }: GameRoomProviderProps) => {
     setPlayersChannel(roomPlayers);
     
     // Initial player list fetch
-    const fetchPlayers = async () => {
-      const { data, error: playersError } = await supabase
-        .from('game_players')
-        .select('*')
-        .eq('room_id', currentRoom.id);
-        
-      if (playersError) {
-        console.error('Error fetching players:', playersError);
-        return;
-      }
-      
-      setPlayers(data as GamePlayer[]);
-    };
-    
     fetchPlayers();
     
+    // Set up periodic refresh as a fallback
+    const refreshInterval = setInterval(() => {
+      console.log('Performing periodic refresh of room data');
+      refreshRoomData();
+    }, 10000); // Refresh every 10 seconds as a fallback
+    
     return () => {
+      console.log('Cleaning up room subscriptions');
       room.unsubscribe();
       roomPlayers.unsubscribe();
+      clearInterval(refreshInterval);
     };
   }, [currentRoom, router]);
   
@@ -215,6 +262,10 @@ export const GameRoomProvider = ({ children }: GameRoomProviderProps) => {
       }
       
       setCurrentRoom(room);
+      
+      // Immediately fetch players after joining
+      await fetchPlayers();
+      
       return true;
     } catch (error: any) {
       setError(error.message || 'An error occurred while joining the game room.');
@@ -363,6 +414,7 @@ export const GameRoomProvider = ({ children }: GameRoomProviderProps) => {
     setReady,
     startGame,
     endGame,
+    refreshRoomData,
   };
   
   return (

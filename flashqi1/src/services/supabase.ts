@@ -209,27 +209,39 @@ export const gameRoomService = {
   
   // Subscribe to room updates
   subscribeToRoom(roomId: string, callback: (payload: any) => void) {
+    console.log(`Setting up room subscription for room: ${roomId}`);
     return supabase
       .channel(`room:${roomId}`)
       .on('postgres_changes', {
-        event: '*',
+        event: '*', // Listen for all events (INSERT, UPDATE, DELETE)
         schema: 'public',
         table: 'game_rooms',
         filter: `id=eq.${roomId}`
-      }, callback)
-      .subscribe();
+      }, (payload) => {
+        console.log('Room change detected:', payload);
+        callback(payload);
+      })
+      .subscribe((status) => {
+        console.log(`Room subscription status: ${status}`);
+      });
   },
   
   // Subscribe to player updates in a room
   subscribeToPlayers(roomId: string, callback: (payload: any) => void) {
+    console.log(`Setting up players subscription for room: ${roomId}`);
     return supabase
       .channel(`room-players:${roomId}`)
       .on('postgres_changes', {
-        event: '*',
+        event: '*', // Listen for all events (INSERT, UPDATE, DELETE) 
         schema: 'public',
         table: 'game_players',
         filter: `room_id=eq.${roomId}`
-      }, callback)
-      .subscribe();
+      }, (payload) => {
+        console.log('Player change detected:', payload);
+        callback(payload);
+      })
+      .subscribe((status) => {
+        console.log(`Players subscription status: ${status}`);
+      });
   }
 }; 
