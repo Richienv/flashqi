@@ -17,9 +17,11 @@ interface ExamQuestion {
   matchPairs?: { hanzi: string; pinyin: string; english: string; id: string }[];
 }
 
-// Helper to get flashcards from lessons 1-5 only
-const getFlashcardsUpToLesson5 = () => {
-  const allowedLessons = ['lesson1', 'lesson2', 'lesson3', 'lesson4', 'lesson5'];
+// Helper to get flashcards from all lessons
+const getAllFlashcards = () => {
+  const allowedLessons = ['lesson1', 'lesson2', 'lesson3', 'lesson4', 'lesson5', 'lesson6', 
+                          'lesson7', 'lesson8', 'lesson9', 'lesson10', 'lesson11', 'lesson12', 
+                          'lesson13', 'lesson14', 'lesson15', 'lesson16', 'lesson17', 'lesson18'];
   const cards: any[] = [];
   
   allowedLessons.forEach(lessonKey => {
@@ -407,7 +409,7 @@ const generateTranslationQuestion = (card: any, allCards: any[]): ExamQuestion =
 // Add character component identification
 const generateCharacterComponentQuestion = (card: any): ExamQuestion => {
   // Only use single character words
-  if (card.hanzi.length !== 1) return generateMultipleChoiceQuestion(card, getFlashcardsUpToLesson5());
+  if (card.hanzi.length !== 1) return generateMultipleChoiceQuestion(card, getAllFlashcards());
   
   // Common components in Chinese characters
   const components = {
@@ -479,12 +481,12 @@ const ensureUniqueOptions = (question: ExamQuestion): ExamQuestion => {
 
 // Update the main function to use only lessons 1-5
 export const generateExamQuestions = (count: number = 30): ExamQuestion[] => {
-  // Use only cards from lessons 1-5
-  const availableCards = getFlashcardsUpToLesson5();
-  const shuffledCards = shuffleArray(availableCards);
+  // Get flashcards to use for the exam
+  const allCards = getAllFlashcards();
+  const shuffledCards = shuffleArray(allCards);
   
   // Take cards needed for the exam
-  const examCards = shuffledCards.slice(0, Math.min(count * 2, availableCards.length));
+  const examCards = shuffledCards.slice(0, Math.min(count * 2, allCards.length));
   
   // Generate different types of questions
   const questions: ExamQuestion[] = [];
@@ -505,13 +507,13 @@ export const generateExamQuestions = (count: number = 30): ExamQuestion[] => {
   // Generate flashcard questions
   for (let i = 0; i < flashcardCount; i++) {
     const card = examCards[currentIndex++ % examCards.length];
-    questions.push(generateFlashcardQuestion(card, availableCards));
+    questions.push(generateFlashcardQuestion(card, allCards));
   }
   
   // Generate multiple choice questions
   for (let i = 0; i < multipleChoiceCount; i++) {
     const card = examCards[currentIndex++ % examCards.length];
-    questions.push(generateMultipleChoiceQuestion(card, availableCards));
+    questions.push(generateMultipleChoiceQuestion(card, allCards));
   }
   
   // Generate tone selection questions
@@ -531,7 +533,7 @@ export const generateExamQuestions = (count: number = 30): ExamQuestion[] => {
   // Generate complete sentence questions
   for (let i = 0; i < completeCount; i++) {
     const card = examCards[currentIndex++ % examCards.length];
-    questions.push(generateCompleteSentenceQuestion(card, availableCards));
+    questions.push(generateCompleteSentenceQuestion(card, allCards));
   }
   
   // Validate and shuffle questions

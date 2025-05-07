@@ -4428,6 +4428,268 @@ export const LESSON_FLASHCARDS = {
       }
     }
   ],
+  "lesson18": [
+    {
+      id: "18-1",
+      lesson_id: "lesson18",
+      hanzi: "修",
+      pinyin: "xiū",
+      english: "To repair; to fix",
+      difficulty_level: 2,
+      example_sentence: {
+        hanzi: "他在修自行车。",
+        pinyin: "Tā zài xiū zìxíngchē.",
+        english: "He is repairing the bicycle."
+      }
+    },
+    {
+      id: "18-2",
+      lesson_id: "lesson18",
+      hanzi: "旅行",
+      pinyin: "lǚxíng",
+      english: "Travel",
+      difficulty_level: 2,
+      example_sentence: {
+        hanzi: "我喜欢旅行。",
+        pinyin: "Wǒ xǐhuān lǚxíng.",
+        english: "I like traveling."
+      }
+    },
+    {
+      id: "18-3",
+      lesson_id: "lesson18",
+      hanzi: "顺便",
+      pinyin: "shùnbiàn",
+      english: "Conveniently; by the way",
+      difficulty_level: 3,
+      example_sentence: {
+        hanzi: "我去商店，顺便买点水果。",
+        pinyin: "Wǒ qù shāngdiàn, shùnbiàn mǎi diǎn shuǐguǒ.",
+        english: "I'm going to the store and buying some fruit by the way."
+      }
+    },
+    {
+      id: "18-4",
+      lesson_id: "lesson18",
+      hanzi: "替",
+      pinyin: "tì",
+      english: "On behalf of; to replace",
+      difficulty_level: 2,
+      example_sentence: {
+        hanzi: "我替你去。",
+        pinyin: "Wǒ tì nǐ qù.",
+        english: "I'll go for you."
+      }
+    },
+    {
+      id: "18-5",
+      lesson_id: "lesson18",
+      hanzi: "盒",
+      pinyin: "hé",
+      english: "Box",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "这是一个笔盒。",
+        pinyin: "Zhè shì yī gè bǐhé.",
+        english: "This is a pencil box."
+      }
+    },
+    {
+      id: "18-6",
+      lesson_id: "lesson18",
+      hanzi: "曲别针",
+      pinyin: "qūbiézhēn",
+      english: "Paper clip",
+      difficulty_level: 3,
+      example_sentence: {
+        hanzi: "请给我一个曲别针。",
+        pinyin: "Qǐng gěi wǒ yī gè qūbiézhēn.",
+        english: "Please give me a paper clip."
+      }
+    },
+    {
+      id: "18-7",
+      lesson_id: "lesson18",
+      hanzi: "拿",
+      pinyin: "ná",
+      english: "To take; to hold",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "请拿这本书。",
+        pinyin: "Qǐng ná zhè běn shū.",
+        english: "Please take this book."
+      }
+    },
+    {
+      id: "18-8",
+      lesson_id: "lesson18",
+      hanzi: "不用",
+      pinyin: "bú yòng",
+      english: "No need",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "不用谢。",
+        pinyin: "Bú yòng xiè.",
+        english: "No need to thank me."
+      }
+    },
+    {
+      id: "18-9",
+      lesson_id: "lesson18",
+      hanzi: "代表",
+      pinyin: "dàibiǎo",
+      english: "Representative; to represent",
+      difficulty_level: 2,
+      example_sentence: {
+        hanzi: "他代表我们学校参加比赛。",
+        pinyin: "Tā dàibiǎo wǒmen xuéxiào cānjiā bǐsài.",
+        english: "He represents our school in the competition."
+      }
+    },
+    {
+      id: "18-10",
+      lesson_id: "lesson18",
+      hanzi: "团",
+      pinyin: "tuán",
+      english: "Group; team",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "我们是一个团。",
+        pinyin: "Wǒmen shì yī gè tuán.",
+        english: "We are a team."
+      }
+    },
+    {
+      id: "18-11",
+      lesson_id: "lesson18",
+      hanzi: "参观",
+      pinyin: "cānguān",
+      english: "To visit",
+      difficulty_level: 2,
+      example_sentence: {
+        hanzi: "我们参观了博物馆。",
+        pinyin: "Wǒmen cānguān le bówùguǎn.",
+        english: "We visited the museum."
+      }
+    },
+    {
+      id: "18-12",
+      lesson_id: "lesson18",
+      hanzi: "当",
+      pinyin: "dāng",
+      english: "To be; to act as",
+      difficulty_level: 2,
+      example_sentence: {
+        hanzi: "他当老师。",
+        pinyin: "Tā dāng lǎoshī.",
+        english: "He works as a teacher."
+      }
+    },
+    {
+      id: "18-13",
+      lesson_id: "lesson18",
+      hanzi: "翻译",
+      pinyin: "fānyì",
+      english: "To translate; translation",
+      difficulty_level: 2,
+      example_sentence: {
+        hanzi: "请你翻译这个句子。",
+        pinyin: "Qǐng nǐ fānyì zhège jùzi.",
+        english: "Please translate this sentence."
+      }
+    },
+    {
+      id: "18-14",
+      lesson_id: "lesson18",
+      hanzi: "飞机",
+      pinyin: "fēijī",
+      english: "Airplane",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "我坐飞机去北京。",
+        pinyin: "Wǒ zuò fēijī qù Běijīng.",
+        english: "I take an airplane to Beijing."
+      }
+    },
+    {
+      id: "18-15",
+      lesson_id: "lesson18",
+      hanzi: "火车",
+      pinyin: "huǒchē",
+      english: "Train",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "这是火车站。",
+        pinyin: "Zhè shì huǒchē zhàn.",
+        english: "This is the train station."
+      }
+    },
+    {
+      id: "18-16",
+      lesson_id: "lesson18",
+      hanzi: "回来",
+      pinyin: "huílái",
+      english: "To come back",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "他明天回来。",
+        pinyin: "Tā míngtiān huílái.",
+        english: "He will come back tomorrow."
+      }
+    },
+    {
+      id: "18-17",
+      lesson_id: "lesson18",
+      hanzi: "帮忙",
+      pinyin: "bāngmáng",
+      english: "To help",
+      difficulty_level: 2,
+      example_sentence: {
+        hanzi: "请你帮忙。",
+        pinyin: "Qǐng nǐ bāngmáng.",
+        english: "Please help me."
+      }
+    },
+    {
+      id: "18-18",
+      lesson_id: "lesson18",
+      hanzi: "浇",
+      pinyin: "jiāo",
+      english: "To water",
+      difficulty_level: 2,
+      example_sentence: {
+        hanzi: "我每天浇花。",
+        pinyin: "Wǒ měitiān jiāo huā.",
+        english: "I water the flowers every day."
+      }
+    },
+    {
+      id: "18-19",
+      lesson_id: "lesson18",
+      hanzi: "花",
+      pinyin: "huā",
+      english: "Flower",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "这些花很美。",
+        pinyin: "Zhèxiē huā hěn měi.",
+        english: "These flowers are beautiful."
+      }
+    },
+    {
+      id: "18-20",
+      lesson_id: "lesson18",
+      hanzi: "问题",
+      pinyin: "wèntí",
+      english: "Question; problem",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "你有问题吗？",
+        pinyin: "Nǐ yǒu wèntí ma?",
+        english: "Do you have any questions?"
+      }
+    }
+  ],
   "r1": function() { return LESSON_FLASHCARDS.lesson1; },
   "r2": function() { return LESSON_FLASHCARDS.lesson2; },
   "r3": function() { return LESSON_FLASHCARDS.lesson3; },
@@ -4444,6 +4706,8 @@ export const LESSON_FLASHCARDS = {
   "r14": function() { return LESSON_FLASHCARDS.lesson14; },
   "r15": function() { return LESSON_FLASHCARDS.lesson15; },
   "r16": function() { return LESSON_FLASHCARDS.lesson16; },
+  "r17": function() { return LESSON_FLASHCARDS.lesson17; },
+  "r18": function() { return LESSON_FLASHCARDS.lesson18; },
   "level2_lesson1": function() { return LESSON_FLASHCARDS.level2_lesson1; },
   "level2_lesson2": function() { return LESSON_FLASHCARDS.level2_lesson2; },
   "level2_lesson3": function() { return LESSON_FLASHCARDS.level2_lesson3; },
@@ -4473,7 +4737,9 @@ export const LESSON_PROGRESS = {
   "lesson13": 0,
   "lesson14": 0,
   "lesson15": 0,
-  "lesson16": 0
+  "lesson16": 0,
+  "lesson17": 0,
+  "lesson18": 0
 };
 
 // Study mode tabs
@@ -4495,7 +4761,15 @@ const calculateTotalFlashcards = () => {
     (LESSON_FLASHCARDS.lesson7?.length || 0) +
     (LESSON_FLASHCARDS.lesson8?.length || 0) +
     (LESSON_FLASHCARDS.lesson9?.length || 0) +
-    (LESSON_FLASHCARDS.lesson10?.length || 0);
+    (LESSON_FLASHCARDS.lesson10?.length || 0) +
+    (LESSON_FLASHCARDS.lesson11?.length || 0) +
+    (LESSON_FLASHCARDS.lesson12?.length || 0) +
+    (LESSON_FLASHCARDS.lesson13?.length || 0) +
+    (LESSON_FLASHCARDS.lesson14?.length || 0) +
+    (LESSON_FLASHCARDS.lesson15?.length || 0) +
+    (LESSON_FLASHCARDS.lesson16?.length || 0) +
+    (LESSON_FLASHCARDS.lesson17?.length || 0) +
+    (LESSON_FLASHCARDS.lesson18?.length || 0);
   
   return tutorialCount;
 };
@@ -4508,7 +4782,7 @@ export const PRACTICE_CATEGORIES = [
     color: 'from-[#EEF1FF] to-white',
     hoverColor: 'from-[#E6EBFF] to-white',
     textColor: 'text-[#2D41D1]',
-    lessons: 10,
+    lessons: 18,
     flashcards: calculateTotalFlashcards()
   },
   {
@@ -4517,7 +4791,7 @@ export const PRACTICE_CATEGORIES = [
     color: 'from-[#EEF1FF] to-white',
     hoverColor: 'from-[#E6EBFF] to-white',
     textColor: 'text-[#2D41D1]',
-    lessons: 10, // Use the same number of lessons as tutorial
+    lessons: 18, // Use the same number of lessons as tutorial
     flashcards: calculateTotalFlashcards() // Same content as tutorial
   },
   {

@@ -265,7 +265,9 @@ export default function FlashcardsPage() {
   // Get flashcards from lessons 1-11 for midterm prep
   const getMidtermPrepFlashcards = () => {
     const allowedLessons = ['lesson1', 'lesson2', 'lesson3', 'lesson4', 'lesson5', 
-                           'lesson6', 'lesson7', 'lesson8', 'lesson9', 'lesson10', 'lesson11'];
+                           'lesson6', 'lesson7', 'lesson8', 'lesson9', 'lesson10', 'lesson11',
+                           'lesson12', 'lesson13', 'lesson14', 'lesson15', 'lesson16', 
+                           'lesson17', 'lesson18'];
     const cards: any[] = [];
     
     allowedLessons.forEach(lessonKey => {
@@ -806,6 +808,8 @@ export default function FlashcardsPage() {
         { id: 'lesson14', title: 'Lesson 14', number: 14, cards: getCardCount('lesson14') },
         { id: 'lesson15', title: 'Lesson 15', number: 15, cards: getCardCount('lesson15') },
         { id: 'lesson16', title: 'Lesson 16', number: 16, cards: getCardCount('lesson16') },
+        { id: 'lesson17', title: 'Lesson 17', number: 17, cards: getCardCount('lesson17') },
+        { id: 'lesson18', title: 'Lesson 18', number: 18, cards: getCardCount('lesson18') },
       ];
       
       // Level 2 Lessons
@@ -826,10 +830,12 @@ export default function FlashcardsPage() {
     return { level1: level1Lessons, level2: level2Lessons };
   };
 
-  // Calculate the total number of cards for midterm prep (lessons 1-11)
+  // Calculate the total number of cards for midterm prep (lessons 1-18)
   const getMidtermPrepCardCount = () => {
     const lessonCount = ['lesson1', 'lesson2', 'lesson3', 'lesson4', 'lesson5', 
-                         'lesson6', 'lesson7', 'lesson8', 'lesson9', 'lesson10', 'lesson11']
+                         'lesson6', 'lesson7', 'lesson8', 'lesson9', 'lesson10', 'lesson11',
+                         'lesson12', 'lesson13', 'lesson14', 'lesson15', 'lesson16',
+                         'lesson17', 'lesson18']
       .reduce((total, lessonKey) => {
         return total + (LESSON_FLASHCARDS[lessonKey as keyof typeof LESSON_FLASHCARDS]?.length || 0);
       }, 0);
@@ -2041,7 +2047,7 @@ export default function FlashcardsPage() {
                         </h2>
                         <p className="text-sm text-slate-600">
                           {activeLesson === "midterm-prep"
-                            ? `${getMidtermPrepCardCount()} cards from Lessons 1-11`
+                            ? `${getMidtermPrepCardCount()} cards from Lessons 1-18`
                             : activeLesson === "level2-midterm-prep"
                               ? `${getLevel2MidtermPrepCardCount()} cards from Level 2 Lessons 1-7`
                               : `${currentFlashcards.length} cards in total`}
@@ -2343,7 +2349,7 @@ export default function FlashcardsPage() {
                           </div>
                           <div>
                             <h3 className="text-sm font-semibold text-blue-700">Midterm Prep</h3>
-                            <p className="text-xs text-blue-600">{getMidtermPrepCardCount()} cards from Lessons 1-11</p>
+                            <p className="text-xs text-blue-600">{getMidtermPrepCardCount()} cards from Lessons 1-18</p>
                           </div>
                         </div>
                         <button 

@@ -9,7 +9,7 @@ import { formatDate } from '@/lib/utils';
 const STATS = {
   totalUsers: 145,
   activeUsers: 78,
-  totalLessons: 10,
+  totalLessons: 18,
   totalFlashcards: 156,
   totalHomework: 15,
   cardsStudiedToday: 342
