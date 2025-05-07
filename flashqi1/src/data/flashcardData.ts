@@ -5528,6 +5528,294 @@ export const LESSON_FLASHCARDS = {
       }
     }
   ],
+  "lesson22": [
+    {
+      id: "22-1",
+      lesson_id: "lesson22",
+      hanzi: "自己",
+      pinyin: "zì jǐ",
+      english: "Self/oneself",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "我想自己做这件事。",
+        pinyin: "Wǒ xiǎng zìjǐ zuò zhè jiàn shì.",
+        english: "I want to do this by myself."
+      }
+    },
+    {
+      id: "22-2",
+      lesson_id: "lesson22",
+      hanzi: "爱好",
+      pinyin: "ài hào",
+      english: "Hobby/interest",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "我的爱好是听音乐。",
+        pinyin: "Wǒ de àihào shì tīng yīnyuè.",
+        english: "My hobby is listening to music."
+      }
+    },
+    {
+      id: "22-3",
+      lesson_id: "lesson22",
+      hanzi: "让",
+      pinyin: "ràng",
+      english: "To let/allow",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "请让我想一想。",
+        pinyin: "Qǐng ràng wǒ xiǎng yī xiǎng.",
+        english: "Please let me think about it."
+      }
+    },
+    {
+      id: "22-4",
+      lesson_id: "lesson22",
+      hanzi: "京剧",
+      pinyin: "jīng jù",
+      english: "Beijing Opera",
+      difficulty_level: 2,
+      example_sentence: {
+        hanzi: "京剧是中国的传统艺术。",
+        pinyin: "Jīngjù shì Zhōngguó de chuántǒng yìshù.",
+        english: "Beijing Opera is a traditional Chinese art."
+      }
+    },
+    {
+      id: "22-5",
+      lesson_id: "lesson22",
+      hanzi: "喜欢",
+      pinyin: "xǐ huan",
+      english: "To like",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "我很喜欢学中文。",
+        pinyin: "Wǒ hěn xǐhuan xué Zhōngwén.",
+        english: "I really like learning Chinese."
+      }
+    },
+    {
+      id: "22-6",
+      lesson_id: "lesson22",
+      hanzi: "非常",
+      pinyin: "fēi cháng",
+      english: "Very/extremely",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "这本书非常有意思。",
+        pinyin: "Zhè běn shū fēicháng yǒu yìsi.",
+        english: "This book is very interesting."
+      }
+    },
+    {
+      id: "22-7",
+      lesson_id: "lesson22",
+      hanzi: "唱",
+      pinyin: "chàng",
+      english: "To sing",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "我喜欢唱歌。",
+        pinyin: "Wǒ xǐhuan chàng gē.",
+        english: "I like to sing songs."
+      }
+    },
+    {
+      id: "22-8",
+      lesson_id: "lesson22",
+      hanzi: "完人",
+      pinyin: "wán rén",
+      english: "Perfect person",
+      difficulty_level: 2,
+      example_sentence: {
+        hanzi: "没有人是完人。",
+        pinyin: "Méiyǒu rén shì wánrén.",
+        english: "Nobody is perfect."
+      }
+    },
+    {
+      id: "22-9",
+      lesson_id: "lesson22",
+      hanzi: "电脑",
+      pinyin: "diàn nǎo",
+      english: "Computer",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "我用电脑工作。",
+        pinyin: "Wǒ yòng diànnǎo gōngzuò.",
+        english: "I use a computer to work."
+      }
+    },
+    {
+      id: "22-10",
+      lesson_id: "lesson22",
+      hanzi: "游戏",
+      pinyin: "yóu xì",
+      english: "Game",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "孩子们喜欢玩游戏。",
+        pinyin: "Háizimen xǐhuan wán yóuxì.",
+        english: "Children like to play games."
+      }
+    },
+    {
+      id: "22-11",
+      lesson_id: "lesson22",
+      hanzi: "感到",
+      pinyin: "gǎn dào",
+      english: "To feel",
+      difficulty_level: 2,
+      example_sentence: {
+        hanzi: "我感到很高兴。",
+        pinyin: "Wǒ gǎndào hěn gāoxìng.",
+        english: "I feel very happy."
+      }
+    },
+    {
+      id: "22-12",
+      lesson_id: "lesson22",
+      hanzi: "心情",
+      pinyin: "xīn qíng",
+      english: "Mood",
+      difficulty_level: 2,
+      example_sentence: {
+        hanzi: "今天我的心情很好。",
+        pinyin: "Jīntiān wǒ de xīnqíng hěn hǎo.",
+        english: "Today my mood is very good."
+      }
+    },
+    {
+      id: "22-13",
+      lesson_id: "lesson22",
+      hanzi: "愉快",
+      pinyin: "yú kuài",
+      english: "Happy/joyful",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "祝你周末愉快！",
+        pinyin: "Zhù nǐ zhōumò yúkuài!",
+        english: "Have a happy weekend!"
+      }
+    },
+    {
+      id: "22-14",
+      lesson_id: "lesson22",
+      hanzi: "业余",
+      pinyin: "yè yú",
+      english: "Spare time/amateur",
+      difficulty_level: 2,
+      example_sentence: {
+        hanzi: "我业余时间学习汉语。",
+        pinyin: "Wǒ yèyú shíjiān xuéxí Hànyǔ.",
+        english: "I study Chinese in my spare time."
+      }
+    },
+    {
+      id: "22-15",
+      lesson_id: "lesson22",
+      hanzi: "以前",
+      pinyin: "yǐ qián",
+      english: "Before/previously",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "以前我住在北京。",
+        pinyin: "Yǐqián wǒ zhù zài Běijīng.",
+        english: "I used to live in Beijing."
+      }
+    },
+    {
+      id: "22-16",
+      lesson_id: "lesson22",
+      hanzi: "就",
+      pinyin: "jiù",
+      english: "Then/right away",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "我吃完饭就去学校。",
+        pinyin: "Wǒ chī wán fàn jiù qù xuéxiào.",
+        english: "I'll go to school right after I finish eating."
+      }
+    },
+    {
+      id: "22-17",
+      lesson_id: "lesson22",
+      hanzi: "对",
+      pinyin: "duì",
+      english: "Towards/to",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "我对中国文化很感兴趣。",
+        pinyin: "Wǒ duì Zhōngguó wénhuà hěn gǎn xìngqù.",
+        english: "I'm very interested in Chinese culture."
+      }
+    },
+    {
+      id: "22-18",
+      lesson_id: "lesson22",
+      hanzi: "书法",
+      pinyin: "shū fǎ",
+      english: "Calligraphy",
+      difficulty_level: 2,
+      example_sentence: {
+        hanzi: "中国书法很有特色。",
+        pinyin: "Zhōngguó shūfǎ hěn yǒu tèsè.",
+        english: "Chinese calligraphy is very distinctive."
+      }
+    },
+    {
+      id: "22-19",
+      lesson_id: "lesson22",
+      hanzi: "特别",
+      pinyin: "tè bié",
+      english: "Especially/particularly",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "我特别喜欢吃中国菜。",
+        pinyin: "Wǒ tèbié xǐhuan chī Zhōngguó cài.",
+        english: "I especially like eating Chinese food."
+      }
+    },
+    {
+      id: "22-20",
+      lesson_id: "lesson22",
+      hanzi: "感兴趣",
+      pinyin: "gǎn xìng qù",
+      english: "To be interested in",
+      difficulty_level: 2,
+      example_sentence: {
+        hanzi: "我对历史很感兴趣。",
+        pinyin: "Wǒ duì lìshǐ hěn gǎn xìngqù.",
+        english: "I'm very interested in history."
+      }
+    },
+    {
+      id: "22-21",
+      lesson_id: "lesson22",
+      hanzi: "派",
+      pinyin: "pài",
+      english: "School of thought/faction",
+      difficulty_level: 2,
+      example_sentence: {
+        hanzi: "他属于现代派画家。",
+        pinyin: "Tā shǔyú xiàndài pài huàjiā.",
+        english: "He belongs to the modern school of painters."
+      }
+    },
+    {
+      id: "22-22",
+      lesson_id: "lesson22",
+      hanzi: "画",
+      pinyin: "huà",
+      english: "To draw/painting",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "我喜欢画画。",
+        pinyin: "Wǒ xǐhuan huà huà.",
+        english: "I like to draw/paint."
+      }
+    }
+  ],
   "r1": function() { return LESSON_FLASHCARDS.lesson1; },
   "r2": function() { return LESSON_FLASHCARDS.lesson2; },
   "r3": function() { return LESSON_FLASHCARDS.lesson3; },
@@ -5549,6 +5837,7 @@ export const LESSON_FLASHCARDS = {
   "r19": function() { return LESSON_FLASHCARDS.lesson19; },
   "r20": function() { return LESSON_FLASHCARDS.lesson20; },
   "r21": function() { return LESSON_FLASHCARDS.lesson21; },
+  "r22": function() { return LESSON_FLASHCARDS.lesson22; },
   "level2_lesson1": function() { return LESSON_FLASHCARDS.level2_lesson1; },
   "level2_lesson2": function() { return LESSON_FLASHCARDS.level2_lesson2; },
   "level2_lesson3": function() { return LESSON_FLASHCARDS.level2_lesson3; },
@@ -5584,6 +5873,7 @@ export const LESSON_PROGRESS = {
   "lesson19": 0,
   "lesson20": 0,
   "lesson21": 0,
+  "lesson22": 0,
   "level2_lesson1": 0,
   "level2_lesson2": 0,
   "level2_lesson3": 0
@@ -5619,7 +5909,8 @@ const calculateTotalFlashcards = () => {
     (LESSON_FLASHCARDS.lesson18?.length || 0) +
     (LESSON_FLASHCARDS.lesson19?.length || 0) +
     (LESSON_FLASHCARDS.lesson20?.length || 0) +
-    (LESSON_FLASHCARDS.lesson21?.length || 0);
+    (LESSON_FLASHCARDS.lesson21?.length || 0) +
+    (LESSON_FLASHCARDS.lesson22?.length || 0);
   
   return tutorialCount;
 };
@@ -5632,7 +5923,7 @@ export const PRACTICE_CATEGORIES = [
     color: 'from-[#EEF1FF] to-white',
     hoverColor: 'from-[#E6EBFF] to-white',
     textColor: 'text-[#2D41D1]',
-    lessons: 21,
+    lessons: 22,
     flashcards: calculateTotalFlashcards()
   },
   {
@@ -5641,7 +5932,7 @@ export const PRACTICE_CATEGORIES = [
     color: 'from-[#EEF1FF] to-white',
     hoverColor: 'from-[#E6EBFF] to-white',
     textColor: 'text-[#2D41D1]',
-    lessons: 21, // Use the same number of lessons as tutorial
+    lessons: 22, // Use the same number of lessons as tutorial
     flashcards: calculateTotalFlashcards() // Same content as tutorial
   },
   {

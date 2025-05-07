@@ -262,12 +262,12 @@ export default function FlashcardsPage() {
     return cards;
   };
 
-  // Get flashcards from lessons 1-21 for midterm prep
+  // Get flashcards from lessons 1-22 for midterm prep
   const getMidtermPrepFlashcards = () => {
     const allowedLessons = ['lesson1', 'lesson2', 'lesson3', 'lesson4', 'lesson5', 
                            'lesson6', 'lesson7', 'lesson8', 'lesson9', 'lesson10', 'lesson11',
                            'lesson12', 'lesson13', 'lesson14', 'lesson15', 'lesson16', 
-                           'lesson17', 'lesson18', 'lesson19', 'lesson20', 'lesson21'];
+                           'lesson17', 'lesson18', 'lesson19', 'lesson20', 'lesson21', 'lesson22'];
     const cards: any[] = [];
     
     allowedLessons.forEach(lessonKey => {
@@ -810,6 +810,10 @@ export default function FlashcardsPage() {
         { id: 'lesson16', title: 'Lesson 16', number: 16, cards: getCardCount('lesson16') },
         { id: 'lesson17', title: 'Lesson 17', number: 17, cards: getCardCount('lesson17') },
         { id: 'lesson18', title: 'Lesson 18', number: 18, cards: getCardCount('lesson18') },
+        { id: 'lesson19', title: 'Lesson 19', number: 19, cards: getCardCount('lesson19') },
+        { id: 'lesson20', title: 'Lesson 20', number: 20, cards: getCardCount('lesson20') },
+        { id: 'lesson21', title: 'Lesson 21', number: 21, cards: getCardCount('lesson21') },
+        { id: 'lesson22', title: 'Lesson 22', number: 22, cards: getCardCount('lesson22') },
       ];
       
       // Level 2 Lessons

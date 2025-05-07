@@ -99,7 +99,7 @@ export default function GameRoomPage() {
       <div className="mx-auto max-w-4xl">
         <div className="mb-6 flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold">Battle Room</h1>
+            <h1 className="text-3xl font-bold text-white">Battle Room</h1>
             <p className="text-gray-400">
               Code: <span className="font-mono text-purple-400">{currentRoom?.code}</span>
             </p>
@@ -116,7 +116,7 @@ export default function GameRoomPage() {
         <div className="grid gap-6 md:grid-cols-2">
           {/* Player List */}
           <div className="rounded-xl border border-gray-800 bg-gray-900/70 p-6 backdrop-blur-sm">
-            <h2 className="mb-4 text-xl font-semibold">Players</h2>
+            <h2 className="mb-4 text-xl font-semibold text-white">Players</h2>
             
             <div className="space-y-3">
               {players.map(player => (
@@ -167,12 +167,12 @@ export default function GameRoomPage() {
           
           {/* Game Controls */}
           <div className="rounded-xl border border-gray-800 bg-gray-900/70 p-6 backdrop-blur-sm">
-            <h2 className="mb-4 text-xl font-semibold">Game Status</h2>
+            <h2 className="mb-4 text-xl font-semibold text-white">Game Status</h2>
             
             <div className="mb-6 flex items-center justify-between rounded-lg bg-gray-800/80 p-4">
               <div>
                 <p className="text-sm text-gray-400">Status</p>
-                <p className="text-lg font-medium">
+                <p className="text-lg font-medium text-white">
                   {currentRoom?.status === 'waiting' 
                     ? 'Waiting for players' 
                     : currentRoom?.status === 'playing'
@@ -182,7 +182,7 @@ export default function GameRoomPage() {
               </div>
               
               <div>
-                <p className="text-sm text-gray-400">Players</p>
+                <p className="text-sm text-white">Players</p>
                 <p className="text-lg font-medium">{players.length} / {currentRoom?.max_players}</p>
               </div>
             </div>

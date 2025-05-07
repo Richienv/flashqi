@@ -266,13 +266,6 @@ export default function BattlePage() {
       <div className={`absolute bottom-1/4 left-1/2 h-40 w-40 -translate-x-1/2 rounded-full border border-purple-500/20 ${rotateAnimation}`}></div>
       
       <div className="mx-auto flex max-w-4xl flex-col items-center justify-center gap-8 py-10">
-        <h1 className="bg-gradient-to-r from-purple-400 to-indigo-600 bg-clip-text text-center text-4xl font-bold text-transparent md:text-5xl">
-          Hanzi Battle Arena
-        </h1>
-        
-        <p className="max-w-2xl text-center text-gray-300">
-          Challenge friends to a Chinese character battle! Create a room or join an existing match.
-        </p>
         
         <div className="relative mt-8 w-full max-w-2xl overflow-hidden rounded-2xl border border-gray-800 bg-gray-900/70 p-6 shadow-xl backdrop-blur-sm">
           {/* Glare effect */}
@@ -328,25 +321,14 @@ export default function BattlePage() {
             
             {/* Initial UI - Create or Join */}
             {!isCreatingGame && !isJoiningGame && (
-              <div className="flex flex-col space-y-8">
-                <div className="flex flex-col space-y-6">
-                  <div className="grid gap-6 md:grid-cols-2">
-                    <button
-                      onClick={() => {
-                        setIsCreatingGame(false);
-                        setIsJoiningGame(false);
-                      }}
-                      className={`flex items-center justify-center space-x-2 rounded-md bg-gradient-to-r px-4 py-3 text-center text-white transition-all ${
-                        !isCreatingGame && !isJoiningGame
-                          ? 'from-purple-600 to-indigo-700 shadow-lg hover:shadow-purple-900/20'
-                          : 'from-gray-700 to-gray-800'
-                      }`}
-                    >
-                      <span>Create or Join a Battle</span>
-                    </button>
+              <div className="flex flex-col items-center justify-center min-h-[400px]">
+                <div className="flex flex-col items-center space-y-6 w-full max-w-lg">
+                  <div className="text-center">
+                    <h1 className="text-3xl font-bold text-white mb-2">Battle Mode</h1>
+                    <p className="text-gray-400">Create a new game or join an existing one</p>
                   </div>
                   
-                  <div className="space-y-4">
+                  <div className="space-y-4 w-full">
                     <div>
                       <label className="mb-1 block text-sm font-medium text-gray-300">
                         Your Name
@@ -395,7 +377,7 @@ export default function BattlePage() {
                             type="text"
                             value={gameCode}
                             onChange={(e) => setGameCode(e.target.value.toUpperCase())}
-                            className="w-full rounded-md border border-gray-700 bg-gray-800 px-4 py-2 text-white placeholder-gray-500 shadow-sm focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500"
+                            className="w-full rounded-md border border-blue-200 bg-white px-4 py-2 text-blue-900 placeholder-blue-300 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                             placeholder="Enter code"
                             maxLength={6}
                           />
@@ -410,21 +392,6 @@ export default function BattlePage() {
                       </div>
                     </div>
                   </div>
-                </div>
-                
-                {/* Game Feature Highlights */}
-                <div className="rounded-lg border border-gray-800 bg-gray-950/50 p-4">
-                  <div className="mb-2 flex items-center">
-                    <span className="mr-2 rounded-full bg-purple-700 px-2 py-0.5 text-xs font-medium text-white">
-                      New Feature!
-                    </span>
-                    <h3 className="text-lg font-medium text-gray-200">Battle Mode</h3>
-                  </div>
-                  <ul className="ml-6 list-disc space-y-1 text-sm text-gray-400">
-                    <li>Challenge friends to real-time character recognition battles</li>
-                    <li>Track scores and compete for the highest accuracy</li>
-                    <li>Practice writing and reading in a fun, competitive environment</li>
-                  </ul>
                 </div>
               </div>
             )}
