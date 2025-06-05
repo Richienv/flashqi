@@ -1891,20 +1891,6 @@ export default function FlashcardsPage() {
                       </button>
                       <h1 className="text-xl font-medium text-gray-800">Draw the Character</h1>
                     </div>
-
-                    {/* Card navigation */}
-                    <div className="flex items-center gap-2">
-                      <button 
-                        className="action-button-text bg-blue-50 text-blue-700"
-                        onClick={goToNextCard}
-                        title="Go to next card"
-                      >
-                        <span>Next Card</span>
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <path d="M9 18l6-6-6-6"></path>
-                        </svg>
-                      </button>
-                    </div>
                   </div>
                   
                   {/* Hint section */}
@@ -2015,6 +2001,17 @@ export default function FlashcardsPage() {
                         aria-label="Next Page"
                       >
                         <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M9 18l6-6-6-6"></path>
+                        </svg>
+                      </button>
+                      {/* Next Card button - visually distinct */}
+                      <button
+                        className="action-button-text bg-blue-600 text-white hover:bg-blue-700 transition-colors shadow-md"
+                        onClick={goToNextCard}
+                        aria-label="Next Card"
+                        style={{marginLeft: '0.5rem', width: '44px', height: '44px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                           <path d="M9 18l6-6-6-6"></path>
                         </svg>
                       </button>
