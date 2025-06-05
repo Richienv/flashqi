@@ -29,7 +29,7 @@ export function Flashcard({ card, onKnown, onUnknown }: FlashcardProps) {
   };
 
   return (
-    <div
+    <div 
       {...handlers}
       className="w-full max-w-md mx-auto perspective-1000 h-[340px] sm:h-[400px] cursor-pointer flex flex-col items-center justify-center"
       onClick={handleFlip}
@@ -95,7 +95,7 @@ export function Flashcard({ card, onKnown, onUnknown }: FlashcardProps) {
           background: radial-gradient(ellipse at center, #fb923c55 0%, transparent 80%);
         }
       `}</style>
-      <div
+      <div 
         className={cn(
           "relative w-full h-full transition-transform duration-500 transform-style-3d",
           isFlipped ? "rotate-y-180" : ""
@@ -147,7 +147,7 @@ export function Flashcard({ card, onKnown, onUnknown }: FlashcardProps) {
       </div>
       {/* Buttons below the card */}
       <div className="flex flex-row items-center justify-center gap-6 mt-8 w-full">
-        <button
+        <button 
           className="glossy-btn metallic-red"
           onClick={e => {
             e.stopPropagation();
@@ -157,7 +157,7 @@ export function Flashcard({ card, onKnown, onUnknown }: FlashcardProps) {
         >
           Don&apos;t Know
         </button>
-        <button
+        <button 
           className="glossy-btn metallic-blue"
           onClick={e => {
             e.stopPropagation();

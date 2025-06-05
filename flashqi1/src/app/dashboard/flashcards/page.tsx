@@ -944,7 +944,7 @@ export default function FlashcardsPage() {
   const startDrawing = (e: React.TouchEvent) => {
     e.preventDefault();
     e.stopPropagation();
-
+    
     if (!ctx || !canvasRef.current) return;
 
     const touch = e.touches[0];
@@ -952,13 +952,13 @@ export default function FlashcardsPage() {
     const rx = (touch as any).radiusX;
     const ry = (touch as any).radiusY;
     if ((typeof rx === 'number' && rx > 20) || (typeof ry === 'number' && ry > 20)) return;
-
+    
     setIsDrawing(true);
-
+    
     const rect = canvasRef.current.getBoundingClientRect();
     const x = touch.clientX - rect.left;
     const y = touch.clientY - rect.top;
-
+    
     ctx.beginPath();
     ctx.moveTo(x, y);
     ctx.lineCap = 'round';
@@ -974,19 +974,19 @@ export default function FlashcardsPage() {
   const draw = (e: React.TouchEvent) => {
     e.preventDefault();
     e.stopPropagation();
-
+    
     if (!isDrawing || !ctx || !canvasRef.current) return;
-
+    
     const touch = e.touches[0];
     // Palm rejection: ignore large-radius touches
     const rx2 = (touch as any).radiusX;
     const ry2 = (touch as any).radiusY;
     if ((typeof rx2 === 'number' && rx2 > 20) || (typeof ry2 === 'number' && ry2 > 20)) return;
-
+    
     const rect = canvasRef.current.getBoundingClientRect();
     const x = touch.clientX - rect.left;
     const y = touch.clientY - rect.top;
-
+    
     ctx.lineTo(x, y);
     ctx.stroke();
     setCurrentStroke(prev => [...prev, {x, y}]);
@@ -1960,73 +1960,65 @@ export default function FlashcardsPage() {
                   {/* Canvas area */}
                   <div className="flex-1 flex flex-col items-center justify-center px-4 py-4 md:py-8">
                     <div className="w-full flex justify-center">
-                      <canvas
-                        ref={canvasRef}
+                    <canvas
+                      ref={canvasRef}
                         className="drawing-canvas max-w-[900px] md:max-w-[900px] w-full h-[60vh] md:h-[70vh] bg-white rounded-2xl shadow-lg border border-blue-200"
                         style={{ touchAction: 'none', background: '#fff', borderRadius: '18px', boxShadow: '0 4px 32px 0 rgba(0,0,0,0.10)' }}
-                        onTouchStart={startDrawing}
-                        onTouchMove={draw}
-                        onTouchEnd={endDrawing}
-                        onTouchCancel={endDrawing}
-                      />
+                      onTouchStart={startDrawing}
+                      onTouchMove={draw}
+                      onTouchEnd={endDrawing}
+                      onTouchCancel={endDrawing}
+                    />
                     </div>
                   </div>
                   
                   {/* Drawing toolbar */}
                   <div className="drawing-footer md:px-24 md:py-6" style={{maxWidth: '900px', margin: '0 auto', background: 'rgba(255,255,255,0.98)'}}>
-                    <div className="flex flex-col md:flex-row justify-between items-center gap-4 md:gap-0">
-                      {/* Left side - Undo/Clear */}
-                      <div className="flex gap-2">
-                        <button 
-                          className="action-button-text bg-gray-100 text-gray-800"
-                          onClick={undoStroke}
-                          disabled={strokeHistory.length <= 1}
-                          style={{opacity: strokeHistory.length <= 1 ? 0.5 : 1}}
-                        >
-                          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M3 7v6h6"></path>
-                            <path d="M3 13c0-4.4 3.6-8 8-8h10"></path>
-                          </svg>
-                          <span>Undo</span>
-                        </button>
-                        <button 
-                          className="action-button-text bg-gray-100 text-gray-800"
-                          onClick={clearCanvas}
-                        >
-                          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M3 6h18"></path>
-                            <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
-                            <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
-                          </svg>
-                          <span>Clear</span>
-                        </button>
-                      </div>
-                      
-                      {/* Right side - Page Navigation */}
-                      <div className="flex gap-2">
-                        <button 
-                          className="action-button-text bg-gray-100 text-gray-800"
-                          onClick={goToPreviousDrawingPage}
-                          disabled={currentDrawingPage === 0}
-                          style={{opacity: currentDrawingPage === 0 ? 0.5 : 1}}
-                        >
-                          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M15 18l-6-6 6-6"></path>
-                          </svg>
-                          <span>Prev</span>
-                        </button>
-                        <button 
-                          className="action-button-text bg-gray-100 text-gray-800"
-                          onClick={addNewDrawingPage}
-                        >
-                          <span>Next</span>
-                          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M9 18l6-6-6-6"></path>
-                          </svg>
-                        </button>
-                      </div>
+                    <div className="flex flex-row justify-center items-center gap-3">
+                      <button 
+                        className="action-button-text bg-gray-100 text-gray-800"
+                        onClick={undoStroke}
+                        disabled={strokeHistory.length <= 1}
+                        style={{opacity: strokeHistory.length <= 1 ? 0.5 : 1}}
+                        aria-label="Undo"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M3 7v6h6"></path>
+                          <path d="M3 13c0-4.4 3.6-8 8-8h10"></path>
+                        </svg>
+                      </button>
+                      <button 
+                        className="action-button-text bg-gray-100 text-gray-800"
+                        onClick={clearCanvas}
+                        aria-label="Clear"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M3 6h18"></path>
+                          <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
+                          <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
+                        </svg>
+                      </button>
+                      <button 
+                        className="action-button-text bg-gray-100 text-gray-800"
+                        onClick={goToPreviousDrawingPage}
+                        disabled={currentDrawingPage === 0}
+                        style={{opacity: currentDrawingPage === 0 ? 0.5 : 1}}
+                        aria-label="Previous Page"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M15 18l-6-6 6-6"></path>
+                        </svg>
+                      </button>
+                      <button 
+                        className="action-button-text bg-gray-100 text-gray-800"
+                        onClick={addNewDrawingPage}
+                        aria-label="Next Page"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M9 18l6-6-6-6"></path>
+                        </svg>
+                      </button>
                     </div>
-                    
                     {/* Done button */}
                     <div className="mt-3">
                       <button 
