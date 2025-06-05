@@ -94,45 +94,30 @@ const FinalPrepTest = () => {
                       </Button>
                     )}
                   </div>
-                  {!revealed[card.id] ? (
-                    <>
-                      <div className="mb-2">
-                        <span className="text-xl font-bold">•••</span>
-                      </div>
-                      <div className="mb-2">
-                        <span className="text-gray-700">•••</span>
-                      </div>
-                      <div className="mb-2">
-                        <span className="text-gray-700">•••</span>
-                      </div>
-                      {card.example_sentence && <div className="mb-2">&nbsp;</div>}
-                    </>
-                  ) : (
-                    <>
-                      <div className="mb-2">
-                        <span className="text-xl font-bold">{card.hanzi}</span>
-                      </div>
-                      <div className="mb-2">
-                        <span className="text-gray-700">{card.pinyin}</span>
-                      </div>
-                      <div className="mb-2">
-                        <span className="text-gray-700">{card.english}</span>
-                      </div>
-                      {card.example_sentence && (
-                        <div className="mb-2">
-                          {showExample[card.id] ? (
-                            <span className="text-blue-700 italic">Hint: {card.example_sentence}</span>
-                          ) : (
-                            <Button size="sm" variant="ghost" onClick={() => handleShowExample(card.id)}>
-                              Show Hint
-                            </Button>
-                          )}
-                        </div>
-                      )}
-                      {dontKnow[card.id] && (
-                        <div className="text-red-600 text-xs mt-2">Marked as "Don't Know"</div>
-                      )}
-                    </>
+                  <div className="mb-2">
+                    <span className="text-xl font-bold">{revealed[card.id] ? card.hanzi : '•••'}</span>
+                  </div>
+                  <div className="mb-2">
+                    <span className="text-gray-700">{revealed[card.id] ? card.pinyin : '•••'}</span>
+                  </div>
+                  <div className="mb-2">
+                    <span className="text-gray-700">{revealed[card.id] ? card.english : '•••'}</span>
+                  </div>
+                  {card.example_sentence && (
+                    <div className="mb-2">
+                      {revealed[card.id] ? (
+                        showExample[card.id] ? (
+                          <span className="text-blue-700 italic">Hint: {card.example_sentence}</span>
+                        ) : (
+                          <Button size="sm" variant="ghost" onClick={() => handleShowExample(card.id)}>
+                            Show Hint
+                          </Button>
+                        )
+                      ) : null}
+                    </div>
+                  )}
+                  {dontKnow[card.id] && (
+                    <div className="text-red-600 text-xs mt-2">Marked as "Don't Know"</div>
                   )}
                 </div>
               ))}

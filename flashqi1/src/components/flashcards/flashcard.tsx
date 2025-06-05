@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useSwipeable } from 'react-swipeable';
 import { cn } from '@/lib/utils';
 import { Flashcard as FlashcardType } from '@/types';
@@ -23,6 +23,15 @@ export function Flashcard({ card, onKnown, onUnknown }: FlashcardProps) {
     },
     trackMouse: true
   });
+
+  useEffect(() => {
+    console.log('Flashcard mounted:', card.id);
+    return () => console.log('Flashcard unmounted:', card.id);
+  }, [card.id]);
+
+  useEffect(() => {
+    console.log('isFlipped changed:', isFlipped, 'for card', card.id);
+  }, [isFlipped, card.id]);
 
   const handleFlip = () => {
     setIsFlipped(!isFlipped);
