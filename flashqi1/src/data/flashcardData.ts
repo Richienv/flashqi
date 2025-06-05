@@ -1,3 +1,5 @@
+import { LESSON_23_FLASHCARDS, LESSON_24_FLASHCARDS, LESSON_25_FLASHCARDS } from './lessons23-25';
+
 // Mock data for flashcards organized by lessons
 export const LESSON_FLASHCARDS = {
   "lesson1": [
@@ -5816,6 +5818,9 @@ export const LESSON_FLASHCARDS = {
       }
     }
   ],
+  "lesson23": LESSON_23_FLASHCARDS,
+  "lesson24": LESSON_24_FLASHCARDS,
+  "lesson25": LESSON_25_FLASHCARDS,
   "r1": function() { return LESSON_FLASHCARDS.lesson1; },
   "r2": function() { return LESSON_FLASHCARDS.lesson2; },
   "r3": function() { return LESSON_FLASHCARDS.lesson3; },

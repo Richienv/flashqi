@@ -814,6 +814,9 @@ export default function FlashcardsPage() {
         { id: 'lesson20', title: 'Lesson 20', number: 20, cards: getCardCount('lesson20') },
         { id: 'lesson21', title: 'Lesson 21', number: 21, cards: getCardCount('lesson21') },
         { id: 'lesson22', title: 'Lesson 22', number: 22, cards: getCardCount('lesson22') },
+        { id: 'lesson23', title: 'Lesson 23', number: 23, cards: getCardCount('lesson23') },
+        { id: 'lesson24', title: 'Lesson 24', number: 24, cards: getCardCount('lesson24') },
+        { id: 'lesson25', title: 'Lesson 25', number: 25, cards: getCardCount('lesson25') },
       ];
       
       // Level 2 Lessons
