@@ -944,34 +944,49 @@ export default function FlashcardsPage() {
   const startDrawing = (e: React.TouchEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    
+
     if (!ctx || !canvasRef.current) return;
-    
-    setIsDrawing(true);
-    
+
     const touch = e.touches[0];
+    // Palm rejection: ignore large-radius touches (likely palm)
+    const rx = (touch as any).radiusX;
+    const ry = (touch as any).radiusY;
+    if ((typeof rx === 'number' && rx > 20) || (typeof ry === 'number' && ry > 20)) return;
+
+    setIsDrawing(true);
+
     const rect = canvasRef.current.getBoundingClientRect();
-    
     const x = touch.clientX - rect.left;
     const y = touch.clientY - rect.top;
-    
+
     ctx.beginPath();
     ctx.moveTo(x, y);
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.lineWidth = 2; // Thinner, more beautiful
+    ctx.globalAlpha = 0.8;
+    ctx.strokeStyle = 'rgba(0, 0, 0, 0.7)';
+    ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
+    ctx.shadowBlur = 5;
     setCurrentStroke([{x, y}]);
   };
 
   const draw = (e: React.TouchEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    
+
     if (!isDrawing || !ctx || !canvasRef.current) return;
-    
+
     const touch = e.touches[0];
+    // Palm rejection: ignore large-radius touches
+    const rx2 = (touch as any).radiusX;
+    const ry2 = (touch as any).radiusY;
+    if ((typeof rx2 === 'number' && rx2 > 20) || (typeof ry2 === 'number' && ry2 > 20)) return;
+
     const rect = canvasRef.current.getBoundingClientRect();
-    
     const x = touch.clientX - rect.left;
     const y = touch.clientY - rect.top;
-    
+
     ctx.lineTo(x, y);
     ctx.stroke();
     setCurrentStroke(prev => [...prev, {x, y}]);
@@ -982,6 +997,8 @@ export default function FlashcardsPage() {
     
     setIsDrawing(false);
     ctx.closePath();
+    ctx.globalAlpha = 1;
+    ctx.shadowBlur = 0;
     
     // Save current state to history for undo
     const canvas = canvasRef.current;
@@ -1941,20 +1958,23 @@ export default function FlashcardsPage() {
                   </div>
                   
                   {/* Canvas area */}
-                  <div className="flex-1 flex flex-col items-center justify-center px-4">
-                    <canvas
-                      ref={canvasRef}
-                      className="drawing-canvas"
-                      onTouchStart={startDrawing}
-                      onTouchMove={draw}
-                      onTouchEnd={endDrawing}
-                      onTouchCancel={endDrawing}
-                    />
+                  <div className="flex-1 flex flex-col items-center justify-center px-4 py-4 md:py-8">
+                    <div className="w-full flex justify-center">
+                      <canvas
+                        ref={canvasRef}
+                        className="drawing-canvas max-w-[900px] md:max-w-[900px] w-full h-[60vh] md:h-[70vh] bg-white rounded-2xl shadow-lg border border-blue-200"
+                        style={{ touchAction: 'none', background: '#fff', borderRadius: '18px', boxShadow: '0 4px 32px 0 rgba(0,0,0,0.10)' }}
+                        onTouchStart={startDrawing}
+                        onTouchMove={draw}
+                        onTouchEnd={endDrawing}
+                        onTouchCancel={endDrawing}
+                      />
+                    </div>
                   </div>
                   
                   {/* Drawing toolbar */}
-                  <div className="drawing-footer">
-                    <div className="flex justify-between items-center">
+                  <div className="drawing-footer md:px-24 md:py-6" style={{maxWidth: '900px', margin: '0 auto', background: 'rgba(255,255,255,0.98)'}}>
+                    <div className="flex flex-col md:flex-row justify-between items-center gap-4 md:gap-0">
                       {/* Left side - Undo/Clear */}
                       <div className="flex gap-2">
                         <button 
