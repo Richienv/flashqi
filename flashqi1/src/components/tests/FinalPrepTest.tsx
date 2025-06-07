@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { LESSON_FLASHCARDS } from '@/data/flashcardData';
+import SimpleFlashcard from '@/components/flashcards/SimpleFlashcard';
 
 // Gather lessons 13-24 in order
 const LESSON_NUMBERS = Array.from({ length: 12 }, (_, i) => 13 + i);
@@ -73,53 +74,19 @@ const FinalPrepTest = () => {
       {lessonsToShow.map(({ lessonKey, cards }) => (
         <div key={lessonKey} className="mb-10">
           <h2 className="text-xl font-semibold mb-4 border-b border-indigo-100 pb-2 text-indigo-800">
-            {lessonKey === 'unknowns' ? 'Unknown Cards' : `Lesson ${lessonKey.replace('lesson', '')}`}
+            {lessonKey === 'unknowns' ? 'Unknown Cards' : `Lesson ${lessonKey.replace('lesson', '')}`} ({cards.length} cards)
           </h2>
           {cards.length === 0 ? (
             <p className="text-gray-500 italic mb-4">No cards in this lesson.</p>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {cards.map((card, idx) => (
-                <div key={card.id} className="border border-indigo-100 p-4 rounded-lg hover:border-indigo-300 transition-all">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-lg font-bold">{idx + 1}. </span>
-                    {!revealed[card.id] && (
-                      <Button size="sm" variant="outline" onClick={() => handleReveal(card.id)}>
-                        Reveal
-                      </Button>
-                    )}
-                    {revealed[card.id] && !dontKnow[card.id] && (
-                      <Button size="sm" variant="destructive" onClick={() => handleDontKnow(card.id)}>
-                        I don't know
-                      </Button>
-                    )}
-                  </div>
-                  <div className="mb-2">
-                    <span className="text-xl font-bold">{revealed[card.id] ? card.hanzi : '•••'}</span>
-                  </div>
-                  <div className="mb-2">
-                    <span className="text-gray-700">{revealed[card.id] ? card.pinyin : '•••'}</span>
-                  </div>
-                  <div className="mb-2">
-                    <span className="text-gray-700">{revealed[card.id] ? card.english : '•••'}</span>
-                  </div>
-                  {card.example_sentence && (
-                    <div className="mb-2">
-                      {revealed[card.id] ? (
-                        showExample[card.id] ? (
-                          <span className="text-blue-700 italic">Hint: {card.example_sentence}</span>
-                        ) : (
-                          <Button size="sm" variant="ghost" onClick={() => handleShowExample(card.id)}>
-                            Show Hint
-                          </Button>
-                        )
-                      ) : null}
-                    </div>
-                  )}
-                  {dontKnow[card.id] && (
-                    <div className="text-red-600 text-xs mt-2">Marked as "Don't Know"</div>
-                  )}
-                </div>
+            <div className="flex flex-col items-center gap-4">
+              {cards.map((card) => (
+                <SimpleFlashcard
+                  key={card.id}
+                  card={card}
+                  onKnown={() => handleReveal(card.id)}
+                  onUnknown={() => handleDontKnow(card.id)}
+                />
               ))}
             </div>
           )}

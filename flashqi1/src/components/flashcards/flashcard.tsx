@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useSwipeable } from 'react-swipeable';
 import { cn } from '@/lib/utils';
 import { Flashcard as FlashcardType } from '@/types';
@@ -23,15 +23,6 @@ export function Flashcard({ card, onKnown, onUnknown }: FlashcardProps) {
     },
     trackMouse: true
   });
-
-  useEffect(() => {
-    console.log('Flashcard mounted:', card.id);
-    return () => console.log('Flashcard unmounted:', card.id);
-  }, [card.id]);
-
-  useEffect(() => {
-    console.log('isFlipped changed:', isFlipped, 'for card', card.id);
-  }, [isFlipped, card.id]);
 
   const handleFlip = () => {
     setIsFlipped(!isFlipped);
@@ -87,7 +78,7 @@ export function Flashcard({ card, onKnown, onUnknown }: FlashcardProps) {
           }
         }
         /* Mesh Glow from component-placement.txt */
-        .mesh-glow {
+        /* .mesh-glow {
           position: absolute;
           left: 50%;
           top: 44%;
@@ -102,11 +93,11 @@ export function Flashcard({ card, onKnown, onUnknown }: FlashcardProps) {
         }
         .mesh-glow-orange {
           background: radial-gradient(ellipse at center, #fb923c55 0%, transparent 80%);
-        }
+        } */
       `}</style>
       <div 
         className={cn(
-          "relative w-full h-full transition-transform duration-500 transform-style-3d",
+          "relative w-full h-full transform-style-3d",
           isFlipped ? "rotate-y-180" : ""
         )}
         style={{ minHeight: '340px' }}
@@ -120,7 +111,7 @@ export function Flashcard({ card, onKnown, onUnknown }: FlashcardProps) {
           style={{ boxShadow: '0 2.8px 2.2px rgba(0,0,0,0.18), 0 6.7px 5.3px rgba(0,0,0,0.22), 0 12.5px 10px rgba(0,0,0,0.24), 0 22.3px 17.9px rgba(0,0,0,0.26), 0 41.8px 33.4px rgba(0,0,0,0.28), 0 100px 80px rgba(0,0,0,0.32)' }}
         >
           {/* Glow behind pinyin */}
-          <div className="mesh-glow"></div>
+          {/* <div className="mesh-glow"></div> */}
           <div className="relative z-10 text-4xl sm:text-5xl font-bold mb-4 text-blue-400">{card.pinyin}</div>
           <div className="text-lg sm:text-xl text-slate-200 font-medium relative z-10">{card.english}</div>
           <div className="absolute bottom-4 left-0 w-full flex justify-center">
@@ -136,7 +127,7 @@ export function Flashcard({ card, onKnown, onUnknown }: FlashcardProps) {
           style={{ boxShadow: '0 2.8px 2.2px rgba(0,0,0,0.18), 0 6.7px 5.3px rgba(0,0,0,0.22), 0 12.5px 10px rgba(0,0,0,0.24), 0 22.3px 17.9px rgba(0,0,0,0.26), 0 41.8px 33.4px rgba(0,0,0,0.28), 0 100px 80px rgba(0,0,0,0.32)' }}
         >
           {/* Glow behind hanzi */}
-          <div className="mesh-glow mesh-glow-orange"></div>
+          {/* <div className="mesh-glow mesh-glow-orange"></div> */}
           <div className="relative z-10 text-6xl sm:text-7xl font-bold mb-4 text-orange-400">{card.hanzi}</div>
           {card.example_sentence && typeof card.example_sentence === 'object' ? (
             <div className="text-base text-slate-200 mt-2 text-center relative z-10">
