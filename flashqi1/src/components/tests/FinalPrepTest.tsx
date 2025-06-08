@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { LESSON_FLASHCARDS } from '@/data/flashcardData';
-import SimpleFlashcard from '@/components/flashcards/SimpleFlashcard';
+import FinalPrepFlipCard from '@/components/flashcards/FinalPrepFlipCard';
 
 // Gather lessons 13-24 in order
 const LESSON_NUMBERS = Array.from({ length: 12 }, (_, i) => 13 + i);
@@ -81,7 +81,7 @@ const FinalPrepTest = () => {
           ) : (
             <div className="flex flex-col items-center gap-4">
               {cards.map((card) => (
-                <SimpleFlashcard
+                <FinalPrepFlipCard
                   key={card.id}
                   card={card}
                   onKnown={() => handleReveal(card.id)}
