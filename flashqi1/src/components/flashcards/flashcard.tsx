@@ -112,8 +112,10 @@ export function Flashcard({ card, onKnown, onUnknown }: FlashcardProps) {
         >
           {/* Glow behind pinyin */}
           {/* <div className="mesh-glow"></div> */}
-          <div className="relative z-10 text-4xl sm:text-5xl font-bold mb-4 text-blue-400">{card.pinyin}</div>
-          <div className="text-lg sm:text-xl text-slate-200 font-medium relative z-10">{card.english}</div>
+          <div className="flex flex-col items-center justify-center h-full w-full">
+            <div className="text-4xl sm:text-5xl font-bold mb-4 text-blue-400 text-center">{card.pinyin}</div>
+            <div className="text-lg sm:text-xl text-slate-200 font-medium text-center">{card.english}</div>
+          </div>
           <div className="absolute bottom-4 left-0 w-full flex justify-center">
             <span className="text-xs text-slate-400">Tap or swipe to flip</span>
           </div>
@@ -128,18 +130,23 @@ export function Flashcard({ card, onKnown, onUnknown }: FlashcardProps) {
         >
           {/* Glow behind hanzi */}
           {/* <div className="mesh-glow mesh-glow-orange"></div> */}
-          <div className="relative z-10 text-6xl sm:text-7xl font-bold mb-4 text-orange-400">{card.hanzi}</div>
-          {card.example_sentence && typeof card.example_sentence === 'object' ? (
-            <div className="text-base text-slate-200 mt-2 text-center relative z-10">
-              {(card.example_sentence as any).hanzi && <p className="mb-1 font-semibold text-lg text-white">{(card.example_sentence as any).hanzi}</p>}
-              {(card.example_sentence as any).pinyin && <p className="mb-1 text-blue-400">{(card.example_sentence as any).pinyin}</p>}
-              {(card.example_sentence as any).english && <p className="mb-1 text-slate-300">{(card.example_sentence as any).english}</p>}
-            </div>
-          ) : card.example_sentence ? (
-            <div className="text-base text-slate-200 mt-2 text-center relative z-10">
-              <p className="mb-1">{card.example_sentence}</p>
-            </div>
-          ) : null}
+          <div className="flex flex-col items-center justify-center h-full w-full">
+            <div className="text-6xl sm:text-7xl font-bold mb-4 text-orange-400 text-center">{card.hanzi}</div>
+            
+            {card.example_sentence && typeof card.example_sentence === 'object' ? (
+              <div className="text-base text-slate-200 mt-2 text-center">
+                <p className="mb-1 text-xs text-slate-400">Example:</p>
+                {(card.example_sentence as any).hanzi && <p className="mb-1 font-semibold text-lg text-white">{(card.example_sentence as any).hanzi}</p>}
+                {(card.example_sentence as any).pinyin && <p className="mb-1 text-blue-400">{(card.example_sentence as any).pinyin}</p>}
+                {(card.example_sentence as any).english && <p className="mb-1 text-slate-300">{(card.example_sentence as any).english}</p>}
+              </div>
+            ) : card.example_sentence && typeof card.example_sentence === 'string' ? (
+              <div className="text-base text-slate-200 mt-2 text-center">
+                <p className="mb-1 text-xs text-slate-400">Example:</p>
+                <p className="mb-1 font-semibold text-lg text-white">{card.example_sentence}</p>
+              </div>
+            ) : null}
+          </div>
           <div className="absolute bottom-4 left-0 w-full flex justify-center">
             <span className="text-xs text-slate-400">Tap or swipe to flip</span>
           </div>

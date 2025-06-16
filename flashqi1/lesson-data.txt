@@ -257,19 +257,35 @@ tongwu
 ban
 
 Lesson 13:
-you (need/to have)
-ci (words)
-yu (rain)
-san (umberella)
-yifu (clothes)
-zhong (heavy)
-qing (light)
-xin (new)
-jiu (old)
-ben  (mw for book)
-jian (mw for clothes)
-hong (red)
-bi (pen)
+
+没有
+箱子
+有
+这人
+重
+轻
+黑
+红
+轻
+旧
+药
+中药
+西药
+茶叶
+里
+日用品
+件
+衣服
+把
+雨伞
+平板
+电脑
+本
+词典
+优盘
+支
+毛笔
+
 
 Lesson 14:
 jingli

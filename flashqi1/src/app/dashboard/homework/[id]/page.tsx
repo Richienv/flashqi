@@ -5,7 +5,7 @@ import { Navbar, MobileNav } from "@/components/ui/navbar";
 import { CommentSection } from "@/components/comments/comment";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { useRouter } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
 import { formatDate } from "@/lib/utils";
 import { Comment } from '@/types';
 
@@ -121,17 +121,18 @@ interface PageProps {
   };
 }
 
-export default function HomeworkDetailPage({ params }: PageProps) {
+export default function HomeworkDetailPage() {
+  const params = useParams();
+  const homeworkId = parseInt(params.id as string);
   const router = useRouter();
-  const homeworkId = params.id;
   const [homework, setHomework] = useState<any>(null);
   const [comments, setComments] = useState<Comment[]>([]);
   const [isCompleted, setIsCompleted] = useState(false);
 
   useEffect(() => {
     // For demo purpose, using mock data
-    const foundHomework = SAMPLE_HOMEWORK.find(h => h.id === homeworkId);
-    const homeworkComments = SAMPLE_COMMENTS[homeworkId] || [];
+    const foundHomework = SAMPLE_HOMEWORK.find(h => h.id === homeworkId.toString());
+    const homeworkComments = SAMPLE_COMMENTS[homeworkId.toString()] || [];
     
     if (foundHomework) {
       setHomework(foundHomework);
@@ -147,7 +148,7 @@ export default function HomeworkDetailPage({ params }: PageProps) {
       id: `h${Date.now()}`, // Generate a temporary ID
       parent_id: parentId,
       user_id: 'current-user', // In a real app, this would be the current user's ID
-      flashcard_id: homeworkId,
+      flashcard_id: homeworkId.toString(),
       content,
       created_at: new Date().toISOString(),
       user: {
@@ -170,11 +171,11 @@ export default function HomeworkDetailPage({ params }: PageProps) {
 
   if (!homework) {
     return (
-      <div className="flex flex-col min-h-screen">
+      <div className="flex flex-col min-h-screen bg-white dark:bg-[#0e0e0e]">
         <Navbar />
         <main className="flex-1 py-8 md:py-12">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-            <p>Loading homework...</p>
+            <p className="text-gray-900 dark:text-gray-100">Loading homework...</p>
           </div>
         </main>
         <MobileNav />
@@ -188,23 +189,23 @@ export default function HomeworkDetailPage({ params }: PageProps) {
 
   let statusClass = "";
   if (isCompleted) {
-    statusClass = "bg-green-50 border-green-200 text-green-700";
+    statusClass = "bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800 text-green-700 dark:text-green-400";
   } else if (isOverdue) {
-    statusClass = "bg-red-50 border-red-200 text-red-700";
+    statusClass = "bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800 text-red-700 dark:text-red-400";
   } else if (isDueSoon) {
-    statusClass = "bg-amber-50 border-amber-200 text-amber-700";
+    statusClass = "bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800 text-amber-700 dark:text-amber-400";
   } else {
-    statusClass = "bg-blue-50 border-blue-200 text-blue-700";
+    statusClass = "bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-400";
   }
 
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col min-h-screen bg-white dark:bg-[#0e0e0e]">
       <Navbar />
       <main className="flex-1 py-8 md:py-12">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="mb-8">
             <div className="flex justify-between items-start">
-              <h1 className="text-3xl font-bold text-slate-900">{homework.title}</h1>
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">{homework.title}</h1>
               <Link href="/dashboard/homework">
                 <Button variant="outline">Back to Homework</Button>
               </Link>
@@ -230,26 +231,26 @@ export default function HomeworkDetailPage({ params }: PageProps) {
             </div>
           </div>
 
-          <div className="bg-white p-6 rounded-lg shadow-sm border border-slate-200 mb-8">
-            <h2 className="text-xl font-semibold mb-4">Assignment Details</h2>
+          <div className="bg-white dark:bg-gray-900 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-800 mb-8">
+            <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-gray-100">Assignment Details</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
               <div>
-                <p className="text-sm text-slate-500">For Lesson</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">For Lesson</p>
                 <p className="text-lg">
-                  <Link href={`/dashboard/lessons/${homework.lesson_id}`} className="text-blue-600 hover:underline">
+                  <Link href={`/dashboard/lessons/${homework.lesson_id}`} className="text-blue-600 dark:text-blue-400 hover:underline">
                     Lesson {homework.lesson.lesson_number}: {homework.lesson.title}
                   </Link>
                 </p>
               </div>
               <div>
-                <p className="text-sm text-slate-500">Assigned Date</p>
-                <p className="text-lg">{formatDate(homework.created_at)}</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">Assigned Date</p>
+                <p className="text-lg text-gray-900 dark:text-gray-100">{formatDate(homework.created_at)}</p>
               </div>
             </div>
             
             <div className="mb-6">
-              <p className="text-sm text-slate-500 mb-2">Instructions</p>
-              <p className="text-lg text-slate-700">{homework.description}</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">Instructions</p>
+              <p className="text-lg text-gray-700 dark:text-gray-300">{homework.description}</p>
             </div>
             
             <div className="flex justify-end">
@@ -259,9 +260,9 @@ export default function HomeworkDetailPage({ params }: PageProps) {
             </div>
           </div>
 
-          <div className="bg-white p-6 rounded-lg shadow-sm border border-slate-200">
-            <h2 className="text-xl font-semibold mb-4">Discussion</h2>
-            <p className="text-slate-600 mb-6">
+          <div className="bg-white dark:bg-gray-900 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-800">
+            <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-gray-100">Discussion</h2>
+            <p className="text-gray-600 dark:text-gray-400 mb-6">
               Ask questions or share your progress with classmates and teachers.
             </p>
             

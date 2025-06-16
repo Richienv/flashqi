@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { Navbar, MobileNav } from "@/components/ui/navbar";
 import Link from "next/link";
 import { useRouter, useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -794,14 +793,12 @@ export default function SpeakingCategoryPage() {
   if (isLoading) {
     return (
       <div className="flex flex-col min-h-screen bg-white">
-        <Navbar />
-        <main className="flex-1 flex items-center justify-center">
+        <div className="flex-1 flex items-center justify-center">
           <div className="flex flex-col items-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mb-4"></div>
             <p className="text-gray-500">Loading...</p>
           </div>
-        </main>
-        <MobileNav />
+        </div>
       </div>
     );
   }
@@ -810,16 +807,14 @@ export default function SpeakingCategoryPage() {
   if (!category) {
     return (
       <div className="flex flex-col min-h-screen bg-white">
-        <Navbar />
-        <main className="flex-1 flex items-center justify-center">
+        <div className="flex-1 flex items-center justify-center">
           <div className="text-center">
             <h2 className="text-2xl font-bold mb-4">Category not found</h2>
             <Button onClick={() => router.push('/dashboard/flashcards/speaking')}>
               Go Back
             </Button>
           </div>
-        </main>
-        <MobileNav />
+        </div>
       </div>
     );
   }
@@ -827,7 +822,6 @@ export default function SpeakingCategoryPage() {
   return (
     <div className="flex flex-col min-h-screen bg-white">
       <AnimationStyles />
-      <Navbar />
       
       {isPracticeMode ? (
         /* New Practice Mode UI (Full Screen) */
@@ -1081,7 +1075,7 @@ export default function SpeakingCategoryPage() {
                       >
                         {/* Delete confirmation that shows after swipe */}
                         {hasDeleteConfirm && (
-                          <div className="absolute inset-0 z-10 bg-white bg-opacity-90 flex items-center justify-center">
+                          <div className="absolute inset-0 z-10 bg-white/90 dark:bg-[#0e0e0e]/90 flex items-center justify-center">
                             <div className="text-center">
                               <p className="mb-4 text-gray-900">Delete this phrase?</p>
                               <div className="flex space-x-3 justify-center">
@@ -1187,8 +1181,6 @@ export default function SpeakingCategoryPage() {
           </div>
         </main>
       )}
-      
-      <MobileNav />
     </div>
   );
 }

@@ -13,7 +13,11 @@ export interface Flashcard {
   hanzi: string;
   pinyin: string;
   english: string;
-  example_sentence?: string;
+  example_sentence?: string | {
+    hanzi: string;
+    pinyin: string;
+    english: string;
+  };
   difficulty_level: number;
   created_at: string;
 }

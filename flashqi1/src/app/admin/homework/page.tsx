@@ -370,19 +370,19 @@ export default function AdminHomeworkPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="min-h-screen bg-gray-50 dark:bg-[#0e0e0e] py-8">
       <div className="container mx-auto px-4">
         <div className="mb-8 flex items-center justify-between">
-          <h1 className="text-2xl font-bold text-gray-900">Homework Management</h1>
-          <Link href="/admin" className="text-blue-600 hover:text-blue-800">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Homework Management</h1>
+          <Link href="/admin" className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300">
             Back to Admin
           </Link>
         </div>
 
         {/* Action Bar */}
-        <div className="bg-white p-4 rounded-lg shadow-sm mb-6 flex justify-between items-center">
+        <div className="bg-white dark:bg-[#101010] p-4 rounded-lg shadow-sm border border-gray-200 dark:border-gray-800 mb-6 flex justify-between items-center">
           <div>
-            <h2 className="text-lg font-medium">
+            <h2 className="text-lg font-medium text-gray-900 dark:text-gray-100">
               {showForm ? (editingId ? 'Edit Homework' : 'Add New Homework') : 'Homework Assignments'}
             </h2>
           </div>
@@ -390,14 +390,14 @@ export default function AdminHomeworkPage() {
             {!showForm ? (
               <button
                 onClick={() => setShowForm(true)}
-                className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
+                className="bg-blue-600 dark:bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors"
               >
                 Add Homework
               </button>
             ) : (
               <button
                 onClick={resetForm}
-                className="text-gray-600 px-4 py-2 rounded-md hover:bg-gray-100"
+                className="text-gray-600 dark:text-gray-400 px-4 py-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
               >
                 Cancel
               </button>
@@ -407,17 +407,17 @@ export default function AdminHomeworkPage() {
 
         {/* Form */}
         {showForm && (
-          <div className="bg-white p-6 rounded-lg shadow-sm mb-8">
+          <div className="bg-white dark:bg-[#101010] p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-800 mb-8">
             <form onSubmit={handleSubmit}>
               {formError && (
-                <div className="mb-4 p-3 bg-red-50 text-red-700 rounded-md">
+                <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 rounded-md border border-red-200 dark:border-red-800">
                   {formError}
                 </div>
               )}
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     Select Lesson
                   </label>
                   <select
@@ -425,7 +425,7 @@ export default function AdminHomeworkPage() {
                     value={formData.lesson_id}
                     onChange={handleLessonSelect}
                     required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-[#0e0e0e] text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent"
                   >
                     <option value="">-- Select a Lesson --</option>
                     {lessons.map(lesson => (
@@ -437,7 +437,7 @@ export default function AdminHomeworkPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     Lesson Number (Auto-filled)
                   </label>
                   <input
@@ -445,12 +445,12 @@ export default function AdminHomeworkPage() {
                     name="lesson_number"
                     value={formData.lesson_number}
                     readOnly
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-100"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     Lesson Title (Auto-filled)
                   </label>
                   <input
@@ -458,12 +458,12 @@ export default function AdminHomeworkPage() {
                     name="lesson_title"
                     value={formData.lesson_title}
                     readOnly
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-100"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     Lesson Type
                   </label>
                   <select
@@ -471,7 +471,7 @@ export default function AdminHomeworkPage() {
                     value={formData.lesson_type}
                     onChange={handleInputChange}
                     required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-[#0e0e0e] text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent"
                   >
                     <option value="comprehensive">Comprehensive</option>
                     <option value="speaking">Speaking</option>
@@ -480,7 +480,7 @@ export default function AdminHomeworkPage() {
                 </div>
 
                 <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     Homework Title
                   </label>
                   <input
@@ -489,13 +489,13 @@ export default function AdminHomeworkPage() {
                     value={formData.title}
                     onChange={handleInputChange}
                     required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-[#0e0e0e] text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent"
                     placeholder="e.g., Family Tree Assignment"
                   />
                 </div>
 
                 <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     Description
                   </label>
                   <textarea
@@ -504,13 +504,13 @@ export default function AdminHomeworkPage() {
                     onChange={handleInputChange}
                     required
                     rows={4}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-[#0e0e0e] text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent"
                     placeholder="Detailed description of the homework assignment..."
                   ></textarea>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     Due Date
                   </label>
                   <input
@@ -519,7 +519,7 @@ export default function AdminHomeworkPage() {
                     value={formData.due_date}
                     onChange={handleInputChange}
                     required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-[#0e0e0e] text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent"
                   />
                 </div>
               </div>
@@ -528,14 +528,14 @@ export default function AdminHomeworkPage() {
                 <button
                   type="button"
                   onClick={resetForm}
-                  className="mr-3 px-4 py-2 text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200"
+                  className="mr-3 px-4 py-2 text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
+                  className="px-4 py-2 bg-blue-600 dark:bg-blue-500 text-white rounded-md hover:bg-blue-700 dark:hover:bg-blue-600 disabled:opacity-50 transition-colors"
                 >
                   {isSubmitting
                     ? 'Saving...'
@@ -549,80 +549,80 @@ export default function AdminHomeworkPage() {
         )}
 
         {/* Homework List */}
-        <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+        <div className="bg-white dark:bg-[#101010] rounded-lg shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden">
           {isLoading ? (
             <div className="p-6 text-center">
-              <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-700 mb-4"></div>
-              <p>Loading homework assignments...</p>
+              <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-700 dark:border-blue-400 mb-4"></div>
+              <p className="text-gray-900 dark:text-gray-100">Loading homework assignments...</p>
             </div>
           ) : homeworkItems.length === 0 ? (
-            <div className="p-6 text-center text-gray-500">
+            <div className="p-6 text-center text-gray-500 dark:text-gray-400">
               <p>No homework assignments found.</p>
               <button
                 onClick={() => setShowForm(true)}
-                className="mt-4 text-blue-600 hover:text-blue-800"
+                className="mt-4 text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300"
               >
                 Add your first homework assignment
               </button>
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
+              <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                <thead className="bg-gray-50 dark:bg-gray-800">
                   <tr>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                       Title
                     </th>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                       Lesson
                     </th>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                       Type
                     </th>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                       Due Date
                     </th>
-                    <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                       Actions
                     </th>
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
+                <tbody className="bg-white dark:bg-[#101010] divide-y divide-gray-200 dark:divide-gray-700">
                   {homeworkItems.map((item) => (
-                    <tr key={item.id} className="hover:bg-gray-50">
+                    <tr key={item.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50">
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium text-gray-900">{item.title}</div>
-                        <div className="text-sm text-gray-500 line-clamp-1">{item.description}</div>
+                        <div className="text-sm font-medium text-gray-900 dark:text-gray-100">{item.title}</div>
+                        <div className="text-sm text-gray-500 dark:text-gray-400 line-clamp-1">{item.description}</div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-900">L{item.lesson_number}</div>
-                        <div className="text-sm text-gray-500">{item.lesson_title}</div>
+                        <div className="text-sm text-gray-900 dark:text-gray-100">L{item.lesson_number}</div>
+                        <div className="text-sm text-gray-500 dark:text-gray-400">{item.lesson_title}</div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span 
                           className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                            item.lesson_type === 'comprehensive' ? 'bg-purple-100 text-purple-800' :
-                            item.lesson_type === 'speaking' ? 'bg-orange-100 text-orange-800' :
-                            'bg-teal-100 text-teal-800'
+                            item.lesson_type === 'comprehensive' ? 'bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-300' :
+                            item.lesson_type === 'speaking' ? 'bg-orange-100 dark:bg-orange-900/30 text-orange-800 dark:text-orange-300' :
+                            'bg-teal-100 dark:bg-teal-900/30 text-teal-800 dark:text-teal-300'
                           }`}
                         >
                           {item.lesson_type === 'comprehensive' ? 'Comprehensive' :
                            item.lesson_type === 'speaking' ? 'Speaking' : 'Listening'}
                         </span>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                         {formatDate(item.due_date)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                         <button
                           onClick={() => handleEdit(item)}
-                          className="text-blue-600 hover:text-blue-900 mr-4"
+                          className="text-blue-600 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300 mr-4 transition-colors"
                         >
                           Edit
                         </button>
                         <button
                           onClick={() => handleDelete(item.id!)}
-                          className="text-red-600 hover:text-red-900"
+                          className="text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300 transition-colors"
                         >
                           Delete
                         </button>

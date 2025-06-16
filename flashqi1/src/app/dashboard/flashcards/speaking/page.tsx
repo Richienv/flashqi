@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Navbar, MobileNav } from "@/components/ui/navbar";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -70,7 +69,7 @@ const DEFAULT_CATEGORIES = [
 // Add this component for dot-matrix style numbers
 const DotMatrixNumber = ({ number }: { number: number }) => {
   return (
-    <div className="text-right font-mono text-2xl text-gray-800 tracking-wider">
+    <div className="text-right font-mono text-2xl text-gray-800 dark:text-gray-200 tracking-wider">
       {number}
     </div>
   );
@@ -559,26 +558,18 @@ export default function SpeakingFlashcardsPage() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-white">
-      <Navbar />
-      
+    <div className="flex flex-col min-h-screen bg-white dark:bg-[#0e0e0e]">
       <main className="flex-1 py-6">
-        <div className="container mx-auto px-6">
-          {/* Header and Back Button */}
-          <div className="flex items-center justify-between mb-10">
-            <div className="flex items-center">
-              <Link href="/dashboard/flashcards" className="mr-3 w-10 h-10 rounded-full bg-white border border-gray-200 flex items-center justify-center hover:bg-gray-50 transition-all">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M19 12H5M12 19l-7-7 7-7"></path>
-                </svg>
-              </Link>
-              <h1 className="text-2xl font-normal text-black">Speaking</h1>
-            </div>
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Header */}
+          <div className="mb-8">
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">Speaking Practice</h1>
+            <p className="text-gray-600 dark:text-gray-400">Practice pronunciation with interactive flashcards</p>
           </div>
 
           {/* Success Message */}
           {successMessage && (
-            <div className="mb-6 p-4 bg-gray-50 border border-gray-100 text-black rounded-lg">
+            <div className="mb-6 p-4 bg-gray-50 dark:bg-[#101010] border border-gray-100 dark:border-gray-800 text-black dark:text-gray-100 rounded-lg">
               <div className="flex items-center">
                 <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
@@ -590,11 +581,11 @@ export default function SpeakingFlashcardsPage() {
           
           {/* Stats Header */}
           <div className="mb-10 grid grid-cols-2 gap-4">
-            <div className="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm">
+            <div className="bg-white dark:bg-[#101010] border border-gray-100 dark:border-gray-800 rounded-2xl p-6 shadow-sm">
               <div className="text-sm text-gray-400 font-light mb-1">Categories</div>
               <DotMatrixNumber number={totalCategories} />
             </div>
-            <div className="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm">
+            <div className="bg-white dark:bg-[#101010] border border-gray-100 dark:border-gray-800 rounded-2xl p-6 shadow-sm">
               <div className="text-sm text-gray-400 font-light mb-1">Phrases</div>
               <DotMatrixNumber number={totalPhrases} />
             </div>
@@ -602,10 +593,10 @@ export default function SpeakingFlashcardsPage() {
           
           {/* Add Category Section */}
           <div className="mb-8 flex justify-between items-center">
-            <h2 className="text-xl font-normal text-gray-900">Categories</h2>
+            <h2 className="text-xl font-normal text-gray-900 dark:text-gray-100">Categories</h2>
             <button 
               onClick={handleAddCategory}
-              className="w-10 h-10 rounded-full bg-gray-900 hover:bg-black flex items-center justify-center text-white transition-all"
+              className="w-10 h-10 rounded-full bg-gray-900 dark:bg-gray-100 hover:bg-black dark:hover:bg-gray-200 flex items-center justify-center text-white dark:text-gray-900 transition-all"
             >
               <PlusCircle size={18} />
             </button>
@@ -613,8 +604,8 @@ export default function SpeakingFlashcardsPage() {
           
           {/* Add Category Form */}
           {isAddingCategory && (
-            <div className="mb-8 p-6 border border-gray-100 rounded-2xl bg-white shadow-sm">
-              <h3 className="font-normal text-lg mb-5">Create New Category</h3>
+            <div className="mb-8 p-6 border border-gray-100 dark:border-gray-800 rounded-2xl bg-white dark:bg-[#101010] shadow-sm">
+              <h3 className="font-normal text-lg mb-5 text-gray-900 dark:text-gray-100">Create New Category</h3>
               <form onSubmit={handleSubmitCategory} className="space-y-4">
                 <div>
                   <label className="block text-sm font-light text-gray-400 mb-1">Category Name</label>
@@ -622,7 +613,7 @@ export default function SpeakingFlashcardsPage() {
                     type="text" 
                     value={newCategoryName}
                     onChange={(e) => setNewCategoryName(e.target.value)}
-                    className="w-full p-3 border border-gray-200 rounded-xl text-gray-900"
+                    className="w-full p-3 border border-gray-200 dark:border-gray-700 rounded-xl text-gray-900 dark:text-gray-100 bg-white dark:bg-[#0e0e0e]"
                     placeholder="E.g., Travel Phrases"
                   />
                 </div>
@@ -632,20 +623,20 @@ export default function SpeakingFlashcardsPage() {
                     type="text" 
                     value={newCategoryDesc}
                     onChange={(e) => setNewCategoryDesc(e.target.value)}
-                    className="w-full p-3 border border-gray-200 rounded-xl text-gray-900"
+                    className="w-full p-3 border border-gray-200 dark:border-gray-700 rounded-xl text-gray-900 dark:text-gray-100 bg-white dark:bg-[#0e0e0e]"
                     placeholder="E.g., Common phrases for traveling"
                   />
                 </div>
                 <div className="flex space-x-3 pt-2">
                   <button 
                     type="submit" 
-                    className="px-4 py-2 bg-gray-900 hover:bg-black text-white rounded-lg transition-all"
+                    className="px-4 py-2 bg-gray-900 dark:bg-gray-100 hover:bg-black dark:hover:bg-gray-200 text-white dark:text-gray-900 rounded-lg transition-all"
                   >
                     Create
                   </button>
                   <button 
                     type="button" 
-                    className="px-4 py-2 border border-gray-200 rounded-lg text-gray-600 hover:bg-gray-50 transition-all"
+                    className="px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all"
                     onClick={() => setIsAddingCategory(false)}
                   >
                     Cancel
@@ -658,7 +649,7 @@ export default function SpeakingFlashcardsPage() {
           {/* Loading state */}
           {isLoading && (
             <div className="flex justify-center items-center py-12">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-800"></div>
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-800 dark:border-gray-200"></div>
             </div>
           )}
           
@@ -666,11 +657,11 @@ export default function SpeakingFlashcardsPage() {
           {!isLoading && (
             <div className="mb-6">              
               {filteredCategories.length === 0 ? (
-                <div className="text-center py-12 rounded-2xl bg-gray-50 border border-gray-100">
+                <div className="text-center py-12 rounded-2xl bg-gray-50 dark:bg-[#101010] border border-gray-100 dark:border-gray-800">
                   <p className="text-gray-400 font-light mb-4">No categories found</p>
                   <button 
                     onClick={handleAddCategory} 
-                    className="px-4 py-2 bg-gray-900 hover:bg-black text-white rounded-lg transition-all"
+                    className="px-4 py-2 bg-gray-900 dark:bg-gray-100 hover:bg-black dark:hover:bg-gray-200 text-white dark:text-gray-900 rounded-lg transition-all"
                   >
                     Create Your First Category
                   </button>
@@ -687,9 +678,9 @@ export default function SpeakingFlashcardsPage() {
                       >
                         {/* Delete confirmation modal */}
                         {hasDeleteConfirm && (
-                          <div className="absolute inset-0 z-10 bg-white bg-opacity-90 flex items-center justify-center">
+                          <div className="absolute inset-0 z-10 bg-white/90 dark:bg-[#0e0e0e]/90 flex items-center justify-center">
                             <div className="text-center">
-                              <p className="mb-4 text-gray-900">Delete this category and all its phrases?</p>
+                              <p className="mb-4 text-gray-900 dark:text-gray-100">Delete this category and all its phrases?</p>
                               <div className="flex space-x-3 justify-center">
                                 <button
                                   onClick={(e) => confirmDelete(category.id, e)}
@@ -699,7 +690,7 @@ export default function SpeakingFlashcardsPage() {
                                 </button>
                                 <button
                                   onClick={cancelDelete}
-                                  className="px-4 py-2 border border-gray-200 rounded-lg text-gray-600 hover:bg-gray-50 transition-all"
+                                  className="px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all"
                                 >
                                   Cancel
                                 </button>
@@ -710,12 +701,12 @@ export default function SpeakingFlashcardsPage() {
                         
                         {/* Main category card without swipe animation */}
                         <div 
-                          className="bg-white border border-gray-100 rounded-2xl p-6 transition-all hover:shadow-sm hover:translate-y-[-2px] relative group"
+                          className="bg-white dark:bg-[#101010] border border-gray-100 dark:border-gray-800 rounded-2xl p-6 transition-all hover:shadow-sm hover:translate-y-[-2px] relative group"
                         >
                           <Link href={`/dashboard/flashcards/speaking/${category.id}`} className="block">
                             <div className="flex items-center justify-between">
                               <div>
-                                <h3 className="font-normal text-xl text-gray-900 mb-1">{category.title}</h3>
+                                <h3 className="font-normal text-xl text-gray-900 dark:text-gray-100 mb-1">{category.title}</h3>
                                 <p className="text-sm text-gray-400 font-light">{category.description}</p>
                               </div>
                               
@@ -729,9 +720,9 @@ export default function SpeakingFlashcardsPage() {
                           {category.custom && (
                             <button
                               onClick={(e) => showDeleteConfirmation(category.id, e)}
-                              className="absolute top-2 right-2 w-8 h-8 rounded-full bg-white border border-gray-200 
+                              className="absolute top-2 right-2 w-8 h-8 rounded-full bg-white dark:bg-[#0e0e0e] border border-gray-200 dark:border-gray-700 
                                         text-gray-400 flex items-center justify-center transition-all 
-                                        hover:text-red-500 hover:border-red-200"
+                                        hover:text-red-500 hover:border-red-200 dark:hover:border-red-400"
                               disabled={isDeletingCategory === category.id}
                             >
                               {isDeletingCategory === category.id ? (
@@ -751,8 +742,6 @@ export default function SpeakingFlashcardsPage() {
           )}
         </div>
       </main>
-      
-      <MobileNav />
     </div>
   );
 }

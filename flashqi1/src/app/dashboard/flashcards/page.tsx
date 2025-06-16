@@ -251,15 +251,8 @@ export default function FlashcardsPage() {
 
   // Get flashcards for a specific lesson ID
   const getLessonFlashcards = (lessonId: string) => {
-    // Map reading lesson IDs to tutorial lesson IDs
-    let mappedLessonId = lessonId;
-    if (lessonId.startsWith('r')) {
-      const lessonNumber = lessonId.substring(1); // Get the number after 'r'
-      mappedLessonId = `lesson${lessonNumber}`; // Convert r1 to lesson1, r2 to lesson2, etc.
-    }
-    
-    const cards = safeGetFlashcards(LESSON_FLASHCARDS[mappedLessonId as keyof typeof LESSON_FLASHCARDS]);
-    return cards;
+    const lessonCards = LESSON_FLASHCARDS[lessonId as keyof typeof LESSON_FLASHCARDS] || [];
+    return safeGetFlashcards(lessonCards);
   };
 
   // Get flashcards from lessons 1-22 for midterm prep
@@ -1846,62 +1839,40 @@ export default function FlashcardsPage() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-white">
+    <div className="flex flex-col min-h-screen bg-white dark:bg-[#0e0e0e]">
       <AnimationStyles />
       
-      {/* Homework Reminder Banner */}
-      <div className="w-full py-3 px-4 sm:px-6 lg:px-8 bg-blue-50 border-b border-blue-100">
-        <div className="container mx-auto flex items-center justify-between">
-          <div className="flex items-center">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-blue-600 mr-2">
-              <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
-              <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
-            </svg>
-            <div>
-              <h3 className="text-sm font-medium text-blue-700">Homework Due Soon</h3>
-              <p className="text-xs text-blue-600">Complete Lesson 3 exercises by Friday</p>
-            </div>
-          </div>
-          <Link 
-            href="/dashboard/homework" 
-            className="text-xs px-3 py-1 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-colors"
-          >
-            View Homework
-          </Link>
-        </div>
-      </div>
-      
-      <main className="flex-1 py-6">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+      <main className="flex-1 pt-24 pb-6">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
           {isStudyMode ? (
             <div className="fixed inset-0 bg-gradient-to-b from-[#001060] via-[#2D41D1] to-[#5E72E4] z-50 overflow-hidden flex flex-col">
               {/* Drawing overlay - shown when drawing mode is active */}
               {isDrawingMode && (
-                <div className="fixed inset-0 bg-white z-[100] flex flex-col">
+                <div className="fixed inset-0 bg-white dark:bg-[#0e0e0e] z-[100] flex flex-col">
                   {/* Header */}
-                  <div className="px-4 pt-4 pb-2 flex justify-between items-center border-b border-gray-100">
+                  <div className="px-4 pt-4 pb-2 flex justify-between items-center border-b border-gray-100 dark:border-gray-800">
                     <div className="flex items-center">
                       <button 
-                        className="action-button mr-3 text-gray-500"
+                        className="action-button mr-3 text-gray-500 dark:text-gray-400"
                         onClick={exitDrawingMode}
                       >
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                           <path d="M19 12H5M12 19l-7-7 7-7"></path>
                         </svg>
                       </button>
-                      <h1 className="text-xl font-medium text-gray-800">Draw the Character</h1>
+                      <h1 className="text-xl font-medium text-gray-800 dark:text-gray-200">Draw the Character</h1>
                     </div>
                   </div>
                   
                   {/* Hint section */}
-                  <div className="text-center py-3 bg-blue-50 border-b border-blue-100 drawing-hint">
-                    <p className="text-sm font-medium text-blue-700 mb-1">Try to draw:</p>
-                    <p className="text-2xl font-bold text-blue-900">{currentFlashcards[currentCardIndex]?.pinyin}</p>
-                    <p className="text-sm text-blue-700 mt-1">"{currentFlashcards[currentCardIndex]?.english}"</p>
+                  <div className="text-center py-3 bg-blue-50 dark:bg-blue-900/20 border-b border-blue-100 dark:border-blue-800 drawing-hint">
+                    <p className="text-sm font-medium text-blue-700 dark:text-blue-300 mb-1">Try to draw:</p>
+                    <p className="text-2xl font-bold text-blue-900 dark:text-blue-100">{currentFlashcards[currentCardIndex]?.pinyin}</p>
+                    <p className="text-sm text-blue-700 dark:text-blue-300 mt-1">"{currentFlashcards[currentCardIndex]?.english}"</p>
                     
                     {/* Show Character button */}
                     <button 
-                      className="mt-2 px-3 py-1 text-xs bg-blue-200 text-blue-800 rounded-full hover:bg-blue-300 transition-colors inline-flex items-center"
+                      className="mt-2 px-3 py-1 text-xs bg-blue-200 dark:bg-blue-800 text-blue-800 dark:text-blue-200 rounded-full hover:bg-blue-300 dark:hover:bg-blue-700 transition-colors inline-flex items-center"
                       onClick={(e) => {
                         e.preventDefault();
                         // Find the target element by a data attribute
@@ -1932,14 +1903,14 @@ export default function FlashcardsPage() {
                       data-hanzi-reveal 
                       className="mt-2 opacity-0 transition-opacity duration-300"
                     >
-                      <div className="inline-block p-2 bg-white rounded-lg border border-blue-200">
-                        <p className="text-4xl font-bold text-blue-900">{currentFlashcards[currentCardIndex]?.hanzi}</p>
+                      <div className="inline-block p-2 bg-white dark:bg-[#101010] rounded-lg border border-blue-200 dark:border-blue-700">
+                        <p className="text-4xl font-bold text-blue-900 dark:text-blue-100">{currentFlashcards[currentCardIndex]?.hanzi}</p>
                       </div>
                     </div>
                   </div>
                   
                   {/* Drawing page indicator */}
-                  <div className="mx-auto mt-2 mb-2 px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-xs flex items-center">
+                  <div className="mx-auto mt-2 mb-2 px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 rounded-full text-xs flex items-center">
                     <span>Page {currentDrawingPage + 1} of {drawingPages.length}</span>
                   </div>
                   
@@ -1948,8 +1919,8 @@ export default function FlashcardsPage() {
                     <div className="w-full flex justify-center">
                     <canvas
                       ref={canvasRef}
-                        className="drawing-canvas max-w-[900px] md:max-w-[900px] w-full h-[60vh] md:h-[70vh] bg-white rounded-2xl shadow-lg border border-blue-200"
-                        style={{ touchAction: 'none', background: '#fff', borderRadius: '18px', boxShadow: '0 4px 32px 0 rgba(0,0,0,0.10)' }}
+                        className="drawing-canvas max-w-[900px] md:max-w-[900px] w-full h-[60vh] md:h-[70vh] bg-white dark:bg-[#101010] rounded-2xl shadow-lg border border-blue-200 dark:border-blue-700"
+                        style={{ touchAction: 'none', background: 'var(--canvas-bg, #fff)', borderRadius: '18px', boxShadow: '0 4px 32px 0 rgba(0,0,0,0.10)' }}
                       onTouchStart={startDrawing}
                       onTouchMove={draw}
                       onTouchEnd={endDrawing}
@@ -1962,7 +1933,7 @@ export default function FlashcardsPage() {
                   <div className="drawing-footer md:px-24 md:py-6" style={{maxWidth: '900px', margin: '0 auto', background: 'rgba(255,255,255,0.98)'}}>
                     <div className="flex flex-row justify-center items-center gap-3">
                       <button 
-                        className="action-button-text bg-gray-100 text-gray-800"
+                        className="action-button-text bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200"
                         onClick={undoStroke}
                         disabled={strokeHistory.length <= 1}
                         style={{opacity: strokeHistory.length <= 1 ? 0.5 : 1}}
@@ -1974,7 +1945,7 @@ export default function FlashcardsPage() {
                         </svg>
                       </button>
                       <button 
-                        className="action-button-text bg-gray-100 text-gray-800"
+                        className="action-button-text bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200"
                         onClick={clearCanvas}
                         aria-label="Clear"
                       >
@@ -1985,7 +1956,7 @@ export default function FlashcardsPage() {
                         </svg>
                       </button>
                       <button 
-                        className="action-button-text bg-gray-100 text-gray-800"
+                        className="action-button-text bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200"
                         onClick={goToPreviousDrawingPage}
                         disabled={currentDrawingPage === 0}
                         style={{opacity: currentDrawingPage === 0 ? 0.5 : 1}}
@@ -1996,7 +1967,7 @@ export default function FlashcardsPage() {
                         </svg>
                       </button>
                       <button 
-                        className="action-button-text bg-gray-100 text-gray-800"
+                        className="action-button-text bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200"
                         onClick={addNewDrawingPage}
                         aria-label="Next Page"
                       >
@@ -2006,7 +1977,7 @@ export default function FlashcardsPage() {
                       </button>
                       {/* Next Card button - visually distinct */}
                       <button
-                        className="action-button-text bg-blue-600 text-white hover:bg-blue-700 transition-colors shadow-md"
+                        className="action-button-text bg-blue-600 dark:bg-blue-500 text-white hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors shadow-md"
                         onClick={goToNextCard}
                         aria-label="Next Card"
                         style={{marginLeft: '0.5rem', width: '44px', height: '44px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}
@@ -2019,7 +1990,7 @@ export default function FlashcardsPage() {
                     {/* Done button */}
                     <div className="mt-3">
                       <button 
-                        className="w-full py-3 bg-blue-600 text-white rounded-lg font-medium flex items-center justify-center"
+                        className="w-full py-3 bg-blue-600 dark:bg-blue-500 text-white rounded-lg font-medium flex items-center justify-center hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors"
                         onClick={exitDrawingMode}
                       >
                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
@@ -2034,12 +2005,12 @@ export default function FlashcardsPage() {
               
               <div className="px-4 pt-6 pb-2 flex-1 flex flex-col">
                 {/* Study Mode Header */}
-                <div className="fixed inset-x-0 top-0 pt-4 pb-2 px-4 bg-white border-b border-slate-200 z-40">
+                <div className="fixed inset-x-0 top-0 pt-4 pb-2 px-4 bg-white dark:bg-[#0e0e0e] border-b border-slate-200 dark:border-gray-800 z-40">
                   <div className="flex justify-between items-center">
                   <div className="flex items-center">
                     <Button 
                       variant="outline" 
-                        className="p-2 mr-3 w-10 h-10 rounded-full"
+                        className="p-2 mr-3 w-10 h-10 rounded-full border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800"
                       onClick={exitStudySession}
                     >
                       <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -2047,7 +2018,7 @@ export default function FlashcardsPage() {
                       </svg>
                     </Button>
                       <div>
-                        <h2 className="text-lg font-semibold text-black">
+                        <h2 className="text-lg font-semibold text-black dark:text-white">
                           {activeLesson === "midterm-prep" 
                             ? "Midterm Prep" 
                             : activeLesson === "level2-midterm-prep"
@@ -2056,7 +2027,7 @@ export default function FlashcardsPage() {
                                 ? "All Flashcards" 
                                 : `Lesson ${typeof activeLesson === 'string' ? activeLesson.replace("lesson", "") : activeLesson}`}
                         </h2>
-                        <p className="text-sm text-slate-600">
+                        <p className="text-sm text-slate-600 dark:text-slate-400">
                           {activeLesson === "midterm-prep"
                             ? `${getMidtermPrepCardCount()} cards from Lessons 1-21`
                             : activeLesson === "level2-midterm-prep"
@@ -2201,15 +2172,23 @@ export default function FlashcardsPage() {
                                 {currentFlashcards[currentCardIndex].example_sentence ? (
                                   <>
                                     <p className="mb-1 italic">Example:</p>
-                                    <p className="mb-2 text-gray-800 font-medium">
-                                      {currentFlashcards[currentCardIndex].example_sentence.hanzi}
-                                    </p>
-                                    <p className="mb-2 text-gray-500">
-                                      {currentFlashcards[currentCardIndex].example_sentence.pinyin}
-                                    </p>
-                                    <p className="text-gray-500">
-                                      {currentFlashcards[currentCardIndex].example_sentence.english}
-                                    </p>
+                                    {typeof currentFlashcards[currentCardIndex].example_sentence === 'object' ? (
+                                      <>
+                                        <p className="mb-2 text-gray-800 font-medium">
+                                          {currentFlashcards[currentCardIndex].example_sentence.hanzi}
+                                        </p>
+                                        <p className="mb-2 text-gray-500">
+                                          {currentFlashcards[currentCardIndex].example_sentence.pinyin}
+                                        </p>
+                                        <p className="text-gray-500">
+                                          {currentFlashcards[currentCardIndex].example_sentence.english}
+                                        </p>
+                                      </>
+                                    ) : (
+                                      <p className="mb-2 text-gray-800 font-medium">
+                                        {currentFlashcards[currentCardIndex].example_sentence}
+                                      </p>
+                                    )}
                                   </>
                                 ) : (
                                   <>
@@ -2347,149 +2326,26 @@ export default function FlashcardsPage() {
               
               {/* Lessons List */}
               <div className="space-y-4 mb-8">
-                  {/* Midterm Prep Button - Only show for the appropriate level */}
-                  {selectedLevel === 'level1' && (
-                    <div 
-                      className="rounded-xl overflow-hidden bg-gradient-to-r from-purple-50 to-blue-50 border border-blue-200 p-4 hover:border-blue-300 hover:shadow-sm transition-all cursor-pointer"
-                      onClick={() => enterMidtermPrepMode()}
-                    >
-                      <div className="flex justify-between items-center">
-                        <div className="flex items-center">
-                          <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white font-medium mr-3 text-sm">
-                            📚
-                          </div>
-                          <div>
-                            <h3 className="text-sm font-semibold text-blue-700">Midterm Prep</h3>
-                            <p className="text-xs text-blue-600">{getMidtermPrepCardCount()} cards from Lessons 1-21</p>
-                          </div>
-                        </div>
-                        <button 
-                          className="p-2.5 rounded-full bg-blue-600 text-white hover:bg-blue-700 transition-colors"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            enterMidtermPrepMode();
-                          }}
-                          title="Start Midterm Prep"
-                        >
-                          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <polygon points="5 3 19 12 5 21 5 3"></polygon>
-                          </svg>
-                        </button>
-                      </div>
-                    </div>
-                  )}
-                  
-                  {/* Midterm Prep 2 Button - Only show for level 1 */}
-                  {selectedLevel === 'level1' && (
-                    <div 
-                      className="rounded-xl overflow-hidden bg-gradient-to-r from-indigo-50 to-purple-50 border border-indigo-200 p-4 hover:border-indigo-300 hover:shadow-sm transition-all cursor-pointer"
-                      onClick={() => enterMidtermPrep2Mode()}
-                    >
-                      <div className="flex justify-between items-center">
-                        <div className="flex items-center">
-                          <div className="w-10 h-10 rounded-full bg-indigo-600 flex items-center justify-center text-white font-medium mr-3 text-sm">
-                            🧠
-                          </div>
-                          <div>
-                            <h3 className="text-sm font-semibold text-indigo-700">Midterm Prep 2</h3>
-                            <p className="text-xs text-indigo-600">Interactive exercises for Lessons 1-11</p>
-                          </div>
-                        </div>
-                        <button 
-                          className="p-2.5 rounded-full bg-indigo-600 text-white hover:bg-indigo-700 transition-colors"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            enterMidtermPrep2Mode();
-                          }}
-                          title="Start Midterm Prep 2"
-                        >
-                          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <polygon points="5 3 19 12 5 21 5 3"></polygon>
-                          </svg>
-                        </button>
-                      </div>
-                    </div>
-                  )}
-                  
-                  {selectedLevel === 'level1' && (
-                    <div 
-                      className="rounded-xl overflow-hidden bg-gradient-to-r from-yellow-50 to-orange-50 border border-yellow-200 p-4 hover:border-yellow-300 hover:shadow-sm transition-all cursor-pointer"
-                      onClick={() => router.push('/dashboard/final-prep')}
-                    >
-                      <div className="flex justify-between items-center">
-                        <div className="flex items-center">
-                          <div className="w-10 h-10 rounded-full bg-yellow-500 flex items-center justify-center text-white font-medium mr-3 text-sm">
-                            🏁
-                          </div>
-                          <div>
-                            <h3 className="text-sm font-semibold text-yellow-700">Final Prep</h3>
-                            <p className="text-xs text-yellow-600">Lessons 13-24, in order</p>
-                          </div>
-                        </div>
-                        <button 
-                          className="p-2.5 rounded-full bg-yellow-500 text-white hover:bg-yellow-600 transition-colors"
-                          onClick={e => { e.stopPropagation(); router.push('/dashboard/final-prep'); }}
-                          title="Start Final Prep"
-                        >
-                          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <polygon points="5 3 19 12 5 21 5 3"></polygon>
-                          </svg>
-                        </button>
-                      </div>
-                    </div>
-                  )}
-                  
-                  {selectedLevel === 'level2' && (
-                    <div 
-                      className="rounded-xl overflow-hidden bg-gradient-to-r from-purple-50 to-blue-50 border border-blue-200 p-4 hover:border-blue-300 hover:shadow-sm transition-all cursor-pointer"
-                      onClick={() => enterLevel2MidtermPrepMode()}
-                    >
-                      <div className="flex justify-between items-center">
-                        <div className="flex items-center">
-                          <div className="w-10 h-10 rounded-full bg-purple-600 flex items-center justify-center text-white font-medium mr-3 text-sm">
-                            📚
-                          </div>
-                          <div>
-                            <h3 className="text-sm font-semibold text-purple-700">Level 2 Midterm Prep</h3>
-                            <p className="text-xs text-purple-600">{getLevel2MidtermPrepCardCount()} cards from Level 2 Lessons 1-7</p>
-                          </div>
-                        </div>
-                        <button 
-                          className="p-2.5 rounded-full bg-purple-600 text-white hover:bg-purple-700 transition-colors"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            enterLevel2MidtermPrepMode();
-                          }}
-                          title="Start Level 2 Midterm Prep"
-                        >
-                          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <polygon points="5 3 19 12 5 21 5 3"></polygon>
-                          </svg>
-                        </button>
-                      </div>
-                    </div>
-                  )}
-                  
                   {/* Lessons for the selected level */}
                   {selectedLevel === 'level1' && getCategoryLessons(selectedCategory).level1.map((lesson) => (
                   <div 
                     key={lesson.id} 
-                    className="rounded-xl overflow-hidden bg-gradient-to-r from-blue-50 to-white border border-blue-100 p-4 hover:border-blue-300 hover:shadow-sm transition-all cursor-pointer"
+                    className="rounded-xl overflow-hidden bg-gradient-to-r from-blue-50 to-white dark:from-blue-900/20 dark:to-blue-800/10 border border-blue-100 dark:border-blue-800/50 p-4 hover:border-blue-300 dark:hover:border-blue-700 hover:shadow-sm transition-all cursor-pointer"
                     onClick={() => previewLessonCards(lesson.id)}
                   >
                     <div className="flex justify-between items-center">
                       <div className="flex items-center">
-                        <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-black font-medium mr-3 text-sm">
+                        <div className="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-black dark:text-blue-300 font-medium mr-3 text-sm">
                           {lesson.number}
                         </div>
                         <div>
-                          <h3 className="text-sm font-medium text-black">{lesson.title}</h3>
-                          <p className="text-xs text-black">{lesson.cards} cards</p>
+                          <h3 className="text-sm font-medium text-black dark:text-gray-100">{lesson.title}</h3>
+                          <p className="text-xs text-black dark:text-gray-400">{lesson.cards} cards</p>
                         </div>
                       </div>
                       <div className="flex space-x-2">
                         <button 
-                          className="p-2.5 rounded-full bg-blue-50 text-blue-700 hover:bg-blue-100 transition-colors"
+                          className="p-2.5 rounded-full bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-colors"
                           onClick={(e) => {
                             e.stopPropagation();
                             previewLessonCards(lesson.id);
@@ -2502,7 +2358,7 @@ export default function FlashcardsPage() {
                           </svg>
                         </button>
                         <button 
-                          className="p-2.5 rounded-full bg-blue-600 text-white hover:bg-blue-700 transition-colors"
+                          className="p-2.5 rounded-full bg-blue-600 dark:bg-blue-500 text-white hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors"
                           onClick={(e) => {
                             e.stopPropagation();
                             enterStudyMode(lesson.id);
@@ -2521,22 +2377,22 @@ export default function FlashcardsPage() {
                   {selectedLevel === 'level2' && getCategoryLessons(selectedCategory).level2.map((lesson) => (
                     <div 
                       key={lesson.id} 
-                      className="rounded-xl overflow-hidden bg-gradient-to-r from-purple-50 to-blue-50 border border-blue-200 p-4 hover:border-blue-300 hover:shadow-sm transition-all cursor-pointer"
+                      className="rounded-xl overflow-hidden bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/10 border border-blue-200 dark:border-purple-800/50 p-4 hover:border-blue-300 dark:hover:border-purple-700 hover:shadow-sm transition-all cursor-pointer"
                       onClick={() => previewLessonCards(lesson.id)}
                     >
                       <div className="flex justify-between items-center">
                         <div className="flex items-center">
-                          <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-black font-medium mr-3 text-sm">
+                          <div className="w-8 h-8 rounded-full bg-blue-100 dark:bg-purple-900/30 flex items-center justify-center text-black dark:text-purple-300 font-medium mr-3 text-sm">
                             {lesson.number}
                           </div>
                           <div>
-                            <h3 className="text-sm font-medium text-black">{lesson.title}</h3>
-                            <p className="text-xs text-black">{lesson.cards} cards</p>
+                            <h3 className="text-sm font-medium text-black dark:text-gray-100">{lesson.title}</h3>
+                            <p className="text-xs text-black dark:text-gray-400">{lesson.cards} cards</p>
                           </div>
                         </div>
                         <div className="flex space-x-2">
                           <button 
-                            className="p-2.5 rounded-full bg-blue-50 text-blue-700 hover:bg-blue-100 transition-colors"
+                            className="p-2.5 rounded-full bg-blue-50 dark:bg-purple-900/30 text-blue-700 dark:text-purple-400 hover:bg-blue-100 dark:hover:bg-purple-900/50 transition-colors"
                             onClick={(e) => {
                               e.stopPropagation();
                               previewLessonCards(lesson.id);
@@ -2549,7 +2405,7 @@ export default function FlashcardsPage() {
                             </svg>
                           </button>
                           <button 
-                            className="p-2.5 rounded-full bg-blue-600 text-white hover:bg-blue-700 transition-colors"
+                            className="p-2.5 rounded-full bg-blue-600 dark:bg-purple-500 text-white hover:bg-blue-700 dark:hover:bg-purple-600 transition-colors"
                             onClick={(e) => {
                               e.stopPropagation();
                               enterStudyMode(lesson.id);
@@ -2580,7 +2436,7 @@ export default function FlashcardsPage() {
                         <path d="M19 12H5M12 19l-7-7 7-7"></path>
                       </svg>
                     </Button>
-                    <h1 className="text-lg font-semibold text-black">{selectedCategoryTitle} Levels</h1>
+                    <h1 className="text-lg font-semibold text-black dark:text-white">{selectedCategoryTitle} Levels</h1>
                   </div>
                 </div>
                 
@@ -2589,21 +2445,21 @@ export default function FlashcardsPage() {
                   {/* Level 1 Button */}
                   {getCategoryLessons(selectedCategory).level1.length > 0 && (
                     <div 
-                      className="rounded-xl overflow-hidden bg-gradient-to-r from-blue-100 to-blue-50 border border-blue-200 p-6 hover:border-blue-300 hover:shadow-md transition-all cursor-pointer"
+                      className="rounded-xl overflow-hidden bg-gradient-to-r from-blue-100 to-blue-50 dark:from-blue-900/30 dark:to-blue-800/20 border border-blue-200 dark:border-blue-800/50 p-6 hover:border-blue-300 dark:hover:border-blue-700 hover:shadow-md transition-all cursor-pointer"
                       onClick={() => selectLevel('level1')}
                     >
                       <div className="flex justify-between items-center">
                         <div className="flex items-center">
-                          <div className="w-12 h-12 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold mr-4">
+                          <div className="w-12 h-12 rounded-full bg-blue-600 dark:bg-blue-500 flex items-center justify-center text-white font-bold mr-4">
                             1
                           </div>
                           <div>
-                            <h3 className="text-xl font-semibold text-blue-900">Level 1</h3>
-                            <p className="text-sm text-blue-700">{getCategoryLessons(selectedCategory).level1.length} Lessons</p>
+                            <h3 className="text-xl font-semibold text-blue-900 dark:text-blue-100">Level 1</h3>
+                            <p className="text-sm text-blue-700 dark:text-blue-300">{getCategoryLessons(selectedCategory).level1.length} Lessons</p>
                           </div>
                         </div>
                         <button 
-                          className="p-3 rounded-full bg-blue-600 text-white hover:bg-blue-700 transition-colors"
+                          className="p-3 rounded-full bg-blue-600 dark:bg-blue-500 text-white hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors"
                           onClick={(e) => {
                             e.stopPropagation();
                             selectLevel('level1');
@@ -2620,21 +2476,21 @@ export default function FlashcardsPage() {
                   {/* Level 2 Button */}
                   {getCategoryLessons(selectedCategory).level2.length > 0 && (
                     <div 
-                      className="rounded-xl overflow-hidden bg-gradient-to-r from-purple-100 to-purple-50 border border-purple-200 p-6 hover:border-purple-300 hover:shadow-md transition-all cursor-pointer"
+                      className="rounded-xl overflow-hidden bg-gradient-to-r from-purple-100 to-purple-50 dark:from-purple-900/30 dark:to-purple-800/20 border border-purple-200 dark:border-purple-800/50 p-6 hover:border-purple-300 dark:hover:border-purple-700 hover:shadow-md transition-all cursor-pointer"
                       onClick={() => selectLevel('level2')}
                     >
                       <div className="flex justify-between items-center">
                         <div className="flex items-center">
-                          <div className="w-12 h-12 rounded-full bg-purple-600 flex items-center justify-center text-white font-bold mr-4">
+                          <div className="w-12 h-12 rounded-full bg-purple-600 dark:bg-purple-500 flex items-center justify-center text-white font-bold mr-4">
                             2
                           </div>
                           <div>
-                            <h3 className="text-xl font-semibold text-purple-900">Level 2</h3>
-                            <p className="text-sm text-purple-700">{getCategoryLessons(selectedCategory).level2.length} Lessons</p>
+                            <h3 className="text-xl font-semibold text-purple-900 dark:text-purple-100">Level 2</h3>
+                            <p className="text-sm text-purple-700 dark:text-purple-300">{getCategoryLessons(selectedCategory).level2.length} Lessons</p>
                           </div>
                         </div>
                         <button 
-                          className="p-3 rounded-full bg-purple-600 text-white hover:bg-purple-700 transition-colors"
+                          className="p-3 rounded-full bg-purple-600 dark:bg-purple-500 text-white hover:bg-purple-700 dark:hover:bg-purple-600 transition-colors"
                           onClick={(e) => {
                             e.stopPropagation();
                             selectLevel('level2');
@@ -2656,17 +2512,17 @@ export default function FlashcardsPage() {
             
               {/* Practice Categories */}
               <div className="mb-8">
-                <h2 className="text-xl font-bold text-black mb-4">Practice</h2>
-                {/* Main Categories */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
+                <h2 className="text-xl font-bold text-black dark:text-white mb-4">Practice</h2>
+                {/* Main Categories - Full Width Grid */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 w-full">
                   {/* Chinese Category */}
                   <div 
-                    className="bg-gradient-to-br from-blue-50 to-white rounded-xl p-5 border border-blue-100 hover:border-blue-300 hover:shadow-sm transition-all cursor-pointer"
+                    className="bg-gradient-to-br from-blue-50 to-white dark:from-blue-900/20 dark:to-blue-800/10 rounded-xl p-8 h-64 border border-blue-100 dark:border-blue-800/50 hover:border-blue-300 dark:hover:border-blue-700 hover:shadow-sm transition-all cursor-pointer flex flex-col justify-between"
                     onClick={() => handleCategorySelect('chinese')}
                   >
-                    <div className="flex items-center mb-3">
-                      <div className="w-12 h-12 rounded-full bg-blue-600 flex items-center justify-center text-white mr-3">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <div className="flex items-center mb-6">
+                      <div className="w-16 h-16 rounded-full bg-blue-600 dark:bg-blue-500 flex items-center justify-center text-white mr-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                           <line x1="4" y1="19" x2="20" y2="19"></line>
                           <line x1="4" y1="15" x2="14" y2="15"></line>
                           <line x1="4" y1="11" x2="20" y2="11"></line>
@@ -2674,22 +2530,22 @@ export default function FlashcardsPage() {
                         </svg>
                       </div>
                       <div>
-                        <h3 className="text-lg font-semibold">Flashcards</h3>
-                        <p className="text-sm text-blue-600">Regular Flashcards</p>
+                        <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Flashcards</h3>
+                        <p className="text-base text-blue-600 dark:text-blue-400">Regular Flashcards</p>
                       </div>
                     </div>
                     
-                    <div className="mt-3 pt-3 border-t border-blue-100">
+                    <div className="mt-4 pt-4 border-t border-blue-100 dark:border-blue-800/50">
                       <div className="flex items-center justify-between">
-                        <span className="text-xs text-blue-600">{calculateTotalFlashcards()} cards total</span>
+                        <span className="text-sm text-blue-600 dark:text-blue-400">{calculateTotalFlashcards()} cards total</span>
                         <button 
-                          className="p-2 rounded-full bg-blue-600 text-white hover:bg-blue-700 transition-colors"
+                          className="p-3 rounded-full bg-blue-600 dark:bg-blue-500 text-white hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors"
                           onClick={(e) => {
                             e.stopPropagation(); // Prevent triggering the parent onclick
                             handleCategorySelect('chinese');
                           }}
                         >
-                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                             <path d="M9 18l6-6-6-6"></path>
                           </svg>
                         </button>
@@ -2699,33 +2555,33 @@ export default function FlashcardsPage() {
 
                   {/* Reading Category */}
                   <div 
-                    className="bg-gradient-to-br from-green-50 to-white rounded-xl p-5 border border-green-100 hover:border-green-300 hover:shadow-sm transition-all cursor-pointer"
+                    className="bg-gradient-to-br from-green-50 to-white dark:from-green-900/20 dark:to-green-800/10 rounded-xl p-8 h-64 border border-green-100 dark:border-green-800/50 hover:border-green-300 dark:hover:border-green-700 hover:shadow-sm transition-all cursor-pointer flex flex-col justify-between"
                     onClick={() => router.push('/dashboard/flashcards/reading')}
                   >
-                    <div className="flex items-center mb-3">
-                      <div className="w-12 h-12 rounded-full bg-green-600 flex items-center justify-center text-white mr-3">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <div className="flex items-center mb-6">
+                      <div className="w-16 h-16 rounded-full bg-green-600 dark:bg-green-500 flex items-center justify-center text-white mr-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                           <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
                           <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
                         </svg>
                       </div>
                       <div>
-                        <h3 className="text-lg font-semibold">Reading</h3>
-                        <p className="text-sm text-green-600">Reading Practice</p>
+                        <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Reading</h3>
+                        <p className="text-base text-green-600 dark:text-green-400">Reading Practice</p>
                       </div>
                     </div>
                     
-                    <div className="mt-3 pt-3 border-t border-green-100">
+                    <div className="mt-4 pt-4 border-t border-green-100 dark:border-green-800/50">
                       <div className="flex items-center justify-between">
-                        <span className="text-xs text-green-600">15 reading exercises</span>
+                        <span className="text-sm text-green-600 dark:text-green-400">15 reading exercises</span>
                         <button 
-                          className="p-2 rounded-full bg-green-600 text-white hover:bg-green-700 transition-colors"
+                          className="p-3 rounded-full bg-green-600 dark:bg-green-500 text-white hover:bg-green-700 dark:hover:bg-green-600 transition-colors"
                           onClick={(e) => {
                             e.stopPropagation();
                             router.push('/dashboard/flashcards/reading');
                           }}
                         >
-                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                             <path d="M9 18l6-6-6-6"></path>
                           </svg>
                         </button>
@@ -2735,12 +2591,12 @@ export default function FlashcardsPage() {
                   
                   {/* Speaking Category */}
                   <div 
-                    className="bg-gradient-to-br from-purple-50 to-white rounded-xl p-5 border border-purple-100 hover:border-purple-300 hover:shadow-sm transition-all cursor-pointer"
+                    className="bg-gradient-to-br from-purple-50 to-white dark:from-purple-900/20 dark:to-purple-800/10 rounded-xl p-8 h-64 border border-purple-100 dark:border-purple-800/50 hover:border-purple-300 dark:hover:border-purple-700 hover:shadow-sm transition-all cursor-pointer flex flex-col justify-between"
                     onClick={() => router.push('/dashboard/flashcards/speaking')}
                   >
-                    <div className="flex items-center mb-3">
-                      <div className="w-12 h-12 rounded-full bg-purple-600 flex items-center justify-center text-white mr-3">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <div className="flex items-center mb-6">
+                      <div className="w-16 h-16 rounded-full bg-purple-600 dark:bg-purple-500 flex items-center justify-center text-white mr-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                           <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
                           <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
                           <line x1="12" y1="19" x2="12" y2="23"></line>
@@ -2748,22 +2604,22 @@ export default function FlashcardsPage() {
                         </svg>
                       </div>
                       <div>
-                        <h3 className="text-lg font-semibold">Speaking</h3>
-                        <p className="text-sm text-purple-600">Practice Conversations</p>
+                        <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Speaking</h3>
+                        <p className="text-base text-purple-600 dark:text-purple-400">Practice Conversations</p>
                       </div>
                     </div>
                     
-                    <div className="mt-3 pt-3 border-t border-purple-100">
+                    <div className="mt-4 pt-4 border-t border-purple-100 dark:border-purple-800/50">
                       <div className="flex items-center justify-between">
-                        <span className="text-xs text-purple-600">45 speaking phrases</span>
+                        <span className="text-sm text-purple-600 dark:text-purple-400">45 speaking phrases</span>
                         <button 
-                          className="p-2 rounded-full bg-purple-600 text-white hover:bg-purple-700 transition-colors"
+                          className="p-3 rounded-full bg-purple-600 dark:bg-purple-500 text-white hover:bg-purple-700 dark:hover:bg-purple-600 transition-colors"
                           onClick={(e) => {
                             e.stopPropagation();
                               router.push('/dashboard/flashcards/speaking');
                           }}
                         >
-                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                             <path d="M9 18l6-6-6-6"></path>
                           </svg>
                         </button>
@@ -2773,35 +2629,35 @@ export default function FlashcardsPage() {
                   
                   {/* Battle Mode Category - NEW */}
                   <div 
-                    className="bg-gradient-to-br from-indigo-50 to-white rounded-xl p-5 border border-indigo-100 hover:border-indigo-300 hover:shadow-sm transition-all cursor-pointer"
+                    className="bg-gradient-to-br from-indigo-50 to-white dark:from-indigo-900/20 dark:to-indigo-800/10 rounded-xl p-8 h-64 border border-indigo-100 dark:border-indigo-800/50 hover:border-indigo-300 dark:hover:border-indigo-700 hover:shadow-sm transition-all cursor-pointer flex flex-col justify-between"
                     onClick={() => router.push('/dashboard/battle')}
                   >
-                    <div className="flex items-center mb-3">
-                      <div className="w-12 h-12 rounded-full bg-indigo-600 flex items-center justify-center text-white mr-3">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <div className="flex items-center mb-6">
+                      <div className="w-16 h-16 rounded-full bg-indigo-600 dark:bg-indigo-500 flex items-center justify-center text-white mr-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                           <path d="M13.5 21v-7.5a.75.75 0 01.75-.75h3a.75.75 0 01.75.75V21m-4.5 0H2.36m11.14 0H18m0 0h3.64m-1.39 0V9.349m-16.5 11.65V9.35m0 0a3.001 3.001 0 003.75-.615A2.993 2.993 0 009.75 9.75c.896 0 1.7-.393 2.25-1.016a2.993 2.993 0 002.25 1.016c.896 0 1.7-.393 2.25-1.016a3.001 3.001 0 003.75.614m-16.5 0a3.004 3.004 0 01-.621-4.72L4.318 3.44A1.5 1.5 0 015.378 3h13.243a1.5 1.5 0 011.06.44l1.19 1.189a3 3 0 01-.621 4.72m-13.5 8.65h3.75a.75.75 0 00.75-.75V13.5a.75.75 0 00-.75-.75H6.75a.75.75 0 00-.75.75v3.75c0 .415.336.75.75.75z" />
                         </svg>
                       </div>
                       <div>
-                        <h3 className="text-lg font-semibold">Battle Mode</h3>
+                        <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Battle Mode</h3>
                         <div className="flex items-center">
-                          <p className="text-sm text-indigo-600">1v1 Drawing Battles</p>
-                          <span className="ml-2 bg-indigo-100 text-indigo-800 text-xs px-2 py-0.5 rounded-full font-semibold">New!</span>
+                          <p className="text-base text-indigo-600 dark:text-indigo-400">1v1 Drawing Battles</p>
+                          <span className="ml-2 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-800 dark:text-indigo-300 text-sm px-2 py-1 rounded-full font-semibold">New!</span>
                         </div>
                       </div>
                     </div>
                     
-                    <div className="mt-3 pt-3 border-t border-indigo-100">
+                    <div className="mt-4 pt-4 border-t border-indigo-100 dark:border-indigo-800/50">
                       <div className="flex items-center justify-between">
-                        <span className="text-xs text-indigo-600">Live Competition</span>
+                        <span className="text-sm text-indigo-600 dark:text-indigo-400">Live Competition</span>
                         <button 
-                          className="p-2 rounded-full bg-indigo-600 text-white hover:bg-indigo-700 transition-colors"
+                          className="p-3 rounded-full bg-indigo-600 dark:bg-indigo-500 text-white hover:bg-indigo-700 dark:hover:bg-indigo-600 transition-colors"
                           onClick={(e) => {
                             e.stopPropagation();
                             router.push('/dashboard/battle');
                           }}
                         >
-                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                             <path d="M9 18l6-6-6-6"></path>
                           </svg>
                         </button>
@@ -2809,236 +2665,99 @@ export default function FlashcardsPage() {
                     </div>
                   </div>
                   
-                  {/* Listening Category - Coming Soon */}
-                  <div className="bg-gradient-to-br from-gray-50 to-white rounded-xl p-5 border border-gray-100 opacity-60 grayscale cursor-not-allowed relative">
-                    <div className="absolute inset-0 bg-gray-100 bg-opacity-40 rounded-xl pointer-events-none"></div>
-                          <div className="absolute top-0 right-0 mt-2 mr-2 z-10">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-blue-600/70">
-                              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-                              <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-                            </svg>
-                          </div>
-                    
-                    <div className="flex items-center mb-3">
-                      <div className="w-12 h-12 rounded-full bg-blue-400 flex items-center justify-center text-white mr-3">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
-                          <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
-                          <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
+                  {/* Homework Category - Replaces the locked Listening category */}
+                  <div 
+                    className="bg-gradient-to-br from-amber-50 to-white dark:from-amber-900/20 dark:to-amber-800/10 rounded-xl p-8 h-64 border border-amber-100 dark:border-amber-800/50 hover:border-amber-300 dark:hover:border-amber-700 hover:shadow-sm transition-all cursor-pointer flex flex-col justify-between"
+                    onClick={() => router.push('/dashboard/homework')}
+                  >
+                    <div className="flex items-center mb-6">
+                      <div className="w-16 h-16 rounded-full bg-amber-600 dark:bg-amber-500 flex items-center justify-center text-white mr-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
+                          <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
                         </svg>
                       </div>
                       <div>
-                        <h3 className="text-lg font-medium text-gray-600">Listening</h3>
-                        <div className="bg-blue-500/80 text-white text-xs font-semibold px-3 py-1 rounded-full inline-block w-fit mb-2 mt-1">
-                              Coming Soon
-                            </div>
+                        <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Homework</h3>
+                        <p className="text-base text-amber-600 dark:text-amber-400">Assignment Tracker</p>
                       </div>
                     </div>
                     
-                    <div className="mt-3 pt-3 border-t border-gray-100">
+                    <div className="mt-4 pt-4 border-t border-amber-100 dark:border-amber-800/50">
                       <div className="flex items-center justify-between">
-                        <span className="text-xs text-blue-600/50">Audio exercises</span>
+                        <span className="text-sm text-amber-600 dark:text-amber-400">Complete Lesson 3 exercises by Friday</span>
                         <button 
-                          className="p-2 rounded-full bg-blue-400 text-white opacity-50"
-                          disabled
+                          className="p-3 rounded-full bg-amber-600 dark:bg-amber-500 text-white hover:bg-amber-700 dark:hover:bg-amber-600 transition-colors"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            router.push('/dashboard/homework');
+                          }}
                         >
-                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                             <path d="M9 18l6-6-6-6"></path>
                           </svg>
                         </button>
-                          </div>
-                        </div>
                       </div>
+                    </div>
+                  </div>
                   
                   {/* Exam Test Category */}
                   <div 
-                    className="bg-gradient-to-br from-orange-50 to-white rounded-xl p-5 border border-orange-100 hover:border-orange-300 hover:shadow-sm transition-all cursor-pointer"
+                    className="bg-gradient-to-br from-orange-50 to-white dark:from-orange-900/20 dark:to-orange-800/10 rounded-xl p-8 h-64 border border-orange-100 dark:border-orange-800/50 hover:border-orange-300 dark:hover:border-orange-700 hover:shadow-sm transition-all cursor-pointer flex flex-col justify-between"
                     onClick={() => router.push('/dashboard/exam-test')}
                   >
-                    <div className="flex items-center mb-3">
-                      <div className="w-12 h-12 rounded-full bg-orange-500 flex items-center justify-center text-white mr-3">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <path d="M18 8h1a4 4 0 0 1 0 8h-1"></path>
-                          <path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"></path>
-                          <line x1="6" y1="1" x2="6" y2="4"></line>
-                          <line x1="10" y1="1" x2="10" y2="4"></line>
-                          <line x1="14" y1="1" x2="14" y2="4"></line>
+                    <div className="flex items-center mb-6">
+                      <div className="w-16 h-16 rounded-full bg-orange-600 dark:bg-orange-500 flex items-center justify-center text-white mr-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
                         </svg>
                       </div>
                       <div>
-                        <h3 className="text-lg font-semibold">Exam Test</h3>
-                        <p className="text-sm text-orange-600">Practice Exams</p>
+                        <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Exam Test</h3>
+                        <p className="text-base text-orange-600 dark:text-orange-400">Test your knowledge</p>
                       </div>
                     </div>
                     
-                    <div className="mt-3 pt-3 border-t border-orange-100">
+                    <div className="mt-4 pt-4 border-t border-orange-100 dark:border-orange-800/50">
                       <div className="flex items-center justify-between">
-                        <span className="text-xs text-orange-600">30 test questions</span>
+                        <span className="text-sm text-orange-600 dark:text-orange-400">30 test questions</span>
                         <button 
-                          className="p-2 rounded-full bg-orange-500 text-white hover:bg-orange-600 transition-colors"
+                          className="p-3 rounded-full bg-orange-600 dark:bg-orange-500 text-white hover:bg-orange-700 dark:hover:bg-orange-600 transition-colors"
                           onClick={(e) => {
                             e.stopPropagation();
                             router.push('/dashboard/exam-test');
                           }}
                         >
-                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                             <path d="M9 18l6-6-6-6"></path>
                           </svg>
                         </button>
                       </div>
                     </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Exam Preparation Section */}
-              <div className="bg-[#F8FAFF] rounded-xl p-6 mb-6">
-                <h2 className="text-2xl font-bold text-black mb-4">Exam Preparation</h2>
-                
-                <div className="bg-white rounded-lg p-5 border border-blue-100">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h3 className="font-medium text-black mb-1">Practice Exam</h3>
-                      <p className="text-black">30 random questions from all lessons</p>
-                    </div>
-                    <Button 
-                      variant="primary" 
-                      onClick={() => router.push('/dashboard/exam')}
-                    >
-                      Start Exam
-                    </Button>
                   </div>
                 </div>
               </div>
   
               {/* Lesson Progress (when a lesson is selected) */}
               {activeLesson !== "all" && (
-                <div className="mb-6 rounded-xl overflow-hidden bg-gradient-to-r from-blue-50 to-white border border-blue-200 p-5">
+                <div className="mb-6 rounded-xl overflow-hidden bg-gradient-to-r from-blue-50 to-white dark:from-blue-900/30 dark:to-blue-800/20 border border-blue-200 dark:border-blue-800/50 p-5">
                   <div className="flex justify-between items-center mb-2">
-                    <h3 className="font-bold text-lg text-black">
+                    <h3 className="font-bold text-lg text-black dark:text-white">
                       Lesson Progress
                     </h3>
-                    <span className="text-blue-600 font-medium">{LESSON_PROGRESS[activeLesson as keyof typeof LESSON_PROGRESS] || 0}%</span>
+                    <span className="text-blue-600 dark:text-blue-400 font-medium">{LESSON_PROGRESS[activeLesson as keyof typeof LESSON_PROGRESS] || 0}%</span>
                   </div>
-                  <div className="w-full bg-white rounded-full h-2">
+                  <div className="w-full bg-white dark:bg-gray-700 rounded-full h-2">
                     <div 
-                      className="bg-blue-600 h-2 rounded-full" 
+                      className="bg-blue-600 dark:bg-blue-500 h-2 rounded-full" 
                       style={{ width: `${LESSON_PROGRESS[activeLesson as keyof typeof LESSON_PROGRESS] || 0}%` }}
                     ></div>
                   </div>
                 </div>
               )}
-  
-              {/* Card grid with enhanced search and infinite scrolling */}
-              <div className="mb-6">
-                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4">
-                  <h2 className="text-2xl font-bold text-black mb-3 sm:mb-0">All Flashcards</h2>
-                  <div className="relative w-full sm:w-64 flex items-center gap-2">
-                    <div className="relative flex-grow">
-                      <input 
-                        type="text" 
-                        placeholder="Search cards..."
-                        className="w-full p-2 pl-3 pr-10 border border-blue-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                      />
-                      {searchQuery && (
-                        <button
-                          className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                          onClick={() => setSearchQuery('')}
-                        >
-                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <line x1="18" y1="6" x2="6" y2="18"></line>
-                            <line x1="6" y1="6" x2="18" y2="18"></line>
-                          </svg>
-                        </button>
-                      )}
-                    </div>
-                    <button
-                      onClick={() => setIsHandwritingModalOpen(true)}
-                      className="p-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors flex-shrink-0 flex items-center justify-center handwriting-button"
-                      title="Handwriting Search"
-                      style={{ minWidth: '40px', height: '40px' }}
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M12 19l7-7 3 3-7 7-3-3z"></path>
-                        <path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"></path>
-                        <path d="M2 2l7.586 7.586"></path>
-                        <circle cx="11" cy="11" r="2"></circle>
-                      </svg>
-                    </button>
-                  </div>
-                </div>
-                
-                {/* Handwriting Search CTA */}
-                <div className="mb-4 flex justify-center sm:justify-end">
-                  <button 
-                    onClick={() => setIsHandwritingModalOpen(true)}
-                    className="flex items-center gap-2 p-2 px-4 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg shadow-md hover:from-blue-600 hover:to-blue-700 transition-all"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M12 19l7-7 3 3-7 7-3-3z"></path>
-                      <path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"></path>
-                      <path d="M2 2l7.586 7.586"></path>
-                      <circle cx="11" cy="11" r="2"></circle>
-                    </svg>
-                    Search by Handwriting
-                  </button>
-                </div>
-                
-                {/* Display search info if there's an exact match */}
-                {isExactMatchFound && searchQuery && (
-                  <div className="mb-3 p-2 bg-blue-50 rounded-lg text-blue-600 text-sm">
-                    Exact match found! Showing it at the top of results.
-                  </div>
-                )}
-                
-                {displayFlashcards.length === 0 ? (
-                  <div className="bg-white rounded-xl p-8 border border-blue-100 text-center">
-                    <p className="text-black">{
-                      searchQuery 
-                        ? "No cards match your search." 
-                        : "No cards available for this lesson."
-                    }</p>
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-2 gap-3">
-                    {displayFlashcards.slice(0, visibleCardsCount).map((card, index) => (
-                      <div 
-                        key={`${card.id}-${index}`} 
-                        className={`rounded-xl overflow-hidden bg-gradient-to-r ${
-                          isExactMatchFound && card.id === matchedCardId 
-                            ? 'from-blue-100 to-white border-2 border-blue-300' 
-                            : 'from-[#F8FAFF] to-white border border-blue-100'
-                        } hover:border-blue-300 hover:shadow-sm transition-all p-3 cursor-pointer`}
-                        onClick={() => {
-                          // Find index of this card in the current flashcards
-                          const cardIndex = displayFlashcards.findIndex(c => c.id === card.id);
-                          if (cardIndex !== -1) {
-                            setCurrentFlashcards(displayFlashcards);
-                            setCurrentCardIndex(cardIndex);
-                            setIsStudyMode(true);
-                          }
-                        }}
-                      >
-                        <div className="mb-1 text-xl font-medium text-center">{card.hanzi}</div>
-                        <div className="text-xs text-center text-gray-500">{card.pinyin}</div>
-                        <div className="mt-1 text-sm text-center text-black">{card.english}</div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-                
-                {/* Loading indicator for infinite scrolling */}
-                {displayFlashcards.length > visibleCardsCount && (
-                  <div className="flex justify-center items-center mt-8 mb-4">
-                    <div className="w-6 h-6 border-t-2 border-blue-500 border-solid rounded-full animate-spin"></div>
-                    <span className="ml-2 text-gray-600">Loading more cards...</span>
-                  </div>
-                )}
-              </div>
               
               {/* Add New Card Floating Button - Only visible on main view */}
+              {/* REMOVED: Floating blue plus button
               <button
                 onClick={() => setIsAddCardModalOpen(true)}
                 className="fixed bottom-20 right-16 md:bottom-6 md:right-20 p-4 rounded-full bg-blue-600 text-white shadow-lg hover:bg-blue-700 transition-all z-50"
@@ -3046,6 +2765,7 @@ export default function FlashcardsPage() {
               >
                 <PlusCircle size={24} />
               </button>
+              */}
             </>
           )}
         </div>
@@ -3055,7 +2775,7 @@ export default function FlashcardsPage() {
       {showBackToTop && (
         <button
           onClick={scrollToTop}
-          className="fixed bottom-20 right-6 md:bottom-6 md:right-6 p-3 rounded-full bg-blue-600 text-white shadow-lg hover:bg-blue-700 transition-all z-50"
+          className="fixed bottom-20 right-6 md:bottom-6 md:right-6 p-3 rounded-full bg-blue-600 dark:bg-blue-500 text-white shadow-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition-all z-50"
           aria-label="Back to top"
         >
           <svg 
@@ -3077,38 +2797,38 @@ export default function FlashcardsPage() {
       {/* Add Card Modal */}
       {isAddCardModalOpen && (
         <div className="fixed inset-0 flex items-center justify-center z-50 bg-black/50 backdrop-blur-sm">
-          <div className="bg-white rounded-2xl p-6 shadow-xl max-w-md w-full animate-bounce-in m-4">
+          <div className="bg-white dark:bg-[#0e0e0e] rounded-2xl p-6 shadow-xl max-w-md w-full animate-bounce-in m-4 border dark:border-gray-800">
             <div className="flex justify-between items-center mb-6">
-              <h2 className="text-xl font-bold text-black">Add Speaking Card</h2>
+              <h2 className="text-xl font-bold text-black dark:text-white">Add Speaking Card</h2>
               <button 
                 onClick={() => setIsAddCardModalOpen(false)}
-                className="p-1 rounded-full hover:bg-gray-100"
+                className="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800"
               >
-                <X size={20} className="text-gray-500" />
+                <X size={20} className="text-gray-500 dark:text-gray-400" />
               </button>
             </div>
             
             {addCardSuccess ? (
               <div className="text-center py-8">
-                <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-green-600">
+                <div className="w-16 h-16 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-green-600 dark:text-green-400">
                     <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
                     <polyline points="22 4 12 14.01 9 11.01"></polyline>
                   </svg>
                 </div>
-                <h3 className="text-lg font-medium text-gray-900 mb-2">Card Added Successfully!</h3>
-                <p className="text-gray-600">Your new card has been added.</p>
+                <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">Card Added Successfully!</h3>
+                <p className="text-gray-600 dark:text-gray-400">Your new card has been added.</p>
               </div>
             ) : (
               <form onSubmit={handleAddCard} className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     Category
                   </label>
                   <select
                     value={selectedSpeakingCategory}
                     onChange={(e) => setSelectedSpeakingCategory(e.target.value)}
-                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full p-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     required
                   >
                     <option value="">Select a category</option>
@@ -3121,42 +2841,42 @@ export default function FlashcardsPage() {
                 </div>
                 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     Chinese Characters (Hanzi)
                   </label>
                   <input
                     type="text"
                     value={newCardHanzi}
                     onChange={(e) => setNewCardHanzi(e.target.value)}
-                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full p-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     placeholder="你好"
                     required
                   />
                 </div>
                 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     Pinyin
                   </label>
                   <input
                     type="text"
                     value={newCardPinyin}
                     onChange={(e) => setNewCardPinyin(e.target.value)}
-                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full p-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     placeholder="nǐ hǎo"
                     required
                   />
                 </div>
                 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     English Translation
                   </label>
                   <input
                     type="text"
                     value={newCardEnglish}
                     onChange={(e) => setNewCardEnglish(e.target.value)}
-                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full p-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     placeholder="Hello"
                     required
                   />
@@ -3165,7 +2885,7 @@ export default function FlashcardsPage() {
                 <div className="pt-2">
                   <button
                     type="submit"
-                    className="w-full p-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-all"
+                    className="w-full p-3 bg-blue-600 dark:bg-blue-500 hover:bg-blue-700 dark:hover:bg-blue-600 text-white rounded-lg transition-all"
                     disabled={isAddingCard}
                   >
                     {isAddingCard ? (
@@ -3184,130 +2904,20 @@ export default function FlashcardsPage() {
         </div>
       )}
       
-      {/* Handwriting Search Modal */}
-      {isHandwritingModalOpen && (
-        <div className="fixed inset-0 flex items-center justify-center z-50 bg-black/50 backdrop-blur-sm handwriting-modal-container">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md md:max-w-lg m-4 flex flex-col h-[85vh] md:h-[80vh]">
-            <div className="flex justify-between items-center p-4 border-b border-gray-100">
-              <h2 className="text-xl font-bold text-black">Handwriting Search</h2>
-              <button 
-                onClick={() => setIsHandwritingModalOpen(false)}
-                className="p-1 rounded-full hover:bg-gray-100"
-              >
-                <X size={20} className="text-gray-500" />
-              </button>
-            </div>
-            
-            <div className="p-3 border-b border-gray-100 bg-blue-50">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-blue-800 font-medium">Draw a Chinese character to search</p>
-                  <p className="text-xs text-blue-600">Write clearly in the box below - recognition happens automatically</p>
-                </div>
-                {recognizedCharacter && (
-                  <div className="p-3 bg-white rounded-lg border border-blue-200 recognized-character">
-                    <p className="text-3xl font-bold text-blue-900">{recognizedCharacter}</p>
-                  </div>
-                )}
-              </div>
-            </div>
-            
-            <div className="p-3 flex-grow flex flex-col items-center justify-center bg-gray-50">
-              <canvas
-                ref={handwritingCanvasRef}
-                className="w-full h-[60vh] max-h-[500px] handwriting-canvas bg-white rounded-lg shadow-inner border border-gray-200"
-                onTouchStart={handleHandwritingStart}
-                onTouchMove={handleHandwritingMove}
-                onTouchEnd={handleHandwritingEnd}
-                onMouseDown={(e) => {
-                  setIsHandwriting(true);
-                  if (handwritingCtx && handwritingCanvasRef.current) {
-                    const rect = handwritingCanvasRef.current.getBoundingClientRect();
-                    const x = e.clientX - rect.left;
-                    const y = e.clientY - rect.top;
-                    handwritingCtx.beginPath();
-                    handwritingCtx.moveTo(x, y);
-                  }
-                }}
-                onMouseMove={(e) => {
-                  if (isHandwriting && handwritingCtx && handwritingCanvasRef.current) {
-                    const rect = handwritingCanvasRef.current.getBoundingClientRect();
-                    const x = e.clientX - rect.left;
-                    const y = e.clientY - rect.top;
-                    handwritingCtx.lineTo(x, y);
-                    handwritingCtx.stroke();
-                  }
-                }}
-                onMouseUp={() => {
-                  setIsHandwriting(false);
-                  saveHandwritingState();
-                  
-                  // Automatically trigger recognition after a short delay
-                  setTimeout(() => {
-                    recognizeHandwriting();
-                  }, 800);
-                }}
-                onMouseLeave={() => {
-                  if (isHandwriting) {
-                    setIsHandwriting(false);
-                    saveHandwritingState();
-                    
-                    // Automatically trigger recognition after a short delay
-                    setTimeout(() => {
-                      recognizeHandwriting();
-                    }, 800);
-                  }
-                }}
-              />
-              
-              {isRecognizing && (
-                <div className="mt-4 flex items-center justify-center text-blue-600">
-                  <div className="w-5 h-5 border-t-2 border-blue-600 border-solid rounded-full animate-spin mr-2"></div>
-                  <span>Recognizing...</span>
-                </div>
-              )}
-            </div>
-            
-            <div className="p-3 border-t border-gray-100 flex justify-between items-center bg-gray-50">
-              <button 
-                onClick={clearHandwritingCanvas}
-                className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-lg transition-colors handwriting-button"
-              >
-                Clear
-              </button>
-              
-              <div className="flex gap-2">
-                {recognizedCharacter && (
-                  <button 
-                    onClick={() => {
-                      setSearchQuery(recognizedCharacter);
-                      setIsHandwritingModalOpen(false);
-                    }}
-                    className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors handwriting-button"
-                  >
-                    Search
-                  </button>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-      
       <MobileNav />
       
       {/* Completion popup */}
       {isCompletionPopupVisible && (
         <div className="fixed inset-0 flex items-center justify-center z-50 bg-black/50 backdrop-blur-sm">
-          <div className="bg-white rounded-2xl p-8 shadow-xl max-w-md w-full text-center animate-bounce-in">
-            <div className="w-20 h-20 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full flex items-center justify-center mx-auto mb-5">
+          <div className="bg-white dark:bg-[#0e0e0e] rounded-2xl p-8 shadow-xl max-w-md w-full text-center animate-bounce-in border dark:border-gray-800">
+            <div className="w-20 h-20 bg-gradient-to-r from-blue-500 to-blue-600 dark:from-blue-400 dark:to-blue-500 rounded-full flex items-center justify-center mx-auto mb-5">
               <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
                 <polyline points="22 4 12 14.01 9 11.01"></polyline>
               </svg>
             </div>
-            <h2 className="text-2xl font-bold mb-2">Congratulations! 🎉</h2>
-            <p className="text-gray-600 mb-6">You've completed all the flashcards in this lesson!</p>
+            <h2 className="text-2xl font-bold mb-2 text-gray-900 dark:text-gray-100">Congratulations! 🎉</h2>
+            <p className="text-gray-600 dark:text-gray-400 mb-6">You've completed all the flashcards in this lesson!</p>
             <Button 
               variant="primary" 
               className="w-full"

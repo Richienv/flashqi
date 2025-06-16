@@ -6,7 +6,7 @@ import { EnhancedFlashcard } from "@/components/flashcards/enhanced-flashcard";
 import { CommentSection } from "@/components/comments/comment";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { useRouter } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
 import { Comment } from '@/types';
 
 // Mock data - will replace with Supabase data later
@@ -97,16 +97,32 @@ interface PageProps {
   };
 }
 
-export default function FlashcardDetailPage({ params }: PageProps) {
+export default function FlashcardDetailPage() {
+  const params = useParams();
+  const cardId = parseInt(params.id as string);
   const router = useRouter();
-  const flashcardId = params.id;
+  
+  // Find the card across all lessons
+  let currentCard = null;
+  let currentLesson = null;
+  
+  for (const lesson of LESSONS) {
+    const card = lesson.cards.find(c => c.id === cardId);
+    if (card) {
+      currentCard = card;
+      currentLesson = lesson;
+      break;
+    }
+  }
+  
+  const [isFlipped, setIsFlipped] = useState(false);
   const [flashcard, setFlashcard] = useState<any>(null);
   const [comments, setComments] = useState<Comment[]>([]);
 
   useEffect(() => {
     // For demo purpose, using mock data
-    const foundFlashcard = SAMPLE_FLASHCARDS.find(f => f.id === flashcardId);
-    const flashcardComments = SAMPLE_COMMENTS[flashcardId] || [];
+    const foundFlashcard = SAMPLE_FLASHCARDS.find(f => f.id === cardId.toString());
+    const flashcardComments = SAMPLE_COMMENTS[cardId.toString()] || [];
     
     if (foundFlashcard) {
       setFlashcard(foundFlashcard);
@@ -115,14 +131,14 @@ export default function FlashcardDetailPage({ params }: PageProps) {
       // Flashcard not found, redirect to flashcards list
       router.push('/dashboard/flashcards');
     }
-  }, [flashcardId, router]);
+  }, [cardId, router]);
 
   const handleAddComment = (content: string, parentId?: string) => {
     const newComment: Comment = {
       id: `c${Date.now()}`, // Generate a temporary ID
       parent_id: parentId,
       user_id: 'current-user', // In a real app, this would be the current user's ID
-      flashcard_id: flashcardId,
+      flashcard_id: cardId.toString(),
       content,
       created_at: new Date().toISOString(),
       user: {
@@ -137,135 +153,69 @@ export default function FlashcardDetailPage({ params }: PageProps) {
     setComments(comments.filter(comment => comment.id !== commentId));
   };
 
-  if (!flashcard) {
-    return (
-      <div className="flex flex-col min-h-screen bg-slate-50">
-        <Navbar />
-        <main className="flex-1 py-8">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center justify-center h-64">
-              <div className="bg-white p-8 rounded-xl shadow-sm border border-slate-200 text-center">
-                <p className="text-slate-600">Loading flashcard...</p>
-              </div>
-            </div>
-          </div>
-        </main>
-        <MobileNav />
-      </div>
-    );
+  if (!currentCard || !currentLesson) {
+    return <div>Card not found</div>;
   }
 
   return (
-    <div className="flex flex-col min-h-screen bg-slate-50">
-      <Navbar />
-      <main className="flex-1 py-8">
+    <div className="flex flex-col min-h-screen bg-white">
+      <main className="flex-1 py-6">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="mb-6">
-            <div className="flex justify-between items-center">
-              <h1 className="text-2xl font-bold text-slate-900">Flashcard Detail</h1>
-              <Link href="/dashboard/flashcards">
-                <Button variant="outline">Back to Flashcards</Button>
-              </Link>
-            </div>
+          {/* Header and Back Button */}
+          <div className="flex items-center mb-6">
+            <Link href="/dashboard/flashcards" className="mr-3 p-2 rounded-full bg-white border border-blue-200 hover:bg-blue-50">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M19 12H5M12 19l-7-7 7-7"></path>
+              </svg>
+            </Link>
+            <h1 className="text-2xl font-bold text-black">Flashcard Detail</h1>
           </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-            <div>
-              {/* Flashcard display */}
-              <EnhancedFlashcard 
-                card={flashcard} 
-                onKnown={() => console.log('Marked as known')}
-                onUnknown={() => console.log('Marked as unknown')}
-              />
-            </div>
-            
-            <div>
-              {/* Flashcard Information */}
-              <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 mb-6">
-                <h2 className="text-lg font-semibold text-slate-900 mb-4 pb-2 border-b border-slate-100">
-                  Flashcard Information
-                </h2>
-                
-                <div className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <h3 className="text-sm font-medium text-slate-500 mb-1">Hanzi</h3>
-                      <p className="text-lg font-medium text-slate-900">{flashcard.hanzi}</p>
-                    </div>
-                    <div>
-                      <h3 className="text-sm font-medium text-slate-500 mb-1">Pinyin</h3>
-                      <p className="text-lg text-slate-900">{flashcard.pinyin}</p>
-                    </div>
+          
+          {/* Card Info */}
+          <div className="mb-6 bg-gradient-to-r from-blue-50 to-white rounded-xl p-4 border border-blue-200">
+            <p className="text-sm text-black">From Lesson {currentLesson.lesson_number}</p>
+          </div>
+          
+          {/* Flashcard */}
+          <div className="mb-6 flex justify-center">
+            <div 
+              className="w-full max-w-md h-64 bg-gradient-to-br from-blue-50 to-white rounded-xl border border-blue-200 cursor-pointer transition-all hover:shadow-lg"
+              onClick={() => setIsFlipped(!isFlipped)}
+            >
+              <div className="h-full flex flex-col justify-center items-center p-6 text-center">
+                {!isFlipped ? (
+                  <div>
+                    <h3 className="text-2xl font-bold text-black mb-2">{currentCard.chinese}</h3>
+                    <p className="text-lg text-blue-600">{currentCard.pinyin}</p>
+                    <p className="text-sm text-gray-500 mt-4">Tap to reveal</p>
                   </div>
-                  
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <h3 className="text-sm font-medium text-slate-500 mb-1">English</h3>
-                      <p className="text-lg text-slate-900">{flashcard.english}</p>
-                    </div>
-                    <div>
-                      <h3 className="text-sm font-medium text-slate-500 mb-1">Difficulty Level</h3>
-                      <div className="flex items-center">
-                        <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-medium">
-                          Level {flashcard.difficulty_level}
-                        </span>
-                      </div>
-                    </div>
+                ) : (
+                  <div>
+                    <h3 className="text-2xl font-bold text-black mb-2">{currentCard.english}</h3>
+                    <p className="text-sm text-gray-500 mt-4">Tap to flip back</p>
                   </div>
-                  
-                  {flashcard.example_sentence && (
-                    <div>
-                      <h3 className="text-sm font-medium text-slate-500 mb-1">Example Sentence</h3>
-                      <p className="text-lg text-slate-900 p-3 bg-slate-50 rounded-lg">
-                        {flashcard.example_sentence}
-                      </p>
-                    </div>
-                  )}
-                  
-                  <div className="flex justify-end pt-4">
-                    <div className="space-x-2">
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
-                        className="text-red-600 border-red-200 hover:bg-red-50"
-                        onClick={() => console.log('Marked as difficult')}
-                      >
-                        Mark as Difficult
-                      </Button>
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
-                        className="text-green-600 border-green-200 hover:bg-green-50"
-                        onClick={() => console.log('Marked as mastered')}
-                      >
-                        Mark as Mastered
-                      </Button>
-                    </div>
-                  </div>
-                </div>
+                )}
               </div>
             </div>
           </div>
-
-          {/* Comments Section */}
-          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-            <h2 className="text-lg font-semibold text-slate-900 mb-4 pb-2 border-b border-slate-100">
-              Discussion
-            </h2>
-            
-            <p className="text-slate-600 mb-6">
-              Ask questions or share insights about this character with other learners.
-            </p>
-            
-            <CommentSection 
-              comments={comments}
-              onAddComment={handleAddComment}
-              onDeleteComment={handleDeleteComment}
-            />
+          
+          {/* Actions */}
+          <div className="flex justify-center space-x-4">
+            <Button 
+              variant="outline" 
+              className="border-blue-200 text-black hover:bg-blue-50"
+            >
+              Mark as Known
+            </Button>
+            <Button 
+              variant="outline" 
+              className="border-blue-200 text-black hover:bg-blue-50"
+            >
+              Study Again
+            </Button>
           </div>
         </div>
       </main>
-      <MobileNav />
     </div>
   );
 } 

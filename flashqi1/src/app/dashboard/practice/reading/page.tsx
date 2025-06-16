@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { Navbar, MobileNav } from "@/components/ui/navbar";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -126,86 +125,142 @@ export default function ReadingPracticePage() {
   });
   
   return (
-    <div className="flex flex-col min-h-screen bg-white">
-      <Navbar />
-      
+    <div className="flex flex-col min-h-screen bg-white dark:bg-[#0e0e0e]">
       <main className="flex-1 py-6">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Header and Back Button */}
-          <div className="flex items-center mb-6">
-            <Link href="/dashboard/flashcards" className="mr-3 p-2 rounded-full bg-white border border-gray-200 hover:bg-gray-50">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M19 12H5M12 19l-7-7 7-7"></path>
-              </svg>
-            </Link>
-            <h1 className="text-2xl font-bold text-black">
-              {CATEGORY_INFO.icon} {CATEGORY_INFO.title}
-            </h1>
+          {/* Header */}
+          <div className="mb-8">
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">Reading Practice</h1>
+            <p className="text-gray-600 dark:text-gray-400">Improve your Chinese reading comprehension</p>
           </div>
-          
-          {/* All Lessons Section */}
-          <div className="mb-6">
-            <div className="flex justify-between items-center mb-4">
-              <div className="flex space-x-2">
-                <select 
-                  className="p-2 rounded-lg border border-gray-200 text-sm text-black"
-                  value={filterStatus}
-                  onChange={(e) => setFilterStatus(e.target.value)}
-                >
-                  <option value="all">All Lessons</option>
-                  <option value="in-progress">In Progress</option>
-                  <option value="completed">Completed</option>
-                  <option value="not-started">Not Started</option>
-                </select>
+
+          {/* Practice Categories */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {/* Beginner Reading */}
+            <div className="card card-hover p-6 bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/10 dark:to-emerald-900/10 border-green-200 dark:border-green-700">
+              <div className="flex items-center mb-4">
+                <div className="p-3 bg-green-100 dark:bg-green-900/20 rounded-lg">
+                  <svg className="w-6 h-6 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                  </svg>
+                </div>
+                <div className="ml-4">
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Beginner Reading</h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Simple texts and stories</p>
+                </div>
               </div>
+              <div className="mb-4">
+                <div className="flex justify-between text-xs text-gray-600 dark:text-gray-400 mb-1">
+                  <span>Progress</span>
+                  <span>65%</span>
+                </div>
+                <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                  <div className="bg-green-600 dark:bg-green-500 h-2 rounded-full" style={{ width: '65%' }}></div>
+                </div>
+              </div>
+              <button className="w-full py-2 px-4 bg-green-600 dark:bg-green-500 text-white rounded-lg font-medium hover:bg-green-700 dark:hover:bg-green-600 transition-colors">
+                Start Reading
+              </button>
             </div>
-            
+
+            {/* Intermediate Reading */}
+            <div className="card card-hover p-6 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/10 dark:to-indigo-900/10 border-blue-200 dark:border-blue-700">
+              <div className="flex items-center mb-4">
+                <div className="p-3 bg-blue-100 dark:bg-blue-900/20 rounded-lg">
+                  <svg className="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                </div>
+                <div className="ml-4">
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Intermediate Reading</h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">News articles and essays</p>
+                </div>
+              </div>
+              <div className="mb-4">
+                <div className="flex justify-between text-xs text-gray-600 dark:text-gray-400 mb-1">
+                  <span>Progress</span>
+                  <span>42%</span>
+                </div>
+                <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                  <div className="bg-blue-600 dark:bg-blue-500 h-2 rounded-full" style={{ width: '42%' }}></div>
+                </div>
+              </div>
+              <button className="w-full py-2 px-4 bg-blue-600 dark:bg-blue-500 text-white rounded-lg font-medium hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors">
+                Start Reading
+              </button>
+            </div>
+
+            {/* Advanced Reading */}
+            <div className="card card-hover p-6 bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/10 dark:to-pink-900/10 border-purple-200 dark:border-purple-700">
+              <div className="flex items-center mb-4">
+                <div className="p-3 bg-purple-100 dark:bg-purple-900/20 rounded-lg">
+                  <svg className="w-6 h-6 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                  </svg>
+                </div>
+                <div className="ml-4">
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Advanced Reading</h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Literature and complex texts</p>
+                </div>
+              </div>
+              <div className="mb-4">
+                <div className="flex justify-between text-xs text-gray-600 dark:text-gray-400 mb-1">
+                  <span>Progress</span>
+                  <span>28%</span>
+                </div>
+                <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                  <div className="bg-purple-600 dark:bg-purple-500 h-2 rounded-full" style={{ width: '28%' }}></div>
+                </div>
+              </div>
+              <button className="w-full py-2 px-4 bg-purple-600 dark:bg-purple-500 text-white rounded-lg font-medium hover:bg-purple-700 dark:hover:bg-purple-600 transition-colors">
+                Start Reading
+              </button>
+            </div>
+          </div>
+
+          {/* Recent Activity */}
+          <div className="mt-12">
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-6">Recent Activity</h2>
             <div className="space-y-4">
-              {filteredLessons.map(lesson => (
-                <div 
-                  key={lesson.id} 
-                  className="bg-gradient-to-r from-amber-50 to-amber-100 rounded-xl p-4 hover:shadow-md transition-all"
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center">
-                      <div className="w-14 h-14 rounded-full bg-amber-100 flex items-center justify-center text-black font-bold mr-4 border border-amber-200">
-                        {lesson.lesson_number}
-                      </div>
-                      <div>
-                        <h4 className="font-medium text-black text-lg">Lesson {lesson.lesson_number}</h4>
-                        <p className="text-sm text-gray-600">{lesson.total_words} words</p>
-                      </div>
-                    </div>
-                    
-                    <div className="flex items-center space-x-4">
-                      <button className="p-2 rounded-lg border border-amber-200 bg-white hover:bg-amber-50">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <path d="M12 20h9"></path>
-                          <path d="M12 4h9"></path>
-                          <path d="M12 12h9"></path>
-                          <path d="M3 20l2-2 2 2"></path>
-                          <path d="M3 4l2 2 2-2"></path>
-                          <path d="M3 12h2"></path>
-                        </svg>
-                      </button>
-                      
-                      <Link href={`/dashboard/lessons/reading/${lesson.id}`}>
-                        <button className="w-12 h-12 rounded-full bg-amber-500 hover:bg-amber-600 flex items-center justify-center text-white">
-                          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <polygon points="5 3 19 12 5 21 5 3"></polygon>
-                          </svg>
-                        </button>
-                      </Link>
-                    </div>
+              <div className="card p-4 flex items-center justify-between">
+                <div className="flex items-center">
+                  <div className="p-2 bg-green-100 dark:bg-green-900/20 rounded-lg">
+                    <svg className="w-5 h-5 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                  <div className="ml-4">
+                    <h4 className="font-medium text-gray-900 dark:text-gray-100">Completed: "My Family"</h4>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Beginner level • 2 hours ago</p>
                   </div>
                 </div>
-              ))}
+                <div className="text-right">
+                  <div className="text-lg font-bold text-green-600 dark:text-green-400">95%</div>
+                  <div className="text-xs text-gray-500 dark:text-gray-400">Score</div>
+                </div>
+              </div>
+
+              <div className="card p-4 flex items-center justify-between">
+                <div className="flex items-center">
+                  <div className="p-2 bg-blue-100 dark:bg-blue-900/20 rounded-lg">
+                    <svg className="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                  <div className="ml-4">
+                    <h4 className="font-medium text-gray-900 dark:text-gray-100">In Progress: "Chinese Culture"</h4>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Intermediate level • Started yesterday</p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <div className="text-lg font-bold text-blue-600 dark:text-blue-400">60%</div>
+                  <div className="text-xs text-gray-500 dark:text-gray-400">Progress</div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </main>
-      
-      <MobileNav />
     </div>
   );
 } 

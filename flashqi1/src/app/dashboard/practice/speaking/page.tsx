@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { Navbar, MobileNav } from "@/components/ui/navbar";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -76,90 +75,21 @@ export default function SpeakingPracticePage() {
   
   return (
     <div className="flex flex-col min-h-screen bg-white">
-      <Navbar />
-      
       <main className="flex-1 py-6">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           {/* Header and Back Button */}
           <div className="flex items-center mb-6">
-            <Link href="/dashboard/practice" className="mr-3 p-2 rounded-full bg-white border border-blue-200 hover:bg-blue-50">
+            <Link href="/dashboard/flashcards" className="mr-3 p-2 rounded-full bg-white border border-blue-200 hover:bg-blue-50">
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M19 12H5M12 19l-7-7 7-7"></path>
               </svg>
             </Link>
-            <h1 className="text-2xl font-bold text-black">
-              {CATEGORY_INFO.icon} {CATEGORY_INFO.title}
-            </h1>
+            <h1 className="text-2xl font-bold text-black">Speaking Practice</h1>
           </div>
           
-          {/* Category Information */}
-          <div className="bg-blue-50 rounded-xl p-5 border border-blue-100 mb-6">
-            <p className="text-black mb-4">{CATEGORY_INFO.description}</p>
-            <div className="flex flex-wrap gap-4">
-              <div className="bg-white px-4 py-2 rounded-lg">
-                <span className="text-black font-medium">{CATEGORY_INFO.totalLessons} Lessons</span>
-              </div>
-              <div className="bg-white px-4 py-2 rounded-lg">
-                <span className="text-black font-medium">{CATEGORY_INFO.totalCards} Flashcards</span>
-              </div>
-              <div className="bg-white px-4 py-2 rounded-lg">
-                <span className="text-black font-medium">
-                  {Math.round((CATEGORY_INFO.completedCards / CATEGORY_INFO.totalCards) * 100)}% Complete
-                </span>
-              </div>
-            </div>
-          </div>
-          
-          {/* Next Lesson Section */}
-          {nextLesson && (
-            <div className="mb-6">
-              <h2 className="text-xl font-bold text-black mb-3">Next Up</h2>
-              <div className="bg-white rounded-xl p-5 border border-blue-200 hover:border-blue-300 hover:shadow-sm transition-all">
-                <div className="flex items-start justify-between">
-                  <div className="flex items-start">
-                    <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center text-black font-bold mr-4">
-                      {nextLesson.lesson_number}
-                    </div>
-                    <div>
-                      <h3 className="font-bold text-lg text-black">{nextLesson.title}</h3>
-                      <p className="text-black mt-1">{nextLesson.description}</p>
-                      {nextLesson.completion_percentage > 0 && (
-                        <div className="mt-3">
-                          <div className="flex justify-between text-sm mb-1">
-                            <span className="text-black">Progress</span>
-                            <span className="text-black">{nextLesson.completion_percentage}%</span>
-                          </div>
-                          <div className="w-full bg-blue-50 rounded-full h-1.5">
-                            <div 
-                              className="bg-blue-500 h-1.5 rounded-full" 
-                              style={{ width: `${nextLesson.completion_percentage}%` }}
-                            ></div>
-                          </div>
-                        </div>
-                      )}
-                      
-                      <div className="mt-4">
-                        <Button variant="primary" onClick={() => router.push(`/dashboard/lessons/${nextLesson.id}`)}>
-                          {nextLesson.completion_percentage > 0 ? 'Continue' : 'Start'} Lesson
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="bg-blue-50 p-3 rounded-lg max-w-xs">
-                    <h4 className="text-sm font-semibold text-black mb-1">Teacher Notes:</h4>
-                    <p className="text-sm text-black">{nextLesson.teacher_notes}</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-          
-          {/* All Lessons Section */}
+          {/* Filter Section */}
           <div className="mb-6">
-            <div className="flex justify-between items-center mb-3">
-              <h2 className="text-xl font-bold text-black">All Lessons</h2>
-              
+            <div className="flex justify-between items-center mb-4">
               <div className="flex space-x-2">
                 <select 
                   className="p-2 rounded-lg border border-blue-200 text-sm text-black"
@@ -173,40 +103,42 @@ export default function SpeakingPracticePage() {
                 </select>
               </div>
             </div>
-            
-            <div className="space-y-4">
-              {filteredLessons.map(lesson => (
-                <Link key={lesson.id} href={`/dashboard/lessons/${lesson.id}`}>
-                  <div className="bg-white rounded-xl p-4 border border-blue-100 hover:border-blue-300 hover:shadow-sm transition-all">
-                    <div className="flex justify-between items-center">
-                      <div className="flex items-center">
-                        <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-black font-bold mr-3">
-                          {lesson.lesson_number}
-                        </div>
-                        <div>
-                          <h4 className="font-medium text-black">{lesson.title}</h4>
-                          <p className="text-sm text-black">{lesson.total_cards} cards</p>
-                        </div>
-                      </div>
-                      <div className="text-sm text-black text-right">
-                        {lesson.completion_percentage > 0 ? (
-                          <div>
-                            <span className="text-blue-600 font-medium">{lesson.completion_percentage}%</span> completed
-                          </div>
-                        ) : (
-                          <span className="text-black">Not started</span>
-                        )}
-                      </div>
+          </div>
+          
+          {/* Speaking Lessons */}
+          <div className="space-y-4">
+            {filteredLessons.map(lesson => (
+              <div key={lesson.id} className="bg-gradient-to-r from-purple-50 to-white rounded-xl p-4 border border-purple-200 hover:border-purple-300 hover:shadow-sm transition-all cursor-pointer">
+                <div className="flex justify-between items-center">
+                  <div className="flex items-center">
+                    <div className="w-14 h-14 rounded-full bg-purple-100 flex items-center justify-center text-black font-bold mr-4 border border-purple-200">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+                        <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                        <line x1="12" y1="19" x2="12" y2="23"></line>
+                        <line x1="8" y1="23" x2="16" y2="23"></line>
+                      </svg>
+                    </div>
+                    <div>
+                      <h4 className="font-medium text-black text-lg">{lesson.title}</h4>
+                      <p className="text-sm text-black">{lesson.total_cards} cards</p>
                     </div>
                   </div>
-                </Link>
-              ))}
-            </div>
+                  <div className="text-sm text-black text-right">
+                    {lesson.completion_percentage > 0 ? (
+                      <div>
+                        <span className="text-purple-600 font-medium">{lesson.completion_percentage}%</span> completed
+                      </div>
+                    ) : (
+                      <span className="text-black">Not started</span>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </main>
-      
-      <MobileNav />
     </div>
   );
 } 
