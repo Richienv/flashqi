@@ -49,23 +49,31 @@ const AnimationStyles = () => (
       top: 10px;
       right: 10px;
       z-index: 10;
-      width: 40px;
-      height: 40px;
+      width: 44px;
+      height: 44px;
       display: flex;
       align-items: center;
       justify-content: center;
       border-radius: 50%;
-      background-color: #4f46e5;
+      background: rgba(99, 102, 241, 0.8);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
       color: white;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-      border: none;
+      box-shadow: 0 8px 16px rgba(99, 102, 241, 0.3);
       outline: none;
-      transition: all 0.2s ease;
+      transition: all 0.3s ease;
+    }
+    
+    .drawing-button:hover {
+      transform: scale(1.05);
+      background: rgba(99, 102, 241, 0.9);
+      box-shadow: 0 12px 24px rgba(99, 102, 241, 0.4);
     }
     
     .drawing-button:active {
       transform: scale(0.95);
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      box-shadow: 0 4px 8px rgba(99, 102, 241, 0.2);
     }
     
     .drawing-controls-button {
@@ -109,15 +117,20 @@ const AnimationStyles = () => (
       transform: scale(0.97);
     }
 
-    .drawing-footer {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      padding: 12px 16px;
-      background-color: white;
-      box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
-      z-index: 10;
+    /* Enhanced glassmorphism floating toolbar */
+    .floating-toolbar {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+    }
+    
+    @media (prefers-color-scheme: dark) {
+      .floating-toolbar {
+        background: rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+      }
     }
 
     /* Grammar part-of-speech color coding - Enhanced for better visibility */
@@ -889,8 +902,8 @@ export default function FlashcardsPage() {
         canvas.width = rect.width;
         canvas.height = rect.height;
         
-        // Set drawing style
-        context.strokeStyle = '#000';
+        // Set drawing style with blue color for visibility in both themes
+        context.strokeStyle = '#3b82f6'; // Blue-500 - visible in both light and dark
         context.lineWidth = 4;
         context.lineCap = 'round';
         context.lineJoin = 'round';
@@ -942,8 +955,8 @@ export default function FlashcardsPage() {
         canvasRef.current.width = rect.width;
         canvasRef.current.height = rect.height;
         
-        // Restore previous drawing style
-        ctx.strokeStyle = '#000';
+        // Restore previous drawing style with blue color
+        ctx.strokeStyle = '#3b82f6'; // Blue-500 - visible in both light and dark
         ctx.lineWidth = 4;
         ctx.lineCap = 'round';
         ctx.lineJoin = 'round';
@@ -989,11 +1002,11 @@ export default function FlashcardsPage() {
     ctx.moveTo(x, y);
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
-    ctx.lineWidth = 2; // Thinner, more beautiful
-    ctx.globalAlpha = 0.8;
-    ctx.strokeStyle = 'rgba(0, 0, 0, 0.7)';
-    ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
-    ctx.shadowBlur = 5;
+    ctx.lineWidth = 3; // Slightly thicker for better visibility
+    ctx.globalAlpha = 0.9;
+    ctx.strokeStyle = '#3b82f6'; // Blue-500 for visibility in both themes
+    ctx.shadowColor = 'rgba(59, 130, 246, 0.3)'; // Blue shadow
+    ctx.shadowBlur = 4;
     setCurrentStroke([{x, y}]);
   };
 
@@ -1270,8 +1283,8 @@ export default function FlashcardsPage() {
         canvas.style.width = `${rect.width}px`;
         canvas.style.height = `${rect.height}px`;
         
-        // Set drawing style for handwriting with responsive line width
-        context.strokeStyle = '#000';
+        // Set drawing style for handwriting with responsive line width and blue color
+        context.strokeStyle = '#3b82f6'; // Blue-500 for visibility in both themes
         context.lineWidth = Math.max(8, Math.min(rect.width, rect.height) / 30); // Responsive line width
         context.lineCap = 'round';
         context.lineJoin = 'round';
@@ -1956,75 +1969,65 @@ export default function FlashcardsPage() {
                     </div>
                   </div>
                   
-                  {/* Drawing toolbar */}
-                  <div className="drawing-footer md:px-24 md:py-6 bg-transparent dark:bg-gray-800/90 dark:border-gray-600 backdrop-filter backdrop-blur-sm border-t border-gray-200 dark:border-gray-700" style={{maxWidth: '900px', margin: '0 auto'}}>
-                    <div className="flex flex-row justify-center items-center gap-3">
-                      <button 
-                        className="action-button-text bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200"
-                        onClick={undoStroke}
-                        disabled={strokeHistory.length <= 1}
-                        style={{opacity: strokeHistory.length <= 1 ? 0.5 : 1}}
-                        aria-label="Undo"
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <path d="M3 7v6h6"></path>
-                          <path d="M3 13c0-4.4 3.6-8 8-8h10"></path>
-                        </svg>
-                      </button>
-                      <button 
-                        className="action-button-text bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200"
-                        onClick={clearCanvas}
-                        aria-label="Clear"
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <path d="M3 6h18"></path>
-                          <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
-                          <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
-                        </svg>
-                      </button>
-                      <button 
-                        className="action-button-text bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200"
-                        onClick={goToPreviousDrawingPage}
-                        disabled={currentDrawingPage === 0}
-                        style={{opacity: currentDrawingPage === 0 ? 0.5 : 1}}
-                        aria-label="Previous Page"
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <path d="M15 18l-6-6 6-6"></path>
-                        </svg>
-                      </button>
-                      <button 
-                        className="action-button-text bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200"
-                        onClick={addNewDrawingPage}
-                        aria-label="Next Page"
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <path d="M9 18l6-6-6-6"></path>
-                        </svg>
-                      </button>
-                      {/* Next Card button - visually distinct */}
-                      <button
-                        className="action-button-text bg-blue-600 dark:bg-blue-500 text-white hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors shadow-md"
-                        onClick={goToNextCard}
-                        aria-label="Next Card"
-                        style={{marginLeft: '0.5rem', width: '44px', height: '44px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <path d="M9 18l6-6-6-6"></path>
-                        </svg>
-                      </button>
-                    </div>
-                    {/* Done button */}
-                    <div className="mt-3">
-                      <button 
-                        className="w-full py-3 bg-blue-600 dark:bg-blue-500 text-white rounded-lg font-medium flex items-center justify-center hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors"
-                        onClick={exitDrawingMode}
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
-                          <polyline points="20 6 9 17 4 12"></polyline>
-                        </svg>
-                        <span>Done</span>
-                      </button>
+                  {/* Drawing toolbar - Floating glassmorphism design */}
+                  <div className="fixed bottom-4 left-4 right-4 z-20 flex justify-center">
+                    <div className="bg-white/10 dark:bg-black/10 backdrop-blur-lg border border-white/20 dark:border-white/10 shadow-xl rounded-2xl px-6 py-4 max-w-lg w-full">
+                      <div className="flex flex-row justify-center items-center gap-3 mb-3">
+                        <button 
+                          className="p-3 rounded-xl bg-white/20 dark:bg-black/20 backdrop-blur-sm border border-white/30 dark:border-white/10 text-black dark:text-white hover:bg-white/30 dark:hover:bg-black/30 transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-sm"
+                          onClick={undoStroke}
+                          disabled={strokeHistory.length <= 1}
+                          style={{opacity: strokeHistory.length <= 1 ? 0.5 : 1}}
+                          aria-label="Undo"
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M3 7v6h6"></path>
+                            <path d="M3 13c0-4.4 3.6-8 8-8h10"></path>
+                          </svg>
+                        </button>
+                        <button 
+                          className="p-3 rounded-xl bg-white/20 dark:bg-black/20 backdrop-blur-sm border border-white/30 dark:border-white/10 text-black dark:text-white hover:bg-white/30 dark:hover:bg-black/30 transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-sm"
+                          onClick={clearCanvas}
+                          aria-label="Clear"
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M3 6h18"></path>
+                            <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
+                            <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
+                          </svg>
+                        </button>
+                        <button 
+                          className="p-3 rounded-xl bg-white/20 dark:bg-black/20 backdrop-blur-sm border border-white/30 dark:border-white/10 text-black dark:text-white hover:bg-white/30 dark:hover:bg-black/30 transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-sm"
+                          onClick={goToPreviousDrawingPage}
+                          disabled={currentDrawingPage === 0}
+                          style={{opacity: currentDrawingPage === 0 ? 0.5 : 1}}
+                          aria-label="Previous Page"
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M15 18l-6-6 6-6"></path>
+                          </svg>
+                        </button>
+                        <button 
+                          className="p-3 rounded-xl bg-white/20 dark:bg-black/20 backdrop-blur-sm border border-white/30 dark:border-white/10 text-black dark:text-white hover:bg-white/30 dark:hover:bg-black/30 transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-sm"
+                          onClick={addNewDrawingPage}
+                          aria-label="Next Page"
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M9 18l6-6-6-6"></path>
+                          </svg>
+                        </button>
+                        {/* Next Card button - visually distinct */}
+                        <button
+                          className="p-3 rounded-xl bg-blue-600/80 dark:bg-blue-500/80 backdrop-blur-sm border border-blue-400/30 dark:border-blue-400/20 text-white hover:bg-blue-700/80 dark:hover:bg-blue-600/80 transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-lg"
+                          onClick={goToNextCard}
+                          aria-label="Next Card"
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M9 18l6-6-6-6"></path>
+                          </svg>
+                        </button>
+                      </div>
+                     
                     </div>
                   </div>
                 </div>
