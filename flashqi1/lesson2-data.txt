@@ -1,135 +1,137 @@
 Lesson 1: 
-wei (hello)
-ayi
-le 
-zhongxue (middle school)
-chu guo
-chu
-da (dianhua)
-guanji
-guan
-e 
-duile 
-wang
-kai ji
-kai 
-you
-xiang
-jie
-ti 
-bisai 
-dui 
-shu (to lose a game)
-ying 
-bi 
-zhuhe
-ai 
-shang 
-tuofu
-yijang 
-kao 
-pei
+词 - Words
+喂
+阿姨
+了
+中学
+出国
+出
+打电话
+关机
+关
+饿
+对了
+忘
+开机
+开
+有
+又
+响
+接
+踢
+比赛
+队
+输
+赢
+比
+祝贺
+哎
+上
+托福
+已经
+考
+陪
 
 
 Lesson 2:
-bingren 
-duzi 
-lihai 
-le 
-pian 
-la duzi 
-la 
-youniurou
-huayan ( to test)
-dabian (feces)
-xiaobian (urine)
-jiancha (check)
-jieguo 
-chulai
-de 
-changyan 
-xiaohua 
-kai 
-da zhen 
-hou 
-ku
-jimo
-suoyi 
-nanguo 
-bie 
-litang
-wuhui
-tiao wu
+病人
+肚子
+厉害
+了
+片
+拉肚子
+鱼
+牛肉
+化验
+大便
+小便
+检查
+结果
+出来
+得
+肠炎
+消化
+开药
+打针
+后
+哭
+寂寞
+所以
+难过
+别
+礼堂
+舞会
+跳舞
 
 
 Lesson 3: 
-tao 
-fangzi 
-manyi 
-youde 
-zhouwei 
-huanjing
-luan 
-chufang
-woshi 
-keting 
-mianji 
-ceng
-ping 
-shangqu
-yangguang
-haishi 
-qizi 
-du che 
-gan 
-cai 
-yaoshi 
-zu 
-fangzu 
-suiran 
-zhen 
-tiao 
-he 
-jiaotong
-fangbian
-ganogong qiche
-zhan 
-chezhan 
-pangbian
-ditie
-fujin
-tiyiguan
+套
+房子
+满意
+有的
+周围
+环境
+乱
+厨房
+卧室
+客厅
+面积
+层
+平方米
+上去
+阳光
+还是
+妻子
+堵车
+赶
+才
+要是
+租
+房租
+虽然
+真
+条
+河
+交通
+方便
+公共汽车
+站
+车站
+旁边
+地铁
+附近
+体育馆
 
 
 Lesson 4: 
-kao shi (take an exam)
-ti 
-wan
-dao
-chengji 
-juzi (sentence)
-kan jian 
-jian 
-gan shenme
-gan 
-ci 
-zaogao 
-cheng
-hui xin 
-gushi
-you yisi
-ye (page)
-xiao 
-hui hua
-nian 
-da 
-banfa 
-he shang 
-shang 
-da kai 
-ting jian 
-zuoye 
- shu 
+考试
+题
+完
+到
+成绩
+句子
+看见
+见
+干什么
+干
+词
+糟糕
+成
+回信
+故事
+有意思
+页
+笑
+会话
+念
+打
+办法
+和尚
+上
+打开
+听见
+作业
+输
 
 
 Lesson 5: 
@@ -408,4 +410,4 @@ toufa
 yanjing 
 shendiao 
 huxiang 
-xiwang 
+xiwang

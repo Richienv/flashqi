@@ -655,53 +655,8 @@ export default function HomeworkPage() {
 
           {/* Main Feature Cards - Full Width Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 w-full">
-            {/* Current Assignment */}
-            <div className="card card-hover p-8 h-64 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/10 dark:to-indigo-900/10 border-blue-200 dark:border-blue-800/50 flex flex-col justify-between">
-              <div className="flex items-center mb-6">
-                <div className="p-4 bg-blue-100 dark:bg-blue-900/20 rounded-xl">
-                  <svg className="w-8 h-8 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                  </svg>
-                </div>
-                <div className="ml-5">
-                  <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Current Assignment</h3>
-                  <p className="text-base text-blue-600 dark:text-blue-400">Due Friday</p>
-                </div>
-              </div>
-              <div className="text-sm text-blue-600 dark:text-blue-400 font-medium">Lesson 3: Character Practice</div>
-            </div>
 
-            {/* Completed Assignments */}
-            <div className="card card-hover p-8 h-64 bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/10 dark:to-emerald-900/10 border-green-200 dark:border-green-800/50 flex flex-col justify-between">
-              <div className="flex items-center mb-6">
-                <div className="p-4 bg-green-100 dark:bg-green-900/20 rounded-xl">
-                  <svg className="w-8 h-8 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                </div>
-                <div className="ml-5">
-                  <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Completed</h3>
-                  <p className="text-base text-green-600 dark:text-green-400">Well done!</p>
-                </div>
-              </div>
-              <div className="text-sm text-green-600 dark:text-green-400 font-medium">12 assignments completed</div>
-            </div>
 
-            {/* Upcoming Assignments */}
-            <div className="card card-hover p-8 h-64 bg-gradient-to-br from-orange-50 to-amber-50 dark:from-orange-900/10 dark:to-amber-900/10 border-orange-200 dark:border-orange-800/50 flex flex-col justify-between">
-              <div className="flex items-center mb-6">
-                <div className="p-4 bg-orange-100 dark:bg-orange-900/20 rounded-xl">
-                  <svg className="w-8 h-8 text-orange-600 dark:text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                </div>
-                <div className="ml-5">
-                  <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Upcoming</h3>
-                  <p className="text-base text-orange-600 dark:text-orange-400">Next week</p>
-                </div>
-              </div>
-              <div className="text-sm text-orange-600 dark:text-orange-400 font-medium">2 assignments scheduled</div>
-            </div>
           </div>
         </div>
       </main>

@@ -77,6 +77,28 @@ export function Flashcard({ card, onKnown, onUnknown }: FlashcardProps) {
             font-size: 1rem;
           }
         }
+        /* Grammar part-of-speech color coding - Enhanced for better visibility */
+        .text-verb { color: #16a34a; font-weight: 600; text-shadow: 0 1px 2px rgba(0,0,0,0.1); }
+        .text-noun { color: #2563eb; font-weight: 600; text-shadow: 0 1px 2px rgba(0,0,0,0.1); }
+        .text-adverb { color: #dc2626; font-weight: 600; text-shadow: 0 1px 2px rgba(0,0,0,0.1); }
+        .text-pronoun { color: #7c3aed; font-weight: 600; text-shadow: 0 1px 2px rgba(0,0,0,0.1); }
+        .text-time { color: #ea580c; font-weight: 600; text-shadow: 0 1px 2px rgba(0,0,0,0.1); }
+        .text-particle { color: #db2777; font-weight: 600; text-shadow: 0 1px 2px rgba(0,0,0,0.1); }
+        .text-preposition { color: #0891b2; font-weight: 600; text-shadow: 0 1px 2px rgba(0,0,0,0.1); }
+        .text-interjection { color: #059669; font-weight: 600; text-shadow: 0 1px 2px rgba(0,0,0,0.1); }
+        
+        /* Dark mode adjustments for better contrast */
+        @media (prefers-color-scheme: dark) {
+          .text-verb { color: #22c55e; }
+          .text-noun { color: #3b82f6; }
+          .text-adverb { color: #ef4444; }
+          .text-pronoun { color: #8b5cf6; }
+          .text-time { color: #f97316; }
+          .text-particle { color: #ec4899; }
+          .text-preposition { color: #06b6d4; }
+          .text-interjection { color: #10b981; }
+        }
+        
         /* Mesh Glow from component-placement.txt */
         /* .mesh-glow {
           position: absolute;
@@ -105,25 +127,71 @@ export function Flashcard({ card, onKnown, onUnknown }: FlashcardProps) {
         {/* Front of card: Pinyin and English only */}
         <div
           className={cn(
-            "absolute w-full h-full bg-neutral-900 rounded-3xl shadow-xl p-8 backface-hidden flex flex-col items-center justify-center border border-neutral-700",
+            "absolute w-full h-full bg-white dark:bg-gradient-to-br dark:from-[#0a0f2c] dark:via-[#12142b] dark:to-[#000000] rounded-3xl shadow-xl p-8 backface-hidden flex flex-col items-center justify-center border border-gray-200 dark:border-neutral-700",
             "select-none"
           )}
           style={{ boxShadow: '0 2.8px 2.2px rgba(0,0,0,0.18), 0 6.7px 5.3px rgba(0,0,0,0.22), 0 12.5px 10px rgba(0,0,0,0.24), 0 22.3px 17.9px rgba(0,0,0,0.26), 0 41.8px 33.4px rgba(0,0,0,0.28), 0 100px 80px rgba(0,0,0,0.32)' }}
         >
-          {/* Glow behind pinyin */}
+          {/* Glow behind content */}
           {/* <div className="mesh-glow"></div> */}
-          <div className="flex flex-col items-center justify-center h-full w-full">
-            <div className="text-4xl sm:text-5xl font-bold mb-4 text-blue-400 text-center">{card.pinyin}</div>
-            <div className="text-lg sm:text-xl text-slate-200 font-medium text-center">{card.english}</div>
+          <div className="flex flex-col items-center justify-center h-full w-full space-y-4">
+            {/* Grammar Usage or Pinyin */}
+            <div className="text-2xl sm:text-3xl font-bold mb-2 text-blue-600 dark:text-blue-400 text-center">
+              {(() => {
+                const isLevel2Card = card.id && card.id.startsWith('l2-');
+                
+                // For Level 2 cards, show pinyin first (for pronunciation practice)
+                // For regular cards, show grammarUsage first (for grammar learning)
+                const displayValue = isLevel2Card 
+                  ? card.pinyin || (card as any).grammarUsage
+                  : (card as any).grammarUsage || card.pinyin;
+                
+                console.log('🔍 FLASHCARD COMPONENT DEBUG - Card data:', {
+                  id: card.id,
+                  hanzi: card.hanzi,
+                  pinyin: card.pinyin,
+                  grammarUsage: (card as any).grammarUsage,
+                  isLevel2Card,
+                  hasGrammarUsage: !!(card as any).grammarUsage,
+                  hasPinyin: !!card.pinyin,
+                  displayValue
+                });
+                
+                return displayValue;
+              })()}
+            </div>
+            
+            {/* English Meaning */}
+            <div className="text-lg sm:text-xl text-gray-700 dark:text-slate-200 font-medium text-center">
+              {card.english}
+            </div>
+            
+            {/* Grammar Tip */}
+            {(card as any).grammarTip && (
+              <div className="text-sm text-gray-600 dark:text-slate-300 text-center italic max-w-xs">
+                {(card as any).grammarTip}
+              </div>
+            )}
+            
+            {/* Color-coded Example */}
+            {(card as any).colorCodedExample && (
+              <div className="mt-4 p-4 bg-white/60 dark:bg-black/30 backdrop-blur-sm rounded-xl border border-white/40 dark:border-white/20 max-w-sm shadow-sm">
+                <div className="text-xs text-gray-600 dark:text-gray-300 mb-2 text-center font-medium">Example:</div>
+                <div 
+                  className="text-base text-center font-semibold leading-relaxed"
+                  dangerouslySetInnerHTML={{ __html: (card as any).colorCodedExample }}
+                />
+              </div>
+            )}
           </div>
           <div className="absolute bottom-4 left-0 w-full flex justify-center">
-            <span className="text-xs text-slate-400">Tap or swipe to flip</span>
+            <span className="text-xs text-gray-500 dark:text-slate-400">Tap or swipe to flip</span>
           </div>
         </div>
         {/* Back of card: Hanzi and Example Sentence */}
         <div
           className={cn(
-            "absolute w-full h-full bg-neutral-900 rounded-3xl shadow-xl p-8 backface-hidden rotate-y-180 flex flex-col items-center justify-center border border-neutral-700",
+            "absolute w-full h-full bg-white dark:bg-gradient-to-br dark:from-[#0a0f2c] dark:via-[#12142b] dark:to-[#000000] rounded-3xl shadow-xl p-8 backface-hidden rotate-y-180 flex flex-col items-center justify-center border border-gray-200 dark:border-neutral-700",
             "select-none"
           )}
           style={{ boxShadow: '0 2.8px 2.2px rgba(0,0,0,0.18), 0 6.7px 5.3px rgba(0,0,0,0.22), 0 12.5px 10px rgba(0,0,0,0.24), 0 22.3px 17.9px rgba(0,0,0,0.26), 0 41.8px 33.4px rgba(0,0,0,0.28), 0 100px 80px rgba(0,0,0,0.32)' }}
@@ -131,24 +199,24 @@ export function Flashcard({ card, onKnown, onUnknown }: FlashcardProps) {
           {/* Glow behind hanzi */}
           {/* <div className="mesh-glow mesh-glow-orange"></div> */}
           <div className="flex flex-col items-center justify-center h-full w-full">
-            <div className="text-6xl sm:text-7xl font-bold mb-4 text-orange-400 text-center">{card.hanzi}</div>
+            <div className="text-6xl sm:text-7xl font-bold mb-4 text-orange-600 dark:text-orange-400 text-center">{card.hanzi}</div>
             
             {card.example_sentence && typeof card.example_sentence === 'object' ? (
-              <div className="text-base text-slate-200 mt-2 text-center">
-                <p className="mb-1 text-xs text-slate-400">Example:</p>
-                {(card.example_sentence as any).hanzi && <p className="mb-1 font-semibold text-lg text-white">{(card.example_sentence as any).hanzi}</p>}
-                {(card.example_sentence as any).pinyin && <p className="mb-1 text-blue-400">{(card.example_sentence as any).pinyin}</p>}
-                {(card.example_sentence as any).english && <p className="mb-1 text-slate-300">{(card.example_sentence as any).english}</p>}
+              <div className="text-base text-gray-700 dark:text-slate-200 mt-2 text-center">
+                <p className="mb-1 text-xs text-gray-500 dark:text-slate-400">Example:</p>
+                {(card.example_sentence as any).hanzi && <p className="mb-1 font-semibold text-lg text-gray-900 dark:text-white">{(card.example_sentence as any).hanzi}</p>}
+                {(card.example_sentence as any).pinyin && <p className="mb-1 text-blue-600 dark:text-blue-400">{(card.example_sentence as any).pinyin}</p>}
+                {(card.example_sentence as any).english && <p className="mb-1 text-gray-700 dark:text-slate-300">{(card.example_sentence as any).english}</p>}
               </div>
             ) : card.example_sentence && typeof card.example_sentence === 'string' ? (
-              <div className="text-base text-slate-200 mt-2 text-center">
-                <p className="mb-1 text-xs text-slate-400">Example:</p>
-                <p className="mb-1 font-semibold text-lg text-white">{card.example_sentence}</p>
+              <div className="text-base text-gray-700 dark:text-slate-200 mt-2 text-center">
+                <p className="mb-1 text-xs text-gray-500 dark:text-slate-400">Example:</p>
+                <p className="mb-1 font-semibold text-lg text-gray-900 dark:text-white">{card.example_sentence}</p>
               </div>
             ) : null}
           </div>
           <div className="absolute bottom-4 left-0 w-full flex justify-center">
-            <span className="text-xs text-slate-400">Tap or swipe to flip</span>
+            <span className="text-xs text-gray-500 dark:text-slate-400">Tap or swipe to flip</span>
           </div>
         </div>
       </div>

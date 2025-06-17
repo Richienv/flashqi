@@ -119,6 +119,28 @@ const AnimationStyles = () => (
       box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
       z-index: 10;
     }
+
+    /* Grammar part-of-speech color coding - Enhanced for better visibility */
+    .text-verb { color: #16a34a; font-weight: 600; text-shadow: 0 1px 2px rgba(0,0,0,0.1); }
+    .text-noun { color: #2563eb; font-weight: 600; text-shadow: 0 1px 2px rgba(0,0,0,0.1); }
+    .text-adverb { color: #dc2626; font-weight: 600; text-shadow: 0 1px 2px rgba(0,0,0,0.1); }
+    .text-pronoun { color: #7c3aed; font-weight: 600; text-shadow: 0 1px 2px rgba(0,0,0,0.1); }
+    .text-time { color: #ea580c; font-weight: 600; text-shadow: 0 1px 2px rgba(0,0,0,0.1); }
+    .text-particle { color: #db2777; font-weight: 600; text-shadow: 0 1px 2px rgba(0,0,0,0.1); }
+    .text-preposition { color: #0891b2; font-weight: 600; text-shadow: 0 1px 2px rgba(0,0,0,0.1); }
+    .text-interjection { color: #059669; font-weight: 600; text-shadow: 0 1px 2px rgba(0,0,0,0.1); }
+    
+    /* Dark mode adjustments for better contrast */
+    @media (prefers-color-scheme: dark) {
+      .text-verb { color: #22c55e; }
+      .text-noun { color: #3b82f6; }
+      .text-adverb { color: #ef4444; }
+      .text-pronoun { color: #8b5cf6; }
+      .text-time { color: #f97316; }
+      .text-particle { color: #ec4899; }
+      .text-preposition { color: #06b6d4; }
+      .text-interjection { color: #10b981; }
+    }
   `}</style>
 );
 
@@ -271,32 +293,29 @@ export default function FlashcardsPage() {
     return cards;
   };
 
-  // Get Level 2 Midterm Prep flashcards (combines Level 2 Lessons 1-10)
+  // Get Level 2 Midterm Prep flashcards (combines Level 2 Lessons 1-4)
   const getLevel2MidtermPrepFlashcards = () => {
-    // Combine flashcards from Level 2 Lessons 1-10
-    const lesson1Cards = safeGetFlashcards(LESSON_FLASHCARDS.level2_lesson1);
-    const lesson2Cards = safeGetFlashcards(LESSON_FLASHCARDS.level2_lesson2);
-    const lesson3Cards = safeGetFlashcards(LESSON_FLASHCARDS.level2_lesson3);
-    const lesson4Cards = safeGetFlashcards(LESSON_FLASHCARDS.level2_lesson4);
-    const lesson5Cards = safeGetFlashcards(LESSON_FLASHCARDS.level2_lesson5);
-    const lesson6Cards = safeGetFlashcards(LESSON_FLASHCARDS.level2_lesson6);
-    const lesson7Cards = safeGetFlashcards(LESSON_FLASHCARDS.level2_lesson7);
-    const lesson8Cards = safeGetFlashcards(LESSON_FLASHCARDS.level2_lesson8);
-    const lesson9Cards = safeGetFlashcards(LESSON_FLASHCARDS.level2_lesson9);
-    const lesson10Cards = safeGetFlashcards(LESSON_FLASHCARDS.level2_lesson10);
+    // Use safer access method to avoid TypeScript errors
+    const lesson1Cards = safeGetFlashcards((LESSON_FLASHCARDS as any).level2_lesson1);
+    const lesson2Cards = safeGetFlashcards((LESSON_FLASHCARDS as any).level2_lesson2);
+    const lesson3Cards = safeGetFlashcards((LESSON_FLASHCARDS as any).level2_lesson3);
+    const lesson4Cards = safeGetFlashcards((LESSON_FLASHCARDS as any).level2_lesson4);
+    
+    console.log('🔍 LEVEL2 MIDTERM DEBUG - Loading cards:', {
+      lesson1Count: lesson1Cards.length,
+      lesson2Count: lesson2Cards.length,
+      lesson3Count: lesson3Cards.length,
+      lesson4Count: lesson4Cards.length,
+      lesson1Sample: lesson1Cards[0],
+      lesson2Sample: lesson2Cards[0]
+    });
     
     // Combine all cards
     let allCards = [
       ...lesson1Cards,
       ...lesson2Cards,
       ...lesson3Cards,
-      ...lesson4Cards,
-      ...lesson5Cards,
-      ...lesson6Cards,
-      ...lesson7Cards,
-      ...lesson8Cards,
-      ...lesson9Cards,
-      ...lesson10Cards
+      ...lesson4Cards
     ];
     
     // Shuffle the cards
@@ -336,6 +355,20 @@ export default function FlashcardsPage() {
   const previewFlashcards = previewLessonId 
     ? getLessonFlashcards(previewLessonId)
     : [];
+  
+  // Debug: Log Level 2 lesson data when accessed
+  if (previewLessonId && previewLessonId.startsWith('level2_')) {
+    console.log('🔍 LEVEL2 DEBUG - Preview lesson data:', {
+      lessonId: previewLessonId,
+      flashcardsCount: previewFlashcards.length,
+      firstCard: previewFlashcards[0],
+      hasGrammarFields: previewFlashcards[0] ? {
+        grammarUsage: !!(previewFlashcards[0] as any).grammarUsage,
+        grammarTip: !!(previewFlashcards[0] as any).grammarTip,
+        pinyin: !!previewFlashcards[0].pinyin
+      } : null
+    });
+  }
 
   // Handle scroll events for Back to Top button and infinite scrolling
   useEffect(() => {
@@ -1799,20 +1832,14 @@ export default function FlashcardsPage() {
     return recognizedChar;
   };
 
-  // Calculate the total number of cards for Level 2 midterm prep (lessons 1-10)
+  // Calculate the total number of cards for Level 2 midterm prep (lessons 1-4)
   const getLevel2MidtermPrepCardCount = () => {
-    const lesson1Count = LESSON_FLASHCARDS.level2_lesson1?.length || 0;
-    const lesson2Count = LESSON_FLASHCARDS.level2_lesson2?.length || 0;
-    const lesson3Count = LESSON_FLASHCARDS.level2_lesson3?.length || 0;
-    const lesson4Count = LESSON_FLASHCARDS.level2_lesson4?.length || 0;
-    const lesson5Count = LESSON_FLASHCARDS.level2_lesson5?.length || 0;
-    const lesson6Count = LESSON_FLASHCARDS.level2_lesson6?.length || 0;
-    const lesson7Count = LESSON_FLASHCARDS.level2_lesson7?.length || 0;
-    const lesson8Count = LESSON_FLASHCARDS.level2_lesson8?.length || 0;
-    const lesson9Count = LESSON_FLASHCARDS.level2_lesson9?.length || 0;
-    const lesson10Count = LESSON_FLASHCARDS.level2_lesson10?.length || 0;
+    const lesson1Count = (LESSON_FLASHCARDS as any).level2_lesson1?.length || 0;
+    const lesson2Count = (LESSON_FLASHCARDS as any).level2_lesson2?.length || 0;
+    const lesson3Count = (LESSON_FLASHCARDS as any).level2_lesson3?.length || 0;
+    const lesson4Count = (LESSON_FLASHCARDS as any).level2_lesson4?.length || 0;
     
-    return lesson1Count + lesson2Count + lesson3Count + lesson4Count + lesson5Count + lesson6Count + lesson7Count + lesson8Count + lesson9Count + lesson10Count;
+    return lesson1Count + lesson2Count + lesson3Count + lesson4Count;
   };
   
   // Select a category
@@ -1845,7 +1872,7 @@ export default function FlashcardsPage() {
       <main className="flex-1 pt-24 pb-6">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
           {isStudyMode ? (
-            <div className="fixed inset-0 bg-gradient-to-b from-[#001060] via-[#2D41D1] to-[#5E72E4] z-50 overflow-hidden flex flex-col">
+            <div className="fixed inset-0 bg-gradient-to-br from-[#1b1f3b] via-[#2a2e49] to-[#16172f] dark:bg-gradient-to-br dark:from-[#000000] dark:via-[#0a0f2c] dark:to-[#12142b] z-50 overflow-hidden flex flex-col">
               {/* Drawing overlay - shown when drawing mode is active */}
               {isDrawingMode && (
                 <div className="fixed inset-0 bg-white dark:bg-[#0e0e0e] z-[100] flex flex-col">
@@ -1930,7 +1957,7 @@ export default function FlashcardsPage() {
                   </div>
                   
                   {/* Drawing toolbar */}
-                  <div className="drawing-footer md:px-24 md:py-6" style={{maxWidth: '900px', margin: '0 auto', background: 'rgba(255,255,255,0.98)'}}>
+                  <div className="drawing-footer md:px-24 md:py-6 bg-transparent dark:bg-gray-800/90 dark:border-gray-600 backdrop-filter backdrop-blur-sm border-t border-gray-200 dark:border-gray-700" style={{maxWidth: '900px', margin: '0 auto'}}>
                     <div className="flex flex-row justify-center items-center gap-3">
                       <button 
                         className="action-button-text bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200"
@@ -2086,12 +2113,12 @@ export default function FlashcardsPage() {
                     <div className="card-stack-container w-full max-w-md perspective-1000 mb-8">
                       {/* Stack cards - visible during transitions */}
                       <div 
-                        className={`stack-card-3 absolute w-full rounded-3xl bg-white shadow-md border border-gray-200 h-[400px] transform ${
+                        className={`stack-card-3 absolute w-full rounded-3xl bg-white/80 backdrop-blur-sm dark:bg-neutral-800 shadow-lg border border-white/40 dark:border-neutral-700 h-[400px] transform ${
                           stackPosition >= 3 ? '-rotate-2 -translate-y-1 translate-x-3 opacity-30' : 'opacity-0'
                         } pointer-events-none`}
                       ></div>
                       <div 
-                        className={`stack-card-2 absolute w-full rounded-3xl bg-white shadow-md border border-gray-200 h-[400px] transform ${
+                        className={`stack-card-2 absolute w-full rounded-3xl bg-white/80 backdrop-blur-sm dark:bg-neutral-800 shadow-lg border border-white/40 dark:border-neutral-700 h-[400px] transform ${
                           stackPosition >= 2 ? '-rotate-1 -translate-y-0.5 translate-x-1.5 opacity-50' : stackPosition === 1 ? '-rotate-2 -translate-y-1 translate-x-3 opacity-30' : 'opacity-0'
                         } pointer-events-none`}
                       ></div>
@@ -2126,21 +2153,68 @@ export default function FlashcardsPage() {
                         {/* Card content - both front and back */}
                         <div className="card-content relative h-full w-full smooth-transform transform-style-3d">
                           {/* Front of card - Pinyin (previously English) */}
-                          <div className="absolute inset-0 backface-hidden rounded-3xl bg-white shadow-md border border-gray-200 flex flex-col">
-                            <div className="flex-grow flex flex-col items-center justify-center p-6">
-                              <div className="text-3xl text-gray-900 font-medium mb-2">
-                                {currentFlashcards[currentCardIndex].pinyin}
+                          <div className="absolute inset-0 backface-hidden rounded-3xl bg-white/90 backdrop-blur-sm dark:bg-gradient-to-br dark:from-[#0a0f2c] dark:via-[#12142b] dark:to-[#000000] shadow-xl border border-white/50 dark:border-neutral-700 flex flex-col">
+                            <div className="flex-grow flex flex-col items-center justify-center p-6 space-y-4">
+                              
+                                            {/* Grammar Usage or Pinyin */}
+              <div className="text-2xl sm:text-3xl text-blue-600 dark:text-blue-400 font-bold text-center">
+                {(() => {
+                  const card = currentFlashcards[currentCardIndex];
+                  const isLevel2Card = card.id && card.id.startsWith('l2-');
+                  
+                  // For Level 2 cards, show pinyin first (for pronunciation practice)
+                  // For regular cards, show grammarUsage first (for grammar learning)
+                  const displayValue = isLevel2Card 
+                    ? card.pinyin || (card as any).grammarUsage
+                    : (card as any).grammarUsage || card.pinyin;
+                  
+                  console.log('🔍 FLASHCARD DEBUG - Current card data:', {
+                    id: card.id,
+                    hanzi: card.hanzi,
+                    pinyin: card.pinyin,
+                    grammarUsage: (card as any).grammarUsage,
+                    isLevel2Card,
+                    hasGrammarUsage: !!(card as any).grammarUsage,
+                    hasPinyin: !!card.pinyin,
+                    displayValue
+                  });
+                  
+                  return displayValue;
+                })()}
+              </div>
+                              
+                              {/* English Meaning */}
+                              <div className="text-lg text-gray-700 dark:text-gray-300 font-medium text-center">
+                                {currentFlashcards[currentCardIndex].english}
                               </div>
+                              
+                              {/* Grammar Tip */}
+                              {(currentFlashcards[currentCardIndex] as any).grammarTip && (
+                                <div className="text-sm text-gray-600 dark:text-slate-300 text-center italic max-w-xs">
+                                  {(currentFlashcards[currentCardIndex] as any).grammarTip}
+                                </div>
+                              )}
+                              
+                              {/* Color-coded Example */}
+                              {(currentFlashcards[currentCardIndex] as any).colorCodedExample && (
+                                <div className="mt-3 p-4 bg-white/60 dark:bg-black/30 backdrop-blur-sm rounded-xl border border-white/40 dark:border-white/20 max-w-sm shadow-sm">
+                                  <div className="text-xs text-gray-600 dark:text-gray-300 mb-2 text-center font-medium">Example:</div>
+                                  <div 
+                                    className="text-base text-center font-semibold leading-relaxed"
+                                    dangerouslySetInnerHTML={{ __html: (currentFlashcards[currentCardIndex] as any).colorCodedExample }}
+                                  />
+                                </div>
+                              )}
                             </div>
                             
                             {/* Answer buttons with grey border on top */}
-                            <div className="grid grid-cols-2 border-t border-gray-200">
+                            <div className="grid grid-cols-2 border-t border-gray-200 dark:border-neutral-700">
                               <button 
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   handleCardResult(false);
                                 }}
-                                className="flex justify-center items-center py-4 border-r border-gray-200"
+                                className="flex justify-center items-center py-4 border-r border-gray-200 dark:border-neutral-700 hover:bg-gray-50 dark:hover:bg-neutral-700 transition-colors"
                               >
                                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#E53E3E" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                   <line x1="18" y1="6" x2="6" y2="18"></line>
@@ -2152,7 +2226,7 @@ export default function FlashcardsPage() {
                                   e.stopPropagation();
                                   handleCardResult(true);
                                 }}
-                                className="flex justify-center items-center py-4"
+                                className="flex justify-center items-center py-4 hover:bg-gray-50 dark:hover:bg-neutral-700 transition-colors"
                               >
                                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#48BB78" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                   <polyline points="20 6 9 17 4 12"></polyline>
@@ -2162,30 +2236,30 @@ export default function FlashcardsPage() {
                           </div>
                           
                           {/* Back of card - Chinese */}
-                          <div className="absolute inset-0 backface-hidden rounded-3xl bg-white shadow-md border border-gray-200 flex flex-col rotate-y-180">
+                          <div className="absolute inset-0 backface-hidden rounded-3xl bg-white/90 backdrop-blur-sm dark:bg-gradient-to-br dark:from-[#0a0f2c] dark:via-[#12142b] dark:to-[#000000] shadow-xl border border-white/50 dark:border-neutral-700 flex flex-col rotate-y-180">
                             {/* Word content - Chinese characters on back */}
                             <div className="flex-grow flex flex-col items-center justify-center p-6">
-                              <div className="text-7xl text-gray-900 font-medium mb-3">
+                              <div className="text-7xl text-orange-600 dark:text-orange-400 font-medium mb-3">
                                 {currentFlashcards[currentCardIndex].hanzi}
                               </div>
-                              <div className="text-gray-600 text-center max-w-xs text-sm mt-5 border-t border-gray-100 pt-5">
+                              <div className="text-gray-600 dark:text-gray-300 text-center max-w-xs text-sm mt-5 border-t border-gray-100 dark:border-neutral-600 pt-5">
                                 {currentFlashcards[currentCardIndex].example_sentence ? (
                                   <>
                                     <p className="mb-1 italic">Example:</p>
                                     {typeof currentFlashcards[currentCardIndex].example_sentence === 'object' ? (
                                       <>
-                                        <p className="mb-2 text-gray-800 font-medium">
+                                        <p className="mb-2 text-gray-800 dark:text-white font-medium">
                                           {currentFlashcards[currentCardIndex].example_sentence.hanzi}
                                         </p>
-                                        <p className="mb-2 text-gray-500">
+                                        <p className="mb-2 text-blue-600 dark:text-blue-400">
                                           {currentFlashcards[currentCardIndex].example_sentence.pinyin}
                                         </p>
-                                        <p className="text-gray-500">
+                                        <p className="text-gray-500 dark:text-gray-400">
                                           {currentFlashcards[currentCardIndex].example_sentence.english}
                                         </p>
                                       </>
                                     ) : (
-                                      <p className="mb-2 text-gray-800 font-medium">
+                                      <p className="mb-2 text-gray-800 dark:text-white font-medium">
                                         {currentFlashcards[currentCardIndex].example_sentence}
                                       </p>
                                     )}
@@ -2196,7 +2270,7 @@ export default function FlashcardsPage() {
                                     <p className="mb-2">
                                       <span className="font-medium">[{currentFlashcards[currentCardIndex].hanzi}]</span>
                                     </p>
-                                    <p className="text-gray-500">
+                                    <p className="text-gray-500 dark:text-gray-400">
                                       {currentFlashcards[currentCardIndex].english.toLowerCase().includes('hello') ? 
                                         'How are you?' : 
                                         currentFlashcards[currentCardIndex].english.toLowerCase().includes('thank') ?
@@ -2209,13 +2283,13 @@ export default function FlashcardsPage() {
                             </div>
                             
                             {/* Answer buttons with grey border on top */}
-                            <div className="grid grid-cols-2 border-t border-gray-200">
+                            <div className="grid grid-cols-2 border-t border-gray-200 dark:border-neutral-700">
                               <button 
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   handleCardResult(false);
                                 }}
-                                className="flex justify-center items-center py-4 border-r border-gray-200"
+                                className="flex justify-center items-center py-4 border-r border-gray-200 dark:border-neutral-700 hover:bg-gray-50 dark:hover:bg-neutral-700 transition-colors"
                               >
                                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#E53E3E" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                   <line x1="18" y1="6" x2="6" y2="18"></line>
@@ -2227,7 +2301,7 @@ export default function FlashcardsPage() {
                                   e.stopPropagation();
                                   handleCardResult(true);
                                 }}
-                                className="flex justify-center items-center py-4"
+                                className="flex justify-center items-center py-4 hover:bg-gray-50 dark:hover:bg-neutral-700 transition-colors"
                               >
                                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#48BB78" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                   <polyline points="20 6 9 17 4 12"></polyline>
@@ -2242,7 +2316,7 @@ export default function FlashcardsPage() {
                 )}
                 
                 {/* Swipe instruction hint */}
-                <div className="text-center text-white/70 text-sm mb-8">
+                <div className="text-center text-slate-600 dark:text-white/70 text-sm mb-8">
                   Swipe to browse cards • Tap ✓ or ✗ to mark as completed
                 </div>
               </div>
@@ -2262,8 +2336,8 @@ export default function FlashcardsPage() {
                     </svg>
                   </Button>
                   <div>
-                    <h1 className="text-lg font-semibold text-black">{previewLessonTitle}</h1>
-                    <p className="text-sm text-black">{previewFlashcards.length} cards</p>
+                    <h1 className="text-lg font-semibold text-black dark:text-white">{previewLessonTitle}</h1>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">{previewFlashcards.length} cards</p>
                   </div>
                 </div>
               </div>
@@ -2271,7 +2345,7 @@ export default function FlashcardsPage() {
               {/* Lesson Cards Grid */}
               <div className="mb-8">
                 <div className="flex justify-between items-center mb-4">
-                  <h2 className="text-xl font-bold text-black">All Flashcards</h2>
+                  <h2 className="text-xl font-bold text-black dark:text-white">All Flashcards</h2>
                   <Button 
                     variant="primary"
                     onClick={() => enterStudyMode(previewLessonId)}
@@ -2288,7 +2362,7 @@ export default function FlashcardsPage() {
                   {previewFlashcards.map((card) => (
                     <div 
                       key={card.id} 
-                      className="rounded-xl overflow-hidden bg-gradient-to-r from-[#F8FAFF] to-white border border-blue-100 hover:border-blue-300 hover:shadow-sm transition-all p-3 cursor-pointer"
+                      className="rounded-xl overflow-hidden bg-gradient-to-r from-blue-50/80 to-white dark:from-blue-900/20 dark:to-neutral-800 border border-blue-100 dark:border-blue-800/50 hover:border-blue-300 dark:hover:border-blue-700 hover:shadow-sm transition-all p-3 cursor-pointer"
                       onClick={() => {
                         enterStudyMode(previewLessonId);
                         const index = previewFlashcards.findIndex(c => c.id === card.id);
@@ -2297,9 +2371,9 @@ export default function FlashcardsPage() {
                         }
                       }}
                     >
-                      <div className="mb-1 text-xl font-medium text-center">{card.hanzi}</div>
-                      <div className="text-xs text-center text-gray-500">{card.pinyin}</div>
-                      <div className="mt-1 text-sm text-center text-black">{card.english}</div>
+                      <div className="mb-1 text-xl font-medium text-center text-orange-600 dark:text-orange-400">{card.hanzi}</div>
+                      <div className="text-xs text-center text-blue-600 dark:text-blue-400">{card.pinyin}</div>
+                      <div className="mt-1 text-sm text-center text-gray-700 dark:text-gray-300">{card.english}</div>
                     </div>
                   ))}
                 </div>
@@ -2320,7 +2394,7 @@ export default function FlashcardsPage() {
                       <path d="M19 12H5M12 19l-7-7 7-7"></path>
                     </svg>
                   </Button>
-                    <h1 className="text-lg font-semibold text-black">{selectedCategoryTitle} - {selectedLevel === 'level1' ? 'Level 1' : 'Level 2'}</h1>
+                    <h1 className="text-lg font-semibold text-black dark:text-white">{selectedCategoryTitle} - {selectedLevel === 'level1' ? 'Level 1' : 'Level 2'}</h1>
                 </div>
               </div>
               

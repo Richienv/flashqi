@@ -6,8 +6,11 @@ export const LEVEL2_FLASHCARDS = {
       lesson_id: "level2_lesson1",
       hanzi: "喂",
       pinyin: "wèi",
+      grammarUsage: "Interjection for phone calls",
       english: "Hello (on phone)",
       difficulty_level: 1,
+      grammarTip: "Note: Only used when answering phones—never for face-to-face greetings.",
+      colorCodedExample: '<span class="text-interjection">Wèi</span>, <span class="text-pronoun">nǐ hǎo</span>!',
       example_sentence: {
         hanzi: "喂，你好！",
         pinyin: "Wèi, nǐ hǎo!",
@@ -19,8 +22,11 @@ export const LEVEL2_FLASHCARDS = {
       lesson_id: "level2_lesson1",
       hanzi: "阿姨",
       pinyin: "āyí",
+      grammarUsage: "Family term + polite address",
       english: "Aunt/maid",
       difficulty_level: 1,
+      grammarTip: "Note: Respectful term for older women—shows social awareness.",
+      colorCodedExample: '<span class="text-pronoun">Zhè</span> <span class="text-verb">shì</span> <span class="text-pronoun">wǒ de</span> <span class="text-noun">āyí</span>.',
       example_sentence: {
         hanzi: "这是我的阿姨。",
         pinyin: "Zhè shì wǒ de āyí.",
@@ -32,8 +38,11 @@ export const LEVEL2_FLASHCARDS = {
       lesson_id: "level2_lesson1",
       hanzi: "了",
       pinyin: "le",
+      grammarUsage: "Aspect particle (completion)",
       english: "Past tense particle",
       difficulty_level: 1,
+      grammarTip: "Note: Indicates completed action—different from English past tense.",
+      colorCodedExample: '<span class="text-pronoun">Wǒ</span> <span class="text-verb">chī</span> <span class="text-particle">le</span> <span class="text-noun">fàn</span>.',
       example_sentence: {
         hanzi: "我吃了饭。",
         pinyin: "Wǒ chī le fàn.",
@@ -45,8 +54,11 @@ export const LEVEL2_FLASHCARDS = {
       lesson_id: "level2_lesson1",
       hanzi: "中学",
       pinyin: "zhōngxué",
+      grammarUsage: "Compound noun (institution)",
       english: "Middle school",
       difficulty_level: 1,
+      grammarTip: "Note: Educational institution—use with 在 for location contexts.",
+      colorCodedExample: '<span class="text-pronoun">Wǒ</span> <span class="text-preposition">zài</span> <span class="text-noun">zhōngxué</span> <span class="text-verb">xuéxí</span>.',
       example_sentence: {
         hanzi: "我在中学学习。",
         pinyin: "Wǒ zài zhōngxué xuéxí.",
@@ -58,8 +70,11 @@ export const LEVEL2_FLASHCARDS = {
       lesson_id: "level2_lesson1",
       hanzi: "出国",
       pinyin: "chū guó",
+      grammarUsage: "Separable verb (direction)",
       english: "To go abroad",
       difficulty_level: 1,
+      grammarTip: "Note: Verb-object compound—can be separated by other elements.",
+      colorCodedExample: '<span class="text-pronoun">Wǒ</span> <span class="text-verb">xiǎng</span> <span class="text-verb">chū guó</span> <span class="text-verb">liúxué</span>.',
       example_sentence: {
         hanzi: "我想出国留学。",
         pinyin: "Wǒ xiǎng chū guó liúxué.",
@@ -71,8 +86,11 @@ export const LEVEL2_FLASHCARDS = {
       lesson_id: "level2_lesson1",
       hanzi: "出",
       pinyin: "chū",
+      grammarUsage: "Directional verb (movement)",
       english: "To go out",
       difficulty_level: 1,
+      grammarTip: "Note: Basic directional verb—often combines with other elements.",
+      colorCodedExample: '<span class="text-pronoun">Wǒmen</span> <span class="text-verb">chū qù</span> <span class="text-particle">ba</span>.',
       example_sentence: {
         hanzi: "我们出去吧。",
         pinyin: "Wǒmen chū qù ba.",
@@ -123,8 +141,11 @@ export const LEVEL2_FLASHCARDS = {
       lesson_id: "level2_lesson1",
       hanzi: "饿",
       pinyin: "è",
+      grammarUsage: "Stative adjective (sensation)",
       english: "Hungry",
       difficulty_level: 1,
+      grammarTip: "Note: Stative adjective—use with 很 to avoid sounding blunt.",
+      colorCodedExample: '<span class="text-pronoun">Wǒ</span> <span class="text-adverb">hěn</span> <span class="text-verb">è</span>.',
       example_sentence: {
         hanzi: "我很饿。",
         pinyin: "Wǒ hěn è.",
@@ -149,8 +170,11 @@ export const LEVEL2_FLASHCARDS = {
       lesson_id: "level2_lesson1",
       hanzi: "忘",
       pinyin: "wàng",
+      grammarUsage: "Transitive verb (memory)",
       english: "To forget",
       difficulty_level: 1,
+      grammarTip: "Note: Often used with 了 to indicate completed forgetting action.",
+      colorCodedExample: '<span class="text-pronoun">Wǒ</span> <span class="text-verb">wàng</span> <span class="text-particle">le</span> <span class="text-pronoun">nǐ de</span> <span class="text-noun">míngzi</span>.',
       example_sentence: {
         hanzi: "我忘了你的名字。",
         pinyin: "Wǒ wàng le nǐ de míngzi.",
@@ -186,53 +210,56 @@ export const LEVEL2_FLASHCARDS = {
     {
       id: "l2-1-15",
       lesson_id: "level2_lesson1",
-      hanzi: "有",
-      pinyin: "yǒu",
-      english: "To have",
+      hanzi: "又",
+      pinyin: "yòu",
+      grammarUsage: "Adverb (repetition)",
+      english: "Again",
       difficulty_level: 1,
+      grammarTip: "Note: Emphasizes repetition—use for repeated unwanted actions.",
+      colorCodedExample: '<span class="text-pronoun">Tā</span> <span class="text-adverb">yòu</span> <span class="text-verb">chídào</span> <span class="text-particle">le</span>.',
       example_sentence: {
-        hanzi: "我有一本书。",
-        pinyin: "Wǒ yǒu yì běn shū.",
-        english: "I have a book."
+        hanzi: "他又迟到了。",
+        pinyin: "Tā yòu chídào le.",
+        english: "He was late again."
       }
     },
     {
       id: "l2-1-16",
       lesson_id: "level2_lesson1",
-      hanzi: "想",
+      hanzi: "响",
       pinyin: "xiǎng",
-      english: "To think/want",
+      english: "To make a sound/ring",
       difficulty_level: 1,
       example_sentence: {
-        hanzi: "我想去北京。",
-        pinyin: "Wǒ xiǎng qù Běijīng.",
-        english: "I want to go to Beijing."
+        hanzi: "电话响了。",
+        pinyin: "Diànhuà xiǎng le.",
+        english: "The phone is ringing."
       }
     },
     {
       id: "l2-1-17",
       lesson_id: "level2_lesson1",
-      hanzi: "借",
-      pinyin: "jiè",
-      english: "To borrow",
+      hanzi: "接",
+      pinyin: "jiē",
+      english: "To receive/answer",
       difficulty_level: 1,
       example_sentence: {
-        hanzi: "我想借这本书。",
-        pinyin: "Wǒ xiǎng jiè zhè běn shū.",
-        english: "I want to borrow this book."
+        hanzi: "我去接电话。",
+        pinyin: "Wǒ qù jiē diànhuà.",
+        english: "I'll go answer the phone."
       }
     },
     {
       id: "l2-1-18",
       lesson_id: "level2_lesson1",
-      hanzi: "题",
-      pinyin: "tí",
-      english: "Question/problem",
+      hanzi: "踢",
+      pinyin: "tī",
+      english: "To kick",
       difficulty_level: 1,
       example_sentence: {
-        hanzi: "这个题很难。",
-        pinyin: "Zhège tí hěn nán.",
-        english: "This question is very difficult."
+        hanzi: "他踢足球。",
+        pinyin: "Tā tī zúqiú.",
+        english: "He kicks the soccer ball."
       }
     },
     {
@@ -354,15 +381,15 @@ export const LEVEL2_FLASHCARDS = {
     },
     {
       id: "l2-1-28",
-      lesson_id: "level2_lesson1",
-      hanzi: "一样",
-      pinyin: "yíyàng",
-      english: "Same",
+      lesson_id: "level2_lesson1", 
+      hanzi: "已经",
+      pinyin: "yǐjīng",
+      english: "Already",
       difficulty_level: 1,
       example_sentence: {
-        hanzi: "这两本书一样。",
-        pinyin: "Zhè liǎng běn shū yíyàng.",
-        english: "These two books are the same."
+        hanzi: "我已经吃饭了。",
+        pinyin: "Wǒ yǐjīng chīfàn le.",
+        english: "I have already eaten."
       }
     },
     {
@@ -487,6 +514,19 @@ export const LEVEL2_FLASHCARDS = {
     {
       id: "l2-2-8",
       lesson_id: "level2_lesson2",
+      hanzi: "鱼",
+      pinyin: "yú",
+      english: "Fish",
+      difficulty_level: 1,
+      example_sentence: {
+        hanzi: "这条鱼很新鲜。",
+        pinyin: "Zhè tiáo yú hěn xīnxiān.",
+        english: "This fish is very fresh."
+      }
+    },
+    {
+      id: "l2-2-9",
+      lesson_id: "level2_lesson2",
       hanzi: "牛肉",
       pinyin: "niúròu",
       english: "Beef",
@@ -498,7 +538,7 @@ export const LEVEL2_FLASHCARDS = {
       }
     },
     {
-      id: "l2-2-9",
+      id: "l2-2-10",
       lesson_id: "level2_lesson2",
       hanzi: "化验",
       pinyin: "huàyàn",
@@ -511,7 +551,7 @@ export const LEVEL2_FLASHCARDS = {
       }
     },
     {
-      id: "l2-2-10",
+      id: "l2-2-11",
       lesson_id: "level2_lesson2",
       hanzi: "大便",
       pinyin: "dàbiàn",
@@ -524,7 +564,7 @@ export const LEVEL2_FLASHCARDS = {
       }
     },
     {
-      id: "l2-2-11",
+      id: "l2-2-12",
       lesson_id: "level2_lesson2",
       hanzi: "小便",
       pinyin: "xiǎobiàn",
@@ -537,7 +577,7 @@ export const LEVEL2_FLASHCARDS = {
       }
     },
     {
-      id: "l2-2-12",
+      id: "l2-2-13",
       lesson_id: "level2_lesson2",
       hanzi: "检查",
       pinyin: "jiǎnchá",
@@ -550,7 +590,7 @@ export const LEVEL2_FLASHCARDS = {
       }
     },
     {
-      id: "l2-2-13",
+      id: "l2-2-14",
       lesson_id: "level2_lesson2",
       hanzi: "结果",
       pinyin: "jiéguǒ",
@@ -563,12 +603,15 @@ export const LEVEL2_FLASHCARDS = {
       }
     },
     {
-      id: "l2-2-14",
+      id: "l2-2-15",
       lesson_id: "level2_lesson2",
       hanzi: "出来",
-      pinyin: "chūlái",
+      pinyin: "chū lái",
+      grammarUsage: "Directional complement",
       english: "To come out",
       difficulty_level: 1,
+      grammarTip: "Note: Direction complement—indicates movement toward the speaker.",
+      colorCodedExample: '<span class="text-noun">Jiéguǒ</span> <span class="text-time">míngtiān</span> <span class="text-verb">chū lái</span>.',
       example_sentence: {
         hanzi: "结果明天出来。",
         pinyin: "Jiéguǒ míngtiān chūlái.",
@@ -918,14 +961,14 @@ export const LEVEL2_FLASHCARDS = {
     {
       id: "l2-3-13",
       lesson_id: "level2_lesson3",
-      hanzi: "平",
-      pinyin: "píng",
-      english: "Flat/peaceful",
+      hanzi: "平方米",
+      pinyin: "píngfāngmǐ",
+      english: "Square meter",
       difficulty_level: 1,
       example_sentence: {
-        hanzi: "这条路很平。",
-        pinyin: "Zhè tiáo lù hěn píng.",
-        english: "This road is very flat."
+        hanzi: "这个房间有五十平方米。",
+        pinyin: "Zhège fángjiān yǒu wǔshí píngfāngmǐ.",
+        english: "This room is fifty square meters."
       }
     },
     {

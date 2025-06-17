@@ -6025,16 +6025,7 @@ export const LESSON_FLASHCARDS = {
   "r20": function() { return LESSON_FLASHCARDS.lesson20; },
   "r21": function() { return LESSON_FLASHCARDS.lesson21; },
   "r22": function() { return LESSON_FLASHCARDS.lesson22; },
-  "level2_lesson1": function() { return LESSON_FLASHCARDS.level2_lesson1; },
-  "level2_lesson2": function() { return LESSON_FLASHCARDS.level2_lesson2; },
-  "level2_lesson3": function() { return LESSON_FLASHCARDS.level2_lesson3; },
-  "level2_lesson4": function() { return LESSON_FLASHCARDS.level2_lesson4; },
-  "level2_lesson5": function() { return LESSON_FLASHCARDS.level2_lesson5; },
-  "level2_lesson6": function() { return LESSON_FLASHCARDS.level2_lesson6; },
-  "level2_lesson7": function() { return LESSON_FLASHCARDS.level2_lesson7; },
-  "level2_lesson8": function() { return LESSON_FLASHCARDS.level2_lesson8; },
-  "level2_lesson9": function() { return LESSON_FLASHCARDS.level2_lesson9; },
-  "level2_lesson10": function() { return LESSON_FLASHCARDS.level2_lesson10; }
+  // Level 2 functions will be added via Object.assign below after importing integrated data
 };
 
 // Mock lesson progress
@@ -6063,7 +6054,8 @@ export const LESSON_PROGRESS = {
   "lesson22": 0,
   "level2_lesson1": 0,
   "level2_lesson2": 0,
-  "level2_lesson3": 0
+  "level2_lesson3": 0,
+  "level2_lesson4": 0
 };
 
 // Study mode tabs
@@ -6164,27 +6156,20 @@ Object.keys(LESSON_FLASHCARDS).forEach(key => {
   }
 });
 
-// Import integrated Level 2 flashcards
-import { INTEGRATED_LEVEL2_FLASHCARDS, INTEGRATED_LEVEL2_HELPERS } from './level2FlashcardIntegration';
+// Import Level 2 flashcards directly
+import { LEVEL2_FLASHCARDS, LEVEL2_HELPERS } from './level2FlashcardData';
 
-// Replace Level 2 flashcards with the integrated ones
-// Instead of redeclaring LESSON_FLASHCARDS, let's extend the existing object
+// Add Level 2 flashcards to the main LESSON_FLASHCARDS object
 Object.assign(LESSON_FLASHCARDS, {
-  // Level 2 Flashcards (imported from the integration file)
-  "level2_lesson1": INTEGRATED_LEVEL2_FLASHCARDS.level2_lesson1,
-  "level2_lesson2": INTEGRATED_LEVEL2_FLASHCARDS.level2_lesson2,
-  "level2_lesson3": INTEGRATED_LEVEL2_FLASHCARDS.level2_lesson3,
-  "level2_lesson4": INTEGRATED_LEVEL2_FLASHCARDS.level2_lesson4,
+  // Level 2 Flashcards (imported directly from level2FlashcardData)
+  "level2_lesson1": LEVEL2_FLASHCARDS.level2_lesson1,
+  "level2_lesson2": LEVEL2_FLASHCARDS.level2_lesson2,
+  "level2_lesson3": LEVEL2_FLASHCARDS.level2_lesson3,
+  "level2_lesson4": LEVEL2_FLASHCARDS.level2_lesson4,
   
-  // Level 2 helper functions
-  "level2_r1": INTEGRATED_LEVEL2_HELPERS.level2_r1,
-  "level2_r2": INTEGRATED_LEVEL2_HELPERS.level2_r2,
-  "level2_r3": INTEGRATED_LEVEL2_HELPERS.level2_r3,
-  "level2_r4": INTEGRATED_LEVEL2_HELPERS.level2_r4,
-  "level2_r5": function() { return LESSON_FLASHCARDS.level2_lesson5; },
-  "level2_r6": function() { return LESSON_FLASHCARDS.level2_lesson6; },
-  "level2_r7": function() { return LESSON_FLASHCARDS.level2_lesson7; },
-  "level2_r8": function() { return LESSON_FLASHCARDS.level2_lesson8; },
-  "level2_r9": function() { return LESSON_FLASHCARDS.level2_lesson9; },
-  "level2_r10": function() { return LESSON_FLASHCARDS.level2_lesson10; }
+  // Level 2 helper functions for reading mode
+  "level2_r1": LEVEL2_HELPERS.level2_r1,
+  "level2_r2": LEVEL2_HELPERS.level2_r2,
+  "level2_r3": LEVEL2_HELPERS.level2_r3,
+  "level2_r4": LEVEL2_HELPERS.level2_r4
 });

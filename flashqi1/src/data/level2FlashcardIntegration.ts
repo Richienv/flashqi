@@ -9,9 +9,6 @@ export const INTEGRATED_LEVEL2_FLASHCARDS = {
   "level2_lesson2": LEVEL2_FLASHCARDS.level2_lesson2,
   "level2_lesson3": LEVEL2_FLASHCARDS.level2_lesson3,
   "level2_lesson4": LEVEL2_FLASHCARDS.level2_lesson4,
-  "level2_lesson5": LEVEL2_FLASHCARDS.level2_lesson5,
-  "level2_lesson6": LEVEL2_FLASHCARDS.level2_lesson6,
-  "level2_lesson7": LEVEL2_FLASHCARDS.level2_lesson7,
 };
 
 // Helper functions for each lesson
@@ -20,9 +17,6 @@ export const INTEGRATED_LEVEL2_HELPERS = {
   "level2_r2": function() { return LEVEL2_FLASHCARDS.level2_lesson2; },
   "level2_r3": function() { return LEVEL2_FLASHCARDS.level2_lesson3; },
   "level2_r4": function() { return LEVEL2_FLASHCARDS.level2_lesson4; },
-  "level2_r5": function() { return LEVEL2_FLASHCARDS.level2_lesson5; },
-  "level2_r6": function() { return LEVEL2_FLASHCARDS.level2_lesson6; },
-  "level2_r7": function() { return LEVEL2_FLASHCARDS.level2_lesson7; },
 };
 
 // Function to calculate total Level 2 flashcards

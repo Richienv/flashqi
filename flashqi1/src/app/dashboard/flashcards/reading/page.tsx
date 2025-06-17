@@ -158,53 +158,6 @@ export default function ReadingFlashcardsPage() {
           
           {/* Main Feature Cards - Full Width Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 w-full">
-            {/* Reading Comprehension */}
-            <div className="card card-hover p-8 h-64 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/10 dark:to-indigo-900/10 border-blue-200 dark:border-blue-800/50 flex flex-col justify-between">
-              <div className="flex items-center mb-6">
-                <div className="p-4 bg-blue-100 dark:bg-blue-900/20 rounded-xl">
-                  <svg className="w-8 h-8 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                  </svg>
-                </div>
-                <div className="ml-5">
-                  <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Comprehension</h3>
-                  <p className="text-base text-blue-600 dark:text-blue-400">Reading exercises</p>
-                </div>
-              </div>
-              <div className="text-sm text-blue-600 dark:text-blue-400 font-medium">15 passages available</div>
-            </div>
-
-            {/* Vocabulary Building */}
-            <div className="card card-hover p-8 h-64 bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/10 dark:to-emerald-900/10 border-green-200 dark:border-green-800/50 flex flex-col justify-between">
-              <div className="flex items-center mb-6">
-                <div className="p-4 bg-green-100 dark:bg-green-900/20 rounded-xl">
-                  <svg className="w-8 h-8 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14" />
-                  </svg>
-                </div>
-                <div className="ml-5">
-                  <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Vocabulary</h3>
-                  <p className="text-base text-green-600 dark:text-green-400">Word building</p>
-                </div>
-              </div>
-              <div className="text-sm text-green-600 dark:text-green-400 font-medium">200+ new words</div>
-            </div>
-
-            {/* Speed Reading */}
-            <div className="card card-hover p-8 h-64 bg-gradient-to-br from-purple-50 to-violet-50 dark:from-purple-900/10 dark:to-violet-900/10 border-purple-200 dark:border-purple-800/50 flex flex-col justify-between">
-              <div className="flex items-center mb-6">
-                <div className="p-4 bg-purple-100 dark:bg-purple-900/20 rounded-xl">
-                  <svg className="w-8 h-8 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                  </svg>
-                </div>
-                <div className="ml-5">
-                  <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Speed Reading</h3>
-                  <p className="text-base text-purple-600 dark:text-purple-400">Improve reading speed</p>
-                </div>
-              </div>
-              <div className="text-sm text-purple-600 dark:text-purple-400 font-medium">Current: 250 WPM</div>
-            </div>
           </div>
           
           {/* Reading Lessons */}
