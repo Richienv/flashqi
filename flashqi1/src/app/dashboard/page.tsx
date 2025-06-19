@@ -1,6 +1,9 @@
 import Link from 'next/link';
+import { redirect } from 'next/navigation';
 
 export default function DashboardPage() {
+  // Redirect to flashcards as the primary dashboard
+  redirect('/dashboard/flashcards');
   return (
     <div className="flex flex-col min-h-screen bg-white dark:bg-[#0e0e0e]">
       <main className="flex-1 pt-24 pb-6">

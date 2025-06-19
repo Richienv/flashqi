@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { MobileNav } from "@/components/ui/navbar";
 import { Button } from "@/components/ui/button";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { Tabs } from "@/components/ui/tabs";
 // Commented out because it's not being used in this file
 // import Link from "next/link";
@@ -19,6 +20,7 @@ import Link from 'next/link';
 import { PlusCircle, X } from "lucide-react";
 import { supabase } from '@/lib/supabase/client'; // Import supabase client
 import { v4 as uuidv4 } from 'uuid';
+import { useAuth } from "@/contexts/auth-context";
 
 // Animation styles
 const AnimationStyles = () => (
@@ -196,12 +198,14 @@ const calculateTotalFlashcards = () => {
 
 export default function FlashcardsPage() {
   const router = useRouter();
+  const { user, signOut } = useAuth();
   
   // State for UI navigation
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [selectedLevel, setSelectedLevel] = useState<string | null>(null); // NEW: Track selected level
   const [previewLessonId, setPreviewLessonId] = useState<string | null>(null); 
   const [activeStudyTab, setActiveStudyTab] = useState<string | number>("new");
+  const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
   
   // State for search functionality
   const [searchQuery, setSearchQuery] = useState('');
@@ -243,6 +247,7 @@ export default function FlashcardsPage() {
   const [handwritingCtx, setHandwritingCtx] = useState<CanvasRenderingContext2D | null>(null);
   const [isHandwriting, setIsHandwriting] = useState(false);
   const [handwritingStrokeHistory, setHandwritingStrokeHistory] = useState<ImageData[]>([]);
+  const profileDropdownRef = useRef<HTMLDivElement>(null);
 
   // Define types for stroke analysis
   type PixelPoint = [number, number];
@@ -411,6 +416,23 @@ export default function FlashcardsPage() {
       window.removeEventListener('scroll', handleScroll);
     };
   }, [isStudyMode, displayFlashcards.length, visibleCardsCount]);
+
+  // Handle click outside profile dropdown
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (profileDropdownRef.current && !profileDropdownRef.current.contains(event.target as Node)) {
+        setIsProfileDropdownOpen(false);
+      }
+    };
+
+    if (isProfileDropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isProfileDropdownOpen]);
 
   // Reset visible cards count when search query changes
   useEffect(() => {
@@ -1882,6 +1904,123 @@ export default function FlashcardsPage() {
     <div className="flex flex-col min-h-screen bg-white dark:bg-[#0e0e0e]">
       <AnimationStyles />
       
+      {/* Floating Glassmorphism Navbar */}
+      <header className="fixed top-4 left-4 right-4 z-50 mx-auto max-w-7xl">
+        <div className="bg-white/10 dark:bg-black/10 backdrop-blur-lg border border-white/20 dark:border-white/10 shadow-lg rounded-2xl px-6 py-3">
+          <div className="flex justify-between items-center">
+            <div className="flex items-center">
+              {isStudyMode ? (
+                <>
+                  <button 
+                    className="p-2 rounded-xl bg-white/20 dark:bg-black/20 backdrop-blur-sm border border-white/30 dark:border-white/10 text-black dark:text-white hover:bg-white/30 dark:hover:bg-black/30 transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-sm mr-3"
+                    onClick={exitStudySession}
+                    title="Exit Study Mode"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M19 12H5M12 19l-7-7 7-7"></path>
+                    </svg>
+                  </button>
+                  <div>
+                    <h1 className="text-lg font-bold text-black dark:text-white">
+                      {activeLesson === "midterm-prep" 
+                        ? "Midterm Prep" 
+                        : activeLesson === "level2-midterm-prep"
+                          ? "Level 2 Midterm Prep"
+                          : activeLesson === "all" 
+                            ? "All Flashcards" 
+                            : `Lesson ${typeof activeLesson === 'string' ? activeLesson.replace("lesson", "").replace("level2_lesson", "") : activeLesson}`}
+                    </h1>
+                    <p className="text-sm text-black/70 dark:text-white/70">
+                      {activeLesson === "midterm-prep"
+                        ? `${getMidtermPrepCardCount()} cards`
+                        : activeLesson === "level2-midterm-prep"
+                          ? `${getLevel2MidtermPrepCardCount()} cards`
+                          : `${currentFlashcards.length} cards`}
+                    </p>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <Link href="/dashboard/flashcards" className="text-xl font-bold text-black dark:text-white">
+                    快玉
+                  </Link>
+                  <nav className="hidden md:ml-10 md:flex md:items-center md:space-x-6">
+                    <span className="text-sm font-medium text-blue-600 dark:text-blue-400">
+                      Flashcards
+                    </span>
+                  </nav>
+                </>
+              )}
+            </div>
+            <div className="flex items-center space-x-4">
+              {isStudyMode && (
+                <div className="bg-white/20 dark:bg-black/20 px-3 py-1 rounded-full text-sm font-medium text-black dark:text-white">
+                  {currentCardIndex + 1} / {currentFlashcards.length}
+                </div>
+              )}
+              <ThemeToggle />
+              
+              {/* Personalized Profile Dropdown */}
+              <div className="relative" ref={profileDropdownRef}>
+                <button
+                  onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)}
+                  className="flex items-center px-3 py-2 text-sm font-medium bg-white/20 dark:bg-black/20 backdrop-blur-sm border border-white/30 dark:border-white/10 rounded-xl text-black dark:text-white hover:bg-white/30 dark:hover:bg-black/30 transition-all duration-300 ease-out transform hover:scale-105 active:scale-95 shadow-sm"
+                >
+                  <div className="flex items-center">
+                    <div className="w-6 h-6 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-xs font-semibold mr-2">
+                      {user?.user_metadata?.name ? user.user_metadata.name.charAt(0).toUpperCase() : user?.email?.charAt(0).toUpperCase()}
+                    </div>
+                    <span className="hidden sm:inline-block mr-1 font-medium">
+                      Hi, {user?.user_metadata?.name || user?.email?.split('@')[0] || 'User'}!
+                    </span>
+                  </div>
+                  <svg
+                    className={`ml-1 h-4 w-4 text-black/60 dark:text-white/60 transition-transform duration-300 ${isProfileDropdownOpen ? 'rotate-180' : ''}`}
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                </button>
+
+                {/* Glassmorphism Dropdown */}
+                {isProfileDropdownOpen && (
+                  <div className="absolute right-0 mt-2 w-56 rounded-xl bg-white/10 dark:bg-black/10 backdrop-filter backdrop-blur-lg py-2 shadow-xl border border-white/20 dark:border-white/10 focus:outline-none animate-in fade-in-0 zoom-in-95 duration-200 z-50">
+                    <Link
+                      href="/profile"
+                      className="flex items-center px-4 py-3 text-sm text-black dark:text-white hover:bg-white/20 dark:hover:bg-black/30 transition-colors duration-200"
+                      onClick={() => setIsProfileDropdownOpen(false)}
+                    >
+                      <svg className="w-4 h-4 mr-3 text-black/70 dark:text-white/70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                      </svg>
+                      Profile Settings
+                    </Link>
+                    <button
+                      onClick={() => {
+                        signOut();
+                        setIsProfileDropdownOpen(false);
+                      }}
+                      className="flex items-center w-full text-left px-4 py-3 text-sm text-black dark:text-white hover:bg-white/20 dark:hover:bg-black/30 transition-colors duration-200"
+                    >
+                      <svg className="w-4 h-4 mr-3 text-black/70 dark:text-white/70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                      </svg>
+                      Sign Out
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      </header>
+      
       <main className="flex-1 pt-24 pb-6">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
           {isStudyMode ? (
@@ -2034,21 +2173,21 @@ export default function FlashcardsPage() {
               )}
               
               <div className="px-4 pt-6 pb-2 flex-1 flex flex-col">
-                {/* Study Mode Header */}
-                <div className="fixed inset-x-0 top-0 pt-4 pb-2 px-4 bg-white dark:bg-[#0e0e0e] border-b border-slate-200 dark:border-gray-800 z-40">
+                {/* Study Mode Info */}
+                <div className="pt-4 pb-2 px-4">
                   <div className="flex justify-between items-center">
-                  <div className="flex items-center">
-                    <Button 
-                      variant="outline" 
-                        className="p-2 mr-3 w-10 h-10 rounded-full border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800"
-                      onClick={exitStudySession}
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M19 12H5M12 19l-7-7 7-7"></path>
-                      </svg>
-                    </Button>
+                    <div className="flex items-center">
+                      <button 
+                        className="p-2 rounded-xl bg-white/20 dark:bg-black/20 backdrop-blur-sm border border-white/30 dark:border-white/10 text-white hover:bg-white/30 dark:hover:bg-black/30 transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-sm mr-3"
+                        onClick={exitStudySession}
+                        title="Exit Study Mode"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M19 12H5M12 19l-7-7 7-7"></path>
+                        </svg>
+                      </button>
                       <div>
-                        <h2 className="text-lg font-semibold text-black dark:text-white">
+                        <h2 className="text-lg font-semibold text-white">
                           {activeLesson === "midterm-prep" 
                             ? "Midterm Prep" 
                             : activeLesson === "level2-midterm-prep"
@@ -2057,7 +2196,7 @@ export default function FlashcardsPage() {
                                 ? "All Flashcards" 
                                 : `Lesson ${typeof activeLesson === 'string' ? activeLesson.replace("lesson", "") : activeLesson}`}
                         </h2>
-                        <p className="text-sm text-slate-600 dark:text-slate-400">
+                        <p className="text-sm text-white/70">
                           {activeLesson === "midterm-prep"
                             ? `${getMidtermPrepCardCount()} cards from Lessons 1-21`
                             : activeLesson === "level2-midterm-prep"
@@ -2065,9 +2204,9 @@ export default function FlashcardsPage() {
                               : `${currentFlashcards.length} cards in total`}
                         </p>
                       </div>
-                  </div>
-                  <div className="bg-white/20 px-3 py-1 rounded-full text-sm font-medium text-white">
-                    {currentCardIndex + 1} / {currentFlashcards.length}
+                    </div>
+                    <div className="bg-white/20 px-3 py-1 rounded-full text-sm font-medium text-white">
+                      {currentCardIndex + 1} / {currentFlashcards.length}
                     </div>
                   </div>
                 </div>
