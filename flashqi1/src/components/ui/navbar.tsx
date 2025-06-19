@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import Link from "next/link";
+import Image from "next/image";
 // Commented out because it's not being used
 // import { Button } from "./button";
 import { usePathname } from "next/navigation";
@@ -26,8 +27,23 @@ export function Navbar() {
       <div className="bg-white/10 dark:bg-black/10 backdrop-blur-lg border border-white/20 dark:border-white/10 shadow-lg rounded-2xl px-6 py-3">
         <div className="flex justify-between items-center">
           <div className="flex items-center">
-            <Link href={isDashboard ? "/dashboard/flashcards" : "/"} className="text-xl font-bold text-black dark:text-white">
-              快玉
+            <Link 
+              href={isDashboard ? "/dashboard/flashcards" : "/"} 
+              className="flex items-center group"
+            >
+              <div className="relative transform transition-transform duration-300 ease-in-out group-hover:scale-110 animate-logo-breathe">
+                <Image
+                  src="/flashqi-main-logo.png"
+                  alt="FlashQi Logo"
+                  width={32}
+                  height={32}
+                  className="object-contain"
+                  priority
+                />
+              </div>
+              <span className="ml-2 text-xl font-bold text-black dark:text-white transition-all duration-300 group-hover:text-blue-600 dark:group-hover:text-blue-400">
+                FlashQi
+              </span>
             </Link>
             
             {isDashboard ? (
@@ -75,7 +91,7 @@ export function Navbar() {
           <div className="flex items-center space-x-4">
             <ThemeToggle />
             
-            {pathname.includes('/dashboard/flashcards') && (
+            {isDashboard && (
               <Link
                 href="/profile"
                 className="p-2 rounded-xl bg-white/20 dark:bg-black/20 backdrop-blur-sm border border-white/30 dark:border-white/10 text-black dark:text-white hover:bg-white/30 dark:hover:bg-black/30 transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-sm"
@@ -179,7 +195,7 @@ export function MobileNav() {
   const isDashboard = pathname.includes('/dashboard');
   const { isAuthenticated } = useAuth();
   
-  if (!isDashboard && !isAuthenticated) return null;
+  if (!isDashboard || !isAuthenticated) return null;
   
   return (
     <div className="hidden">

@@ -5,127 +5,39 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 
-// Mock data for reading lessons
-const READING_LESSONS = [
+// Level information
+const READING_LEVELS = [
   {
-    id: "r1",
-    lesson_number: 1,
-    title: "Basic Sentences",
-    description: "Simple sentences using fundamental vocabulary.",
-    total_words: 42,
-    completion_percentage: 70,
-    teacher_notes: "Focus on character recognition and sentence structure"
+    id: "1",
+    title: "Level 1",
+    description: "Basic reading exercises with fundamental vocabulary",
+    lessons: 10,
+    totalWords: 520,
+    difficulty: "Beginner",
+    color: "from-blue-50 to-white dark:from-blue-900/20 dark:to-blue-800/10",
+    borderColor: "border-blue-200 dark:border-blue-800/50",
+    hoverColor: "hover:border-blue-300 dark:hover:border-blue-700",
+    iconColor: "bg-blue-600 dark:bg-blue-500"
   },
   {
-    id: "r2",
-    lesson_number: 2,
-    title: "Family Descriptions",
-    description: "Paragraphs about family members and relationships.",
-    total_words: 68,
-    completion_percentage: 40,
-    teacher_notes: "Pay attention to descriptive adjectives and relationship terms"
-  },
-  {
-    id: "r3",
-    lesson_number: 3,
-    title: "Daily Activities",
-    description: "Read about common everyday activities.",
-    total_words: 85,
-    completion_percentage: 20,
-    teacher_notes: "Notice how time expressions are used with verbs"
-  },
-  {
-    id: "r4",
-    lesson_number: 4,
-    title: "Home and Living",
-    description: "Paragraphs describing homes and living environments.",
-    total_words: 62,
-    completion_percentage: 0,
-    teacher_notes: "Focus on location words and descriptive terms"
-  },
-  {
-    id: "r5",
-    lesson_number: 5,
-    title: "Food and Meals",
-    description: "Read about different foods and meal preparation.",
-    total_words: 74,
-    completion_percentage: 0,
-    teacher_notes: "Pay attention to taste descriptions and cooking verbs"
-  },
-  {
-    id: "r6",
-    lesson_number: 6,
-    title: "Travel and Transportation",
-    description: "Paragraphs about traveling and different modes of transport.",
-    total_words: 79,
-    completion_percentage: 0,
-    teacher_notes: "Notice direction terms and location prepositions"
-  },
-  {
-    id: "r7",
-    lesson_number: 7,
-    title: "Shopping Scenarios",
-    description: "Reading exercises about shopping experiences.",
-    total_words: 58,
-    completion_percentage: 0,
-    teacher_notes: "Focus on number terms and transaction vocabulary"
-  },
-  {
-    id: "r8",
-    lesson_number: 8,
-    title: "Weather and Seasons",
-    description: "Paragraphs about different weather conditions and seasons.",
-    total_words: 67,
-    completion_percentage: 0,
-    teacher_notes: "Pay attention to descriptive terms for natural phenomena"
-  },
-  {
-    id: "r9",
-    lesson_number: 9,
-    title: "Hobbies and Interests",
-    description: "Read about various leisure activities and interests.",
-    total_words: 71,
-    completion_percentage: 0,
-    teacher_notes: "Notice how verbs are used to describe different activities"
-  },
-  {
-    id: "r10",
-    lesson_number: 10,
-    title: "School and Education",
-    description: "Paragraphs about educational settings and learning.",
-    total_words: 76,
-    completion_percentage: 0,
-    teacher_notes: "Focus on academic vocabulary and educational terms"
+    id: "2", 
+    title: "Level 2",
+    description: "Intermediate reading with complex sentence structures",
+    lessons: 8,
+    totalWords: 680,
+    difficulty: "Intermediate",
+    color: "from-purple-50 to-white dark:from-purple-900/20 dark:to-purple-800/10",
+    borderColor: "border-purple-200 dark:border-purple-800/50",
+    hoverColor: "hover:border-purple-300 dark:hover:border-purple-700",
+    iconColor: "bg-purple-600 dark:bg-purple-500"
   }
 ];
 
-// Category information
-const CATEGORY_INFO = {
-  id: 'reading',
-  title: 'Reading Practice',
-  description: 'Enhance your Chinese reading skills through paragraph-based exercises.',
-  icon: '📖',
-  color: 'bg-amber-100',
-  totalLessons: READING_LESSONS.length,
-  totalWords: READING_LESSONS.reduce((total, lesson) => total + lesson.total_words, 0),
-  completedLessons: READING_LESSONS.filter(lesson => lesson.completion_percentage > 0).length
-};
-
-export default function ReadingFlashcardsPage() {
+export default function ReadingPage() {
   const router = useRouter();
-  const [filterStatus, setFilterStatus] = useState('all'); // 'all', 'in-progress', 'completed', 'not-started'
-  
-  // Filter lessons based on status
-  const filteredLessons = READING_LESSONS.filter(lesson => {
-    if (filterStatus === 'all') return true;
-    if (filterStatus === 'in-progress') return lesson.completion_percentage > 0 && lesson.completion_percentage < 100;
-    if (filterStatus === 'completed') return lesson.completion_percentage === 100;
-    if (filterStatus === 'not-started') return lesson.completion_percentage === 0;
-    return true;
-  });
   
   return (
-    <div className="flex flex-col min-h-screen bg-white dark:bg-[#0e0e0e]">
+    <div className="flex flex-col min-h-screen bg-white dark:bg-black">
       <main className="flex-1 pt-24 pb-6">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
           {/* Header and Back Button */}
@@ -135,60 +47,88 @@ export default function ReadingFlashcardsPage() {
                 <path d="M19 12H5M12 19l-7-7 7-7"></path>
               </svg>
             </Link>
-            <h1 className="text-2xl font-bold text-black dark:text-gray-100">Reading Flashcards</h1>
-          </div>
-          
-          {/* Filter Section */}
-          <div className="mb-6">
-            <div className="flex justify-between items-center mb-4">
-              <div className="flex space-x-2">
-                <select 
-                  className="p-2 rounded-lg border border-blue-200 dark:border-gray-700 text-sm text-black dark:text-gray-100 bg-white dark:bg-[#101010]"
-                  value={filterStatus}
-                  onChange={(e) => setFilterStatus(e.target.value)}
-                >
-                  <option value="all">All Lessons</option>
-                  <option value="in-progress">In Progress</option>
-                  <option value="completed">Completed</option>
-                  <option value="not-started">Not Started</option>
-                </select>
-              </div>
+            <div>
+              <h1 className="text-2xl font-bold text-black dark:text-gray-100">Reading Practice</h1>
+              <p className="text-sm text-gray-600 dark:text-gray-400">Choose your reading level to get started</p>
             </div>
           </div>
           
-          {/* Main Feature Cards - Full Width Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 w-full">
-          </div>
-          
-          {/* Reading Lessons */}
-          <div className="space-y-4">
-            {filteredLessons.map(lesson => (
-              <div key={lesson.id} className="bg-gradient-to-r from-orange-50 to-white dark:from-orange-900/20 dark:to-orange-800/10 rounded-xl p-4 border border-orange-200 dark:border-orange-800/50 hover:border-orange-300 dark:hover:border-orange-700 hover:shadow-sm transition-all cursor-pointer">
+          {/* Reading Levels */}
+          <div className="space-y-6 mb-8">
+            {READING_LEVELS.map((level) => (
+              <div 
+                key={level.id}
+                className={`bg-gradient-to-r ${level.color} rounded-xl p-6 border ${level.borderColor} ${level.hoverColor} hover:shadow-md transition-all cursor-pointer`}
+                onClick={() => router.push(`/dashboard/reading/level/${level.id}`)}
+              >
                 <div className="flex justify-between items-center">
                   <div className="flex items-center">
-                    <div className="w-14 h-14 rounded-full bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center text-black dark:text-orange-300 font-bold mr-4 border border-orange-200 dark:border-orange-800/50">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <div className={`w-16 h-16 rounded-full ${level.iconColor} flex items-center justify-center text-white font-bold mr-6`}>
+                      <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
                         <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
                       </svg>
                     </div>
                     <div>
-                      <h4 className="font-medium text-black dark:text-gray-100 text-lg">{lesson.title}</h4>
-                      <p className="text-sm text-black dark:text-gray-400">{lesson.total_words} words • {lesson.teacher_notes}</p>
+                      <h3 className="text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-1">{level.title}</h3>
+                      <p className="text-gray-700 dark:text-gray-300 mb-2">{level.description}</p>
+                      <div className="flex items-center space-x-4 text-sm text-gray-600 dark:text-gray-400">
+                        <span>{level.lessons} lessons</span>
+                        <span>•</span>
+                        <span>{level.totalWords} total words</span>
+                        <span>•</span>
+                        <span className="font-medium">{level.difficulty}</span>
+                      </div>
                     </div>
                   </div>
-                  <div className="text-sm text-black dark:text-gray-300 text-right">
-                    {lesson.completion_percentage > 0 ? (
-                      <div>
-                        <span className="text-orange-600 dark:text-orange-400 font-medium">{lesson.completion_percentage}%</span> completed
-                      </div>
-                    ) : (
-                      <span className="text-black dark:text-gray-400">Not started</span>
-                    )}
-                  </div>
+                  <button 
+                    className={`p-4 rounded-full ${level.iconColor} text-white hover:opacity-90 transition-all transform hover:scale-105 active:scale-95 shadow-lg`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      router.push(`/dashboard/reading/level/${level.id}`);
+                    }}
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M9 18l6-6-6-6"></path>
+                    </svg>
+                  </button>
                 </div>
               </div>
             ))}
+          </div>
+          
+          {/* Reading Progress Overview */}
+          <div className="bg-gradient-to-r from-amber-50 to-white dark:from-amber-900/20 dark:to-amber-800/10 rounded-xl p-6 border border-amber-200 dark:border-amber-800/50">
+            <div className="flex items-center mb-4">
+              <div className="w-12 h-12 rounded-full bg-amber-600 dark:bg-amber-500 flex items-center justify-center text-white mr-4">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <polyline points="12 6 12 12 16 14"></polyline>
+                </svg>
+              </div>
+              <div>
+                <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Your Progress</h3>
+                <p className="text-gray-700 dark:text-gray-300">Track your reading improvement across all levels</p>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="text-center">
+                <div className="text-2xl font-bold text-amber-600 dark:text-amber-400">18</div>
+                <div className="text-sm text-gray-600 dark:text-gray-400">Lessons</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-amber-600 dark:text-amber-400">1,200</div>
+                <div className="text-sm text-gray-600 dark:text-gray-400">Words Read</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-amber-600 dark:text-amber-400">85%</div>
+                <div className="text-sm text-gray-600 dark:text-gray-400">Comprehension</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-amber-600 dark:text-amber-400">12</div>
+                <div className="text-sm text-gray-600 dark:text-gray-400">Days Streak</div>
+              </div>
+            </div>
           </div>
         </div>
       </main>

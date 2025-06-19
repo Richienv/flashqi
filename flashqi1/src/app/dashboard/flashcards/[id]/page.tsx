@@ -102,19 +102,6 @@ export default function FlashcardDetailPage() {
   const cardId = parseInt(params.id as string);
   const router = useRouter();
   
-  // Find the card across all lessons
-  let currentCard = null;
-  let currentLesson = null;
-  
-  for (const lesson of LESSONS) {
-    const card = lesson.cards.find(c => c.id === cardId);
-    if (card) {
-      currentCard = card;
-      currentLesson = lesson;
-      break;
-    }
-  }
-  
   const [isFlipped, setIsFlipped] = useState(false);
   const [flashcard, setFlashcard] = useState<any>(null);
   const [comments, setComments] = useState<Comment[]>([]);
@@ -153,8 +140,17 @@ export default function FlashcardDetailPage() {
     setComments(comments.filter(comment => comment.id !== commentId));
   };
 
-  if (!currentCard || !currentLesson) {
-    return <div>Card not found</div>;
+  if (!flashcard) {
+    return (
+      <div className="flex flex-col min-h-screen bg-white">
+        <main className="flex-1 py-8">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+            <p className="text-black">Loading flashcard...</p>
+          </div>
+        </main>
+        <MobileNav />
+      </div>
+    );
   }
 
   return (
@@ -173,7 +169,7 @@ export default function FlashcardDetailPage() {
           
           {/* Card Info */}
           <div className="mb-6 bg-gradient-to-r from-blue-50 to-white rounded-xl p-4 border border-blue-200">
-            <p className="text-sm text-black">From Lesson {currentLesson.lesson_number}</p>
+            <p className="text-sm text-black">From Lesson {flashcard.lesson_id}</p>
           </div>
           
           {/* Flashcard */}
@@ -185,13 +181,13 @@ export default function FlashcardDetailPage() {
               <div className="h-full flex flex-col justify-center items-center p-6 text-center">
                 {!isFlipped ? (
                   <div>
-                    <h3 className="text-2xl font-bold text-black mb-2">{currentCard.chinese}</h3>
-                    <p className="text-lg text-blue-600">{currentCard.pinyin}</p>
+                    <h3 className="text-2xl font-bold text-black mb-2">{flashcard.hanzi}</h3>
+                    <p className="text-lg text-blue-600">{flashcard.pinyin}</p>
                     <p className="text-sm text-gray-500 mt-4">Tap to reveal</p>
                   </div>
                 ) : (
                   <div>
-                    <h3 className="text-2xl font-bold text-black mb-2">{currentCard.english}</h3>
+                    <h3 className="text-2xl font-bold text-black mb-2">{flashcard.english}</h3>
                     <p className="text-sm text-gray-500 mt-4">Tap to flip back</p>
                   </div>
                 )}
@@ -200,22 +196,23 @@ export default function FlashcardDetailPage() {
           </div>
           
           {/* Actions */}
-          <div className="flex justify-center space-x-4">
-            <Button 
-              variant="outline" 
-              className="border-blue-200 text-black hover:bg-blue-50"
-            >
-              Mark as Known
-            </Button>
-            <Button 
-              variant="outline" 
-              className="border-blue-200 text-black hover:bg-blue-50"
-            >
-              Study Again
-            </Button>
+          <div className="mb-6 flex justify-center space-x-4">
+            <Button variant="primary">Mark as Known</Button>
+            <Button variant="outline">Mark as Unknown</Button>
+          </div>
+          
+          {/* Comments Section */}
+          <div className="bg-white rounded-xl border border-gray-200 p-6">
+            <h3 className="text-lg font-semibold text-black mb-4">Study Notes & Comments</h3>
+            <CommentSection 
+              comments={comments}
+              onAddComment={handleAddComment}
+              onDeleteComment={handleDeleteComment}
+            />
           </div>
         </div>
       </main>
+      <MobileNav />
     </div>
   );
 } 

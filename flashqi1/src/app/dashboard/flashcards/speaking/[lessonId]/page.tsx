@@ -2,8 +2,7 @@
 
 import { useState } from 'react';
 import Link from "next/link";
-import { ArrowLeft, BookOpen, Users, MessageCircle, PenTool, ChevronRight, ChevronDown, ChevronUp, ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { ArrowLeft, BookOpen, Users, MessageCircle, PenTool, ChevronDown, ChevronUp, ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
 import { 
   LEVEL1_PRACTICE_DATA, 
   LEVEL1_LESSONS, 
@@ -15,15 +14,6 @@ import {
   getLevel2PracticeByLesson 
 } from "@/data/practice-level2-data";
 import type { PracticeExercise } from "@/data/practice-level1-data";
-
-// Dot-matrix style numbers component
-const DotMatrixNumber = ({ number }: { number: number }) => {
-  return (
-    <div className="text-right font-mono text-2xl text-gray-800 dark:text-gray-200 tracking-wider">
-      {number}
-    </div>
-  );
-};
 
 // Exercise type icons
 const getExerciseIcon = (type: string) => {
@@ -285,170 +275,110 @@ const ExerciseDisplay = ({ exercise }: { exercise: PracticeExercise }) => {
   );
 };
 
-export default function SpeakingFlashcardsPage() {
-  const [selectedLevel, setSelectedLevel] = useState<1 | 2>(1);
-  const [selectedLesson, setSelectedLesson] = useState<number | null>(null);
-
-  // Get data based on selected level
-  const currentLessons = selectedLevel === 1 ? LEVEL1_LESSONS : LEVEL2_LESSONS;
-  const currentData = selectedLevel === 1 ? LEVEL1_PRACTICE_DATA : LEVEL2_PRACTICE_DATA;
+export default function SpeakingLessonPage({ params }: { params: { lessonId: string } }) {
+  const { lessonId } = params;
   
-  // Get exercises for selected lesson
-  const lessonExercises = selectedLesson 
-    ? (selectedLevel === 1 
-        ? getLevel1PracticeByLesson(selectedLesson)
-        : getLevel2PracticeByLesson(selectedLesson))
-    : [];
+  // Parse lessonId (format: l1-1 = Level 1, Lesson 1)
+  const match = lessonId.match(/^l(\d+)-(\d+)$/);
+  if (!match) {
+    return (
+      <div className="flex flex-col min-h-screen bg-white dark:bg-[#0e0e0e]">
+        <main className="flex-1 flex items-center justify-center">
+          <div className="text-center">
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">Invalid Lesson</h1>
+            <p className="text-gray-600 dark:text-gray-400 mb-4">
+              Please use a valid lesson format (e.g., l1-1, l2-3)
+            </p>
+            <Link 
+              href="/dashboard/flashcards/speaking"
+              className="inline-flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100"
+            >
+              <ArrowLeft size={16} />
+              <span>Back to Speaking Practice</span>
+            </Link>
+          </div>
+        </main>
+      </div>
+    );
+  }
 
-  // Calculate stats
-  const totalLessons = currentLessons.length;
-  const totalExercises = currentData.length;
+  const level = parseInt(match[1]) as 1 | 2;
+  const lesson = parseInt(match[2]);
 
-  // Reset lesson selection when level changes
-  const handleLevelChange = (level: 1 | 2) => {
-    setSelectedLevel(level);
-    setSelectedLesson(null);
-  };
+  // Get lesson data
+  const currentLessons = level === 1 ? LEVEL1_LESSONS : LEVEL2_LESSONS;
+  const lessonInfo = currentLessons.find(l => l.id === lesson);
+  
+  if (!lessonInfo) {
+    return (
+      <div className="flex flex-col min-h-screen bg-white dark:bg-[#0e0e0e]">
+        <main className="flex-1 flex items-center justify-center">
+          <div className="text-center">
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">Lesson Not Found</h1>
+            <p className="text-gray-600 dark:text-gray-400 mb-4">
+              Lesson {lesson} for Level {level} does not exist
+            </p>
+            <Link 
+              href="/dashboard/flashcards/speaking"
+              className="inline-flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100"
+            >
+              <ArrowLeft size={16} />
+              <span>Back to Speaking Practice</span>
+            </Link>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
+  // Get exercises for this lesson
+  const exercises = level === 1 
+    ? getLevel1PracticeByLesson(lesson)
+    : getLevel2PracticeByLesson(lesson);
 
   return (
     <div className="flex flex-col min-h-screen bg-white dark:bg-[#0e0e0e]">
       <main className="flex-1 py-6">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-6xl">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-4xl">
           {/* Header */}
-          <div className="flex items-center gap-3 mb-8">
+          <div className="mb-6">
             <Link 
-              href="/dashboard" 
-              className="p-2 rounded-full bg-white dark:bg-[#101010] border border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all"
+              href="/dashboard/flashcards/speaking"
+              className="inline-flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 mb-4"
             >
-              <ArrowLeft size={20} className="text-gray-600 dark:text-gray-400" />
+              <ArrowLeft size={16} />
+              <span>Back to Speaking Practice</span>
             </Link>
-            <div className="text-center flex-1">
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Speaking Practice</h1>
-              <p className="text-gray-600 dark:text-gray-400 font-light">Complete answer key for all exercises</p>
+            
+            <div className="bg-white dark:bg-[#101010] border border-gray-200 dark:border-gray-800 rounded-2xl p-6 text-center">
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+                Level {level} - Lesson {lesson}
+              </h1>
+              <h2 className="text-xl text-gray-600 dark:text-gray-400 mb-2">
+                {lessonInfo.title}
+              </h2>
+              <p className="text-gray-500 dark:text-gray-500">
+                {exercises.length} exercises with complete answers
+              </p>
             </div>
           </div>
-          
-          {!selectedLesson ? (
-            <>
-              {/* Stats Header */}
-              <div className="mb-10 grid grid-cols-2 gap-4 max-w-md mx-auto">
-                <div className="bg-white dark:bg-[#101010] border border-gray-100 dark:border-gray-800 rounded-2xl p-6 shadow-sm text-center">
-                  <div className="text-sm text-gray-400 font-light mb-1">Lessons</div>
-                  <DotMatrixNumber number={totalLessons} />
-                </div>
-                <div className="bg-white dark:bg-[#101010] border border-gray-100 dark:border-gray-800 rounded-2xl p-6 shadow-sm text-center">
-                  <div className="text-sm text-gray-400 font-light mb-1">Exercises</div>
-                  <DotMatrixNumber number={totalExercises} />
-                </div>
+
+          {/* Exercise List */}
+          <div className="space-y-6">
+            {exercises.length > 0 ? (
+              exercises
+                .sort((a, b) => a.exerciseNumber - b.exerciseNumber)
+                .map((exercise) => (
+                  <ExerciseDisplay key={exercise.id} exercise={exercise} />
+                ))
+            ) : (
+              <div className="text-center py-12 rounded-2xl bg-gray-50 dark:bg-[#101010] border border-gray-100 dark:border-gray-800">
+                <p className="text-gray-400 font-light">No exercises found for this lesson</p>
               </div>
-
-              {/* Level Selector */}
-              <div className="mb-8">
-                <h2 className="text-xl font-normal text-gray-900 dark:text-gray-100 mb-4 text-center">Select Level</h2>
-                <div className="grid grid-cols-2 gap-4 max-w-lg mx-auto">
-                  <button 
-                    onClick={() => handleLevelChange(1)}
-                    className={`p-6 rounded-2xl border-2 transition-all text-center ${
-                      selectedLevel === 1
-                        ? 'border-gray-900 dark:border-gray-100 bg-gray-50 dark:bg-[#101010]'
-                        : 'border-gray-200 dark:border-gray-800 hover:border-gray-300 dark:hover:border-gray-700'
-                    }`}
-                  >
-                    <div className="text-lg font-medium text-gray-900 dark:text-gray-100">Level 1</div>
-                    <div className="text-gray-600 dark:text-gray-400 text-sm">Beginner exercises</div>
-                  </button>
-                  <button 
-                    onClick={() => handleLevelChange(2)}
-                    className={`p-6 rounded-2xl border-2 transition-all text-center ${
-                      selectedLevel === 2
-                        ? 'border-gray-900 dark:border-gray-100 bg-gray-50 dark:bg-[#101010]'
-                        : 'border-gray-200 dark:border-gray-800 hover:border-gray-300 dark:hover:border-gray-700'
-                    }`}
-                  >
-                    <div className="text-lg font-medium text-gray-900 dark:text-gray-100">Level 2</div>
-                    <div className="text-gray-600 dark:text-gray-400 text-sm">Intermediate exercises</div>
-                  </button>
-                </div>
-            </div>
-
-              {/* Lesson Selector */}
-              <div className="mb-8">
-                <h2 className="text-xl font-normal text-gray-900 dark:text-gray-100 mb-4 text-center">
-                  Level {selectedLevel} Lessons
-                </h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-4xl mx-auto">
-                  {currentLessons.map((lesson) => (
-                  <button 
-                      key={lesson.id}
-                      onClick={() => setSelectedLesson(lesson.id)}
-                      className="bg-white dark:bg-[#101010] border border-gray-200 dark:border-gray-800 rounded-2xl p-6 
-                                hover:shadow-sm hover:translate-y-[-2px] transition-all group text-left"
-                    >
-                      <div className="flex items-center justify-between">
-                        <div className="flex-1">
-                          <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-1">
-                            Lesson {lesson.id}
-                          </h3>
-                          <p className="text-gray-600 dark:text-gray-400 text-sm font-light mb-2">
-                            {lesson.title}
-                          </p>
-                          <p className="text-gray-500 dark:text-gray-500 text-sm">
-                            {lesson.exerciseCount} exercises
-                          </p>
-                        </div>
-                        <ChevronRight 
-                          size={20} 
-                          className="text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-300 transition-colors" 
-                        />
-                      </div>
-                  </button>
-                  ))}
-                </div>
-              </div>
-            </>
-          ) : (
-            <>
-              {/* Lesson Detail View */}
-              <div className="mb-6">
-                                <button
-                  onClick={() => setSelectedLesson(null)}
-                  className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 mb-4 mx-auto"
-                >
-                  <ArrowLeft size={16} />
-                  <span>Back to Lessons</span>
-                                </button>
-                
-                <div className="bg-white dark:bg-[#101010] border border-gray-200 dark:border-gray-800 rounded-2xl p-6 mb-6 text-center max-w-2xl mx-auto">
-                  <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
-                    Level {selectedLevel} - Lesson {selectedLesson}
-                  </h2>
-                  <h3 className="text-lg text-gray-600 dark:text-gray-400 mb-1">
-                    {currentLessons.find(l => l.id === selectedLesson)?.title}
-                  </h3>
-                  <p className="text-gray-500 dark:text-gray-500">
-                    {lessonExercises.length} exercises with complete answers
-                  </p>
-                              </div>
-                            </div>
-
-              {/* Exercise List */}
-              <div className="space-y-6 max-w-4xl mx-auto">
-                {lessonExercises.length > 0 ? (
-                  lessonExercises
-                    .sort((a, b) => a.exerciseNumber - b.exerciseNumber)
-                    .map((exercise) => (
-                      <ExerciseDisplay key={exercise.id} exercise={exercise} />
-                    ))
-                ) : (
-                  <div className="text-center py-12 rounded-2xl bg-gray-50 dark:bg-[#101010] border border-gray-100 dark:border-gray-800">
-                    <p className="text-gray-400 font-light">No exercises found for this lesson</p>
-                </div>
-              )}
-            </div>
-            </>
-          )}
+            )}
+          </div>
         </div>
       </main>
     </div>
   );
-}
+} 

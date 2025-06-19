@@ -1,5 +1,6 @@
 'use client';
 
+import { usePathname } from 'next/navigation';
 import { Navbar, MobileNav } from '@/components/ui/navbar';
 import RouteGuard from '@/components/auth/RouteGuard';
 
@@ -8,12 +9,15 @@ export default function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const pathname = usePathname();
+  const isFlashcardsPage = pathname === '/dashboard/flashcards';
+
   return (
     <RouteGuard>
       <div className="flex flex-col min-h-screen">
-        <Navbar />
+        {!isFlashcardsPage && <Navbar />}
         {children}
-        <MobileNav />
+        {!isFlashcardsPage && <MobileNav />}
       </div>
     </RouteGuard>
   );

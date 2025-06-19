@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef, useMemo } from 'react';
-import { MobileNav } from "@/components/ui/navbar";
+import Image from 'next/image';
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { Tabs } from "@/components/ui/tabs";
@@ -32,6 +32,14 @@ const AnimationStyles = () => (
     }
     .animate-bounce-in {
       animation: bounce-in 0.5s ease-out forwards;
+    }
+    
+    @keyframes logo-breathe {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+    .animate-logo-breathe {
+      animation: logo-breathe 3s ease-in-out infinite;
     }
     
     /* Drawing mode styles */
@@ -1901,7 +1909,7 @@ export default function FlashcardsPage() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-white dark:bg-[#0e0e0e]">
+    <div className="flex flex-col min-h-screen bg-white dark:bg-gradient-to-br dark:from-black dark:to-black">
       <AnimationStyles />
       
       {/* Floating Glassmorphism Navbar */}
@@ -1941,8 +1949,20 @@ export default function FlashcardsPage() {
                 </>
               ) : (
                 <>
-                  <Link href="/dashboard/flashcards" className="text-xl font-bold text-black dark:text-white">
-                    快玉
+                  <Link href="/dashboard/flashcards" className="flex items-center group">
+                    <div className="relative transform transition-transform duration-300 ease-in-out group-hover:scale-110 animate-logo-breathe">
+                      <Image
+                        src="/flashqi-main-logo.png"
+                        alt="FlashQi Logo"
+                        width={32}
+                        height={32}
+                        className="object-contain"
+                        priority
+                      />
+                    </div>
+                    <span className="ml-2 text-xl font-bold text-black dark:text-white transition-all duration-300 group-hover:text-blue-600 dark:group-hover:text-blue-400">
+                      FlashQi
+                    </span>
                   </Link>
                   <nav className="hidden md:ml-10 md:flex md:items-center md:space-x-6">
                     <span className="text-sm font-medium text-blue-600 dark:text-blue-400">
@@ -2112,104 +2132,67 @@ export default function FlashcardsPage() {
                   <div className="fixed bottom-4 left-4 right-4 z-20 flex justify-center">
                     <div className="bg-white/10 dark:bg-black/10 backdrop-blur-lg border border-white/20 dark:border-white/10 shadow-xl rounded-2xl px-6 py-4 max-w-lg w-full">
                       <div className="flex flex-row justify-center items-center gap-3 mb-3">
-                        <button 
+                      <button 
                           className="p-3 rounded-xl bg-white/20 dark:bg-black/20 backdrop-blur-sm border border-white/30 dark:border-white/10 text-black dark:text-white hover:bg-white/30 dark:hover:bg-black/30 transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-sm"
-                          onClick={undoStroke}
-                          disabled={strokeHistory.length <= 1}
-                          style={{opacity: strokeHistory.length <= 1 ? 0.5 : 1}}
-                          aria-label="Undo"
-                        >
+                        onClick={undoStroke}
+                        disabled={strokeHistory.length <= 1}
+                        style={{opacity: strokeHistory.length <= 1 ? 0.5 : 1}}
+                        aria-label="Undo"
+                      >
                           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M3 7v6h6"></path>
-                            <path d="M3 13c0-4.4 3.6-8 8-8h10"></path>
-                          </svg>
-                        </button>
-                        <button 
+                          <path d="M3 7v6h6"></path>
+                          <path d="M3 13c0-4.4 3.6-8 8-8h10"></path>
+                        </svg>
+                      </button>
+                      <button 
                           className="p-3 rounded-xl bg-white/20 dark:bg-black/20 backdrop-blur-sm border border-white/30 dark:border-white/10 text-black dark:text-white hover:bg-white/30 dark:hover:bg-black/30 transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-sm"
-                          onClick={clearCanvas}
-                          aria-label="Clear"
-                        >
+                        onClick={clearCanvas}
+                        aria-label="Clear"
+                      >
                           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M3 6h18"></path>
-                            <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
-                            <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
-                          </svg>
-                        </button>
-                        <button 
+                          <path d="M3 6h18"></path>
+                          <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
+                          <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
+                        </svg>
+                      </button>
+                      <button 
                           className="p-3 rounded-xl bg-white/20 dark:bg-black/20 backdrop-blur-sm border border-white/30 dark:border-white/10 text-black dark:text-white hover:bg-white/30 dark:hover:bg-black/30 transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-sm"
-                          onClick={goToPreviousDrawingPage}
-                          disabled={currentDrawingPage === 0}
-                          style={{opacity: currentDrawingPage === 0 ? 0.5 : 1}}
-                          aria-label="Previous Page"
-                        >
+                        onClick={goToPreviousDrawingPage}
+                        disabled={currentDrawingPage === 0}
+                        style={{opacity: currentDrawingPage === 0 ? 0.5 : 1}}
+                        aria-label="Previous Page"
+                      >
                           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M15 18l-6-6 6-6"></path>
-                          </svg>
-                        </button>
-                        <button 
+                          <path d="M15 18l-6-6 6-6"></path>
+                        </svg>
+                      </button>
+                      <button 
                           className="p-3 rounded-xl bg-white/20 dark:bg-black/20 backdrop-blur-sm border border-white/30 dark:border-white/10 text-black dark:text-white hover:bg-white/30 dark:hover:bg-black/30 transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-sm"
-                          onClick={addNewDrawingPage}
-                          aria-label="Next Page"
-                        >
+                        onClick={addNewDrawingPage}
+                        aria-label="Next Page"
+                      >
                           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M9 18l6-6-6-6"></path>
-                          </svg>
-                        </button>
-                        {/* Next Card button - visually distinct */}
-                        <button
+                          <path d="M9 18l6-6-6-6"></path>
+                        </svg>
+                      </button>
+                      {/* Next Card button - visually distinct */}
+                      <button
                           className="p-3 rounded-xl bg-blue-600/80 dark:bg-blue-500/80 backdrop-blur-sm border border-blue-400/30 dark:border-blue-400/20 text-white hover:bg-blue-700/80 dark:hover:bg-blue-600/80 transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-lg"
-                          onClick={goToNextCard}
-                          aria-label="Next Card"
-                        >
+                        onClick={goToNextCard}
+                        aria-label="Next Card"
+                      >
                           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M9 18l6-6-6-6"></path>
-                          </svg>
-                        </button>
-                      </div>
+                          <path d="M9 18l6-6-6-6"></path>
+                        </svg>
+                      </button>
+                    </div>
                      
                     </div>
                   </div>
                 </div>
               )}
               
-              <div className="px-4 pt-6 pb-2 flex-1 flex flex-col">
-                {/* Study Mode Info */}
-                <div className="pt-4 pb-2 px-4">
-                  <div className="flex justify-between items-center">
-                    <div className="flex items-center">
-                      <button 
-                        className="p-2 rounded-xl bg-white/20 dark:bg-black/20 backdrop-blur-sm border border-white/30 dark:border-white/10 text-white hover:bg-white/30 dark:hover:bg-black/30 transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-sm mr-3"
-                        onClick={exitStudySession}
-                        title="Exit Study Mode"
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <path d="M19 12H5M12 19l-7-7 7-7"></path>
-                        </svg>
-                      </button>
-                      <div>
-                        <h2 className="text-lg font-semibold text-white">
-                          {activeLesson === "midterm-prep" 
-                            ? "Midterm Prep" 
-                            : activeLesson === "level2-midterm-prep"
-                              ? "Level 2 Midterm Prep"
-                              : activeLesson === "all" 
-                                ? "All Flashcards" 
-                                : `Lesson ${typeof activeLesson === 'string' ? activeLesson.replace("lesson", "") : activeLesson}`}
-                        </h2>
-                        <p className="text-sm text-white/70">
-                          {activeLesson === "midterm-prep"
-                            ? `${getMidtermPrepCardCount()} cards from Lessons 1-21`
-                            : activeLesson === "level2-midterm-prep"
-                              ? `${getLevel2MidtermPrepCardCount()} cards from Level 2 Lessons 1-7`
-                              : `${currentFlashcards.length} cards in total`}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="bg-white/20 px-3 py-1 rounded-full text-sm font-medium text-white">
-                      {currentCardIndex + 1} / {currentFlashcards.length}
-                    </div>
-                  </div>
-                </div>
+              <div className="px-4 pt-20 pb-2 flex-1 flex flex-col">
                 
                 {/* Progress bar */}
                 <div className="w-full bg-blue-600/20 rounded-full h-2 mb-8">
@@ -2772,7 +2755,7 @@ export default function FlashcardsPage() {
                   {/* Reading Category */}
                   <div 
                     className="bg-gradient-to-br from-green-50 to-white dark:from-green-900/20 dark:to-green-800/10 rounded-xl p-8 h-64 border border-green-100 dark:border-green-800/50 hover:border-green-300 dark:hover:border-green-700 hover:shadow-sm transition-all cursor-pointer flex flex-col justify-between"
-                    onClick={() => router.push('/dashboard/flashcards/reading')}
+                    onClick={() => router.push('/dashboard/reading')}
                   >
                     <div className="flex items-center mb-6">
                       <div className="w-16 h-16 rounded-full bg-green-600 dark:bg-green-500 flex items-center justify-center text-white mr-4">
@@ -2794,7 +2777,7 @@ export default function FlashcardsPage() {
                           className="p-3 rounded-full bg-green-600 dark:bg-green-500 text-white hover:bg-green-700 dark:hover:bg-green-600 transition-colors"
                           onClick={(e) => {
                             e.stopPropagation();
-                            router.push('/dashboard/flashcards/reading');
+                            router.push('/dashboard/reading');
                           }}
                         >
                           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -3119,8 +3102,6 @@ export default function FlashcardsPage() {
           </div>
         </div>
       )}
-      
-      <MobileNav />
       
       {/* Completion popup */}
       {isCompletionPopupVisible && (

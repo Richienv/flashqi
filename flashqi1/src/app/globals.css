@@ -27,6 +27,11 @@
     transform: rotateY(180deg);
   }
 
+  /* Metallic gradient utilities for dark mode */
+  .bg-gradient-radial {
+    background: radial-gradient(circle at center, var(--tw-gradient-stops));
+  }
+
   /* New utilities for our redesign */
   .hide-scrollbar {
     -ms-overflow-style: none;
@@ -585,18 +590,31 @@ body {
 
 @keyframes pulse-slow {
   0%, 100% {
-    opacity: 0.3;
+    opacity: 1;
   }
   50% {
-    opacity: 0.6;
+    opacity: .5;
+  }
+}
+
+@keyframes logo-breathe {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
   }
 }
 
 @keyframes rotate-slow {
-  0% {
-    transform: translate(-50%, 0) rotate(0deg);
+  from {
+    transform: rotate(0deg);
   }
-  100% {
-    transform: translate(-50%, 0) rotate(360deg);
+  to {
+    transform: rotate(360deg);
   }
+}
+
+.animate-logo-breathe {
+  animation: logo-breathe 3s ease-in-out infinite;
 }

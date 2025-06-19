@@ -2,141 +2,308 @@
 
 import { useState } from 'react';
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { ArrowLeft, BookOpen, Users, MessageCircle, PenTool, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { 
+  LEVEL1_PRACTICE_DATA, 
+  LEVEL1_LESSONS, 
+  getLevel1PracticeByLesson 
+} from "@/data/practice-level1-data";
+import { 
+  LEVEL2_PRACTICE_DATA, 
+  LEVEL2_LESSONS, 
+  getLevel2PracticeByLesson 
+} from "@/data/practice-level2-data";
+import type { PracticeExercise } from "@/data/practice-level1-data";
 
-// Mock data for speaking lessons
-const SPEAKING_LESSONS = [
-  {
-    id: "s1",
-    lesson_number: 1,
-    title: "Basic Greetings",
-    description: "Learn to introduce yourself and greet others.",
-    total_cards: 12,
-    completion_percentage: 75,
-    teacher_notes: "Focus on proper tones for 'hello' (nǐ hǎo) and 'thank you' (xiè xie)"
-  },
-  {
-    id: "s2",
-    lesson_number: 2,
-    title: "Ordering Food",
-    description: "Practice ordering food at restaurants.",
-    total_cards: 15,
-    completion_percentage: 40,
-    teacher_notes: "Remember to use 'Please' (qǐng) before each request"
-  },
-  {
-    id: "s3",
-    lesson_number: 3,
-    title: "Asking Directions",
-    description: "Learn how to ask for and give directions.",
-    total_cards: 10,
-    completion_percentage: 0,
-    teacher_notes: "Pay attention to position words like 'left' (zuǒ) and 'right' (yòu)"
-  },
-  {
-    id: "s4",
-    lesson_number: 4,
-    title: "Shopping Conversations",
-    description: "Practice essential phrases for shopping.",
-    total_cards: 8,
-    completion_percentage: 0,
-    teacher_notes: "Focus on numbers and currency terms"
-  },
-];
+// Dot-matrix style numbers component
+const DotMatrixNumber = ({ number }: { number: number }) => {
+  return (
+    <div className="text-right font-mono text-2xl text-gray-800 dark:text-gray-200 tracking-wider">
+      {number}
+    </div>
+  );
+};
 
-// Category information
-const CATEGORY_INFO = {
-  id: 'speaking',
-  title: 'Speaking Practice',
-  description: 'Improve your Chinese speaking skills through conversation practice. These lessons help you develop proper pronunciation, intonation, and conversational fluency.',
-  icon: '🗣️',
-  color: 'bg-blue-100',
-  totalLessons: SPEAKING_LESSONS.length,
-  totalCards: SPEAKING_LESSONS.reduce((total, lesson) => total + lesson.total_cards, 0),
-  completedCards: SPEAKING_LESSONS.reduce((total, lesson) => total + Math.round(lesson.total_cards * lesson.completion_percentage / 100), 0)
+// Exercise type icons
+const getExerciseIcon = (type: string) => {
+  switch (type) {
+    case 'image':
+      return <BookOpen size={20} className="text-blue-500" />;
+    case 'dialogue':
+      return <Users size={20} className="text-green-500" />;
+    case 'fill-blank':
+      return <PenTool size={20} className="text-purple-500" />;
+    default:
+      return <MessageCircle size={20} className="text-gray-500" />;
+  }
+};
+
+// Individual exercise component
+const ExerciseDisplay = ({ exercise }: { exercise: PracticeExercise }) => {
+  return (
+    <div className="bg-white dark:bg-[#101010] border border-gray-200 dark:border-gray-800 rounded-2xl p-6 mb-6">
+      <div className="flex items-center gap-3 mb-4">
+        {getExerciseIcon(exercise.type)}
+        <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">
+          Exercise {exercise.exerciseNumber}: {exercise.title}
+        </h3>
+      </div>
+
+      {/* Exercise-specific content */}
+      {exercise.type === 'image' && (
+        <div className="space-y-4">
+          {exercise.question && (
+            <p className="text-gray-600 dark:text-gray-400 font-light">
+              {exercise.question}
+            </p>
+          )}
+          {exercise.imageUrl && (
+            <div className="flex justify-center">
+              <div className="w-32 h-32 bg-gray-100 dark:bg-gray-800 rounded-xl flex items-center justify-center">
+                <span className="text-gray-400 text-sm">Image Placeholder</span>
+              </div>
+            </div>
+          )}
+          <div className="bg-gray-50 dark:bg-[#0e0e0e] rounded-xl p-4">
+            <h4 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Answer:</h4>
+            <div className="space-y-2">
+              <div className="text-xl text-gray-900 dark:text-gray-100">{exercise.hanziAnswer}</div>
+              <div className="text-gray-600 dark:text-gray-400">{exercise.pinyinAnswer}</div>
+              <div className="text-gray-500 dark:text-gray-500">{exercise.englishAnswer}</div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {exercise.type === 'dialogue' && exercise.dialogueParts && (
+        <div className="space-y-4">
+          <div className="bg-gray-50 dark:bg-[#0e0e0e] rounded-xl p-4">
+            <h4 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-4">Complete Dialogue:</h4>
+            <div className="space-y-4">
+              {exercise.dialogueParts.map((part, index) => (
+                <div key={index} className="border-l-2 border-gray-200 dark:border-gray-700 pl-4">
+                  <div className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
+                    Speaker {part.speaker}:
+                  </div>
+                  <div className="space-y-1">
+                    <div className="text-lg text-gray-900 dark:text-gray-100">{part.hanzi}</div>
+                    <div className="text-gray-600 dark:text-gray-400">{part.pinyin}</div>
+                    <div className="text-gray-500 dark:text-gray-500">{part.english}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {exercise.type === 'fill-blank' && (
+        <div className="space-y-4">
+          {exercise.question && (
+            <p className="text-gray-600 dark:text-gray-400 font-light">
+              {exercise.question}
+            </p>
+          )}
+          {exercise.sentenceWithBlanks && (
+            <div className="bg-gray-50 dark:bg-[#0e0e0e] rounded-xl p-4">
+              <h4 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Sentence with blanks:</h4>
+              <div className="text-lg text-gray-700 dark:text-gray-300 mb-3">
+                {exercise.sentenceWithBlanks}
+              </div>
+              <h4 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Complete sentence:</h4>
+              <div className="space-y-2">
+                <div className="text-xl text-gray-900 dark:text-gray-100">{exercise.hanziAnswer}</div>
+                <div className="text-gray-600 dark:text-gray-400">{exercise.pinyinAnswer}</div>
+                <div className="text-gray-500 dark:text-gray-500">{exercise.englishAnswer}</div>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Vocabulary section */}
+      {exercise.vocabulary.length > 0 && (
+        <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+          <h4 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Key Vocabulary:</h4>
+          <div className="flex flex-wrap gap-2">
+            {exercise.vocabulary.map((word, index) => (
+              <span 
+                key={index}
+                className="px-2 py-1 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 text-sm rounded-lg"
+              >
+                {word}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
 };
 
 export default function SpeakingPracticePage() {
-  const router = useRouter();
-  const [filterStatus, setFilterStatus] = useState('all'); // 'all', 'in-progress', 'completed', 'not-started'
+  const [selectedLevel, setSelectedLevel] = useState<1 | 2>(1);
+  const [selectedLesson, setSelectedLesson] = useState<number | null>(null);
+
+  // Get data based on selected level
+  const currentLessons = selectedLevel === 1 ? LEVEL1_LESSONS : LEVEL2_LESSONS;
+  const currentData = selectedLevel === 1 ? LEVEL1_PRACTICE_DATA : LEVEL2_PRACTICE_DATA;
   
-  // Filter lessons based on status
-  const filteredLessons = SPEAKING_LESSONS.filter(lesson => {
-    if (filterStatus === 'all') return true;
-    if (filterStatus === 'in-progress') return lesson.completion_percentage > 0 && lesson.completion_percentage < 100;
-    if (filterStatus === 'completed') return lesson.completion_percentage === 100;
-    if (filterStatus === 'not-started') return lesson.completion_percentage === 0;
-    return true;
-  });
-  
-  // Find next incomplete lesson
-  const nextLesson = SPEAKING_LESSONS.find(lesson => lesson.completion_percentage < 100);
-  
+  // Get exercises for selected lesson
+  const lessonExercises = selectedLesson 
+    ? (selectedLevel === 1 
+        ? getLevel1PracticeByLesson(selectedLesson)
+        : getLevel2PracticeByLesson(selectedLesson))
+    : [];
+
+  // Calculate stats
+  const totalLessons = currentLessons.length;
+  const totalExercises = currentData.length;
+
+  // Reset lesson selection when level changes
+  const handleLevelChange = (level: 1 | 2) => {
+    setSelectedLevel(level);
+    setSelectedLesson(null);
+  };
+
   return (
-    <div className="flex flex-col min-h-screen bg-white">
+    <div className="flex flex-col min-h-screen bg-white dark:bg-[#0e0e0e]">
       <main className="flex-1 py-6">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Header and Back Button */}
-          <div className="flex items-center mb-6">
-            <Link href="/dashboard/flashcards" className="mr-3 p-2 rounded-full bg-white border border-blue-200 hover:bg-blue-50">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M19 12H5M12 19l-7-7 7-7"></path>
-              </svg>
+          {/* Header */}
+          <div className="flex items-center gap-3 mb-8">
+            <Link 
+              href="/dashboard" 
+              className="p-2 rounded-full bg-white dark:bg-[#101010] border border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all"
+            >
+              <ArrowLeft size={20} className="text-gray-600 dark:text-gray-400" />
             </Link>
-            <h1 className="text-2xl font-bold text-black">Speaking Practice</h1>
-          </div>
-          
-          {/* Filter Section */}
-          <div className="mb-6">
-            <div className="flex justify-between items-center mb-4">
-              <div className="flex space-x-2">
-                <select 
-                  className="p-2 rounded-lg border border-blue-200 text-sm text-black"
-                  value={filterStatus}
-                  onChange={(e) => setFilterStatus(e.target.value)}
-                >
-                  <option value="all">All Lessons</option>
-                  <option value="in-progress">In Progress</option>
-                  <option value="completed">Completed</option>
-                  <option value="not-started">Not Started</option>
-                </select>
-              </div>
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Speaking Practice</h1>
+              <p className="text-gray-600 dark:text-gray-400 font-light">Complete answer key for all exercises</p>
             </div>
           </div>
-          
-          {/* Speaking Lessons */}
-          <div className="space-y-4">
-            {filteredLessons.map(lesson => (
-              <div key={lesson.id} className="bg-gradient-to-r from-purple-50 to-white rounded-xl p-4 border border-purple-200 hover:border-purple-300 hover:shadow-sm transition-all cursor-pointer">
-                <div className="flex justify-between items-center">
-                  <div className="flex items-center">
-                    <div className="w-14 h-14 rounded-full bg-purple-100 flex items-center justify-center text-black font-bold mr-4 border border-purple-200">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
-                        <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
-                        <line x1="12" y1="19" x2="12" y2="23"></line>
-                        <line x1="8" y1="23" x2="16" y2="23"></line>
-                      </svg>
-                    </div>
-                    <div>
-                      <h4 className="font-medium text-black text-lg">{lesson.title}</h4>
-                      <p className="text-sm text-black">{lesson.total_cards} cards</p>
-                    </div>
-                  </div>
-                  <div className="text-sm text-black text-right">
-                    {lesson.completion_percentage > 0 ? (
-                      <div>
-                        <span className="text-purple-600 font-medium">{lesson.completion_percentage}%</span> completed
-                      </div>
-                    ) : (
-                      <span className="text-black">Not started</span>
-                    )}
-                  </div>
+
+          {!selectedLesson ? (
+            <>
+              {/* Stats Header */}
+              <div className="mb-10 grid grid-cols-2 gap-4">
+                <div className="bg-white dark:bg-[#101010] border border-gray-100 dark:border-gray-800 rounded-2xl p-6 shadow-sm">
+                  <div className="text-sm text-gray-400 font-light mb-1">Lessons</div>
+                  <DotMatrixNumber number={totalLessons} />
+                </div>
+                <div className="bg-white dark:bg-[#101010] border border-gray-100 dark:border-gray-800 rounded-2xl p-6 shadow-sm">
+                  <div className="text-sm text-gray-400 font-light mb-1">Exercises</div>
+                  <DotMatrixNumber number={totalExercises} />
                 </div>
               </div>
-            ))}
-          </div>
+
+              {/* Level Selector */}
+              <div className="mb-8">
+                <h2 className="text-xl font-normal text-gray-900 dark:text-gray-100 mb-4">Select Level</h2>
+                <div className="grid grid-cols-2 gap-4">
+                  <button
+                    onClick={() => handleLevelChange(1)}
+                    className={`p-6 rounded-2xl border-2 transition-all ${
+                      selectedLevel === 1
+                        ? 'border-gray-900 dark:border-gray-100 bg-gray-50 dark:bg-[#101010]'
+                        : 'border-gray-200 dark:border-gray-800 hover:border-gray-300 dark:hover:border-gray-700'
+                    }`}
+                  >
+                    <div className="text-lg font-medium text-gray-900 dark:text-gray-100">Level 1</div>
+                    <div className="text-gray-600 dark:text-gray-400 text-sm">Beginner exercises</div>
+                  </button>
+                  <button
+                    onClick={() => handleLevelChange(2)}
+                    className={`p-6 rounded-2xl border-2 transition-all ${
+                      selectedLevel === 2
+                        ? 'border-gray-900 dark:border-gray-100 bg-gray-50 dark:bg-[#101010]'
+                        : 'border-gray-200 dark:border-gray-800 hover:border-gray-300 dark:hover:border-gray-700'
+                    }`}
+                  >
+                    <div className="text-lg font-medium text-gray-900 dark:text-gray-100">Level 2</div>
+                    <div className="text-gray-600 dark:text-gray-400 text-sm">Intermediate exercises</div>
+                  </button>
+                </div>
+              </div>
+
+              {/* Lesson Selector */}
+              <div className="mb-8">
+                <h2 className="text-xl font-normal text-gray-900 dark:text-gray-100 mb-4">
+                  Level {selectedLevel} Lessons
+                </h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {currentLessons.map((lesson) => (
+                    <button
+                      key={lesson.id}
+                      onClick={() => setSelectedLesson(lesson.id)}
+                      className="bg-white dark:bg-[#101010] border border-gray-200 dark:border-gray-800 rounded-2xl p-6 
+                                hover:shadow-sm hover:translate-y-[-2px] transition-all group text-left"
+                    >
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-1">
+                            Lesson {lesson.id}
+                          </h3>
+                          <p className="text-gray-600 dark:text-gray-400 text-sm font-light mb-2">
+                            {lesson.title}
+                          </p>
+                          <p className="text-gray-500 dark:text-gray-500 text-sm">
+                            {lesson.exerciseCount} exercises
+                          </p>
+                        </div>
+                        <ChevronRight 
+                          size={20} 
+                          className="text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-300 transition-colors" 
+                        />
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </>
+          ) : (
+            <>
+              {/* Lesson Detail View */}
+              <div className="mb-6">
+                <button
+                  onClick={() => setSelectedLesson(null)}
+                  className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 mb-4"
+                >
+                  <ArrowLeft size={16} />
+                  <span>Back to Lessons</span>
+                </button>
+                
+                <div className="bg-white dark:bg-[#101010] border border-gray-200 dark:border-gray-800 rounded-2xl p-6 mb-6">
+                  <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+                    Level {selectedLevel} - Lesson {selectedLesson}
+                  </h2>
+                  <h3 className="text-lg text-gray-600 dark:text-gray-400 mb-1">
+                    {currentLessons.find(l => l.id === selectedLesson)?.title}
+                  </h3>
+                  <p className="text-gray-500 dark:text-gray-500">
+                    {lessonExercises.length} exercises with complete answers
+                  </p>
+                </div>
+              </div>
+
+              {/* Exercise List */}
+              <div className="space-y-6">
+                {lessonExercises.length > 0 ? (
+                  lessonExercises
+                    .sort((a, b) => a.exerciseNumber - b.exerciseNumber)
+                    .map((exercise) => (
+                      <ExerciseDisplay key={exercise.id} exercise={exercise} />
+                    ))
+                ) : (
+                  <div className="text-center py-12 rounded-2xl bg-gray-50 dark:bg-[#101010] border border-gray-100 dark:border-gray-800">
+                    <p className="text-gray-400 font-light">No exercises found for this lesson</p>
+                  </div>
+                )}
+              </div>
+            </>
+          )}
         </div>
       </main>
     </div>

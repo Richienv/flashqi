@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { AuroraText } from "@/components/magicui/aurora-text";
 
@@ -21,7 +22,17 @@ export default function Home() {
         <div className="flex justify-between items-center">
           {/* Brand Logo/Name */}
           <Link href="/" className="flex items-center group">
-            <span className="text-2xl font-bold text-white group-hover:text-blue-300 transition-colors duration-300">快玉</span>
+            <div className="relative transform transition-transform duration-300 ease-in-out group-hover:scale-110">
+              <Image
+                src="/flashqi-main-logo.png"
+                alt="FlashQi Logo"
+                width={32}
+                height={32}
+                className="object-contain"
+                priority
+              />
+            </div>
+            <span className="ml-2 text-2xl font-bold text-white group-hover:text-blue-300 transition-colors duration-300">FlashQi</span>
           </Link>
           
           {/* Sign In Button - Top Right */}
