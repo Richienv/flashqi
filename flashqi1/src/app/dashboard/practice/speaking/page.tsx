@@ -160,13 +160,13 @@ export default function SpeakingPracticePage() {
   // Calculate stats
   const totalLessons = currentLessons.length;
   const totalExercises = currentData.length;
-
+  
   // Reset lesson selection when level changes
   const handleLevelChange = (level: 1 | 2) => {
     setSelectedLevel(level);
     setSelectedLesson(null);
   };
-
+  
   return (
     <div className="flex flex-col min-h-screen bg-white dark:bg-[#0e0e0e]">
       <main className="flex-1 py-6">
@@ -184,7 +184,7 @@ export default function SpeakingPracticePage() {
               <p className="text-gray-600 dark:text-gray-400 font-light">Complete answer key for all exercises</p>
             </div>
           </div>
-
+          
           {!selectedLesson ? (
             <>
               {/* Stats Header */}
@@ -225,9 +225,9 @@ export default function SpeakingPracticePage() {
                     <div className="text-lg font-medium text-gray-900 dark:text-gray-100">Level 2</div>
                     <div className="text-gray-600 dark:text-gray-400 text-sm">Intermediate exercises</div>
                   </button>
-                </div>
-              </div>
-
+            </div>
+          </div>
+          
               {/* Lesson Selector */}
               <div className="mb-8">
                 <h2 className="text-xl font-normal text-gray-900 dark:text-gray-100 mb-4">
@@ -242,7 +242,7 @@ export default function SpeakingPracticePage() {
                                 hover:shadow-sm hover:translate-y-[-2px] transition-all group text-left"
                     >
                       <div className="flex items-center justify-between">
-                        <div>
+                    <div>
                           <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-1">
                             Lesson {lesson.id}
                           </h3>
@@ -252,7 +252,7 @@ export default function SpeakingPracticePage() {
                           <p className="text-gray-500 dark:text-gray-500 text-sm">
                             {lesson.exerciseCount} exercises
                           </p>
-                        </div>
+                    </div>
                         <ChevronRight 
                           size={20} 
                           className="text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-300 transition-colors" 
@@ -263,7 +263,7 @@ export default function SpeakingPracticePage() {
                 </div>
               </div>
             </>
-          ) : (
+                    ) : (
             <>
               {/* Lesson Detail View */}
               <div className="mb-6">
@@ -301,7 +301,7 @@ export default function SpeakingPracticePage() {
                     <p className="text-gray-400 font-light">No exercises found for this lesson</p>
                   </div>
                 )}
-              </div>
+          </div>
             </>
           )}
         </div>

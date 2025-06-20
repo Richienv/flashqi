@@ -142,10 +142,19 @@ export default function FlashcardDetailPage() {
 
   if (!flashcard) {
     return (
-      <div className="flex flex-col min-h-screen bg-white">
-        <main className="flex-1 py-8">
+      <div className="flex flex-col min-h-screen bg-white dark:bg-black">
+        {/* Glassmorphism Header Container - Loading State */}
+        <header className="fixed top-4 left-1/2 transform -translate-x-1/2 z-10 w-full max-w-md mx-4">
+          <div className="bg-white/10 dark:bg-black/10 backdrop-filter backdrop-blur-lg border border-white/20 dark:border-gray-600 rounded-xl p-4">
+            <div className="flex items-center justify-center">
+              <div className="text-lg font-semibold text-black dark:text-white">Loading...</div>
+            </div>
+          </div>
+        </header>
+        
+        <main className="flex-1 py-8 pt-24">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-            <p className="text-black">Loading flashcard...</p>
+            <p className="text-black dark:text-white">Loading flashcard...</p>
           </div>
         </main>
         <MobileNav />
@@ -154,41 +163,53 @@ export default function FlashcardDetailPage() {
   }
 
   return (
-    <div className="flex flex-col min-h-screen bg-white">
-      <main className="flex-1 py-6">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Header and Back Button */}
-          <div className="flex items-center mb-6">
-            <Link href="/dashboard/flashcards" className="mr-3 p-2 rounded-full bg-white border border-blue-200 hover:bg-blue-50">
+    <div className="flex flex-col min-h-screen bg-white dark:bg-gradient-to-br dark:from-black dark:to-black">
+      {/* Glassmorphism Header Container */}
+      <header className="fixed top-4 left-1/2 transform -translate-x-1/2 z-10 w-full max-w-md mx-4">
+        <div className="bg-white/10 dark:bg-black/10 backdrop-filter backdrop-blur-lg border border-white/20 dark:border-gray-600 rounded-xl p-4">
+          <div className="flex items-center justify-between">
+            <Link 
+              href="/dashboard/flashcards" 
+              className="p-2 rounded-full bg-white/20 dark:bg-black/20 backdrop-blur-sm border border-white/30 dark:border-white/10 text-black dark:text-white hover:bg-white/30 dark:hover:bg-black/30 transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-sm"
+              title="Back to Flashcards"
+            >
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M19 12H5M12 19l-7-7 7-7"></path>
               </svg>
             </Link>
-            <h1 className="text-2xl font-bold text-black">Flashcard Detail</h1>
+            <div className="text-center flex-1 mx-4">
+              <h1 className="text-lg font-semibold text-black dark:text-white">Lesson {flashcard.lesson_id}</h1>
+              <p className="text-sm text-black/70 dark:text-white/70">Flashcard Detail</p>
+            </div>
+            <div className="w-10 h-10"></div> {/* Spacer for centering */}
           </div>
-          
+        </div>
+      </header>
+      
+      <main className="flex-1 py-6 pt-24">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           {/* Card Info */}
-          <div className="mb-6 bg-gradient-to-r from-blue-50 to-white rounded-xl p-4 border border-blue-200">
-            <p className="text-sm text-black">From Lesson {flashcard.lesson_id}</p>
+          <div className="mb-6 bg-gradient-to-r from-blue-50 to-white dark:from-blue-900/20 dark:to-blue-800/10 rounded-xl p-4 border border-blue-200 dark:border-blue-800/50">
+            <p className="text-sm text-black dark:text-white">Character from Lesson {flashcard.lesson_id}</p>
           </div>
           
           {/* Flashcard */}
           <div className="mb-6 flex justify-center">
             <div 
-              className="w-full max-w-md h-64 bg-gradient-to-br from-blue-50 to-white rounded-xl border border-blue-200 cursor-pointer transition-all hover:shadow-lg"
+              className="w-full max-w-md h-64 bg-gradient-to-br from-blue-50 to-white dark:from-blue-900/20 dark:to-blue-800/10 rounded-xl border border-blue-200 dark:border-blue-800/50 cursor-pointer transition-all hover:shadow-lg dark:hover:shadow-xl"
               onClick={() => setIsFlipped(!isFlipped)}
             >
               <div className="h-full flex flex-col justify-center items-center p-6 text-center">
                 {!isFlipped ? (
                   <div>
-                    <h3 className="text-2xl font-bold text-black mb-2">{flashcard.hanzi}</h3>
-                    <p className="text-lg text-blue-600">{flashcard.pinyin}</p>
-                    <p className="text-sm text-gray-500 mt-4">Tap to reveal</p>
+                    <h3 className="text-2xl font-bold text-black dark:text-white mb-2">{flashcard.hanzi}</h3>
+                    <p className="text-lg text-blue-600 dark:text-blue-400">{flashcard.pinyin}</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-4">Tap to reveal</p>
                   </div>
                 ) : (
                   <div>
-                    <h3 className="text-2xl font-bold text-black mb-2">{flashcard.english}</h3>
-                    <p className="text-sm text-gray-500 mt-4">Tap to flip back</p>
+                    <h3 className="text-2xl font-bold text-black dark:text-white mb-2">{flashcard.english}</h3>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-4">Tap to flip back</p>
                   </div>
                 )}
               </div>
@@ -202,8 +223,8 @@ export default function FlashcardDetailPage() {
           </div>
           
           {/* Comments Section */}
-          <div className="bg-white rounded-xl border border-gray-200 p-6">
-            <h3 className="text-lg font-semibold text-black mb-4">Study Notes & Comments</h3>
+          <div className="bg-white dark:bg-gray-800/50 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+            <h3 className="text-lg font-semibold text-black dark:text-white mb-4">Study Notes & Comments</h3>
             <CommentSection 
               comments={comments}
               onAddComment={handleAddComment}

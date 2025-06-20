@@ -21,6 +21,7 @@ import { PlusCircle, X } from "lucide-react";
 import { supabase } from '@/lib/supabase/client'; // Import supabase client
 import { v4 as uuidv4 } from 'uuid';
 import { useAuth } from "@/contexts/auth-context";
+import SpacedRepetitionService, { FlashcardSR } from '@/services/spacedRepetition';
 
 // Animation styles
 const AnimationStyles = () => (
@@ -164,6 +165,50 @@ const AnimationStyles = () => (
       .text-preposition { color: #06b6d4; }
       .text-interjection { color: #10b981; }
     }
+
+    /* Spaced Repetition Status Badges with gentle animations */
+    .sr-badge-new {
+      background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+      animation: gentle-pulse 2s ease-in-out infinite;
+    }
+    
+    .sr-badge-due {
+      background: linear-gradient(135deg, #fed7aa 0%, #fdba74 100%);
+      animation: urgent-pulse 1.5s ease-in-out infinite;
+    }
+    
+    .sr-badge-known {
+      background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
+    }
+    
+    @keyframes gentle-pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.8; transform: scale(1.02); }
+    }
+    
+    @keyframes urgent-pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.9; transform: scale(1.05); }
+    }
+
+    /* Glassmorphism enhancements for spaced repetition */
+    .sr-card-container {
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+    }
+
+    /* Subtle grain noise texture */
+    .bg-noise {
+      background-image: 
+        radial-gradient(circle at 20% 80%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 40% 40%, rgba(255, 255, 255, 0.05) 0%, transparent 50%);
+      background-size: 4px 4px, 6px 6px, 8px 8px;
+      background-position: 0 0, 2px 2px, 4px 4px;
+    }
   `}</style>
 );
 
@@ -282,6 +327,88 @@ export default function FlashcardsPage() {
   const [currentDrawingPage, setCurrentDrawingPage] = useState(0);
   const [drawingPages, setDrawingPages] = useState<{ strokes: ImageData[] }[]>([{ strokes: [] }]);
 
+  // Spaced Repetition state management (Supabase-backed)
+  const [spacedRepetitionCards, setSpacedRepetitionCards] = useState<FlashcardSR[]>([]);
+  const [spacedRepetitionFilter, setSpacedRepetitionFilter] = useState<'both' | 'new' | 'due'>('both');
+  const [isSpacedRepetitionMode, setIsSpacedRepetitionMode] = useState(false);
+  const [dueCardsCount, setDueCardsCount] = useState<number>(0);
+  const [isLoadingSR, setIsLoadingSR] = useState(false);
+  
+  // Spaced Repetition onboarding and settings
+  const [showSRInfoModal, setShowSRInfoModal] = useState(false);
+  const [hasSeenSRInfo, setHasSeenSRInfo] = useState(false);
+  const [srStrengthLevel, setSrStrengthLevel] = useState<'low' | 'medium' | 'high'>('medium');
+
+  // Load due cards count on mount and refresh periodically
+  useEffect(() => {
+    const loadDueCardsCount = async () => {
+      const count = await SpacedRepetitionService.getDueCardsCount();
+      setDueCardsCount(count);
+    };
+
+    // Check if user has seen the SR info modal before
+    const hasSeenInfo = localStorage.getItem('flashqi-sr-info-seen') === 'true';
+    setHasSeenSRInfo(hasSeenInfo);
+
+    // Load saved strength level
+    const savedStrength = localStorage.getItem('flashqi-sr-strength') as 'low' | 'medium' | 'high';
+    if (savedStrength) {
+      setSrStrengthLevel(savedStrength);
+    }
+
+    loadDueCardsCount();
+    // Refresh count every 30 seconds
+    const interval = setInterval(loadDueCardsCount, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Spaced Repetition utility functions (Supabase-backed)
+  const loadSpacedRepetitionCards = async () => {
+    setIsLoadingSR(true);
+    try {
+      const cards = await SpacedRepetitionService.getCardsByStatus(spacedRepetitionFilter, 50);
+      setSpacedRepetitionCards(cards);
+    } catch (error) {
+      console.error('Error loading spaced repetition cards:', error);
+    } finally {
+      setIsLoadingSR(false);
+    }
+  };
+
+  const updateCardReviewStatus = async (cardId: string, correct: boolean) => {
+    try {
+      // Find current card data
+      const currentCard = spacedRepetitionCards.find(card => card.id === cardId);
+      const currentInterval = currentCard?.interval_days || 1;
+      
+      const success = await SpacedRepetitionService.updateCardReview(
+        cardId, 
+        correct, 
+        currentInterval, 
+        srStrengthLevel
+      );
+      
+      if (success) {
+        // Refresh the cards list and due count
+        await loadSpacedRepetitionCards();
+        const newCount = await SpacedRepetitionService.getDueCardsCount();
+        setDueCardsCount(newCount);
+      }
+      
+      return success;
+    } catch (error) {
+      console.error('Error updating card review status:', error);
+      return false;
+    }
+  };
+
+  // Load spaced repetition cards when filter changes
+  useEffect(() => {
+    if (isSpacedRepetitionMode) {
+      loadSpacedRepetitionCards();
+    }
+  }, [spacedRepetitionFilter, isSpacedRepetitionMode]);
+
   // Get all flashcards based on active lesson
   const getAllFlashcards = () => {
     if (activeLesson === "all") {
@@ -395,6 +522,8 @@ export default function FlashcardsPage() {
       } : null
     });
   }
+
+
 
   // Handle scroll events for Back to Top button and infinite scrolling
   useEffect(() => {
@@ -634,6 +763,7 @@ export default function FlashcardsPage() {
     setCompletedCardIds([]);
     setIsCompletionPopupVisible(false);
     setIsStudyMode(false);
+    setIsSpacedRepetitionMode(false);
   };
 
   // Handle next card with circular navigation and improved stack animation
@@ -735,6 +865,13 @@ export default function FlashcardsPage() {
     }
     
     const currentCard = currentFlashcards[currentCardIndex];
+    
+    // Update spaced repetition data if in spaced repetition mode (async)
+    if (isSpacedRepetitionMode || activeLesson === "spaced-repetition") {
+      updateCardReviewStatus(currentCard.id, known).catch(error => {
+        console.error('Failed to update card review status:', error);
+      });
+    }
     
     // Add to completed cards using functional update to ensure we're working with latest state
     setCompletedCardIds(prevCompletedIds => {
@@ -1902,6 +2039,94 @@ export default function FlashcardsPage() {
     setSelectedLevel(null);
   };
 
+  // Enter Spaced Repetition Mode
+  const enterSpacedRepetitionMode = async () => {
+    // Show info modal if user hasn't seen it before
+    if (!hasSeenSRInfo) {
+      setShowSRInfoModal(true);
+      return;
+    }
+
+    await startSpacedRepetitionSession();
+  };
+
+  const startSpacedRepetitionSession = async () => {
+    setIsLoadingSR(true);
+    
+    try {
+      // Load cards from Supabase
+      const cards = await SpacedRepetitionService.getCardsByStatus(spacedRepetitionFilter, 50);
+      
+      if (cards.length === 0) {
+        alert(`🎉 Great job! No cards need review right now.\n\nStart studying some lessons first, or check back later when your cards are due for review.`);
+        setIsLoadingSR(false);
+        return;
+      }
+      
+      // Reset all study session state
+      setCompletedCardIds([]);
+      setCurrentCardIndex(0);
+      setIsCardFlipped(false);
+      setStackPosition(3);
+      setIsCompletionPopupVisible(false);
+      
+      // Set the spaced repetition cards and enter study mode
+      setCurrentFlashcards(cards);
+      setSpacedRepetitionCards(cards);
+      setActiveLesson("spaced-repetition");
+      setIsSpacedRepetitionMode(true);
+      setIsStudyMode(true);
+    } catch (error) {
+      console.error('Error loading spaced repetition cards:', error);
+      alert('Error loading cards. Please try again.');
+    } finally {
+      setIsLoadingSR(false);
+    }
+  };
+
+  const handleSRInfoDismiss = () => {
+    // Mark as seen and save to localStorage
+    setHasSeenSRInfo(true);
+    setShowSRInfoModal(false);
+    localStorage.setItem('flashqi-sr-info-seen', 'true');
+    localStorage.setItem('flashqi-sr-strength', srStrengthLevel);
+    
+    // Start the session
+    startSpacedRepetitionSession();
+  };
+
+  // Status badge component helper for Supabase cards
+  const getStatusBadge = (card: FlashcardSR) => {
+    const badgeConfig = {
+      new: { 
+        emoji: '🆕', 
+        text: 'New', 
+        className: 'sr-badge-new text-blue-800 dark:text-blue-900 border-blue-200 dark:border-blue-700',
+        shadowClass: 'shadow-blue-200/50 dark:shadow-blue-900/30'
+      },
+      due: { 
+        emoji: '⏳', 
+        text: 'Due', 
+        className: 'sr-badge-due text-orange-800 dark:text-orange-900 border-orange-200 dark:border-orange-700',
+        shadowClass: 'shadow-orange-200/50 dark:shadow-orange-900/30'
+      },
+      known: { 
+        emoji: '✔️', 
+        text: 'Known', 
+        className: 'sr-badge-known text-green-800 dark:text-green-900 border-green-200 dark:border-green-700',
+        shadowClass: 'shadow-green-200/50 dark:shadow-green-900/30'
+      }
+    };
+
+    const config = badgeConfig[card.status];
+    return (
+      <div className={`absolute top-2 right-2 px-2 py-1 rounded-full text-xs font-semibold border backdrop-blur-md shadow-lg ${config.className} ${config.shadowClass} z-10 transition-all duration-300 hover:scale-105`}>
+        <span className="mr-1">{config.emoji}</span>
+        {config.text}
+      </div>
+    );
+  };
+
   // Enter Midterm Prep 2 Mode (links to our new midterm prep test)
   const enterMidtermPrep2Mode = () => {
     // Navigate to the midterm prep test page
@@ -1913,130 +2138,146 @@ export default function FlashcardsPage() {
       <AnimationStyles />
       
       {/* Floating Glassmorphism Navbar */}
-      <header className="fixed top-4 left-4 right-4 z-50 mx-auto max-w-7xl">
+      <header className="fixed top-4 left-4 right-4 z-[60] mx-auto max-w-7xl">
         <div className="bg-white/10 dark:bg-black/10 backdrop-blur-lg border border-white/20 dark:border-white/10 shadow-lg rounded-2xl px-6 py-3">
-          <div className="flex justify-between items-center">
-            <div className="flex items-center">
-              {isStudyMode ? (
-                <>
-                  <button 
-                    className="p-2 rounded-xl bg-white/20 dark:bg-black/20 backdrop-blur-sm border border-white/30 dark:border-white/10 text-black dark:text-white hover:bg-white/30 dark:hover:bg-black/30 transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-sm mr-3"
-                    onClick={exitStudySession}
-                    title="Exit Study Mode"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M19 12H5M12 19l-7-7 7-7"></path>
-                    </svg>
-                  </button>
-                  <div>
-                    <h1 className="text-lg font-bold text-black dark:text-white">
-                      {activeLesson === "midterm-prep" 
-                        ? "Midterm Prep" 
-                        : activeLesson === "level2-midterm-prep"
-                          ? "Level 2 Midterm Prep"
-                          : activeLesson === "all" 
-                            ? "All Flashcards" 
-                            : `Lesson ${typeof activeLesson === 'string' ? activeLesson.replace("lesson", "").replace("level2_lesson", "") : activeLesson}`}
-                    </h1>
-                    <p className="text-sm text-black/70 dark:text-white/70">
-                      {activeLesson === "midterm-prep"
-                        ? `${getMidtermPrepCardCount()} cards`
-                        : activeLesson === "level2-midterm-prep"
-                          ? `${getLevel2MidtermPrepCardCount()} cards`
-                          : `${currentFlashcards.length} cards`}
-                    </p>
-                  </div>
-                </>
-              ) : (
-                <>
-                  <Link href="/dashboard/flashcards" className="flex items-center group">
-                    <div className="relative transform transition-transform duration-300 ease-in-out group-hover:scale-110 animate-logo-breathe">
-                      <Image
-                        src="/flashqi-main-logo.png"
-                        alt="FlashQi Logo"
-                        width={32}
-                        height={32}
-                        className="object-contain"
-                        priority
-                      />
-                    </div>
-                    <span className="ml-2 text-xl font-bold text-black dark:text-white transition-all duration-300 group-hover:text-blue-600 dark:group-hover:text-blue-400">
-                      FlashQi
-                    </span>
-                  </Link>
-                  <nav className="hidden md:ml-10 md:flex md:items-center md:space-x-6">
-                    <span className="text-sm font-medium text-blue-600 dark:text-blue-400">
-                      Flashcards
-                    </span>
-                  </nav>
-                </>
-              )}
-            </div>
-            <div className="flex items-center space-x-4">
-              {isStudyMode && (
-                <div className="bg-white/20 dark:bg-black/20 px-3 py-1 rounded-full text-sm font-medium text-black dark:text-white">
-                  {currentCardIndex + 1} / {currentFlashcards.length}
-                </div>
-              )}
-              <ThemeToggle />
-              
-              {/* Personalized Profile Dropdown */}
-              <div className="relative" ref={profileDropdownRef}>
-                <button
-                  onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)}
-                  className="flex items-center px-3 py-2 text-sm font-medium bg-white/20 dark:bg-black/20 backdrop-blur-sm border border-white/30 dark:border-white/10 rounded-xl text-black dark:text-white hover:bg-white/30 dark:hover:bg-black/30 transition-all duration-300 ease-out transform hover:scale-105 active:scale-95 shadow-sm"
-                >
-                  <div className="flex items-center">
-                    <div className="w-6 h-6 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-xs font-semibold mr-2">
-                      {user?.user_metadata?.name ? user.user_metadata.name.charAt(0).toUpperCase() : user?.email?.charAt(0).toUpperCase()}
-                    </div>
-                    <span className="hidden sm:inline-block mr-1 font-medium">
-                      Hi, {user?.user_metadata?.name || user?.email?.split('@')[0] || 'User'}!
-                    </span>
-                  </div>
-                  <svg
-                    className={`ml-1 h-4 w-4 text-black/60 dark:text-white/60 transition-transform duration-300 ${isProfileDropdownOpen ? 'rotate-180' : ''}`}
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                </button>
-
-                {/* Glassmorphism Dropdown */}
-                {isProfileDropdownOpen && (
-                  <div className="absolute right-0 mt-2 w-56 rounded-xl bg-white/10 dark:bg-black/10 backdrop-filter backdrop-blur-lg py-2 shadow-xl border border-white/20 dark:border-white/10 focus:outline-none animate-in fade-in-0 zoom-in-95 duration-200 z-50">
-                    <Link
-                      href="/profile"
-                      className="flex items-center px-4 py-3 text-sm text-black dark:text-white hover:bg-white/20 dark:hover:bg-black/30 transition-colors duration-200"
-                      onClick={() => setIsProfileDropdownOpen(false)}
+          <div className="flex flex-col">
+            <div className="flex justify-between items-center mb-3">
+              <div className="flex items-center">
+                {isStudyMode ? (
+                  <>
+                    <button 
+                      className="p-2 rounded-xl bg-white/20 dark:bg-black/20 backdrop-blur-sm border border-white/30 dark:border-white/10 text-black dark:text-white hover:bg-white/30 dark:hover:bg-black/30 transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-sm mr-3"
+                                          onClick={exitStudySession}
+                      title="Exit Study Mode"
                     >
-                      <svg className="w-4 h-4 mr-3 text-black/70 dark:text-white/70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M19 12H5M12 19l-7-7 7-7"></path>
                       </svg>
-                      Profile Settings
-                    </Link>
-                    <button
-                      onClick={() => {
-                        signOut();
-                        setIsProfileDropdownOpen(false);
-                      }}
-                      className="flex items-center w-full text-left px-4 py-3 text-sm text-black dark:text-white hover:bg-white/20 dark:hover:bg-black/30 transition-colors duration-200"
-                    >
-                      <svg className="w-4 h-4 mr-3 text-black/70 dark:text-white/70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                      </svg>
-                      Sign Out
                     </button>
-                  </div>
+                    <div>
+                      <h1 className="text-lg font-bold text-black dark:text-white">
+                        {activeLesson === "midterm-prep" 
+                          ? "Midterm Prep" 
+                          : activeLesson === "level2-midterm-prep"
+                            ? "Level 2 Midterm Prep"
+                            : activeLesson === "spaced-repetition"
+                              ? "Spaced Repetition"
+                            : activeLesson === "all" 
+                              ? "All Flashcards" 
+                              : `Lesson ${typeof activeLesson === 'string' ? activeLesson.replace("lesson", "").replace("level2_lesson", "") : activeLesson}`}
+                      </h1>
+                      <p className="text-sm text-black/70 dark:text-white/70">
+                        {activeLesson === "midterm-prep"
+                          ? `${getMidtermPrepCardCount()} cards`
+                          : activeLesson === "level2-midterm-prep"
+                            ? `${getLevel2MidtermPrepCardCount()} cards`
+                            : activeLesson === "spaced-repetition"
+                              ? `${currentFlashcards.length} cards to review`
+                            : `${currentFlashcards.length} cards`}
+                      </p>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <Link href="/dashboard/flashcards" className="flex items-center group">
+                      <div className="relative transform transition-transform duration-300 ease-in-out group-hover:scale-110 animate-logo-breathe">
+                        <Image
+                          src="/flashqi-main-logo.png"
+                          alt="FlashQi Logo"
+                          width={32}
+                          height={32}
+                          className="object-contain"
+                          priority
+                        />
+                      </div>
+                      <span className="ml-2 text-xl font-bold text-black dark:text-white transition-all duration-300 group-hover:text-blue-600 dark:group-hover:text-blue-400">
+                        FlashQi
+                      </span>
+                    </Link>
+                    <nav className="hidden md:ml-10 md:flex md:items-center md:space-x-6">
+                      <span className="text-sm font-medium text-blue-600 dark:text-blue-400">
+                        Flashcards
+                      </span>
+                    </nav>
+                  </>
                 )}
               </div>
+              <div className="flex items-center space-x-4">
+                {isStudyMode && (
+                  <div className="bg-white/20 dark:bg-black/20 px-3 py-1 rounded-full text-sm font-medium text-black dark:text-white">
+                    {currentCardIndex + 1} / {currentFlashcards.length}
+                  </div>
+                )}
+                <ThemeToggle />
+                
+                {/* Personalized Profile Dropdown */}
+                <div className="relative" ref={profileDropdownRef}>
+                  <button
+                    onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)}
+                    className="flex items-center px-3 py-2 text-sm font-medium bg-white/20 dark:bg-black/20 backdrop-blur-sm border border-white/30 dark:border-white/10 rounded-xl text-black dark:text-white hover:bg-white/30 dark:hover:bg-black/30 transition-all duration-300 ease-out transform hover:scale-105 active:scale-95 shadow-sm"
+                  >
+                    <div className="flex items-center">
+                      <div className="w-6 h-6 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-xs font-semibold mr-2">
+                        {user?.user_metadata?.name ? user.user_metadata.name.charAt(0).toUpperCase() : user?.email?.charAt(0).toUpperCase()}
+                      </div>
+                      <span className="hidden sm:inline-block mr-1 font-medium">
+                        Hi, {user?.user_metadata?.name || user?.email?.split('@')[0] || 'User'}!
+                      </span>
+                    </div>
+                    <svg
+                      className={`ml-1 h-4 w-4 text-black/60 dark:text-white/60 transition-transform duration-300 ${isProfileDropdownOpen ? 'rotate-180' : ''}`}
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                  </button>
+
+                  {/* Glassmorphism Dropdown */}
+                  {isProfileDropdownOpen && (
+                    <div className="absolute right-0 mt-2 w-56 rounded-xl bg-white/10 dark:bg-black/10 backdrop-filter backdrop-blur-lg py-2 shadow-xl border border-white/20 dark:border-white/10 focus:outline-none animate-in fade-in-0 zoom-in-95 duration-200 z-50">
+                      <Link
+                        href="/profile"
+                        className="flex items-center px-4 py-3 text-sm text-black dark:text-white hover:bg-white/20 dark:hover:bg-black/30 transition-colors duration-200"
+                        onClick={() => setIsProfileDropdownOpen(false)}
+                      >
+                        <svg className="w-4 h-4 mr-3 text-black/70 dark:text-white/70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                        </svg>
+                        Profile Settings
+                      </Link>
+                      <button
+                        onClick={() => {
+                          signOut();
+                          setIsProfileDropdownOpen(false);
+                        }}
+                        className="flex items-center w-full text-left px-4 py-3 text-sm text-black dark:text-white hover:bg-white/20 dark:hover:bg-black/30 transition-colors duration-200"
+                      >
+                        <svg className="w-4 h-4 mr-3 text-black/70 dark:text-white/70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                        </svg>
+                        Sign Out
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
+            
+            {/* Progress bar - only show in study mode */}
+            {isStudyMode && currentFlashcards.length > 0 && (
+              <div className="w-full bg-white/20 dark:bg-black/20 rounded-full h-1.5">
+                <div
+                  className="bg-white dark:bg-blue-400 h-1.5 rounded-full transition-all duration-300"
+                  style={{ width: `${((currentCardIndex + 1) / currentFlashcards.length) * 100}%` }}
+                ></div>
+              </div>
+            )}
           </div>
         </div>
       </header>
@@ -2194,18 +2435,10 @@ export default function FlashcardsPage() {
               
               <div className="px-4 pt-20 pb-2 flex-1 flex flex-col">
                 
-                {/* Progress bar */}
-                <div className="w-full bg-blue-600/20 rounded-full h-2 mb-8">
-                  <div
-                    className="bg-white h-2 rounded-full"
-                    style={{ width: `${((currentCardIndex + 1) / currentFlashcards.length) * 100}%` }}
-                  ></div>
-                </div>
-                
                 {/* Flashcard */}
                 {currentFlashcards.length > 0 && (
                   <div 
-                    className="flex justify-center items-center flex-grow"
+                    className="flex justify-center items-center flex-grow mb-8"
                     onTouchStart={(e) => {
                       const touch = e.touches[0];
                       setTouchStart({ x: touch.clientX, y: touch.clientY });
@@ -2442,7 +2675,7 @@ export default function FlashcardsPage() {
                 
                 {/* Swipe instruction hint */}
                 <div className="text-center text-slate-600 dark:text-white/70 text-sm mb-8">
-                  Swipe to browse cards • Tap ✓ or ✗ to mark as completed
+                  Tap ✓ if correct or ✗ to mark as incorrect
                 </div>
               </div>
             </div>
@@ -2487,7 +2720,7 @@ export default function FlashcardsPage() {
                   {previewFlashcards.map((card) => (
                     <div 
                       key={card.id} 
-                      className="rounded-xl overflow-hidden bg-gradient-to-r from-blue-50/80 to-white dark:from-blue-900/20 dark:to-neutral-800 border border-blue-100 dark:border-blue-800/50 hover:border-blue-300 dark:hover:border-blue-700 hover:shadow-sm transition-all p-3 cursor-pointer"
+                      className="relative rounded-xl overflow-hidden bg-gradient-to-r from-blue-50/80 to-white dark:from-blue-900/20 dark:to-neutral-800 border border-blue-100 dark:border-blue-800/50 hover:border-blue-300 dark:hover:border-blue-700 hover:shadow-sm transition-all p-3 cursor-pointer"
                       onClick={() => {
                         enterStudyMode(previewLessonId);
                         const index = previewFlashcards.findIndex(c => c.id === card.id);
@@ -2496,6 +2729,7 @@ export default function FlashcardsPage() {
                         }
                       }}
                     >
+                      {getStatusBadge(card.id)}
                       <div className="mb-1 text-xl font-medium text-center text-orange-600 dark:text-orange-400">{card.hanzi}</div>
                       <div className="text-xs text-center text-blue-600 dark:text-blue-400">{card.pinyin}</div>
                       <div className="mt-1 text-sm text-center text-gray-700 dark:text-gray-300">{card.english}</div>
@@ -2641,6 +2875,90 @@ export default function FlashcardsPage() {
                 
                 {/* Levels Selection */}
                 <div className="space-y-6 mb-8">
+                  {/* Spaced Repetition Button */}
+                  <div 
+                    className="rounded-xl overflow-hidden bg-transparent backdrop-blur-sm border-2 border-red-400 border-t-blue-500 p-6 hover:border-opacity-80 hover:shadow-md transition-all cursor-pointer relative"
+                    onClick={enterSpacedRepetitionMode}
+                  >
+                    <span className="absolute inset-0 bg-noise opacity-10 pointer-events-none rounded-xl"></span>
+                    <div className="flex justify-between items-center">
+                      <div className="flex items-center">
+                        <div className="w-12 h-12 rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 dark:from-emerald-400 dark:to-teal-400 flex items-center justify-center text-white font-bold mr-4 shadow-lg">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+                          </svg>
+                        </div>
+                        <div>
+                          <h3 className="text-xl font-semibold text-emerald-900 dark:text-emerald-100 flex items-center">
+                            Spaced Repetition
+                            <span className="ml-2 text-xs bg-emerald-200 dark:bg-emerald-800/50 text-emerald-800 dark:text-emerald-300 px-2 py-1 rounded-full font-medium">
+                              ✨ Smart
+                            </span>
+                          </h3>
+                          <p className="text-sm text-emerald-700 dark:text-emerald-300">
+                            {isLoadingSR ? 'Loading...' : `${dueCardsCount} cards to review`}
+                          </p>
+                        </div>
+                      </div>
+                      <button 
+                        className="p-3 rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 dark:from-emerald-400 dark:to-teal-400 text-white hover:from-emerald-600 hover:to-teal-600 dark:hover:from-emerald-500 dark:hover:to-teal-500 transition-all transform hover:scale-105 active:scale-95 shadow-lg"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          enterSpacedRepetitionMode();
+                        }}
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                        </svg>
+                      </button>
+                    </div>
+                    
+                    {/* Sub-filters for Spaced Repetition */}
+                    <div className="mt-4 pt-4 border-t border-emerald-200 dark:border-emerald-700/50">
+                      <div className="flex gap-2">
+                        <button
+                          className={`px-3 py-1 rounded-full text-xs font-medium transition-all ${
+                            spacedRepetitionFilter === 'both' 
+                              ? 'bg-emerald-500 text-white shadow-sm' 
+                              : 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-200 dark:hover:bg-emerald-800/50'
+                          }`}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSpacedRepetitionFilter('both');
+                          }}
+                        >
+                          Both
+                        </button>
+                        <button
+                          className={`px-3 py-1 rounded-full text-xs font-medium transition-all ${
+                            spacedRepetitionFilter === 'new' 
+                              ? 'bg-emerald-500 text-white shadow-sm' 
+                              : 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-200 dark:hover:bg-emerald-800/50'
+                          }`}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSpacedRepetitionFilter('new');
+                          }}
+                        >
+                          🆕 New Only
+                        </button>
+                        <button
+                          className={`px-3 py-1 rounded-full text-xs font-medium transition-all ${
+                            spacedRepetitionFilter === 'due' 
+                              ? 'bg-emerald-500 text-white shadow-sm' 
+                              : 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-200 dark:hover:bg-emerald-800/50'
+                          }`}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSpacedRepetitionFilter('due');
+                          }}
+                        >
+                          ⏳ Due Only
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
                   {/* Level 1 Button */}
                   {getCategoryLessons(selectedCategory).level1.length > 0 && (
                     <div 
@@ -3103,6 +3421,98 @@ export default function FlashcardsPage() {
         </div>
       )}
       
+      {/* Spaced Repetition Info Modal */}
+      {showSRInfoModal && (
+        <div className="fixed inset-0 flex items-center justify-center z-50 bg-black/50 backdrop-blur-sm">
+          <div className="bg-transparent backdrop-blur-lg border border-white/20 dark:border-white/10 rounded-xl p-6 shadow-xl max-w-lg w-full mx-4 animate-bounce-in">
+            <div className="text-center">
+              <div className="w-16 h-16 bg-gradient-to-r from-emerald-500 to-teal-500 dark:from-emerald-400 dark:to-teal-400 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+                </svg>
+              </div>
+              
+              <h2 className="text-2xl font-bold mb-4 text-white">
+                ✨ Welcome to Spaced Repetition
+              </h2>
+              
+              <div className="text-left space-y-4 mb-6 text-white/90">
+                <div className="bg-white/10 rounded-lg p-4 backdrop-blur-sm">
+                  <h3 className="font-semibold text-emerald-300 mb-2">🧠 How it works:</h3>
+                  <p className="text-sm">Our smart algorithm shows you cards right when you're about to forget them, maximizing retention with minimal effort.</p>
+                </div>
+                
+                <div className="bg-white/10 rounded-lg p-4 backdrop-blur-sm">
+                  <h3 className="font-semibold text-blue-300 mb-2">✅ Mark "Known":</h3>
+                  <p className="text-sm">Doubles the wait time before you see this card again!</p>
+                </div>
+                
+                <div className="bg-white/10 rounded-lg p-4 backdrop-blur-sm">
+                  <h3 className="font-semibold text-red-300 mb-2">❌ Mark "Don't Know":</h3>
+                  <p className="text-sm">Resets the card to review again tomorrow.</p>
+                </div>
+              </div>
+              
+              <div className="mb-6">
+                <label className="block text-sm font-medium text-white/90 mb-3">
+                  Choose your review intensity:
+                </label>
+                <div className="grid grid-cols-3 gap-2">
+                  <button
+                    className={`p-3 rounded-lg text-sm font-medium transition-all ${
+                      srStrengthLevel === 'low' 
+                        ? 'bg-emerald-500 text-white shadow-lg' 
+                        : 'bg-white/20 text-white/80 hover:bg-white/30'
+                    }`}
+                    onClick={() => setSrStrengthLevel('low')}
+                  >
+                    <div className="font-semibold">🌱 Low</div>
+                    <div className="text-xs">Easier pace</div>
+                  </button>
+                  <button
+                    className={`p-3 rounded-lg text-sm font-medium transition-all ${
+                      srStrengthLevel === 'medium' 
+                        ? 'bg-emerald-500 text-white shadow-lg' 
+                        : 'bg-white/20 text-white/80 hover:bg-white/30'
+                    }`}
+                    onClick={() => setSrStrengthLevel('medium')}
+                  >
+                    <div className="font-semibold">🎯 Medium</div>
+                    <div className="text-xs">Balanced</div>
+                  </button>
+                  <button
+                    className={`p-3 rounded-lg text-sm font-medium transition-all ${
+                      srStrengthLevel === 'high' 
+                        ? 'bg-emerald-500 text-white shadow-lg' 
+                        : 'bg-white/20 text-white/80 hover:bg-white/30'
+                    }`}
+                    onClick={() => setSrStrengthLevel('high')}
+                  >
+                    <div className="font-semibold">🔥 High</div>
+                    <div className="text-xs">More frequent</div>
+                  </button>
+                </div>
+              </div>
+              
+              <div className="flex gap-3">
+                <button
+                  onClick={handleSRInfoDismiss}
+                  className="flex-1 py-3 px-6 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-semibold rounded-lg transition-all shadow-lg"
+                >
+                  Got It! Let's Start
+                </button>
+                <button
+                  onClick={() => window.open('/help/spaced-repetition', '_blank')}
+                  className="py-3 px-4 bg-white/20 hover:bg-white/30 text-white font-medium rounded-lg transition-all"
+                >
+                  Learn More
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Completion popup */}
       {isCompletionPopupVisible && (
         <div className="fixed inset-0 flex items-center justify-center z-50 bg-black/50 backdrop-blur-sm">
