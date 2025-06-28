@@ -1,0 +1,74 @@
+
+Flashcards Table Documentation
+==============================
+
+Table Name: flashcards
+Description: No description available
+
+Columns:
+--------
+
+1. id
+   - Format: uuid
+   - Type: string
+   - Description: Unique identifier for each flashcard.
+
+2. lesson_id
+   - Format: uuid
+   - Type: string
+   - Description: Identifier linking the flashcard to a specific lesson.
+
+3. hanzi
+   - Format: text
+   - Type: string
+   - Description: The Chinese characters on the flashcard.
+
+4. pinyin
+   - Format: text
+   - Type: string
+   - Description: The pinyin (phonetic pronunciation) of the hanzi.
+
+5. english
+   - Format: text
+   - Type: string
+   - Description: The English translation of the hanzi.
+
+6. example_sentence
+   - Format: text
+   - Type: string
+   - Description: An example sentence using the hanzi.
+
+7. audio_url
+   - Format: text
+   - Type: string
+   - Description: URL to the audio pronunciation of the hanzi or sentence.
+
+8. difficulty_level
+   - Format: integer
+   - Type: number
+   - Description: An integer representing the difficulty level of the flashcard.
+
+9. created_at
+   - Format: timestamp with time zone
+   - Type: string
+   - Description: Timestamp of when the flashcard was created.
+
+10. updated_at
+    - Format: timestamp with time zone
+    - Type: string
+    - Description: Timestamp of the most recent update to the flashcard.
+
+11. last_reviewed
+    - Format: timestamp with time zone
+    - Type: string
+    - Description: Timestamp of the last time this flashcard was reviewed.
+
+12. status
+    - Format: text
+    - Type: string
+    - Description: Status of the flashcard (e.g., active, archived).
+
+13. interval_days
+    - Format: integer
+    - Type: number
+    - Description: Number of days until the next review based on spaced repetition.

@@ -185,7 +185,7 @@ export default function FlashcardDetailPage() {
           </div>
         </div>
       </header>
-      
+          
       <main className="flex-1 py-6 pt-24">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           {/* Card Info */}

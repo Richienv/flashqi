@@ -1,3 +1,4 @@
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState, useCallback } from 'react';
 import { 
   OptimizedSpacedRepetitionService, 
@@ -16,12 +17,9 @@ export function useOptimizedFlashcards({
   prefetchNext,
   enabled = true 
 }: UseOptimizedFlashcardsOptions) {
+  const queryClient = useQueryClient();
   const [cards, setCards] = useState<EnhancedFlashcard[]>([]);
   const [isPhase1Complete, setIsPhase1Complete] = useState(false);
-  const [isStatusLoading, setIsStatusLoading] = useState(false);
-  const [statusError, setStatusError] = useState<Error | null>(null);
-  const [dueCount, setDueCount] = useState(0);
-  const [isDueCountLoading, setIsDueCountLoading] = useState(false);
 
   // Phase 1: Get instant static cards
   useEffect(() => {
@@ -32,66 +30,63 @@ export function useOptimizedFlashcards({
     setIsPhase1Complete(true);
   }, [lessonId, enabled]);
 
-  // Phase 2: Fetch review statuses
+  // Phase 2: Fetch review statuses with React Query
+  const cardIds = cards.map(card => card.id);
+  
+  const {
+    data: reviewStatuses,
+    isLoading: isStatusLoading,
+    error: statusError
+  } = useQuery<ReviewStatus[]>({
+    queryKey: ['review-statuses', lessonId, cardIds.length],
+    queryFn: () => OptimizedSpacedRepetitionService.fetchReviewStatuses(cardIds),
+    enabled: enabled && isPhase1Complete && cardIds.length > 0,
+    staleTime: 30 * 1000, // 30 seconds
+    gcTime: 5 * 60 * 1000, // 5 minutes
+    refetchOnWindowFocus: false,
+  });
+
+  // Merge static cards with review statuses when available
   useEffect(() => {
-    if (!enabled || !isPhase1Complete || cards.length === 0) return;
+    if (reviewStatuses && isPhase1Complete) {
+      const staticCards = OptimizedSpacedRepetitionService.getInstantCards(lessonId);
+      const mergedCards = OptimizedSpacedRepetitionService.mergeCardStatuses(
+        staticCards, 
+        reviewStatuses
+      );
+      setCards(mergedCards);
+    }
+  }, [reviewStatuses, lessonId, isPhase1Complete]);
 
-    const fetchStatuses = async () => {
-      setIsStatusLoading(true);
-      setStatusError(null);
-      
-      try {
-        const cardIds = cards.map(card => card.id);
-        const reviewStatuses = await OptimizedSpacedRepetitionService.fetchReviewStatuses(cardIds);
-        
-        const staticCards = OptimizedSpacedRepetitionService.getInstantCards(lessonId);
-        const mergedCards = OptimizedSpacedRepetitionService.mergeCardStatuses(
-          staticCards, 
-          reviewStatuses
-        );
-        setCards(mergedCards);
-      } catch (error) {
-        setStatusError(error as Error);
-        console.error('Error fetching review statuses:', error);
-      } finally {
-        setIsStatusLoading(false);
-      }
-    };
-
-    fetchStatuses();
-  }, [lessonId, enabled, isPhase1Complete]);
-
-  // Load due cards count
-  useEffect(() => {
-    if (!enabled) return;
-
-    const loadDueCount = async () => {
-      setIsDueCountLoading(true);
-      try {
-        const count = await OptimizedSpacedRepetitionService.getDueCardsCount();
-        setDueCount(count);
-      } catch (error) {
-        console.error('Error loading due count:', error);
-      } finally {
-        setIsDueCountLoading(false);
-      }
-    };
-
-    loadDueCount();
-    
-    // Refresh every minute
-    const interval = setInterval(loadDueCount, 60 * 1000);
-    return () => clearInterval(interval);
-  }, [enabled]);
+  // Due cards count query
+  const {
+    data: dueCount = 0,
+    isLoading: isDueCountLoading
+  } = useQuery({
+    queryKey: ['due-cards-count'],
+    queryFn: OptimizedSpacedRepetitionService.getDueCardsCount,
+    staleTime: 30 * 1000,
+    refetchInterval: 60 * 1000, // Refresh every minute
+    enabled
+  });
 
   // Prefetch next lesson in background
   useEffect(() => {
     if (prefetchNext && !isStatusLoading) {
       setTimeout(() => {
-        OptimizedSpacedRepetitionService.prefetchNextLesson(prefetchNext);
+        queryClient.prefetchQuery({
+          queryKey: ['review-statuses', prefetchNext],
+          queryFn: () => {
+            const nextCardIds = OptimizedSpacedRepetitionService
+              .getInstantCards(prefetchNext)
+              .map(card => card.id);
+            return OptimizedSpacedRepetitionService.fetchReviewStatuses(nextCardIds);
+          },
+          staleTime: 60 * 1000, // 1 minute
+        });
       }, 1000);
     }
-  }, [prefetchNext, isStatusLoading]);
+  }, [prefetchNext, isStatusLoading, queryClient]);
 
   // Update review status with optimistic updates
   const updateReviewStatus = useCallback((
@@ -121,9 +116,10 @@ export function useOptimizedFlashcards({
       strength_level: strengthLevel
     });
 
-    // Update due count optimistically
-    setDueCount(prev => isCorrect ? Math.max(0, prev - 1) : prev);
-  }, []);
+    // Invalidate queries for real-time updates
+    queryClient.invalidateQueries({ queryKey: ['due-cards-count'] });
+    queryClient.invalidateQueries({ queryKey: ['review-statuses', lessonId] });
+  }, [queryClient, lessonId]);
 
   // Filter cards by status
   const getCardsByStatus = useCallback((status: 'new' | 'due' | 'known' | 'all') => {
@@ -164,26 +160,35 @@ export function useOptimizedFlashcards({
   };
 }
 
-// Simple hook for spaced repetition mode
+// Hook for spaced repetition mode specifically
 export function useSpacedRepetitionCards(strengthLevel: 'low' | 'medium' | 'high' = 'medium') {
-  const [dueCards, setDueCards] = useState<EnhancedFlashcard[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<Error | null>(null);
+  const queryClient = useQueryClient();
 
-  const loadDueCards = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
-    
-    try {
-      // This would need implementation based on your specific requirements
-      // For now, return empty array
-      setDueCards([]);
-    } catch (err) {
-      setError(err as Error);
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+  // Get all due cards across lessons using React Query
+  const {
+    data: dueCards = [],
+    isLoading,
+    error,
+    refetch
+  } = useQuery<EnhancedFlashcard[]>({
+    queryKey: ['spaced-repetition-cards', strengthLevel],
+    queryFn: async () => {
+      // Get due card IDs from all lessons
+      const allStaticCards = OptimizedSpacedRepetitionService.getInstantCards('all');
+      const cardIds = allStaticCards.map(card => card.id);
+      
+      // Fetch review statuses
+      const reviewStatuses = await OptimizedSpacedRepetitionService.fetchReviewStatuses(cardIds);
+      
+      // Filter for due cards and merge with static content
+      const dueStatuses = reviewStatuses.filter(status => 
+        status.status === 'new' || status.status === 'due'
+      );
+      
+      return OptimizedSpacedRepetitionService.mergeCardStatuses(allStaticCards, dueStatuses);
+    },
+    staleTime: 30 * 1000,
+  });
 
   const updateCard = useCallback((cardId: string, isCorrect: boolean) => {
     OptimizedSpacedRepetitionService.queueReviewUpdate({
@@ -192,19 +197,16 @@ export function useSpacedRepetitionCards(strengthLevel: 'low' | 'medium' | 'high
       strength_level: strengthLevel
     });
 
-    // Refetch due cards
-    setTimeout(() => loadDueCards(), 100);
-  }, [strengthLevel, loadDueCards]);
-
-  useEffect(() => {
-    loadDueCards();
-  }, [loadDueCards]);
+    // Invalidate and refetch
+    queryClient.invalidateQueries({ queryKey: ['spaced-repetition-cards'] });
+    queryClient.invalidateQueries({ queryKey: ['due-cards-count'] });
+  }, [strengthLevel, queryClient]);
 
   return {
     dueCards,
     isLoading,
     error,
     updateCard,
-    refetch: loadDueCards
+    refetch
   };
 } 

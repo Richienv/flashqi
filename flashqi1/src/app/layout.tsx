@@ -4,6 +4,7 @@ import "./globals.css";
 import { AuthProvider } from "@/contexts/auth-context";
 import { GameRoomProvider } from "@/contexts/game-room-context";
 import { ThemeProvider } from '@/contexts/ThemeContext';
+import { QueryProvider } from '@/providers/QueryProvider';
 
 export const metadata: Metadata = {
   title: "FlashQi - Learn Chinese with Flashcards",
@@ -21,6 +22,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="min-h-screen font-sans antialiased">
+        <QueryProvider>
         <ThemeProvider>
           <AuthProvider>
             <GameRoomProvider>
@@ -28,6 +30,7 @@ export default function RootLayout({
             </GameRoomProvider>
           </AuthProvider>
         </ThemeProvider>
+        </QueryProvider>
       </body>
     </html>
   );

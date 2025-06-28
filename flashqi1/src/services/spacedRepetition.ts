@@ -72,7 +72,7 @@ export class SpacedRepetitionService {
         .limit(limit);
 
       if (error) {
-        console.error('Error fetching spaced repetition cards:', error);
+        // Silently handle database errors - spaced repetition is optional
         return [];
       }
 
@@ -86,7 +86,7 @@ export class SpacedRepetitionService {
         return now >= nextReview;
       });
     } catch (error) {
-      console.error('Network error fetching spaced repetition cards:', error);
+      // Silently handle network errors - spaced repetition is optional
       return [];
     }
   }
@@ -131,13 +131,13 @@ export class SpacedRepetitionService {
         .eq('id', cardId);
 
       if (error) {
-        console.error('Error updating card review status:', error);
+        // Silently handle database errors - spaced repetition is optional
         return false;
       }
 
       return true;
     } catch (error) {
-      console.error('Network error updating card review:', error);
+      // Silently handle network errors - spaced repetition is optional
       return false;
     }
   }
@@ -153,13 +153,13 @@ export class SpacedRepetitionService {
         .or('status.eq.new,status.eq.due,last_reviewed.is.null');
 
       if (error) {
-        console.error('Error getting due cards count:', error);
+        // Silently handle database errors - spaced repetition is optional
         return 0;
       }
 
       return count || 0;
     } catch (error) {
-      console.error('Network error getting due cards count:', error);
+      // Silently handle network errors - spaced repetition is optional
       return 0;
     }
   }
@@ -184,13 +184,13 @@ export class SpacedRepetitionService {
         .limit(limit);
 
       if (error) {
-        console.error('Error fetching cards by status:', error);
+        // Silently handle database errors - spaced repetition is optional
         return [];
       }
 
       return data || [];
     } catch (error) {
-      console.error('Network error fetching cards by status:', error);
+      // Silently handle network errors - spaced repetition is optional
       return [];
     }
   }
@@ -211,7 +211,7 @@ export class SpacedRepetitionService {
 
       return !error;
     } catch (error) {
-      console.error('Error resetting card:', error);
+      // Silently handle network errors - spaced repetition is optional
       return false;
     }
   }
@@ -228,7 +228,7 @@ export class SpacedRepetitionService {
       const results = await Promise.all(promises);
       return results.every(result => result === true);
     } catch (error) {
-      console.error('Error in bulk update:', error);
+      // Silently handle network errors - spaced repetition is optional
       return false;
     }
   }

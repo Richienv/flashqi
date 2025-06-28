@@ -1,0 +1,72 @@
+Flascards table schema:
+
+create table public.flashcards (
+  id uuid not null default gen_random_uuid (),
+  lesson_id uuid null,
+  hanzi text not null,
+  pinyin text not null,
+  english text not null,
+  example_sentence jsonb null,
+  difficulty_level integer null default 1,
+  grammar_usage text null,
+  grammar_tip text null,
+  color_coded_example text null,
+  created_at timestamp with time zone null default now(),
+  updated_at timestamp with time zone null default now(),
+  constraint flashcards_pkey primary key (id),
+  constraint flashcards_lesson_id_fkey foreign KEY (lesson_id) references lessons (id) on delete CASCADE
+) TABLESPACE pg_default;
+
+create index IF not exists idx_flashcards_lesson_id on public.flashcards using btree (lesson_id) TABLESPACE pg_default;
+
+create index IF not exists idx_flashcards_hanzi on public.flashcards using btree (hanzi) TABLESPACE pg_default;
+---
+
+suer_flashcards_progress schema 
+
+create table public.user_flashcard_progress (
+  id uuid not null default gen_random_uuid (),
+  user_id uuid null,
+  flashcard_id uuid null,
+  status text null default 'new'::text,
+  last_reviewed timestamp with time zone null,
+  next_review timestamp with time zone null,
+  interval_days integer null default 1,
+  ease_factor numeric(3, 2) null default 2.5,
+  review_count integer null default 0,
+  correct_count integer null default 0,
+  created_at timestamp with time zone null default now(),
+  updated_at timestamp with time zone null default now(),
+  constraint user_flashcard_progress_pkey primary key (id),
+  constraint user_flashcard_progress_user_id_flashcard_id_key unique (user_id, flashcard_id),
+  constraint user_flashcard_progress_flashcard_id_fkey foreign KEY (flashcard_id) references flashcards (id) on delete CASCADE,
+  constraint user_flashcard_progress_user_id_fkey foreign KEY (user_id) references auth.users (id) on delete CASCADE,
+  constraint user_flashcard_progress_status_check check (
+    (
+      status = any (
+        array[
+          'new'::text,
+          'learning'::text,
+          'known'::text,
+          'due'::text
+        ]
+      )
+    )
+  )
+) TABLESPACE pg_default;
+
+create index IF not exists idx_user_progress_user_status on public.user_flashcard_progress using btree (user_id, status) TABLESPACE pg_default;
+
+create index IF not exists idx_user_progress_due on public.user_flashcard_progress using btree (user_id, next_review) TABLESPACE pg_default;
+
+lessons table schema: 
+create table public.lessons (
+  id uuid not null default gen_random_uuid (),
+  lesson_number integer not null,
+  level integer null default 1,
+  title text not null,
+  description text null,
+  created_at timestamp with time zone null default now(),
+  updated_at timestamp with time zone null default now(),
+  constraint lessons_pkey primary key (id)
+) TABLESPACE pg_default;

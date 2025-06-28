@@ -7,19 +7,24 @@ import { Flashcard as FlashcardType } from '@/types';
 
 interface FlashcardProps {
   card: FlashcardType;
+  onDifficulty?: (difficulty: 'easy' | 'normal' | 'hard' | 'difficult') => void;
+  // Legacy support - will be removed
   onKnown?: () => void;
   onUnknown?: () => void;
+  isDatabaseMode?: boolean; // New prop to differentiate UI
 }
 
-export function Flashcard({ card, onKnown, onUnknown }: FlashcardProps) {
+export function Flashcard({ card, onDifficulty, onKnown, onUnknown, isDatabaseMode = false }: FlashcardProps) {
   const [isFlipped, setIsFlipped] = useState(false);
   
   const handlers = useSwipeable({
     onSwipedRight: () => {
-      if (onKnown) onKnown();
+      if (onDifficulty) onDifficulty('easy');
+      else if (onKnown) onKnown(); // Legacy support
     },
     onSwipedLeft: () => {
-      if (onUnknown) onUnknown();
+      if (onDifficulty) onDifficulty('hard');
+      else if (onUnknown) onUnknown(); // Legacy support
     },
     trackMouse: true
   });
@@ -132,6 +137,23 @@ export function Flashcard({ card, onKnown, onUnknown }: FlashcardProps) {
           )}
           style={{ boxShadow: '0 2.8px 2.2px rgba(0,0,0,0.18), 0 6.7px 5.3px rgba(0,0,0,0.22), 0 12.5px 10px rgba(0,0,0,0.24), 0 22.3px 17.9px rgba(0,0,0,0.26), 0 41.8px 33.4px rgba(0,0,0,0.28), 0 100px 80px rgba(0,0,0,0.32)' }}
         >
+          {/* Spaced Repetition Status Badge */}
+          {(card as any).status && (
+            <div className="absolute top-3 right-3 z-10">
+              <div className={`px-2 py-1 rounded-full text-xs font-semibold border backdrop-blur-md shadow-sm ${
+                (card as any).status === 'new' ? 'bg-blue-100 text-blue-800 border-blue-200' :
+                (card as any).status === 'learning' ? 'bg-yellow-100 text-yellow-800 border-yellow-200' :
+                (card as any).status === 'known' ? 'bg-green-100 text-green-800 border-green-200' :
+                'bg-red-100 text-red-800 border-red-200'
+              }`}>
+                {(card as any).status === 'new' && '🆕 New'}
+                {(card as any).status === 'learning' && '📚 Learning'}
+                {(card as any).status === 'known' && '✅ Known'}
+                {(card as any).status === 'due' && '⏰ Due'}
+              </div>
+            </div>
+          )}
+          
           {/* Glow behind content */}
           {/* <div className="mesh-glow"></div> */}
           <div className="flex flex-col items-center justify-center h-full w-full space-y-4">
@@ -184,9 +206,55 @@ export function Flashcard({ card, onKnown, onUnknown }: FlashcardProps) {
               </div>
             )}
           </div>
+          {/* Database mode - 4 simple buttons at bottom */}
+          {onDifficulty && isDatabaseMode ? (
+            <div className="absolute bottom-0 left-0 w-full grid grid-cols-4 border-t border-gray-200 dark:border-neutral-700">
+              <button 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDifficulty('easy');
+                  setIsFlipped(false);
+                }}
+                className="flex justify-center items-center py-3 border-r border-gray-200 dark:border-neutral-700 hover:bg-gray-50 dark:hover:bg-neutral-700 transition-colors text-xs font-medium text-green-600 dark:text-green-400"
+              >
+                Easy
+              </button>
+              <button 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDifficulty('normal');
+                  setIsFlipped(false);
+                }}
+                className="flex justify-center items-center py-3 border-r border-gray-200 dark:border-neutral-700 hover:bg-gray-50 dark:hover:bg-neutral-700 transition-colors text-xs font-medium text-yellow-600 dark:text-yellow-400"
+              >
+                Normal
+              </button>
+              <button 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDifficulty('hard');
+                  setIsFlipped(false);
+                }}
+                className="flex justify-center items-center py-3 border-r border-gray-200 dark:border-neutral-700 hover:bg-gray-50 dark:hover:bg-neutral-700 transition-colors text-xs font-medium text-orange-600 dark:text-orange-400"
+              >
+                Hard
+              </button>
+              <button 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDifficulty('difficult');
+                  setIsFlipped(false);
+                }}
+                className="flex justify-center items-center py-3 hover:bg-gray-50 dark:hover:bg-neutral-700 transition-colors text-xs font-medium text-red-600 dark:text-red-400"
+              >
+                Difficult
+              </button>
+            </div>
+          ) : (
           <div className="absolute bottom-4 left-0 w-full flex justify-center">
             <span className="text-xs text-gray-500 dark:text-slate-400">Tap or swipe to flip</span>
           </div>
+          )}
         </div>
         {/* Back of card: Hanzi and Example Sentence */}
         <div
@@ -215,13 +283,105 @@ export function Flashcard({ card, onKnown, onUnknown }: FlashcardProps) {
               </div>
             ) : null}
           </div>
+          {/* Database mode - 4 simple buttons at bottom */}
+          {onDifficulty && isDatabaseMode ? (
+            <div className="absolute bottom-0 left-0 w-full grid grid-cols-4 border-t border-gray-200 dark:border-neutral-700">
+              <button 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDifficulty('easy');
+                  setIsFlipped(false);
+                }}
+                className="flex justify-center items-center py-3 border-r border-gray-200 dark:border-neutral-700 hover:bg-gray-50 dark:hover:bg-neutral-700 transition-colors text-xs font-medium text-green-600 dark:text-green-400"
+              >
+                Easy
+              </button>
+              <button 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDifficulty('normal');
+                  setIsFlipped(false);
+                }}
+                className="flex justify-center items-center py-3 border-r border-gray-200 dark:border-neutral-700 hover:bg-gray-50 dark:hover:bg-neutral-700 transition-colors text-xs font-medium text-yellow-600 dark:text-yellow-400"
+              >
+                Normal
+              </button>
+              <button 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDifficulty('hard');
+                  setIsFlipped(false);
+                }}
+                className="flex justify-center items-center py-3 border-r border-gray-200 dark:border-neutral-700 hover:bg-gray-50 dark:hover:bg-neutral-700 transition-colors text-xs font-medium text-orange-600 dark:text-orange-400"
+              >
+                Hard
+              </button>
+              <button 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDifficulty('difficult');
+                  setIsFlipped(false);
+                }}
+                className="flex justify-center items-center py-3 hover:bg-gray-50 dark:hover:bg-neutral-700 transition-colors text-xs font-medium text-red-600 dark:text-red-400"
+              >
+                Difficult
+              </button>
+            </div>
+          ) : (
           <div className="absolute bottom-4 left-0 w-full flex justify-center">
             <span className="text-xs text-gray-500 dark:text-slate-400">Tap or swipe to flip</span>
           </div>
+          )}
         </div>
       </div>
-      {/* Buttons below the card */}
-      <div className="flex flex-row items-center justify-center gap-6 mt-8 w-full">
+      {/* Action buttons below the card */}
+      <div className="flex flex-row items-center justify-center gap-2 mt-8 w-full">
+        {onDifficulty && isDatabaseMode ? (
+          // Database mode - 4 simple buttons inside card (like old X/checkmark)
+          null // Buttons will be rendered inside the card
+        ) : onDifficulty ? (
+          // Regular mode - 3 buttons horizontal layout (legacy)
+          <>
+            <button 
+              className="glossy-btn metallic-red text-sm px-4 py-3"
+              onClick={e => {
+                e.stopPropagation();
+                onDifficulty('hard');
+                setIsFlipped(false);
+              }}
+              title="Hard - Review tomorrow"
+            >
+              😰 Hard
+              <div className="text-xs opacity-80 mt-1">1 day</div>
+            </button>
+            <button 
+              className="glossy-btn bg-gradient-to-r from-yellow-500 to-orange-500 text-white text-sm px-4 py-3"
+              onClick={e => {
+                e.stopPropagation();
+                onDifficulty('normal');
+                setIsFlipped(false);
+              }}
+              title="Normal - Review in 3 days"
+            >
+              🤔 Normal
+              <div className="text-xs opacity-80 mt-1">3 days</div>
+            </button>
+            <button 
+              className="glossy-btn bg-gradient-to-r from-green-500 to-emerald-500 text-white text-sm px-4 py-3"
+              onClick={e => {
+                e.stopPropagation();
+                onDifficulty('easy');
+                setIsFlipped(false);
+              }}
+              title="Easy - Review in 7+ days"
+            >
+              😊 Easy
+              <div className="text-xs opacity-80 mt-1">7+ days</div>
+            </button>
+          </>
+        ) : (
+          // Legacy buttons for backward compatibility
+          <>
         <button 
           className="glossy-btn metallic-red"
           onClick={e => {
@@ -242,6 +402,8 @@ export function Flashcard({ card, onKnown, onUnknown }: FlashcardProps) {
         >
           Know
         </button>
+          </>
+        )}
       </div>
     </div>
   );

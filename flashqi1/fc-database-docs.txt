@@ -1,0 +1,143 @@
+Here is the complete documentation for your flashcard learning system’s database schema:
+
+⸻
+
+Flashcard System Database Documentation
+
+Overview
+
+This database supports a spaced repetition system for language learning using flashcards grouped by lessons. It includes review tracking per user and computed due status for each card.
+
+⸻
+
+🗂️ Table: flashcards
+
+Stores each individual flashcard.
+
+Column Name	Type	Description
+id	uuid	Primary key – unique ID for the flashcard
+lesson_id	uuid	Foreign key → lessons.id
+hanzi	text	Chinese characters
+pinyin	text	Pinyin pronunciation
+english	text	English meaning/translation
+example_sentence	text	Sentence example using the word
+audio_url	text	URL to audio pronunciation
+difficulty_level	integer	Manual difficulty rating
+created_at	timestamp with time zone	Creation timestamp
+updated_at	timestamp with time zone	Last update timestamp
+last_reviewed	timestamp with time zone	Last time this card was reviewed
+status	text	Card status (e.g., active, retired)
+interval_days	integer	Days between current and next review
+
+
+⸻
+
+🔁 Table: flashcard_reviews
+
+Tracks spaced repetition progress per user for each card.
+
+Column Name	Type	Description
+id	uuid	Primary key – unique ID of review entry
+card_id	uuid	Foreign key → flashcards.id
+user_id	uuid	ID of the user who reviewed the card
+last_reviewed	timestamp with time zone	Timestamp of latest review
+status	text	Review result status (e.g., correct, incorrect)
+interval_days	integer	Days until next review
+review_count	integer	Total number of reviews for this card by this user
+ease_factor	numeric	Used in spaced repetition (SM-2 algorithm)
+created_at	timestamp with time zone	When the review record was created
+updated_at	timestamp with time zone	Last time review record was updated
+
+
+⸻
+
+📅 Table: flashcards_due
+
+Filtered list of flashcards that are currently due for review.
+
+Column Name	Type	Description
+id	uuid	Matches flashcards.id
+lesson_id	uuid	Matches flashcards.lesson_id
+hanzi	text	Hanzi characters
+pinyin	text	Pinyin pronunciation
+english	text	English translation
+example_sentence	text	Example usage
+audio_url	text	Audio resource URL
+difficulty_level	integer	Flashcard difficulty level
+created_at	timestamp with time zone	Original creation time
+updated_at	timestamp with time zone	Last update to card
+last_reviewed	timestamp with time zone	Last reviewed timestamp
+status	text	Current card status
+interval_days	integer	Current interval in days
+is_due	boolean	true if the card is due for review
+
+
+⸻
+
+📚 Table: lessons
+
+Organizes flashcards into lesson structures.
+
+Column Name	Type	Description
+id	uuid	Primary key – lesson ID
+lesson_number	integer	Sequential lesson number
+title	text	Lesson title
+description	text	Lesson description or overview
+category	text	Type of lesson (e.g., vocab, grammar)
+difficulty_level	integer	Estimated difficulty of the lesson
+created_at	timestamp with time zone	Creation timestamp
+updated_at	timestamp with time zone	Last update timestamp
+
+
+⸻
+
+🔗 Relationships
+	•	flashcards.lesson_id → lessons.id
+	•	flashcard_reviews.card_id → flashcards.id
+
+⸻
+
+How to Insert a New Flashcard (Supabase)
+
+Required fields
+	•	lesson_id – UUID of an existing lesson
+	•	hanzi – Chinese characters
+	•	pinyin – Pinyin pronunciation
+	•	english – English translation
+
+Optional override fields
+	•	example_sentence – a sample sentence (text)
+	•	audio_url – URL to pronunciation audio
+	•	difficulty_level – custom difficulty (integer, default 1)
+
+Auto-filled by Supabase
+	•	id – uuid_generate_v4()
+	•	status – defaults to 'new'
+	•	interval_days – defaults to 1
+	•	created_at / updated_at – now()
+	•	last_reviewed – NULL on insert
+
+⸻
+
+Example SQL
+
+INSERT INTO flashcards (
+  lesson_id,
+  hanzi,
+  pinyin,
+  english,
+  example_sentence,   -- optional
+  audio_url           -- optional
+)
+VALUES (
+  'a1b2c3d4-e5f6-7890-abcd-1234567890ef',  -- lesson_id
+  '再见',                                  -- hanzi
+  'zài jiàn',                              -- pinyin
+  'goodbye',                               -- english
+  '我们下次见，再见！',                       -- example_sentence
+  'https://…/zaijian.mp3'                   -- audio_url
+);
+
+Note:
+• In the Supabase UI, you only need to fill the Required (and any Optional) fields.
+• All other columns will be populated automatically.

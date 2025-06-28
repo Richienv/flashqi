@@ -8,22 +8,133 @@ import { Tabs } from "@/components/ui/tabs";
 // Commented out because it's not being used in this file
 // import Link from "next/link";
 // import { useRouter } from "next/navigation";
-import { 
-  LESSON_FLASHCARDS, 
-  LESSON_PROGRESS, 
-  STUDY_MODE_TABS, 
-  PRACTICE_CATEGORIES 
-} from "@/data/flashcardData";
 import './flashcards.css';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { PlusCircle, X } from "lucide-react";
-import { supabase } from '@/lib/supabase/client'; // Import supabase client
+import { supabase } from '@/lib/supabase/client';
 import { v4 as uuidv4 } from 'uuid';
 import { useAuth } from "@/contexts/auth-context";
-import SpacedRepetitionService, { FlashcardSR } from '@/services/spacedRepetition';
+import { FlashcardDatabaseService, FlashcardWithProgress } from '@/services/flashcardDatabaseService';
+import { Flashcard } from '@/components/flashcards/flashcard';
+
+// 🎯 DATABASE-ONLY MODE: All hardcoded imports removed
+// FlashcardSR interface for spaced repetition compatibility
+interface FlashcardSR {
+  id: string;
+  hanzi: string;
+  pinyin: string;
+  english: string;
+  lesson_id: string;
+  last_reviewed: string | null;
+  status: 'new' | 'known' | 'due' | 'learning';
+  interval_days: number;
+  difficulty_level?: number;
+  created_at: string;
+  grammar_usage?: string;
+  grammar_tip?: string;
+  color_coded_example?: string;
+}
 
 // Animation styles
+// Skeleton loading component for lessons
+const LessonSkeleton = () => (
+  <div className="space-y-4 mb-8">
+    {[...Array(5)].map((_, i) => (
+      <div key={i} className="rounded-xl overflow-hidden bg-gray-100 dark:bg-black/80 dark:border dark:border-blue-500/20 dark:shadow-lg dark:shadow-blue-500/10 border border-gray-200 p-4 animate-pulse">
+        <div className="flex justify-between items-center">
+          <div className="flex items-center">
+            <div className="w-8 h-8 rounded-full bg-gray-300 dark:bg-gray-600/50 mr-3"></div>
+            <div>
+              <div className="h-4 bg-gray-300 dark:bg-gray-600/50 rounded w-20 mb-2"></div>
+              <div className="h-3 bg-gray-200 dark:bg-gray-700/50 rounded w-16"></div>
+            </div>
+          </div>
+          <div className="flex space-x-2">
+            <div className="w-10 h-10 bg-gray-300 dark:bg-gray-600/50 rounded-full"></div>
+            <div className="w-10 h-10 bg-gray-300 dark:bg-gray-600/50 rounded-full"></div>
+          </div>
+        </div>
+      </div>
+    ))}
+  </div>
+);
+
+// Skeleton loading component for level selection
+const LevelSkeleton = () => (
+  <div className="space-y-6 mb-8">
+    {[...Array(2)].map((_, i) => (
+      <div key={i} className="rounded-xl bg-gray-100 dark:bg-black/80 dark:border dark:border-blue-500/20 dark:shadow-lg dark:shadow-blue-500/10 border border-gray-200 p-6 animate-pulse">
+        <div className="flex justify-between items-center">
+          <div className="flex items-center">
+            <div className="w-12 h-12 rounded-full bg-gray-300 dark:bg-gray-600/50 mr-4"></div>
+            <div>
+              <div className="h-5 bg-gray-300 dark:bg-gray-600/50 rounded w-24 mb-2"></div>
+              <div className="h-4 bg-gray-200 dark:bg-gray-700/50 rounded w-20"></div>
+            </div>
+          </div>
+          <div className="w-12 h-12 bg-gray-300 dark:bg-gray-600/50 rounded-full"></div>
+        </div>
+      </div>
+    ))}
+  </div>
+);
+
+// New flashcard skeleton for study mode
+const FlashcardSkeleton = () => (
+  <div className="bg-white dark:bg-black/90 dark:border dark:border-blue-500/30 dark:shadow-xl dark:shadow-blue-500/20 rounded-2xl p-8 min-h-[400px] flex flex-col justify-center items-center animate-pulse">
+    <div className="w-full max-w-md text-center space-y-6">
+      {/* Status badge skeleton */}
+      <div className="flex justify-end mb-4">
+        <div className="bg-gray-200 dark:bg-gray-700/50 rounded-full w-16 h-6"></div>
+      </div>
+      
+      {/* Chinese character skeleton */}
+      <div className="bg-gray-300 dark:bg-gray-600/50 rounded-lg w-24 h-16 mx-auto"></div>
+      
+      {/* Pinyin skeleton */}
+      <div className="bg-gray-200 dark:bg-gray-700/50 rounded w-32 h-5 mx-auto"></div>
+      
+      {/* English skeleton */}
+      <div className="bg-gray-200 dark:bg-gray-700/50 rounded w-40 h-4 mx-auto"></div>
+      
+      {/* Grammar content skeleton */}
+      <div className="space-y-3 mt-8">
+        <div className="bg-gray-200 dark:bg-gray-700/50 rounded w-full h-4"></div>
+        <div className="bg-gray-200 dark:bg-gray-700/50 rounded w-3/4 h-4 mx-auto"></div>
+      </div>
+      
+      {/* Buttons skeleton */}
+      <div className="flex justify-center space-x-3 mt-8">
+        <div className="bg-gray-200 dark:bg-gray-700/50 rounded-lg w-20 h-10"></div>
+        <div className="bg-gray-200 dark:bg-gray-700/50 rounded-lg w-20 h-10"></div>
+        <div className="bg-gray-200 dark:bg-gray-700/50 rounded-lg w-20 h-10"></div>
+      </div>
+    </div>
+  </div>
+);
+
+// Study mode loading skeleton
+const StudyModeSkeleton = () => (
+  <div className="flex flex-col items-center justify-center min-h-screen bg-white dark:bg-gradient-to-br dark:from-black dark:to-black p-4">
+    <div className="w-full max-w-md">
+      {/* Progress bar skeleton */}
+      <div className="mb-8">
+        <div className="bg-gray-200 dark:bg-gray-800/50 rounded-full h-2 w-full"></div>
+      </div>
+      
+      {/* Card skeleton */}
+      <FlashcardSkeleton />
+      
+      {/* Navigation skeleton */}
+      <div className="flex justify-between mt-8">
+        <div className="bg-gray-200 dark:bg-gray-700/50 rounded-lg w-12 h-12"></div>
+        <div className="bg-gray-200 dark:bg-gray-700/50 rounded-lg w-12 h-12"></div>
+      </div>
+    </div>
+  </div>
+);
+
 const AnimationStyles = () => (
   <style jsx global>{`
     @keyframes bounce-in {
@@ -209,6 +320,46 @@ const AnimationStyles = () => (
       background-size: 4px 4px, 6px 6px, 8px 8px;
       background-position: 0 0, 2px 2px, 4px 4px;
     }
+
+    /* Enhanced morphing glow animations */
+    @keyframes morphing-glow {
+      0%, 100% { 
+        background: linear-gradient(45deg, rgba(59, 130, 246, 0.15), rgba(168, 85, 247, 0.15), rgba(239, 68, 68, 0.15));
+        box-shadow: 0 0 20px rgba(59, 130, 246, 0.1), 0 0 40px rgba(168, 85, 247, 0.05);
+      }
+      25% { 
+        background: linear-gradient(135deg, rgba(168, 85, 247, 0.15), rgba(239, 68, 68, 0.15), rgba(59, 130, 246, 0.15));
+        box-shadow: 0 0 20px rgba(168, 85, 247, 0.1), 0 0 40px rgba(239, 68, 68, 0.05);
+      }
+      50% { 
+        background: linear-gradient(225deg, rgba(239, 68, 68, 0.15), rgba(59, 130, 246, 0.15), rgba(168, 85, 247, 0.15));
+        box-shadow: 0 0 20px rgba(239, 68, 68, 0.1), 0 0 40px rgba(59, 130, 246, 0.05);
+      }
+      75% { 
+        background: linear-gradient(315deg, rgba(59, 130, 246, 0.15), rgba(168, 85, 247, 0.15), rgba(239, 68, 68, 0.15));
+        box-shadow: 0 0 20px rgba(59, 130, 246, 0.1), 0 0 40px rgba(168, 85, 247, 0.05);
+      }
+    }
+    
+    .animate-morphing-glow {
+      animation: morphing-glow 4s ease-in-out infinite;
+    }
+
+    /* Enhanced skeleton pulse */
+    @keyframes enhanced-pulse {
+      0%, 100% { 
+        opacity: 1;
+        transform: scale(1);
+      }
+      50% { 
+        opacity: 0.5;
+        transform: scale(1.01);
+      }
+    }
+    
+    .animate-enhanced-pulse {
+      animation: enhanced-pulse 2s ease-in-out infinite;
+    }
   `}</style>
 );
 
@@ -231,27 +382,36 @@ const safeGetFlashcards = (source: any): any[] => {
 };
 
 // Function to calculate total flashcards
-const calculateTotalFlashcards = () => {
-  let total = 0;
-  
-  // Count regular lessons
-  for (let i = 1; i <= 15; i++) {
-    const lessonKey = `lesson${i}` as keyof typeof LESSON_FLASHCARDS;
-    total += LESSON_FLASHCARDS[lessonKey]?.length || 0;
-  }
-  
-  // Count level 2 lessons
-  for (let i = 1; i <= 7; i++) {
-    const lessonKey = `level2_lesson${i}` as keyof typeof LESSON_FLASHCARDS;
-    total += LESSON_FLASHCARDS[lessonKey]?.length || 0;
-  }
-  
-  return total;
+// 🎯 DATABASE-ONLY: Always use database count
+const calculateTotalFlashcards = (dbTotalCount: number) => {
+  return dbTotalCount;
 };
 
 export default function FlashcardsPage() {
   const router = useRouter();
   const { user, signOut } = useAuth();
+  
+  // 🎯 DATABASE-ONLY: Always use database mode (toggle removed)
+  const useDatabaseMode = true;
+  
+  // New database flashcards state
+  const [dbFlashcards, setDbFlashcards] = useState<FlashcardWithProgress[]>([]);
+  const [dbTotalCount, setDbTotalCount] = useState(0);
+  const [isDbLoading, setIsDbLoading] = useState(false);
+  const [dbError, setDbError] = useState<string | null>(null);
+  
+  // Add new loading states for better UX
+  const [isLessonsLoading, setIsLessonsLoading] = useState(false);
+  const [isLevelDataLoading, setIsLevelDataLoading] = useState(false);
+  const [isCategoryLoading, setIsCategoryLoading] = useState(false);
+  
+  // Add caching for database calls
+  const [flashcardCache, setFlashcardCache] = useState<Map<string, any>>(new Map());
+  const [lastCacheUpdate, setLastCacheUpdate] = useState<number>(0);
+  const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes cache
+  
+  // Add debouncing for frequent operations
+  const [updateTimer, setUpdateTimer] = useState<NodeJS.Timeout | null>(null);
   
   // State for UI navigation
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
@@ -259,6 +419,9 @@ export default function FlashcardsPage() {
   const [previewLessonId, setPreviewLessonId] = useState<string | null>(null); 
   const [activeStudyTab, setActiveStudyTab] = useState<string | number>("new");
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
+  
+  // Track if we've completed the initial load to prevent loading indicators on subsequent updates
+  const [hasInitiallyLoaded, setHasInitiallyLoaded] = useState(false);
   
   // State for search functionality
   const [searchQuery, setSearchQuery] = useState('');
@@ -329,21 +492,287 @@ export default function FlashcardsPage() {
 
   // Spaced Repetition state management (Supabase-backed)
   const [spacedRepetitionCards, setSpacedRepetitionCards] = useState<FlashcardSR[]>([]);
-  const [spacedRepetitionFilter, setSpacedRepetitionFilter] = useState<'both' | 'new' | 'due'>('both');
+  const [spacedRepetitionFilter, setSpacedRepetitionFilter] = useState<'easy' | 'normal' | 'hard' | 'difficult' | 'all'>('all');
   const [isSpacedRepetitionMode, setIsSpacedRepetitionMode] = useState(false);
   const [dueCardsCount, setDueCardsCount] = useState<number>(0);
   const [isLoadingSR, setIsLoadingSR] = useState(false);
   
   // Spaced Repetition onboarding and settings
   const [showSRInfoModal, setShowSRInfoModal] = useState(false);
+  const [showSRDifficultyModal, setShowSRDifficultyModal] = useState(false);
   const [hasSeenSRInfo, setHasSeenSRInfo] = useState(false);
   const [srStrengthLevel, setSrStrengthLevel] = useState<'low' | 'medium' | 'high'>('medium');
 
-  // Load due cards count on mount and refresh periodically
+  // 🎯 DATABASE-ONLY: Direct database service usage (no hooks)
+  const [databaseLessons, setDatabaseLessons] = useState<any>({ level1: [], level2: [] });
+
+  // Optimized load flashcards from database with caching
+  const loadAllFlashcards = async (forceRefresh = false) => {
+    const now = Date.now();
+    const cacheKey = 'all_flashcards';
+    
+    // Check cache first (unless forced refresh)
+    if (!forceRefresh && flashcardCache.has(cacheKey) && (now - lastCacheUpdate) < CACHE_DURATION) {
+      console.log('🔍 USING CACHED DATABASE FLASHCARDS');
+      const cached = flashcardCache.get(cacheKey);
+      setDbFlashcards(cached.flashcards);
+      setDbTotalCount(cached.totalCount);
+      return;
+    }
+    
+    setIsDbLoading(true);
+    setDbError(null);
+    
+    try {
+      console.log('🔍 LOADING DATABASE FLASHCARDS...');
+      
+      // Load flashcards and count in parallel for better performance
+      const [flashcards, totalCount] = await Promise.all([
+        FlashcardDatabaseService.getAllFlashcards(),
+        FlashcardDatabaseService.getTotalFlashcardCount()
+      ]);
+      
+      console.log('🔍 DATABASE CARDS LOADED:', {
+        count: flashcards.length,
+        totalCount,
+        sampleCard: flashcards[0],
+        useDatabaseMode
+      });
+      
+      // Cache the results
+      flashcardCache.set(cacheKey, { flashcards, totalCount });
+      setLastCacheUpdate(now);
+      
+      console.log('🔍 [STATE UPDATE] Setting dbFlashcards:', {
+        flashcardsLength: flashcards.length,
+        firstCard: flashcards[0],
+        willTriggerUseEffect: true
+      });
+      
+      setDbFlashcards(flashcards);
+      setDbTotalCount(totalCount);
+    } catch (error) {
+      console.error('❌ Error loading flashcards:', error);
+      setDbError('Failed to load flashcards');
+    } finally {
+      setIsDbLoading(false);
+    }
+  };
+
+  // Load flashcards by lesson ID
+  const loadFlashcardsByLesson = async (lessonId: string) => {
+    try {
+      return await FlashcardDatabaseService.getFlashcardsByLessonId(lessonId);
+    } catch (error) {
+      console.warn('Error loading lesson flashcards:', error);
+      return [];
+    }
+  };
+
+  // Load due flashcards for spaced repetition
+  const loadDueFlashcards = async () => {
+    try {
+      return await FlashcardDatabaseService.getDueFlashcards();
+    } catch (error) {
+      console.warn('Error loading due flashcards:', error);
+      return [];
+    }
+  };
+
+  // Optimized update flashcard progress with debouncing
+  const updateFlashcardProgress = async (flashcardId: string, difficulty: 'easy' | 'normal' | 'hard' | 'difficult') => {
+    try {
+      console.log('💾 [PROGRESS UPDATE] Attempting to update progress:', {
+        flashcardId,
+        difficulty,
+        isValidUUID: flashcardId.includes('-') && flashcardId.length > 20
+      });
+      
+      // Check if this is a valid database UUID (contains hyphens and is long)
+      const isValidDatabaseId = flashcardId.includes('-') && flashcardId.length > 20;
+      
+      if (!isValidDatabaseId) {
+        console.log('💾 [PROGRESS UPDATE] Invalid database ID - this is likely a hardcoded card, skipping database update');
+        return false;
+      }
+      
+      const success = await FlashcardDatabaseService.updateProgress(flashcardId, difficulty);
+      if (success) {
+        console.log('💾 [PROGRESS UPDATE] Successfully updated progress in database');
+        
+        // Clear existing timer
+        if (updateTimer) {
+          clearTimeout(updateTimer);
+        }
+        
+        // Debounce the cache refresh to avoid too many reloads
+        const newTimer = setTimeout(() => {
+          // Force refresh cache to get updated progress
+          loadAllFlashcards(true);
+        }, 1000); // Wait 1 second before refreshing
+        
+        setUpdateTimer(newTimer);
+      } else {
+        console.log('💾 [PROGRESS UPDATE] Failed to update progress in database');
+      }
+      return success;
+    } catch (error) {
+      console.warn('💾 [PROGRESS UPDATE] Error updating flashcard progress:', error);
+      return false;
+    }
+  };
+
+  // Track initial load completion
+  useEffect(() => {
+    if (useDatabaseMode && !isDbLoading && dbFlashcards.length > 0 && !hasInitiallyLoaded) {
+      setHasInitiallyLoaded(true);
+    } else if (!useDatabaseMode && !hasInitiallyLoaded) {
+      setHasInitiallyLoaded(true);
+    }
+  }, [useDatabaseMode, isDbLoading, dbFlashcards.length, hasInitiallyLoaded]);
+
+  // Load flashcards on mount and handle URL parameters
+  useEffect(() => {
+    if (useDatabaseMode) {
+      loadAllFlashcards();
+    }
+  }, [useDatabaseMode]);
+
+  // Handle URL parameters for spaced repetition mode - separate useEffect to avoid dependency issues
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const mode = urlParams.get('mode');
+    const difficulty = urlParams.get('difficulty');
+    
+    if (mode === 'spaced-repetition' && difficulty && dbFlashcards.length > 0) {
+      console.log('🎯 [URL PARAMS] Starting spaced repetition with difficulty:', difficulty);
+      // Start spaced repetition with specified difficulty
+      startSpacedRepetitionSession(difficulty as 'easy' | 'normal' | 'hard' | 'difficult' | 'all');
+      
+      // Clear URL parameters after processing
+      window.history.replaceState({}, '', window.location.pathname);
+    }
+  }, [dbFlashcards.length]); // Wait for flashcards to load first
+
+  // 🎯 CRITICAL: Load all flashcards on component mount
+  useEffect(() => {
+    console.log('🔍 [INITIAL LOAD] Component mounted, loading database flashcards...');
+    loadAllFlashcards();
+    setHasInitiallyLoaded(true);
+  }, []); // Only run once on mount
+
+  // 🎯 CRITICAL: Process loaded flashcards into lesson structure
+  useEffect(() => {
+    console.log('🔍 [LESSON PROCESSING] useEffect triggered:', {
+      dbFlashcardsLength: dbFlashcards.length,
+      hasFlashcards: dbFlashcards.length > 0,
+      sampleCard: dbFlashcards[0]
+    });
+    
+    if (dbFlashcards.length > 0) {
+      console.log('🔍 [LESSON PROCESSING] Processing flashcards into lessons...', {
+        totalCards: dbFlashcards.length,
+        firstCardLessonId: dbFlashcards[0]?.lesson_id
+      });
+      
+      // Group flashcards by lesson_id
+      const lessonGroups = dbFlashcards.reduce((groups, card) => {
+        const lessonId = String(card.lesson_id); // Ensure it's a string
+        console.log('🔍 [LESSON PROCESSING] Processing card:', {
+          cardId: card.id,
+          lessonId,
+          lessonIdType: typeof lessonId,
+          hanzi: card.hanzi
+        });
+        
+        if (!groups[lessonId]) {
+          groups[lessonId] = [];
+        }
+        groups[lessonId].push(card);
+        return groups;
+      }, {} as Record<string, FlashcardWithProgress[]>);
+
+      // Convert groups to lesson objects
+      const level1Lessons: any[] = [];
+      const level2Lessons: any[] = [];
+
+      Object.entries(lessonGroups).forEach(([lessonId, cards]) => {
+        console.log('🔍 [LESSON PROCESSING] Analyzing lesson ID:', {
+          lessonId,
+          lessonIdType: typeof lessonId,
+          cardsCount: cards.length
+        });
+        
+        // Extract lesson number from lesson_id
+        const lessonMatch = lessonId.match(/lesson(\d+)/i);
+        const levelMatch = lessonId.match(/level(\d+)/i);
+        
+        console.log('🔍 [LESSON PROCESSING] Regex matches:', {
+          lessonMatch,
+          levelMatch,
+          originalLessonId: lessonId
+        });
+        
+        if (lessonMatch) {
+          const lessonNumber = parseInt(lessonMatch[1]);
+          const level = levelMatch ? parseInt(levelMatch[1]) : 1;
+          
+          const lessonObj = {
+            id: lessonId,
+            title: `Lesson ${lessonNumber}`,
+            number: lessonNumber,
+            cards: cards.length
+          };
+          
+          console.log('🔍 [LESSON PROCESSING] Created lesson object:', lessonObj);
+
+          if (level === 2) {
+            level2Lessons.push(lessonObj);
+          } else {
+            level1Lessons.push(lessonObj);
+          }
+        } else {
+          console.warn('🔍 [LESSON PROCESSING] Could not match lesson pattern for:', lessonId);
+        }
+      });
+
+      // Sort lessons by number
+      level1Lessons.sort((a, b) => a.number - b.number);
+      level2Lessons.sort((a, b) => a.number - b.number);
+
+      console.log('🔍 [LESSON PROCESSING] Processed lessons:', {
+        level1Count: level1Lessons.length,
+        level2Count: level2Lessons.length,
+        level1Sample: level1Lessons[0],
+        level2Sample: level2Lessons[0]
+      });
+
+      setDatabaseLessons({
+        level1: level1Lessons,
+        level2: level2Lessons
+      });
+    }
+  }, [dbFlashcards]); // Run when flashcards are loaded
+
+  // Optimized: Load due cards count only once on mount, refresh only when needed
   useEffect(() => {
     const loadDueCardsCount = async () => {
-      const count = await SpacedRepetitionService.getDueCardsCount();
+      console.log('🔍 [DUE COUNT DEBUG] Starting loadDueCardsCount', {
+        useDatabaseMode,
+        dbFlashcardsLength: dbFlashcards.length
+      });
+      
+      try {
+        // 🎯 DATABASE-ONLY: Count due cards from database
+        const dueCards = await FlashcardDatabaseService.getDueFlashcards(1000);
+        const newCards = dbFlashcards.filter(card => card.status === 'new');
+        const count = dueCards.length + newCards.length;
       setDueCardsCount(count);
+      } catch (error) {
+        // Silently handle errors - don't disrupt UX
+        console.warn('🔍 [DUE COUNT DEBUG] Error loading due count:', error);
+        setDueCardsCount(0);
+      }
     };
 
     // Check if user has seen the SR info modal before
@@ -356,123 +785,249 @@ export default function FlashcardsPage() {
       setSrStrengthLevel(savedStrength);
     }
 
+    // Load once on mount only
     loadDueCardsCount();
-    // Refresh count every 30 seconds
-    const interval = setInterval(loadDueCardsCount, 30000);
-    return () => clearInterval(interval);
-  }, []);
+    
+    // Optional: Refresh only when user returns to the page (visibility change)
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        loadDueCardsCount();
+      }
+    };
+    
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [useDatabaseMode, dbFlashcards]);
 
   // Spaced Repetition utility functions (Supabase-backed)
   const loadSpacedRepetitionCards = async () => {
+    console.log('🔍 [SR DEBUG] Starting loadSpacedRepetitionCards', {
+      useDatabaseMode,
+      spacedRepetitionFilter,
+      timestamp: new Date().toISOString()
+    });
+    
     setIsLoadingSR(true);
     try {
-      const cards = await SpacedRepetitionService.getCardsByStatus(spacedRepetitionFilter, 50);
-      setSpacedRepetitionCards(cards);
+      if (useDatabaseMode) {
+        console.log('🔍 [SR DEBUG] Using database mode for spaced repetition');
+        
+        // Use new database system for spaced repetition
+        let cards: FlashcardWithProgress[] = [];
+        
+        console.log('🔍 [SR DEBUG] Calling getFlashcardsByDifficulty with filter:', spacedRepetitionFilter);
+        
+        // Use the new difficulty-based filtering function
+        cards = await FlashcardDatabaseService.getFlashcardsByDifficulty(spacedRepetitionFilter, 50);
+        
+        console.log('🔍 [SR DEBUG] Raw database response:', {
+          cardsCount: cards.length,
+          firstCard: cards[0],
+          sampleCards: cards.slice(0, 3).map(c => ({
+            id: c.id,
+            hanzi: c.hanzi,
+            english: c.english,
+            status: c.status,
+            next_review: c.next_review,
+            last_difficulty: c.last_difficulty
+          }))
+        });
+        
+        // Convert FlashcardWithProgress to FlashcardSR format for compatibility
+        const srCards = cards.map(card => {
+          // Determine status based on next_review date and current status
+          let displayStatus: 'new' | 'known' | 'due' | 'learning' = 'new';
+          
+          if (card.status === 'new') {
+            displayStatus = 'new';
+          } else if (String(card.status) === 'learning') {
+            displayStatus = 'learning';
+          } else if (card.next_review && new Date(card.next_review) <= new Date()) {
+            displayStatus = 'due';
+          } else if (String(card.status) === 'known' || card.review_count > 0) {
+            displayStatus = 'known';
+          }
+          
+          console.log('🔍 [SR DEBUG] Card status mapping:', {
+            cardId: card.id,
+            originalStatus: card.status,
+            nextReview: card.next_review,
+            reviewCount: card.review_count,
+            mappedStatus: displayStatus
+          });
+          
+          return {
+            id: card.id,
+            hanzi: card.hanzi,
+            pinyin: card.pinyin,
+            english: card.english,
+            lesson_id: card.lesson_id || '',
+            last_reviewed: card.last_reviewed || null,
+            status: displayStatus,
+            interval_days: card.interval_days,
+            difficulty_level: card.difficulty_level,
+            created_at: new Date().toISOString(),
+            grammar_usage: card.grammar_usage,
+            grammar_tip: card.grammar_tip,
+            color_coded_example: card.color_coded_example
+          };
+        });
+        
+        console.log('🔍 [SR DEBUG] Converted SR cards:', {
+          totalCount: srCards.length,
+          statusBreakdown: {
+            new: srCards.filter(c => c.status === 'new').length,
+            due: srCards.filter(c => c.status === 'due').length,
+            known: srCards.filter(c => c.status === 'known').length
+          }
+        });
+        
+        setSpacedRepetitionCards(srCards);
+      }
+      
+      // Cache the results to avoid frequent refetching - do this after setting the cards
+      setSrCardsCache(prevCache => {
+        const newCache = new Map(prevCache);
+        // Use the updated spacedRepetitionCards state for caching
+        setTimeout(() => {
+          newCache.set(spacedRepetitionFilter, spacedRepetitionCards);
+        }, 0);
+        return newCache;
+      });
     } catch (error) {
-      console.error('Error loading spaced repetition cards:', error);
+      console.warn('Spaced repetition service not available:', error);
+      setSpacedRepetitionCards([]); // Fallback to empty array
     } finally {
       setIsLoadingSR(false);
     }
   };
 
+  // 🎯 DATABASE-ONLY: Simplified update function
   const updateCardReviewStatus = async (cardId: string, correct: boolean) => {
     try {
-      // Find current card data
-      const currentCard = spacedRepetitionCards.find(card => card.id === cardId);
-      const currentInterval = currentCard?.interval_days || 1;
-      
-      const success = await SpacedRepetitionService.updateCardReview(
-        cardId, 
-        correct, 
-        currentInterval, 
-        srStrengthLevel
-      );
+      // Convert boolean to difficulty
+      const difficulty = correct ? 'normal' : 'hard';
+      const success = await FlashcardDatabaseService.updateProgress(cardId, difficulty);
       
       if (success) {
+        // Clear cache to ensure fresh data on next load
+        setSrCardsCache(new Map());
+        
         // Refresh the cards list and due count
         await loadSpacedRepetitionCards();
-        const newCount = await SpacedRepetitionService.getDueCardsCount();
-        setDueCardsCount(newCount);
+        try {
+          const dueCards = await FlashcardDatabaseService.getDueFlashcards(50);
+          setDueCardsCount(dueCards.length);
+        } catch (countError) {
+          console.warn('Could not update due cards count:', countError);
+        }
       }
       
       return success;
     } catch (error) {
-      console.error('Error updating card review status:', error);
+      console.warn('Spaced repetition update not available:', error);
       return false;
     }
   };
 
-  // Load spaced repetition cards when filter changes
+  // Optimized: Load spaced repetition cards only when entering SR mode, cache by filter
+  const [srCardsCache, setSrCardsCache] = useState<Map<string, FlashcardSR[]>>(new Map());
+  
   useEffect(() => {
-    if (isSpacedRepetitionMode) {
+    if (isSpacedRepetitionMode && !srCardsCache.has(spacedRepetitionFilter)) {
       loadSpacedRepetitionCards();
+    } else if (isSpacedRepetitionMode && srCardsCache.has(spacedRepetitionFilter)) {
+      // Use cached data instead of refetching
+      const cachedCards = srCardsCache.get(spacedRepetitionFilter) || [];
+      setSpacedRepetitionCards(cachedCards);
     }
-  }, [spacedRepetitionFilter, isSpacedRepetitionMode]);
+  }, [spacedRepetitionFilter, isSpacedRepetitionMode, srCardsCache]);
 
-  // Get all flashcards based on active lesson
+  // Helper function to convert UI lesson ID to database lesson ID
+  const convertUILessonIdToDatabase = (uiLessonId: string): string => {
+    if (uiLessonId.startsWith('lesson')) {
+      // lesson1 -> lesson1, lesson2 -> lesson2, etc.
+      return uiLessonId;
+    } else if (uiLessonId.startsWith('level2_lesson')) {
+      // level2_lesson1 -> level2_lesson1, etc.
+      return uiLessonId;
+    }
+    return uiLessonId;
+  };
+
+  // 🎯 DATABASE-ONLY: Get all flashcards based on active lesson
   const getAllFlashcards = () => {
-    if (activeLesson === "all") {
-      // Combine all lessons' flashcards
-      const allCards = Object.values(LESSON_FLASHCARDS)
-        .map(cards => safeGetFlashcards(cards))
-        .flat();
-      return allCards;
-    } else {
-      // Return specific lesson's flashcards
-      const lessonCards = safeGetFlashcards(LESSON_FLASHCARDS[activeLesson as keyof typeof LESSON_FLASHCARDS]);
-      return lessonCards;
-    }
-  };
-
-  // Get flashcards for a specific lesson ID
-  const getLessonFlashcards = (lessonId: string) => {
-    const lessonCards = LESSON_FLASHCARDS[lessonId as keyof typeof LESSON_FLASHCARDS] || [];
-    return safeGetFlashcards(lessonCards);
-  };
-
-  // Get flashcards from lessons 1-22 for midterm prep
-  const getMidtermPrepFlashcards = () => {
-    const allowedLessons = ['lesson1', 'lesson2', 'lesson3', 'lesson4', 'lesson5', 
-                           'lesson6', 'lesson7', 'lesson8', 'lesson9', 'lesson10', 'lesson11',
-                           'lesson12', 'lesson13', 'lesson14', 'lesson15', 'lesson16', 
-                           'lesson17', 'lesson18', 'lesson19', 'lesson20', 'lesson21', 'lesson22'];
-    const cards: any[] = [];
-    
-    allowedLessons.forEach(lessonKey => {
-      const lessonCards = LESSON_FLASHCARDS[lessonKey as keyof typeof LESSON_FLASHCARDS] || [];
-      cards.push(...safeGetFlashcards(lessonCards));
+    console.log('🔍 GET ALL FLASHCARDS - Database Mode:', {
+      activeLesson,
+      dbFlashcardsCount: dbFlashcards.length,
+      dbSample: dbFlashcards[0]
     });
     
-    return cards;
+    if (activeLesson === "all") {
+      return dbFlashcards;
+    } else if (activeLesson === "spaced-repetition") {
+      return spacedRepetitionCards;
+      } else {
+      // Filter by lesson using lesson_id from database
+      const { lessonNumber, level } = FlashcardDatabaseService.parseLessonId(activeLesson as string);
+      const filtered = dbFlashcards.filter(card => {
+        const cardLessonId = (card as any).lesson_id || '';
+        return cardLessonId.includes(`lesson${lessonNumber}`) || cardLessonId.includes(`level${level}`);
+      });
+      
+      console.log('🔍 FILTERED CARDS:', {
+        lessonNumber,
+        level,
+        filteredCount: filtered.length,
+        sampleFiltered: filtered[0]
+      });
+      
+      return filtered;
+    }
   };
 
-  // Get Level 2 Midterm Prep flashcards (combines Level 2 Lessons 1-4)
+  // 🎯 DATABASE-ONLY: Get flashcards for a specific lesson ID
+  const getLessonFlashcards = (lessonId: string) => {
+    // Filter database flashcards by lesson
+    const { lessonNumber, level } = FlashcardDatabaseService.parseLessonId(lessonId);
+    return dbFlashcards.filter(card => {
+      const cardLessonId = (card as any).lesson_id || '';
+      return cardLessonId.includes(`lesson${lessonNumber}`) || cardLessonId.includes(`level${level}`);
+    });
+  };
+
+  // 🎯 DATABASE-ONLY: Get flashcards from lessons 1-22 for midterm prep
+  const getMidtermPrepFlashcards = () => {
+    return dbFlashcards.filter(card => {
+      const cardLessonId = (card as any).lesson_id || '';
+      // Match lessons 1-22
+      for (let i = 1; i <= 22; i++) {
+        if (cardLessonId.includes(`lesson${i}`)) return true;
+      }
+      return false;
+    });
+  };
+
+  // 🎯 DATABASE-ONLY: Get Level 2 Midterm Prep flashcards (combines Level 2 Lessons 1-4)
   const getLevel2MidtermPrepFlashcards = () => {
-    // Use safer access method to avoid TypeScript errors
-    const lesson1Cards = safeGetFlashcards((LESSON_FLASHCARDS as any).level2_lesson1);
-    const lesson2Cards = safeGetFlashcards((LESSON_FLASHCARDS as any).level2_lesson2);
-    const lesson3Cards = safeGetFlashcards((LESSON_FLASHCARDS as any).level2_lesson3);
-    const lesson4Cards = safeGetFlashcards((LESSON_FLASHCARDS as any).level2_lesson4);
+    const level2Cards = dbFlashcards.filter(card => {
+      const cardLessonId = (card as any).lesson_id || '';
+      // Match level2 lessons 1-4
+      for (let i = 1; i <= 4; i++) {
+        if (cardLessonId.includes(`level2_lesson${i}`)) return true;
+      }
+      return false;
+    });
     
     console.log('🔍 LEVEL2 MIDTERM DEBUG - Loading cards:', {
-      lesson1Count: lesson1Cards.length,
-      lesson2Count: lesson2Cards.length,
-      lesson3Count: lesson3Cards.length,
-      lesson4Count: lesson4Cards.length,
-      lesson1Sample: lesson1Cards[0],
-      lesson2Sample: lesson2Cards[0]
+      totalCards: level2Cards.length,
+      sampleCard: level2Cards[0]
     });
     
-    // Combine all cards
-    let allCards = [
-      ...lesson1Cards,
-      ...lesson2Cards,
-      ...lesson3Cards,
-      ...lesson4Cards
-    ];
-    
     // Shuffle the cards
-    return shuffleArray(allCards);
+    return shuffleArray(level2Cards);
   };
 
   // Filter flashcards by search query with enhanced matching
@@ -669,7 +1224,7 @@ export default function FlashcardsPage() {
     
     // Get the cards and shuffle them
     const cardsToStudy = mappedLessonId 
-      ? safeGetFlashcards(LESSON_FLASHCARDS[mappedLessonId as keyof typeof LESSON_FLASHCARDS])
+      ? getLessonFlashcards(mappedLessonId)
       : getAllFlashcards();
     
     if (cardsToStudy.length === 0) {
@@ -677,7 +1232,7 @@ export default function FlashcardsPage() {
     }
     
     // Shuffle the cards
-    const shuffledCards = shuffleArray(cardsToStudy);
+    const shuffledCards = shuffleArray(cardsToStudy as any[]);
     
     // IMPORTANT: Reset all study session state in a single batch
     // to prevent race conditions and ensure clean state
@@ -854,23 +1409,47 @@ export default function FlashcardsPage() {
     }
   };
 
-  // Handle known/unknown card with improved stack animation and robust completion detection
-  const handleCardResult = (known: boolean) => {
-    if (currentFlashcards.length === 0) {
-      return;
-    }
-    
-    if (currentCardIndex >= currentFlashcards.length) {
-      return;
-    }
-    
+  // Handle card difficulty rating with improved stack animation and robust completion detection
+  const handleCardResult = (difficulty: 'easy' | 'normal' | 'hard' | 'difficult') => {
     const currentCard = currentFlashcards[currentCardIndex];
+    if (!currentCard) return;
     
-    // Update spaced repetition data if in spaced repetition mode (async)
-    if (isSpacedRepetitionMode || activeLesson === "spaced-repetition") {
-      updateCardReviewStatus(currentCard.id, known).catch(error => {
-        console.error('Failed to update card review status:', error);
+    console.log('🔍 HANDLE CARD RESULT:', {
+      difficulty,
+      cardId: currentCard.id,
+      cardHanzi: currentCard.hanzi,
+      useDatabaseMode,
+      currentCardIndex
+    });
+    
+    // Convert difficulty to known/unknown for compatibility
+    const known = difficulty !== 'hard' && difficulty !== 'difficult';
+    
+    // 🎯 ALWAYS update progress in database for spaced repetition tracking
+    // This ensures progress records are created for ALL study modes, not just database mode
+    if (currentCard.id) {
+      console.log('💾 Updating progress for card:', {
+        cardId: currentCard.id,
+        difficulty,
+        cardHanzi: currentCard.hanzi
       });
+      updateFlashcardProgress(currentCard.id, difficulty);
+    }
+    
+    // Additional legacy tracking for non-database modes (kept for compatibility)
+    if (!useDatabaseMode) {
+    if (isSpacedRepetitionMode || activeLesson === "spaced-repetition") {
+        try {
+          if (bridgedUpdateReview) {
+            bridgedUpdateReview();
+          } else {
+            // Fallback to updateCardReviewStatus if bridgedUpdateReview is not available
+            updateCardReviewStatus(currentCard.id, known);
+          }
+        } catch (error) {
+          console.warn('Review update not available:', error);
+        }
+      }
     }
     
     // Add to completed cards using functional update to ensure we're working with latest state
@@ -980,19 +1559,29 @@ export default function FlashcardsPage() {
     // In a real app, this would play the audio for the word
   };
 
-  // Get category-specific lessons with accurate card counts
+  // Get category-specific lessons with accurate card counts (optimized)
   const getCategoryLessons = (categoryId: string) => {
+    if (useDatabaseMode && categoryId === 'chinese') {
+      // Show loading state if database is still loading OR if databaseLessons is not ready
+      if (isDbLoading || !databaseLessons.level1.length) {
+        return { level1: [], level2: [], isLoading: true };
+      }
+      return { ...databaseLessons, isLoading: false };
+    }
+    
+    // Fallback to hardcoded lessons
     let level1Lessons: any[] = [];
     let level2Lessons: any[] = [];
     
     const getCardCount = (lessonId: string) => {
       // If it's a level2 lesson
       if (lessonId.startsWith('level2_')) {
-        const key = lessonId.replace('level2_', '');
-        return LESSON_FLASHCARDS[key as keyof typeof LESSON_FLASHCARDS]?.length || 0;
+        const cards = getLessonFlashcards(lessonId);
+        return cards.length;
       }
       // Regular lesson
-      return LESSON_FLASHCARDS[lessonId as keyof typeof LESSON_FLASHCARDS]?.length || 0;
+      const cards = getLessonFlashcards(lessonId);
+      return cards.length;
     };
 
     if (categoryId === 'chinese') {
@@ -1040,13 +1629,16 @@ export default function FlashcardsPage() {
       ];
     }
     
-    return { level1: level1Lessons, level2: level2Lessons };
+    return { level1: level1Lessons, level2: level2Lessons, isLoading: false };
   };
 
   // Calculate the total number of cards for midterm prep (lessons 1-21)
   const getMidtermPrepCardCount = () => {
     const lessonCounts = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21].map(
-      lessonNum => LESSON_FLASHCARDS[`lesson${lessonNum}`]?.length || 0
+      lessonNum => {
+        const cards = getLessonFlashcards(`lesson${lessonNum}`);
+        return cards.length;
+      }
     );
     return lessonCounts.reduce((sum, count) => sum + count, 0);
   };
@@ -2014,10 +2606,10 @@ export default function FlashcardsPage() {
 
   // Calculate the total number of cards for Level 2 midterm prep (lessons 1-4)
   const getLevel2MidtermPrepCardCount = () => {
-    const lesson1Count = (LESSON_FLASHCARDS as any).level2_lesson1?.length || 0;
-    const lesson2Count = (LESSON_FLASHCARDS as any).level2_lesson2?.length || 0;
-    const lesson3Count = (LESSON_FLASHCARDS as any).level2_lesson3?.length || 0;
-    const lesson4Count = (LESSON_FLASHCARDS as any).level2_lesson4?.length || 0;
+    const lesson1Count = getLessonFlashcards('level2_lesson1').length;
+    const lesson2Count = getLessonFlashcards('level2_lesson2').length;
+    const lesson3Count = getLessonFlashcards('level2_lesson3').length;
+    const lesson4Count = getLessonFlashcards('level2_lesson4').length;
     
     return lesson1Count + lesson2Count + lesson3Count + lesson4Count;
   };
@@ -2039,48 +2631,52 @@ export default function FlashcardsPage() {
     setSelectedLevel(null);
   };
 
-  // Enter Spaced Repetition Mode
+  // Enter Spaced Repetition Mode - Navigate to dedicated page
   const enterSpacedRepetitionMode = async () => {
-    // Show info modal if user hasn't seen it before
-    if (!hasSeenSRInfo) {
-      setShowSRInfoModal(true);
-      return;
-    }
-
-    await startSpacedRepetitionSession();
+    router.push('/dashboard/flashcards/spaced-repetition');
   };
 
-  const startSpacedRepetitionSession = async () => {
-    setIsLoadingSR(true);
+  const startSpacedRepetitionSession = async (selectedDifficulty?: 'easy' | 'normal' | 'hard' | 'difficult' | 'all') => {
+    console.log('🎯 [NEW DB] Starting spaced repetition with difficulty:', selectedDifficulty);
+    console.log('🎯 [NEW DB] Database flashcards available:', dbFlashcards.length);
+    console.log('🎯 [NEW DB] Current study mode state:', isStudyMode);
     
     try {
-      // Load cards from Supabase
-      const cards = await SpacedRepetitionService.getCardsByStatus(spacedRepetitionFilter, 50);
+      setIsDbLoading(true);
+      setDbError(null);
       
-      if (cards.length === 0) {
-        alert(`🎉 Great job! No cards need review right now.\n\nStart studying some lessons first, or check back later when your cards are due for review.`);
-        setIsLoadingSR(false);
+      let flashcards: FlashcardWithProgress[];
+      
+      if (!selectedDifficulty || selectedDifficulty === 'all') {
+        // Get all cards that need review
+        flashcards = await FlashcardDatabaseService.getDueFlashcards();
+        console.log('🎯 [NEW DB] Got due flashcards (all):', flashcards.length);
+      } else {
+        // Get cards filtered by difficulty
+        flashcards = await FlashcardDatabaseService.getFlashcardsByDifficulty(selectedDifficulty);
+        console.log('🎯 [NEW DB] Got flashcards by difficulty:', selectedDifficulty, 'count:', flashcards.length);
+      }
+      
+      if (flashcards.length === 0) {
+        console.warn('🎯 [NEW DB] No flashcards available for spaced repetition');
+        alert(`🎉 Great job! No ${selectedDifficulty === 'all' ? '' : selectedDifficulty} cards need review right now.\n\nStart studying some lessons first, or check back later when your cards are due for review.`);
+        setIsDbLoading(false);
         return;
       }
       
-      // Reset all study session state
-      setCompletedCardIds([]);
+      // Set up for study mode using standard system
+      console.log('🎯 [NEW DB] Setting up study mode with', flashcards.length, 'cards');
+      setCurrentFlashcards(flashcards);
       setCurrentCardIndex(0);
-      setIsCardFlipped(false);
-      setStackPosition(3);
-      setIsCompletionPopupVisible(false);
-      
-      // Set the spaced repetition cards and enter study mode
-      setCurrentFlashcards(cards);
-      setSpacedRepetitionCards(cards);
       setActiveLesson("spaced-repetition");
-      setIsSpacedRepetitionMode(true);
       setIsStudyMode(true);
+      
+      console.log('🎯 [NEW DB] Study mode setup complete');
+      setIsDbLoading(false);
     } catch (error) {
-      console.error('Error loading spaced repetition cards:', error);
-      alert('Error loading cards. Please try again.');
-    } finally {
-      setIsLoadingSR(false);
+      console.warn('Error starting database spaced repetition session:', error);
+      alert('Failed to load spaced repetition cards. Please try again.');
+      setIsDbLoading(false);
     }
   };
 
@@ -2097,6 +2693,11 @@ export default function FlashcardsPage() {
 
   // Status badge component helper for Supabase cards
   const getStatusBadge = (card: FlashcardSR) => {
+    // Return null if card or status is invalid
+    if (!card || !card.status) {
+      return null;
+    }
+
     const badgeConfig = {
       new: { 
         emoji: '🆕', 
@@ -2115,10 +2716,23 @@ export default function FlashcardsPage() {
         text: 'Known', 
         className: 'sr-badge-known text-green-800 dark:text-green-900 border-green-200 dark:border-green-700',
         shadowClass: 'shadow-green-200/50 dark:shadow-green-900/30'
+      },
+      learning: { 
+        emoji: '📚', 
+        text: 'Learning', 
+        className: 'sr-badge-learning text-yellow-800 dark:text-yellow-900 border-yellow-200 dark:border-yellow-700',
+        shadowClass: 'shadow-yellow-200/50 dark:shadow-yellow-900/30'
       }
     };
 
-    const config = badgeConfig[card.status];
+    const config = badgeConfig[card.status as keyof typeof badgeConfig];
+    
+    // Return null if status is not recognized
+    if (!config) {
+      console.warn('Unknown card status:', card.status);
+      return null;
+    }
+    
     return (
       <div className={`absolute top-2 right-2 px-2 py-1 rounded-full text-xs font-semibold border backdrop-blur-md shadow-lg ${config.className} ${config.shadowClass} z-10 transition-all duration-300 hover:scale-105`}>
         <span className="mr-1">{config.emoji}</span>
@@ -2133,6 +2747,13 @@ export default function FlashcardsPage() {
     window.location.href = '/tests/midterm-prep';
   };
 
+  // REPLACE the old spaced repetition state with:
+     // Removed useUnifiedFlashcards as we're using database-only mode
+   const bridgedCards: any[] = [];
+   const bridgedDueCount = 0;
+   const bridgedUpdateReview = () => {}; // Placeholder
+   const isOptimizedSystemReady = true; // Database system is always ready
+
   return (
     <div className="flex flex-col min-h-screen bg-white dark:bg-gradient-to-br dark:from-black dark:to-black">
       <AnimationStyles />
@@ -2142,43 +2763,43 @@ export default function FlashcardsPage() {
         <div className="bg-white/10 dark:bg-black/10 backdrop-blur-lg border border-white/20 dark:border-white/10 shadow-lg rounded-2xl px-6 py-3">
           <div className="flex flex-col">
             <div className="flex justify-between items-center mb-3">
-              <div className="flex items-center">
-                {isStudyMode ? (
-                  <>
-                    <button 
-                      className="p-2 rounded-xl bg-white/20 dark:bg-black/20 backdrop-blur-sm border border-white/30 dark:border-white/10 text-black dark:text-white hover:bg-white/30 dark:hover:bg-black/30 transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-sm mr-3"
-                                          onClick={exitStudySession}
-                      title="Exit Study Mode"
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M19 12H5M12 19l-7-7 7-7"></path>
-                      </svg>
-                    </button>
-                    <div>
-                      <h1 className="text-lg font-bold text-black dark:text-white">
-                        {activeLesson === "midterm-prep" 
-                          ? "Midterm Prep" 
-                          : activeLesson === "level2-midterm-prep"
-                            ? "Level 2 Midterm Prep"
+            <div className="flex items-center">
+              {isStudyMode ? (
+                <>
+                  <button 
+                    className="p-2 rounded-xl bg-white/20 dark:bg-black/20 backdrop-blur-sm border border-white/30 dark:border-white/10 text-black dark:text-white hover:bg-white/30 dark:hover:bg-black/30 transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-sm mr-3"
+                    onClick={exitStudySession}
+                    title="Exit Study Mode"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M19 12H5M12 19l-7-7 7-7"></path>
+                    </svg>
+                  </button>
+                  <div>
+                    <h1 className="text-lg font-bold text-black dark:text-white">
+                      {activeLesson === "midterm-prep" 
+                        ? "Midterm Prep" 
+                        : activeLesson === "level2-midterm-prep"
+                          ? "Level 2 Midterm Prep"
                             : activeLesson === "spaced-repetition"
                               ? "Spaced Repetition"
-                            : activeLesson === "all" 
-                              ? "All Flashcards" 
-                              : `Lesson ${typeof activeLesson === 'string' ? activeLesson.replace("lesson", "").replace("level2_lesson", "") : activeLesson}`}
-                      </h1>
-                      <p className="text-sm text-black/70 dark:text-white/70">
-                        {activeLesson === "midterm-prep"
-                          ? `${getMidtermPrepCardCount()} cards`
-                          : activeLesson === "level2-midterm-prep"
-                            ? `${getLevel2MidtermPrepCardCount()} cards`
+                          : activeLesson === "all" 
+                            ? "All Flashcards" 
+                            : `Lesson ${typeof activeLesson === 'string' ? activeLesson.replace("lesson", "").replace("level2_lesson", "") : activeLesson}`}
+                    </h1>
+                    <p className="text-sm text-black/70 dark:text-white/70">
+                      {activeLesson === "midterm-prep"
+                        ? `${getMidtermPrepCardCount()} cards`
+                        : activeLesson === "level2-midterm-prep"
+                          ? `${getLevel2MidtermPrepCardCount()} cards`
                             : activeLesson === "spaced-repetition"
                               ? `${currentFlashcards.length} cards to review`
-                            : `${currentFlashcards.length} cards`}
-                      </p>
-                    </div>
-                  </>
-                ) : (
-                  <>
+                          : `${currentFlashcards.length} cards`}
+                    </p>
+                  </div>
+                </>
+              ) : (
+                <>
                     <Link href="/dashboard/flashcards" className="flex items-center group">
                       <div className="relative transform transition-transform duration-300 ease-in-out group-hover:scale-110 animate-logo-breathe">
                         <Image
@@ -2193,80 +2814,106 @@ export default function FlashcardsPage() {
                       <span className="ml-2 text-xl font-bold text-black dark:text-white transition-all duration-300 group-hover:text-blue-600 dark:group-hover:text-blue-400">
                         FlashQi
                       </span>
-                    </Link>
-                    <nav className="hidden md:ml-10 md:flex md:items-center md:space-x-6">
-                      <span className="text-sm font-medium text-blue-600 dark:text-blue-400">
-                        Flashcards
-                      </span>
-                    </nav>
-                  </>
-                )}
-              </div>
-              <div className="flex items-center space-x-4">
-                {isStudyMode && (
-                  <div className="bg-white/20 dark:bg-black/20 px-3 py-1 rounded-full text-sm font-medium text-black dark:text-white">
-                    {currentCardIndex + 1} / {currentFlashcards.length}
+                  </Link>
+                  <nav className="hidden md:ml-10 md:flex md:items-center md:space-x-6">
+                    <span className="text-sm font-medium text-blue-600 dark:text-blue-400">
+                      Flashcards
+                    </span>
+                  </nav>
+                </>
+              )}
+            </div>
+            <div className="flex items-center space-x-4">
+              {isStudyMode && (
+                <div className="flex items-center space-x-2">
+                <div className="bg-white/20 dark:bg-black/20 px-3 py-1 rounded-full text-sm font-medium text-black dark:text-white">
+                  {currentCardIndex + 1} / {currentFlashcards.length}
                   </div>
-                )}
-                <ThemeToggle />
-                
-                {/* Personalized Profile Dropdown */}
-                <div className="relative" ref={profileDropdownRef}>
-                  <button
-                    onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)}
-                    className="flex items-center px-3 py-2 text-sm font-medium bg-white/20 dark:bg-black/20 backdrop-blur-sm border border-white/30 dark:border-white/10 rounded-xl text-black dark:text-white hover:bg-white/30 dark:hover:bg-black/30 transition-all duration-300 ease-out transform hover:scale-105 active:scale-95 shadow-sm"
-                  >
-                    <div className="flex items-center">
-                      <div className="w-6 h-6 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-xs font-semibold mr-2">
-                        {user?.user_metadata?.name ? user.user_metadata.name.charAt(0).toUpperCase() : user?.email?.charAt(0).toUpperCase()}
-                      </div>
-                      <span className="hidden sm:inline-block mr-1 font-medium">
-                        Hi, {user?.user_metadata?.name || user?.email?.split('@')[0] || 'User'}!
-                      </span>
-                    </div>
-                    <svg
-                      className={`ml-1 h-4 w-4 text-black/60 dark:text-white/60 transition-transform duration-300 ${isProfileDropdownOpen ? 'rotate-180' : ''}`}
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 20 20"
-                      fill="currentColor"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                  </button>
-
-                  {/* Glassmorphism Dropdown */}
-                  {isProfileDropdownOpen && (
-                    <div className="absolute right-0 mt-2 w-56 rounded-xl bg-white/10 dark:bg-black/10 backdrop-filter backdrop-blur-lg py-2 shadow-xl border border-white/20 dark:border-white/10 focus:outline-none animate-in fade-in-0 zoom-in-95 duration-200 z-50">
-                      <Link
-                        href="/profile"
-                        className="flex items-center px-4 py-3 text-sm text-black dark:text-white hover:bg-white/20 dark:hover:bg-black/30 transition-colors duration-200"
-                        onClick={() => setIsProfileDropdownOpen(false)}
-                      >
-                        <svg className="w-4 h-4 mr-3 text-black/70 dark:text-white/70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                        </svg>
-                        Profile Settings
-                      </Link>
-                      <button
-                        onClick={() => {
-                          signOut();
-                          setIsProfileDropdownOpen(false);
-                        }}
-                        className="flex items-center w-full text-left px-4 py-3 text-sm text-black dark:text-white hover:bg-white/20 dark:hover:bg-black/30 transition-colors duration-200"
-                      >
-                        <svg className="w-4 h-4 mr-3 text-black/70 dark:text-white/70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                        </svg>
-                        Sign Out
-                      </button>
+                  {useDatabaseMode && (
+                    <div className="bg-green-500/20 px-2 py-1 rounded-full text-xs font-medium text-green-700 dark:text-green-300 border border-green-400/30">
+                      🗄️ DB Mode
                     </div>
                   )}
                 </div>
+              )}
+              
+              {/* Database Mode Toggle - Only show when not in study mode */}
+              {!isStudyMode && (
+                <button
+                  onClick={() => {
+                    // Database mode is now always enabled
+                    console.log('Database mode is permanently enabled');
+                  }}
+                  className={`px-3 py-2 text-xs font-medium rounded-xl transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-sm ${
+                    useDatabaseMode 
+                      ? 'bg-green-500/20 text-green-700 dark:text-green-300 border border-green-400/30' 
+                      : 'bg-orange-500/20 text-orange-700 dark:text-orange-300 border border-orange-400/30'
+                  }`}
+                  title={useDatabaseMode ? 'Using Database (Click to use hardcoded)' : 'Using Hardcoded (Click to use database)'}
+                >
+                  {useDatabaseMode ? '🗄️ DB' : '📄 Static'}
+                </button>
+              )}
+              
+              <ThemeToggle />
+              
+              {/* Personalized Profile Dropdown */}
+              <div className="relative" ref={profileDropdownRef}>
+                <button
+                  onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)}
+                  className="flex items-center px-3 py-2 text-sm font-medium bg-white/20 dark:bg-black/20 backdrop-blur-sm border border-white/30 dark:border-white/10 rounded-xl text-black dark:text-white hover:bg-white/30 dark:hover:bg-black/30 transition-all duration-300 ease-out transform hover:scale-105 active:scale-95 shadow-sm"
+                >
+                  <div className="flex items-center">
+                    <div className="w-6 h-6 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-xs font-semibold mr-2">
+                      {user?.user_metadata?.name ? user.user_metadata.name.charAt(0).toUpperCase() : user?.email?.charAt(0).toUpperCase()}
+                    </div>
+                    <span className="hidden sm:inline-block mr-1 font-medium">
+                      Hi, {user?.user_metadata?.name || user?.email?.split('@')[0] || 'User'}!
+                    </span>
+                  </div>
+                  <svg
+                    className={`ml-1 h-4 w-4 text-black/60 dark:text-white/60 transition-transform duration-300 ${isProfileDropdownOpen ? 'rotate-180' : ''}`}
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                </button>
+
+                {/* Glassmorphism Dropdown */}
+                {isProfileDropdownOpen && (
+                  <div className="absolute right-0 mt-2 w-56 rounded-xl bg-white/10 dark:bg-black/10 backdrop-filter backdrop-blur-lg py-2 shadow-xl border border-white/20 dark:border-white/10 focus:outline-none animate-in fade-in-0 zoom-in-95 duration-200 z-50">
+                    <Link
+                      href="/profile"
+                      className="flex items-center px-4 py-3 text-sm text-black dark:text-white hover:bg-white/20 dark:hover:bg-black/30 transition-colors duration-200"
+                      onClick={() => setIsProfileDropdownOpen(false)}
+                    >
+                      <svg className="w-4 h-4 mr-3 text-black/70 dark:text-white/70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                      </svg>
+                      Profile Settings
+                    </Link>
+                    <button
+                      onClick={() => {
+                        signOut();
+                        setIsProfileDropdownOpen(false);
+                      }}
+                      className="flex items-center w-full text-left px-4 py-3 text-sm text-black dark:text-white hover:bg-white/20 dark:hover:bg-black/30 transition-colors duration-200"
+                    >
+                      <svg className="w-4 h-4 mr-3 text-black/70 dark:text-white/70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                      </svg>
+                      Sign Out
+                    </button>
+                  </div>
+                )}
               </div>
+            </div>
             </div>
             
             {/* Progress bar - only show in study mode */}
@@ -2284,7 +2931,50 @@ export default function FlashcardsPage() {
       
       <main className="flex-1 pt-24 pb-6">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
-          {isStudyMode ? (
+          
+
+          
+          {/* Database Error State */}
+          {useDatabaseMode && dbError && !isStudyMode && (
+            <div className="mb-6 rounded-xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800/50 p-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center">
+                  <svg className="w-5 h-5 text-red-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <span className="text-red-700 dark:text-red-300 font-medium">Error loading from database: {dbError}</span>
+                </div>
+                <button
+                  onClick={() => {
+                    // Database mode is now always enabled
+                    console.log('Database mode is permanently enabled');
+                  }}
+                  className="px-3 py-1 text-xs bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                >
+                  Switch to Static Data
+                </button>
+              </div>
+            </div>
+          )}
+          
+          {/* Database Status Indicator - Only show when not in study mode */}
+          {!isStudyMode && hasInitiallyLoaded && (
+            <div className="mb-6 rounded-xl bg-gray-50 dark:bg-gray-900/20 border border-gray-200 dark:border-gray-800/50 p-4">
+                <div className="flex items-center">
+                  <div className={`w-3 h-3 rounded-full mr-3 ${useDatabaseMode ? 'bg-green-500' : 'bg-orange-500'}`}></div>
+                  <span className="text-gray-700 dark:text-gray-300 font-medium">
+                    {useDatabaseMode ? 'Database Mode' : 'Static Data Mode'}
+                  </span>
+                  <span className="ml-2 text-sm text-gray-500 dark:text-gray-400">
+                  ({useDatabaseMode ? dbTotalCount : 0} cards total)
+                  </span>
+              </div>
+            </div>
+          )}
+          
+          {isStudyMode && isDbLoading ? (
+            <StudyModeSkeleton />
+          ) : isStudyMode ? (
             <div className="fixed inset-0 bg-gradient-to-br from-[#1b1f3b] via-[#2a2e49] to-[#16172f] dark:bg-gradient-to-br dark:from-[#000000] dark:via-[#0a0f2c] dark:to-[#12142b] z-50 overflow-hidden flex flex-col">
               {/* Drawing overlay - shown when drawing mode is active */}
               {isDrawingMode && (
@@ -2437,245 +3127,21 @@ export default function FlashcardsPage() {
                 
                 {/* Flashcard */}
                 {currentFlashcards.length > 0 && (
-                  <div 
-                    className="flex justify-center items-center flex-grow mb-8"
-                    onTouchStart={(e) => {
-                      const touch = e.touches[0];
-                      setTouchStart({ x: touch.clientX, y: touch.clientY });
-                    }}
-                    onTouchMove={(e) => {
-                      if (!touchStart) return;
-                      const touch = e.touches[0];
-                      setTouchPosition({ x: touch.clientX, y: touch.clientY });
-                    }}
-                    onTouchEnd={() => {
-                      if (!touchStart || !touchPosition) return;
-                      
-                      const distanceX = touchPosition.x - touchStart.x;
-                      const distanceY = touchPosition.y - touchStart.y;
-                      
-                      // Only register horizontal swipes (not vertical)
-                      if (Math.abs(distanceX) > Math.abs(distanceY)) {
-                        if (distanceX > 50) { // Swiped right - go to previous
-                          handlePrevCard();
-                        } else if (distanceX < -50) { // Swiped left - go to next
-                          handleNextCard();
-                        }
-                      }
-                      
-                      // Reset touch points
-                      setTouchStart(null);
-                      setTouchPosition(null);
-                    }}
-                  >
-                    <div className="card-stack-container w-full max-w-md perspective-1000 mb-8">
-                      {/* Stack cards - visible during transitions */}
-                      <div 
-                        className={`stack-card-3 absolute w-full rounded-3xl bg-white/80 backdrop-blur-sm dark:bg-neutral-800 shadow-lg border border-white/40 dark:border-neutral-700 h-[400px] transform ${
-                          stackPosition >= 3 ? '-rotate-2 -translate-y-1 translate-x-3 opacity-30' : 'opacity-0'
-                        } pointer-events-none`}
-                      ></div>
-                      <div 
-                        className={`stack-card-2 absolute w-full rounded-3xl bg-white/80 backdrop-blur-sm dark:bg-neutral-800 shadow-lg border border-white/40 dark:border-neutral-700 h-[400px] transform ${
-                          stackPosition >= 2 ? '-rotate-1 -translate-y-0.5 translate-x-1.5 opacity-50' : stackPosition === 1 ? '-rotate-2 -translate-y-1 translate-x-3 opacity-30' : 'opacity-0'
-                        } pointer-events-none`}
-                      ></div>
-                      
-                      {/* Main interactive card (top card) */}
-                      <div 
-                        className="relative h-[400px] w-full transform-style-3d card-stack-item top-card"
-                        onClick={() => {
-                          const card = document.querySelector('.card-content') as HTMLElement;
-                          if (card) {
-                            card.style.transform = card.style.transform === 'rotateY(180deg)' ? '' : 'rotateY(180deg)';
-                          }
-                        }}
-                      >
-                        {/* Drawing mode button */}
-                        <button
-                          className="drawing-button"
-                          onClick={(e) => {
-                            e.stopPropagation(); // Prevent card flip
-                            setIsDrawingMode(true);
-                          }}
-                          title="Practice writing"
-                        >
-                          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M12 19l7-7 3 3-7 7-3-3z"></path>
-                            <path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"></path>
-                            <path d="M2 2l7.586 7.586"></path>
-                            <circle cx="11" cy="11" r="2"></circle>
-                          </svg>
-                        </button>
-                        
-                        {/* Card content - both front and back */}
-                        <div className="card-content relative h-full w-full smooth-transform transform-style-3d">
-                          {/* Front of card - Pinyin (previously English) */}
-                          <div className="absolute inset-0 backface-hidden rounded-3xl bg-white/90 backdrop-blur-sm dark:bg-gradient-to-br dark:from-[#0a0f2c] dark:via-[#12142b] dark:to-[#000000] shadow-xl border border-white/50 dark:border-neutral-700 flex flex-col">
-                            <div className="flex-grow flex flex-col items-center justify-center p-6 space-y-4">
-                              
-                                            {/* Grammar Usage or Pinyin */}
-              <div className="text-2xl sm:text-3xl text-blue-600 dark:text-blue-400 font-bold text-center">
-                {(() => {
-                  const card = currentFlashcards[currentCardIndex];
-                  const isLevel2Card = card.id && card.id.startsWith('l2-');
-                  
-                  // For Level 2 cards, show pinyin first (for pronunciation practice)
-                  // For regular cards, show grammarUsage first (for grammar learning)
-                  const displayValue = isLevel2Card 
-                    ? card.pinyin || (card as any).grammarUsage
-                    : (card as any).grammarUsage || card.pinyin;
-                  
-                  console.log('🔍 FLASHCARD DEBUG - Current card data:', {
-                    id: card.id,
-                    hanzi: card.hanzi,
-                    pinyin: card.pinyin,
-                    grammarUsage: (card as any).grammarUsage,
-                    isLevel2Card,
-                    hasGrammarUsage: !!(card as any).grammarUsage,
-                    hasPinyin: !!card.pinyin,
-                    displayValue
-                  });
-                  
-                  return displayValue;
-                })()}
-              </div>
-                              
-                              {/* English Meaning */}
-                              <div className="text-lg text-gray-700 dark:text-gray-300 font-medium text-center">
-                                {currentFlashcards[currentCardIndex].english}
-                              </div>
-                              
-                              {/* Grammar Tip */}
-                              {(currentFlashcards[currentCardIndex] as any).grammarTip && (
-                                <div className="text-sm text-gray-600 dark:text-slate-300 text-center italic max-w-xs">
-                                  {(currentFlashcards[currentCardIndex] as any).grammarTip}
-                                </div>
-                              )}
-                              
-                              {/* Color-coded Example */}
-                              {(currentFlashcards[currentCardIndex] as any).colorCodedExample && (
-                                <div className="mt-3 p-4 bg-white/60 dark:bg-black/30 backdrop-blur-sm rounded-xl border border-white/40 dark:border-white/20 max-w-sm shadow-sm">
-                                  <div className="text-xs text-gray-600 dark:text-gray-300 mb-2 text-center font-medium">Example:</div>
-                                  <div 
-                                    className="text-base text-center font-semibold leading-relaxed"
-                                    dangerouslySetInnerHTML={{ __html: (currentFlashcards[currentCardIndex] as any).colorCodedExample }}
-                                  />
-                                </div>
-                              )}
-                            </div>
-                            
-                            {/* Answer buttons with grey border on top */}
-                            <div className="grid grid-cols-2 border-t border-gray-200 dark:border-neutral-700">
-                              <button 
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleCardResult(false);
-                                }}
-                                className="flex justify-center items-center py-4 border-r border-gray-200 dark:border-neutral-700 hover:bg-gray-50 dark:hover:bg-neutral-700 transition-colors"
-                              >
-                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#E53E3E" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                  <line x1="18" y1="6" x2="6" y2="18"></line>
-                                  <line x1="6" y1="6" x2="18" y2="18"></line>
-                                </svg>
-                              </button>
-                              <button 
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleCardResult(true);
-                                }}
-                                className="flex justify-center items-center py-4 hover:bg-gray-50 dark:hover:bg-neutral-700 transition-colors"
-                              >
-                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#48BB78" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                  <polyline points="20 6 9 17 4 12"></polyline>
-                                </svg>
-                              </button>
-                            </div>
-                          </div>
-                          
-                          {/* Back of card - Chinese */}
-                          <div className="absolute inset-0 backface-hidden rounded-3xl bg-white/90 backdrop-blur-sm dark:bg-gradient-to-br dark:from-[#0a0f2c] dark:via-[#12142b] dark:to-[#000000] shadow-xl border border-white/50 dark:border-neutral-700 flex flex-col rotate-y-180">
-                            {/* Word content - Chinese characters on back */}
-                            <div className="flex-grow flex flex-col items-center justify-center p-6">
-                              <div className="text-7xl text-orange-600 dark:text-orange-400 font-medium mb-3">
-                                {currentFlashcards[currentCardIndex].hanzi}
-                              </div>
-                              <div className="text-gray-600 dark:text-gray-300 text-center max-w-xs text-sm mt-5 border-t border-gray-100 dark:border-neutral-600 pt-5">
-                                {currentFlashcards[currentCardIndex].example_sentence ? (
-                                  <>
-                                    <p className="mb-1 italic">Example:</p>
-                                    {typeof currentFlashcards[currentCardIndex].example_sentence === 'object' ? (
-                                      <>
-                                        <p className="mb-2 text-gray-800 dark:text-white font-medium">
-                                          {currentFlashcards[currentCardIndex].example_sentence.hanzi}
-                                        </p>
-                                        <p className="mb-2 text-blue-600 dark:text-blue-400">
-                                          {currentFlashcards[currentCardIndex].example_sentence.pinyin}
-                                        </p>
-                                        <p className="text-gray-500 dark:text-gray-400">
-                                          {currentFlashcards[currentCardIndex].example_sentence.english}
-                                        </p>
-                                      </>
-                                    ) : (
-                                      <p className="mb-2 text-gray-800 dark:text-white font-medium">
-                                        {currentFlashcards[currentCardIndex].example_sentence}
-                                      </p>
-                                    )}
-                                  </>
-                                ) : (
-                                  <>
-                                    <p className="mb-1 italic">Example:</p>
-                                    <p className="mb-2">
-                                      <span className="font-medium">[{currentFlashcards[currentCardIndex].hanzi}]</span>
-                                    </p>
-                                    <p className="text-gray-500 dark:text-gray-400">
-                                      {currentFlashcards[currentCardIndex].english.toLowerCase().includes('hello') ? 
-                                        'How are you?' : 
-                                        currentFlashcards[currentCardIndex].english.toLowerCase().includes('thank') ?
-                                        'Thank you very much!' :
-                                        'This is very useful.'}
-                                    </p>
-                                  </>
-                                )}
-                              </div>
-                            </div>
-                            
-                            {/* Answer buttons with grey border on top */}
-                            <div className="grid grid-cols-2 border-t border-gray-200 dark:border-neutral-700">
-                              <button 
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleCardResult(false);
-                                }}
-                                className="flex justify-center items-center py-4 border-r border-gray-200 dark:border-neutral-700 hover:bg-gray-50 dark:hover:bg-neutral-700 transition-colors"
-                              >
-                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#E53E3E" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                  <line x1="18" y1="6" x2="6" y2="18"></line>
-                                  <line x1="6" y1="6" x2="18" y2="18"></line>
-                                </svg>
-                              </button>
-                              <button 
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleCardResult(true);
-                                }}
-                                className="flex justify-center items-center py-4 hover:bg-gray-50 dark:hover:bg-neutral-700 transition-colors"
-                              >
-                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#48BB78" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                  <polyline points="20 6 9 17 4 12"></polyline>
-                                </svg>
-                              </button>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
+                  <div className="flex justify-center items-center flex-grow mb-8">
+                    <Flashcard 
+                      card={currentFlashcards[currentCardIndex]} 
+                      onDifficulty={handleCardResult}
+                      isDatabaseMode={useDatabaseMode}
+                    />
                   </div>
                 )}
                 
                 {/* Swipe instruction hint */}
                 <div className="text-center text-slate-600 dark:text-white/70 text-sm mb-8">
-                  Tap ✓ if correct or ✗ to mark as incorrect
+                  {useDatabaseMode ? 
+                    "Rate your difficulty: Easy • Normal • Hard • Difficult" : 
+                    "Swipe right for easy, left for hard, or use buttons below"
+                  }
                 </div>
               </div>
             </div>
@@ -2729,7 +3195,7 @@ export default function FlashcardsPage() {
                         }
                       }}
                     >
-                      {getStatusBadge(card.id)}
+                      {getStatusBadge(card)}
                       <div className="mb-1 text-xl font-medium text-center text-orange-600 dark:text-orange-400">{card.hanzi}</div>
                       <div className="text-xs text-center text-blue-600 dark:text-blue-400">{card.pinyin}</div>
                       <div className="mt-1 text-sm text-center text-gray-700 dark:text-gray-300">{card.english}</div>
@@ -2759,8 +3225,13 @@ export default function FlashcardsPage() {
               
               {/* Lessons List */}
               <div className="space-y-4 mb-8">
-                  {/* Lessons for the selected level */}
-                  {selectedLevel === 'level1' && getCategoryLessons(selectedCategory).level1.map((lesson) => (
+                  {/* Show loading skeleton if data is loading */}
+                  {getCategoryLessons(selectedCategory).isLoading ? (
+                    <LessonSkeleton />
+                  ) : (
+                    <>
+                      {/* Level 1 Lessons */}
+                      {selectedLevel === 'level1' && getCategoryLessons(selectedCategory).level1.filter(lesson => lesson.cards > 0).map((lesson) => (
                   <div 
                     key={lesson.id} 
                     className="rounded-xl overflow-hidden bg-gradient-to-r from-blue-50 to-white dark:from-blue-900/20 dark:to-blue-800/10 border border-blue-100 dark:border-blue-800/50 p-4 hover:border-blue-300 dark:hover:border-blue-700 hover:shadow-sm transition-all cursor-pointer"
@@ -2807,7 +3278,8 @@ export default function FlashcardsPage() {
                   </div>
                 ))}
                   
-                  {selectedLevel === 'level2' && getCategoryLessons(selectedCategory).level2.map((lesson) => (
+                      {/* Level 2 Lessons */}
+                      {selectedLevel === 'level2' && getCategoryLessons(selectedCategory).level2.filter(lesson => lesson.cards > 0).map((lesson) => (
                     <div 
                       key={lesson.id} 
                       className="rounded-xl overflow-hidden bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/10 border border-blue-200 dark:border-purple-800/50 p-4 hover:border-blue-300 dark:hover:border-purple-700 hover:shadow-sm transition-all cursor-pointer"
@@ -2853,6 +3325,8 @@ export default function FlashcardsPage() {
                       </div>
                     </div>
                   ))}
+                    </>
+                  )}
               </div>
             </>
             ) : (
@@ -2877,90 +3351,128 @@ export default function FlashcardsPage() {
                 <div className="space-y-6 mb-8">
                   {/* Spaced Repetition Button */}
                   <div 
-                    className="rounded-xl overflow-hidden bg-transparent backdrop-blur-sm border-2 border-red-400 border-t-blue-500 p-6 hover:border-opacity-80 hover:shadow-md transition-all cursor-pointer relative"
+                    className="rounded-xl overflow-hidden relative p-6 cursor-pointer group transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl"
                     onClick={enterSpacedRepetitionMode}
                   >
+                    {/* Animated glowy morphing background */}
+                    <div className="absolute inset-0 rounded-xl animate-morphing-glow"></div>
+                    <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-transparent via-blue-500/10 to-transparent dark:via-blue-400/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                    <div className="absolute inset-0 rounded-xl backdrop-blur-sm bg-white/5 dark:bg-black/10 border border-white/20 dark:border-white/10"></div>
                     <span className="absolute inset-0 bg-noise opacity-10 pointer-events-none rounded-xl"></span>
-                    <div className="flex justify-between items-center">
+                    <div className="relative z-10 flex justify-between items-center">
                       <div className="flex items-center">
-                        <div className="w-12 h-12 rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 dark:from-emerald-400 dark:to-teal-400 flex items-center justify-center text-white font-bold mr-4 shadow-lg">
-                          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-yellow-400 via-yellow-500 to-amber-600 dark:from-yellow-300 dark:via-amber-400 dark:to-amber-600 flex items-center justify-center text-white font-bold mr-4 shadow-xl relative overflow-hidden">
+                          {/* Glossy overlay effect */}
+                          <div className="absolute inset-0 bg-gradient-to-tr from-white/30 via-white/10 to-transparent rounded-full"></div>
+                          <div className="absolute top-1 left-1 w-3 h-3 bg-white/40 rounded-full blur-sm"></div>
+                          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="relative z-10 drop-shadow-sm">
                             <path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
                           </svg>
                         </div>
                         <div>
-                          <h3 className="text-xl font-semibold text-emerald-900 dark:text-emerald-100 flex items-center">
+                          <h3 className="text-xl font-semibold text-amber-900 dark:text-amber-100 flex items-center">
                             Spaced Repetition
-                            <span className="ml-2 text-xs bg-emerald-200 dark:bg-emerald-800/50 text-emerald-800 dark:text-emerald-300 px-2 py-1 rounded-full font-medium">
+                            <span className="ml-2 text-xs bg-amber-200 dark:bg-amber-800/50 text-amber-800 dark:text-amber-300 px-2 py-1 rounded-full font-medium">
                               ✨ Smart
                             </span>
                           </h3>
-                          <p className="text-sm text-emerald-700 dark:text-emerald-300">
+                          <p className="text-sm text-amber-700 dark:text-amber-300">
                             {isLoadingSR ? 'Loading...' : `${dueCardsCount} cards to review`}
                           </p>
                         </div>
                       </div>
                       <button 
-                        className="p-3 rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 dark:from-emerald-400 dark:to-teal-400 text-white hover:from-emerald-600 hover:to-teal-600 dark:hover:from-emerald-500 dark:hover:to-teal-500 transition-all transform hover:scale-105 active:scale-95 shadow-lg"
+                        className="p-3 rounded-full bg-gradient-to-r from-yellow-400 to-amber-500 dark:from-yellow-300 dark:to-amber-400 text-white hover:from-yellow-500 hover:to-amber-600 dark:hover:from-yellow-400 dark:hover:to-amber-500 transition-all transform hover:scale-105 active:scale-95 shadow-lg relative overflow-hidden"
                         onClick={(e) => {
                           e.stopPropagation();
                           enterSpacedRepetitionMode();
                         }}
                       >
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        {/* Subtle glossy overlay for button */}
+                        <div className="absolute inset-0 bg-gradient-to-t from-transparent via-white/10 to-white/20 rounded-full"></div>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="relative z-10">
                           <polygon points="5 3 19 12 5 21 5 3"></polygon>
                         </svg>
                       </button>
                     </div>
                     
                     {/* Sub-filters for Spaced Repetition */}
-                    <div className="mt-4 pt-4 border-t border-emerald-200 dark:border-emerald-700/50">
-                      <div className="flex gap-2">
+                    <div className="relative z-10 mt-4 pt-4 border-t border-amber-200 dark:border-amber-700/50">
+                      <div className="flex gap-2 flex-wrap">
                         <button
                           className={`px-3 py-1 rounded-full text-xs font-medium transition-all ${
-                            spacedRepetitionFilter === 'both' 
-                              ? 'bg-emerald-500 text-white shadow-sm' 
-                              : 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-200 dark:hover:bg-emerald-800/50'
+                            spacedRepetitionFilter === 'all' 
+                              ? 'bg-amber-500 text-white shadow-sm' 
+                              : 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 hover:bg-amber-200 dark:hover:bg-amber-800/50'
                           }`}
                           onClick={(e) => {
                             e.stopPropagation();
-                            setSpacedRepetitionFilter('both');
+                            setSpacedRepetitionFilter('all');
                           }}
                         >
-                          Both
+                          🎯 All
                         </button>
                         <button
                           className={`px-3 py-1 rounded-full text-xs font-medium transition-all ${
-                            spacedRepetitionFilter === 'new' 
-                              ? 'bg-emerald-500 text-white shadow-sm' 
-                              : 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-200 dark:hover:bg-emerald-800/50'
+                            spacedRepetitionFilter === 'easy' 
+                              ? 'bg-green-500 text-white shadow-sm' 
+                              : 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-200 dark:hover:bg-green-800/50'
                           }`}
                           onClick={(e) => {
                             e.stopPropagation();
-                            setSpacedRepetitionFilter('new');
+                            setSpacedRepetitionFilter('easy');
                           }}
                         >
-                          🆕 New Only
+                          😊 Easy
                         </button>
                         <button
                           className={`px-3 py-1 rounded-full text-xs font-medium transition-all ${
-                            spacedRepetitionFilter === 'due' 
-                              ? 'bg-emerald-500 text-white shadow-sm' 
-                              : 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-200 dark:hover:bg-emerald-800/50'
+                            spacedRepetitionFilter === 'normal' 
+                              ? 'bg-blue-500 text-white shadow-sm' 
+                              : 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-800/50'
                           }`}
                           onClick={(e) => {
                             e.stopPropagation();
-                            setSpacedRepetitionFilter('due');
+                            setSpacedRepetitionFilter('normal');
                           }}
                         >
-                          ⏳ Due Only
+                          🤔 Normal
+                        </button>
+                        <button
+                          className={`px-3 py-1 rounded-full text-xs font-medium transition-all ${
+                            spacedRepetitionFilter === 'hard' 
+                              ? 'bg-orange-500 text-white shadow-sm' 
+                              : 'bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 hover:bg-orange-200 dark:hover:bg-orange-800/50'
+                          }`}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSpacedRepetitionFilter('hard');
+                          }}
+                        >
+                          😰 Hard
+                        </button>
+                        <button
+                          className={`px-3 py-1 rounded-full text-xs font-medium transition-all ${
+                            spacedRepetitionFilter === 'difficult' 
+                              ? 'bg-red-500 text-white shadow-sm' 
+                              : 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 hover:bg-red-200 dark:hover:bg-red-800/50'
+                          }`}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSpacedRepetitionFilter('difficult');
+                          }}
+                        >
+                          😖 Difficult
                         </button>
                       </div>
                     </div>
                   </div>
 
                   {/* Level 1 Button */}
-                  {getCategoryLessons(selectedCategory).level1.length > 0 && (
+                  {getCategoryLessons(selectedCategory).isLoading ? (
+                    <LevelSkeleton />
+                  ) : (
+                    getCategoryLessons(selectedCategory).level1.length > 0 && (
                     <div 
                       className="rounded-xl overflow-hidden bg-gradient-to-r from-blue-100 to-blue-50 dark:from-blue-900/30 dark:to-blue-800/20 border border-blue-200 dark:border-blue-800/50 p-6 hover:border-blue-300 dark:hover:border-blue-700 hover:shadow-md transition-all cursor-pointer"
                       onClick={() => selectLevel('level1')}
@@ -2988,10 +3500,14 @@ export default function FlashcardsPage() {
                         </button>
                       </div>
                     </div>
+                    )
                   )}
                   
                   {/* Level 2 Button */}
-                  {getCategoryLessons(selectedCategory).level2.length > 0 && (
+                  {getCategoryLessons(selectedCategory).isLoading ? (
+                    <LevelSkeleton />
+                  ) : (
+                    getCategoryLessons(selectedCategory).level2.length > 0 && (
                     <div 
                       className="rounded-xl overflow-hidden bg-gradient-to-r from-purple-100 to-purple-50 dark:from-purple-900/30 dark:to-purple-800/20 border border-purple-200 dark:border-purple-800/50 p-6 hover:border-purple-300 dark:hover:border-purple-700 hover:shadow-md transition-all cursor-pointer"
                       onClick={() => selectLevel('level2')}
@@ -3019,6 +3535,7 @@ export default function FlashcardsPage() {
                         </button>
                       </div>
                     </div>
+                    )
                   )}
                 </div>
               </>
@@ -3054,7 +3571,7 @@ export default function FlashcardsPage() {
                     
                     <div className="mt-4 pt-4 border-t border-blue-100 dark:border-blue-800/50">
                       <div className="flex items-center justify-between">
-                        <span className="text-sm text-blue-600 dark:text-blue-400">{calculateTotalFlashcards()} cards total</span>
+                        <span className="text-sm text-blue-600 dark:text-blue-400">{useDatabaseMode ? dbTotalCount : 0} cards total</span>
                         <button 
                           className="p-3 rounded-full bg-blue-600 dark:bg-blue-500 text-white hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors"
                           onClick={(e) => {
@@ -3262,12 +3779,12 @@ export default function FlashcardsPage() {
                     <h3 className="font-bold text-lg text-black dark:text-white">
                       Lesson Progress
                     </h3>
-                    <span className="text-blue-600 dark:text-blue-400 font-medium">{LESSON_PROGRESS[activeLesson as keyof typeof LESSON_PROGRESS] || 0}%</span>
+                    <span className="text-blue-600 dark:text-blue-400 font-medium">{true || 0}%</span>
                   </div>
                   <div className="w-full bg-white dark:bg-gray-700 rounded-full h-2">
                     <div 
                       className="bg-blue-600 dark:bg-blue-500 h-2 rounded-full" 
-                      style={{ width: `${LESSON_PROGRESS[activeLesson as keyof typeof LESSON_PROGRESS] || 0}%` }}
+                      style={{ width: `${true || 0}%` }}
                     ></div>
                   </div>
                 </div>
@@ -3421,13 +3938,139 @@ export default function FlashcardsPage() {
         </div>
       )}
       
+      {/* Spaced Repetition Difficulty Selection Modal */}
+      {showSRDifficultyModal && (
+        <div className="fixed inset-0 flex items-center justify-center z-50 bg-black/50 backdrop-blur-sm">
+          <div className="bg-white/10 dark:bg-black/10 backdrop-blur-lg border border-white/20 dark:border-white/10 rounded-xl p-6 shadow-xl max-w-md w-full mx-4 animate-bounce-in">
+            <div className="text-center">
+              <div className="w-16 h-16 bg-gradient-to-r from-yellow-400 to-amber-500 dark:from-yellow-300 dark:to-amber-400 rounded-full flex items-center justify-center mx-auto mb-4 relative overflow-hidden">
+                {/* Glossy overlay effect */}
+                <div className="absolute inset-0 bg-gradient-to-tr from-white/30 via-white/10 to-transparent rounded-full"></div>
+                <div className="absolute top-1 left-1 w-3 h-3 bg-white/40 rounded-full blur-sm"></div>
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="relative z-10 drop-shadow-sm">
+                  <path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+                </svg>
+              </div>
+              
+              <h2 className="text-2xl font-bold mb-4 text-white">
+                ✨ Choose Review Type
+              </h2>
+              
+              <p className="text-white/90 mb-6">
+                Choose cards by difficulty level to practice specific areas.
+              </p>
+              
+              <div className="space-y-3 mb-6">
+                <button
+                  onClick={() => startSpacedRepetitionSession('easy')}
+                  className="w-full p-4 rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 text-white transition-all backdrop-blur-sm"
+                  disabled={isLoadingSR}
+                >
+                  <div className="flex items-center">
+                    <div className="w-8 h-8 rounded-full bg-green-500 flex items-center justify-center mr-3">
+                      <span className="text-white font-bold text-sm">😊</span>
+                    </div>
+                    <div className="text-left">
+                      <div className="font-semibold">Easy Cards</div>
+                      <div className="text-sm text-white/70">Practice cards you know well</div>
+                    </div>
+                  </div>
+                </button>
+                
+                <button
+                  onClick={() => startSpacedRepetitionSession('normal')}
+                  className="w-full p-4 rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 text-white transition-all backdrop-blur-sm"
+                  disabled={isLoadingSR}
+                >
+                  <div className="flex items-center">
+                    <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center mr-3">
+                      <span className="text-white font-bold text-sm">🤔</span>
+                    </div>
+                    <div className="text-left">
+                      <div className="font-semibold">Normal Cards</div>
+                      <div className="text-sm text-white/70">Review moderately challenging cards</div>
+                    </div>
+                  </div>
+                </button>
+                
+                <button
+                  onClick={() => startSpacedRepetitionSession('hard')}
+                  className="w-full p-4 rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 text-white transition-all backdrop-blur-sm"
+                  disabled={isLoadingSR}
+                >
+                  <div className="flex items-center">
+                    <div className="w-8 h-8 rounded-full bg-orange-500 flex items-center justify-center mr-3">
+                      <span className="text-white font-bold text-sm">😰</span>
+                    </div>
+                    <div className="text-left">
+                      <div className="font-semibold">Hard Cards</div>
+                      <div className="text-sm text-white/70">Focus on challenging vocabulary</div>
+                    </div>
+                  </div>
+                </button>
+                
+                <button
+                  onClick={() => startSpacedRepetitionSession('difficult')}
+                  className="w-full p-4 rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 text-white transition-all backdrop-blur-sm"
+                  disabled={isLoadingSR}
+                >
+                  <div className="flex items-center">
+                    <div className="w-8 h-8 rounded-full bg-red-500 flex items-center justify-center mr-3">
+                      <span className="text-white font-bold text-sm">😖</span>
+                    </div>
+                    <div className="text-left">
+                      <div className="font-semibold">Difficult Cards</div>
+                      <div className="text-sm text-white/70">Master the most challenging words</div>
+                    </div>
+                  </div>
+                </button>
+                
+                <button
+                  onClick={() => startSpacedRepetitionSession('all')}
+                  className="w-full p-4 rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 text-white transition-all backdrop-blur-sm"
+                  disabled={isLoadingSR}
+                >
+                  <div className="flex items-center">
+                    <div className="w-8 h-8 rounded-full bg-amber-500 flex items-center justify-center mr-3">
+                      <span className="text-white font-bold text-sm">🎯</span>
+                    </div>
+                    <div className="text-left">
+                      <div className="font-semibold">All Cards</div>
+                      <div className="text-sm text-white/70">Review cards of all difficulty levels</div>
+                    </div>
+                  </div>
+                </button>
+              </div>
+              
+              {isLoadingSR && (
+                <div className="flex items-center justify-center mb-4">
+                  <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2"></div>
+                  <span className="text-white/80">Loading cards...</span>
+                </div>
+              )}
+              
+              <button
+                onClick={() => setShowSRDifficultyModal(false)}
+                className="w-full py-3 px-6 bg-white/20 hover:bg-white/30 text-white font-medium rounded-lg transition-all"
+                disabled={isLoadingSR}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      
       {/* Spaced Repetition Info Modal */}
       {showSRInfoModal && (
         <div className="fixed inset-0 flex items-center justify-center z-50 bg-black/50 backdrop-blur-sm">
           <div className="bg-transparent backdrop-blur-lg border border-white/20 dark:border-white/10 rounded-xl p-6 shadow-xl max-w-lg w-full mx-4 animate-bounce-in">
             <div className="text-center">
-              <div className="w-16 h-16 bg-gradient-to-r from-emerald-500 to-teal-500 dark:from-emerald-400 dark:to-teal-400 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <div className="w-16 h-16 bg-gradient-to-r from-yellow-400 to-amber-500 dark:from-yellow-300 dark:to-amber-400 rounded-full flex items-center justify-center mx-auto mb-4 relative overflow-hidden">
+                {/* Glossy overlay effect */}
+                <div className="absolute inset-0 bg-gradient-to-tr from-white/30 via-white/10 to-transparent rounded-full"></div>
+                <div className="absolute top-1 left-1 w-3 h-3 bg-white/40 rounded-full blur-sm"></div>
+                                  <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="relative z-10 drop-shadow-sm">
                   <path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
                 </svg>
               </div>
@@ -3438,7 +4081,7 @@ export default function FlashcardsPage() {
               
               <div className="text-left space-y-4 mb-6 text-white/90">
                 <div className="bg-white/10 rounded-lg p-4 backdrop-blur-sm">
-                  <h3 className="font-semibold text-emerald-300 mb-2">🧠 How it works:</h3>
+                  <h3 className="font-semibold text-amber-300 mb-2">🧠 How it works:</h3>
                   <p className="text-sm">Our smart algorithm shows you cards right when you're about to forget them, maximizing retention with minimal effort.</p>
                 </div>
                 
@@ -3461,7 +4104,7 @@ export default function FlashcardsPage() {
                   <button
                     className={`p-3 rounded-lg text-sm font-medium transition-all ${
                       srStrengthLevel === 'low' 
-                        ? 'bg-emerald-500 text-white shadow-lg' 
+                        ? 'bg-amber-500 text-white shadow-lg' 
                         : 'bg-white/20 text-white/80 hover:bg-white/30'
                     }`}
                     onClick={() => setSrStrengthLevel('low')}
@@ -3472,7 +4115,7 @@ export default function FlashcardsPage() {
                   <button
                     className={`p-3 rounded-lg text-sm font-medium transition-all ${
                       srStrengthLevel === 'medium' 
-                        ? 'bg-emerald-500 text-white shadow-lg' 
+                        ? 'bg-amber-500 text-white shadow-lg' 
                         : 'bg-white/20 text-white/80 hover:bg-white/30'
                     }`}
                     onClick={() => setSrStrengthLevel('medium')}
@@ -3483,7 +4126,7 @@ export default function FlashcardsPage() {
                   <button
                     className={`p-3 rounded-lg text-sm font-medium transition-all ${
                       srStrengthLevel === 'high' 
-                        ? 'bg-emerald-500 text-white shadow-lg' 
+                        ? 'bg-amber-500 text-white shadow-lg' 
                         : 'bg-white/20 text-white/80 hover:bg-white/30'
                     }`}
                     onClick={() => setSrStrengthLevel('high')}
@@ -3497,9 +4140,11 @@ export default function FlashcardsPage() {
               <div className="flex gap-3">
                 <button
                   onClick={handleSRInfoDismiss}
-                  className="flex-1 py-3 px-6 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-semibold rounded-lg transition-all shadow-lg"
+                  className="flex-1 py-3 px-6 bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-500 hover:to-amber-600 text-white font-semibold rounded-lg transition-all shadow-lg relative overflow-hidden"
                 >
-                  Got It! Let's Start
+                  {/* Subtle glossy overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-transparent via-white/10 to-white/20 rounded-lg"></div>
+                  <span className="relative z-10">Got It! Let's Start</span>
                 </button>
                 <button
                   onClick={() => window.open('/help/spaced-repetition', '_blank')}
@@ -3512,7 +4157,7 @@ export default function FlashcardsPage() {
           </div>
         </div>
       )}
-
+      
       {/* Completion popup */}
       {isCompletionPopupVisible && (
         <div className="fixed inset-0 flex items-center justify-center z-50 bg-black/50 backdrop-blur-sm">
