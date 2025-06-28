@@ -236,10 +236,8 @@ export default function SpacedRepetitionPage() {
                           <div className="bg-gray-200 dark:bg-gray-700/50 rounded-full w-12 h-4"></div>
                           <div className="bg-gray-200 dark:bg-gray-700/50 rounded-full w-8 h-4"></div>
                         </div>
-                        <div className="text-center space-y-2">
-                          <div className="bg-gray-300 dark:bg-gray-600/50 rounded w-12 h-8 mx-auto"></div>
-                          <div className="bg-gray-200 dark:bg-gray-700/50 rounded w-16 h-4 mx-auto"></div>
-                          <div className="bg-gray-200 dark:bg-gray-700/50 rounded w-20 h-3 mx-auto"></div>
+                        <div className="text-center py-8">
+                          <div className="bg-gray-200 dark:bg-gray-700/50 rounded w-24 h-5 mx-auto"></div>
                         </div>
                       </div>
                     ))}
@@ -254,40 +252,43 @@ export default function SpacedRepetitionPage() {
                   </div>
                 ) : (
                   <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 sm:gap-4">
-                    {previewCards.map((card) => (
-                      <div
-                        key={card.id}
-                        className="bg-gray-50 dark:bg-black/80 dark:border dark:border-blue-500/30 dark:shadow-lg dark:shadow-blue-500/10 rounded-lg p-3 sm:p-4 hover:bg-gray-100 dark:hover:bg-black/90 dark:hover:border-blue-400/40 transition-all duration-200"
-                      >
-                        {/* Status Badge */}
-                        <div className="flex justify-between items-start mb-3">
-                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                            String(card.status) === 'new' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300' :
-                            String(card.status) === 'learning' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-300' :
-                            String(card.status) === 'known' ? 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300' :
-                            'bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300'
-                          }`}>
-                            {card.status}
-                          </span>
-                          <span className="text-xs text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 px-2 py-1 rounded-full">
-                            {card.interval_days}d
-                          </span>
+                    {previewCards.map((card) => {
+                      // Extract lesson info from lesson_id
+                      const getLessonDisplay = (lessonId: string) => {
+                        if (lessonId.startsWith('level2_lesson')) {
+                          const lessonNum = lessonId.replace('level2_lesson', '');
+                          return `L2-${lessonNum}`;
+                        } else if (lessonId.startsWith('lesson')) {
+                          const lessonNum = lessonId.replace('lesson', '');
+                          return `L1-${lessonNum}`;
+                        }
+                        return 'Unknown';
+                      };
+
+                      return (
+                        <div
+                          key={card.id}
+                          className="bg-gray-50 dark:bg-black/80 dark:border dark:border-blue-500/30 dark:shadow-lg dark:shadow-blue-500/10 rounded-lg p-3 sm:p-4 hover:bg-gray-100 dark:hover:bg-black/90 dark:hover:border-blue-400/40 transition-all duration-200"
+                        >
+                          {/* Lesson Badge */}
+                          <div className="flex justify-between items-start mb-3">
+                            <span className="px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800 dark:bg-purple-900/50 dark:text-purple-300">
+                              {getLessonDisplay(card.lesson_id)}
+                            </span>
+                            <span className="text-xs text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 px-2 py-1 rounded-full">
+                              {card.interval_days}d
+                            </span>
+                          </div>
+                          
+                          {/* Card Content - Only English */}
+                          <div className="text-center">
+                            <div className="text-lg font-bold text-gray-900 dark:text-gray-100 py-8">
+                              {card.english}
+                            </div>
+                          </div>
                         </div>
-                        
-                        {/* Card Content */}
-                        <div className="text-center">
-                          <div className="text-2xl font-bold text-orange-600 dark:text-orange-400 mb-1">
-                            {card.hanzi}
-                          </div>
-                          <div className="text-sm text-blue-600 dark:text-blue-400 mb-1 font-medium">
-                            {card.pinyin}
-                          </div>
-                          <div className="text-xs text-gray-700 dark:text-gray-300 font-medium">
-                            {card.english}
-                          </div>
-                        </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 )}
               </div>
