@@ -11,10 +11,10 @@ interface FlashcardProps {
   // Legacy support - will be removed
   onKnown?: () => void;
   onUnknown?: () => void;
-  isDatabaseMode?: boolean; // New prop to differentiate UI
+  isDatabaseMode?: boolean; // Whether to use 4-button difficulty rating UI
 }
 
-export function Flashcard({ card, onDifficulty, onKnown, onUnknown, isDatabaseMode = false }: FlashcardProps) {
+export function Flashcard({ card, onDifficulty, onKnown, onUnknown, isDatabaseMode = true }: FlashcardProps) {
   const [isFlipped, setIsFlipped] = useState(false);
   
   const handlers = useSwipeable({

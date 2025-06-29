@@ -16,6 +16,7 @@ import { supabase } from '@/lib/supabase/client';
 import { v4 as uuidv4 } from 'uuid';
 import { useAuth } from "@/contexts/auth-context";
 import { FlashcardDatabaseService, FlashcardWithProgress } from '@/services/flashcardDatabaseService';
+import { DatabaseFlashcardService } from '@/services/databaseFlashcardService';
 import { Flashcard } from '@/components/flashcards/flashcard';
 
 // 🎯 DATABASE-ONLY MODE: All hardcoded imports removed
@@ -661,98 +662,40 @@ export default function FlashcardsPage() {
     setHasInitiallyLoaded(true);
   }, []); // Only run once on mount
 
-  // 🎯 CRITICAL: Process loaded flashcards into lesson structure
+  // 🎯 CRITICAL: Load lessons from database and get card counts
   useEffect(() => {
-    console.log('🔍 [LESSON PROCESSING] useEffect triggered:', {
-      dbFlashcardsLength: dbFlashcards.length,
-      hasFlashcards: dbFlashcards.length > 0,
-      sampleCard: dbFlashcards[0]
-    });
-    
-    if (dbFlashcards.length > 0) {
-      console.log('🔍 [LESSON PROCESSING] Processing flashcards into lessons...', {
-        totalCards: dbFlashcards.length,
-        firstCardLessonId: dbFlashcards[0]?.lesson_id
-      });
+    const loadLessonsFromDatabase = async () => {
+      console.log('🔍 [LESSON PROCESSING] Loading lessons from database...');
       
-      // Group flashcards by lesson_id
-      const lessonGroups = dbFlashcards.reduce((groups, card) => {
-        const lessonId = String(card.lesson_id); // Ensure it's a string
-        console.log('🔍 [LESSON PROCESSING] Processing card:', {
-          cardId: card.id,
-          lessonId,
-          lessonIdType: typeof lessonId,
-          hanzi: card.hanzi
+      try {
+        // Get all lessons from database
+        const allLessonsData = await DatabaseFlashcardService.getFormattedLessons();
+        console.log('🔍 [LESSON PROCESSING] Got formatted lessons:', {
+          level1Count: allLessonsData.level1.length,
+          level2Count: allLessonsData.level2.length,
+          level2Lessons: allLessonsData.level2
+        });
+
+        setDatabaseLessons({
+          level1: allLessonsData.level1,
+          level2: allLessonsData.level2
         });
         
-        if (!groups[lessonId]) {
-          groups[lessonId] = [];
-        }
-        groups[lessonId].push(card);
-        return groups;
-      }, {} as Record<string, FlashcardWithProgress[]>);
-
-      // Convert groups to lesson objects
-      const level1Lessons: any[] = [];
-      const level2Lessons: any[] = [];
-
-      Object.entries(lessonGroups).forEach(([lessonId, cards]) => {
-        console.log('🔍 [LESSON PROCESSING] Analyzing lesson ID:', {
-          lessonId,
-          lessonIdType: typeof lessonId,
-          cardsCount: cards.length
+      } catch (error) {
+        console.error('🔍 [LESSON PROCESSING] Error loading lessons:', error);
+        // Fallback to empty arrays
+        setDatabaseLessons({
+          level1: [],
+          level2: []
         });
-        
-        // Extract lesson number from lesson_id
-        const lessonMatch = lessonId.match(/lesson(\d+)/i);
-        const levelMatch = lessonId.match(/level(\d+)/i);
-        
-        console.log('🔍 [LESSON PROCESSING] Regex matches:', {
-          lessonMatch,
-          levelMatch,
-          originalLessonId: lessonId
-        });
-        
-        if (lessonMatch) {
-          const lessonNumber = parseInt(lessonMatch[1]);
-          const level = levelMatch ? parseInt(levelMatch[1]) : 1;
-          
-          const lessonObj = {
-            id: lessonId,
-            title: `Lesson ${lessonNumber}`,
-            number: lessonNumber,
-            cards: cards.length
-          };
-          
-          console.log('🔍 [LESSON PROCESSING] Created lesson object:', lessonObj);
-
-          if (level === 2) {
-            level2Lessons.push(lessonObj);
-          } else {
-            level1Lessons.push(lessonObj);
-          }
-        } else {
-          console.warn('🔍 [LESSON PROCESSING] Could not match lesson pattern for:', lessonId);
-        }
-      });
-
-      // Sort lessons by number
-      level1Lessons.sort((a, b) => a.number - b.number);
-      level2Lessons.sort((a, b) => a.number - b.number);
-
-      console.log('🔍 [LESSON PROCESSING] Processed lessons:', {
-        level1Count: level1Lessons.length,
-        level2Count: level2Lessons.length,
-        level1Sample: level1Lessons[0],
-        level2Sample: level2Lessons[0]
-      });
-
-      setDatabaseLessons({
-        level1: level1Lessons,
-        level2: level2Lessons
-      });
+      }
+    };
+    
+    // Load lessons from database once flashcards are loaded
+    if (dbFlashcards.length > 0) {
+      loadLessonsFromDatabase();
     }
-  }, [dbFlashcards]); // Run when flashcards are loaded
+  }, [dbFlashcards.length]); // Run when flashcards count changes
 
   // Optimized: Load due cards count only once on mount, refresh only when needed
   useEffect(() => {
@@ -970,16 +913,20 @@ export default function FlashcardsPage() {
     } else if (activeLesson === "spaced-repetition") {
       return spacedRepetitionCards;
       } else {
-      // Filter by lesson using lesson_id from database
+      // Filter by exact lesson_id match
       const { lessonNumber, level } = FlashcardDatabaseService.parseLessonId(activeLesson as string);
+      const expectedLessonId = level === 2 ? `level2_lesson${lessonNumber}` : `lesson${lessonNumber}`;
+      
       const filtered = dbFlashcards.filter(card => {
         const cardLessonId = (card as any).lesson_id || '';
-        return cardLessonId.includes(`lesson${lessonNumber}`) || cardLessonId.includes(`level${level}`);
+        return cardLessonId === expectedLessonId;
       });
       
       console.log('🔍 FILTERED CARDS:', {
+        activeLesson,
         lessonNumber,
         level,
+        expectedLessonId,
         filteredCount: filtered.length,
         sampleFiltered: filtered[0]
       });
@@ -990,21 +937,49 @@ export default function FlashcardsPage() {
 
   // 🎯 DATABASE-ONLY: Get flashcards for a specific lesson ID
   const getLessonFlashcards = (lessonId: string) => {
-    // Filter database flashcards by lesson
+    // Filter database flashcards by exact lesson_id match
     const { lessonNumber, level } = FlashcardDatabaseService.parseLessonId(lessonId);
-    return dbFlashcards.filter(card => {
-      const cardLessonId = (card as any).lesson_id || '';
-      return cardLessonId.includes(`lesson${lessonNumber}`) || cardLessonId.includes(`level${level}`);
+    const expectedLessonId = level === 2 ? `level2_lesson${lessonNumber}` : `lesson${lessonNumber}`;
+    
+    console.log('🔍 LESSON FILTER DEBUG:', {
+      inputLessonId: lessonId,
+      parsedLessonNumber: lessonNumber,
+      parsedLevel: level,
+      expectedLessonId,
+      totalCards: dbFlashcards.length
     });
+    
+    const filtered = dbFlashcards.filter(card => {
+      const cardLessonId = (card as any).lesson_id || '';
+      const matches = cardLessonId === expectedLessonId;
+      
+      if (matches) {
+        console.log('🔍 LESSON FILTER - Card matched:', {
+          cardId: card.id,
+          cardLessonId,
+          hanzi: card.hanzi
+        });
+      }
+      
+      return matches;
+    });
+    
+    console.log('🔍 LESSON FILTER RESULT:', {
+      expectedLessonId,
+      filteredCount: filtered.length,
+      firstCard: filtered[0]
+    });
+    
+    return filtered;
   };
 
   // 🎯 DATABASE-ONLY: Get flashcards from lessons 1-22 for midterm prep
   const getMidtermPrepFlashcards = () => {
     return dbFlashcards.filter(card => {
       const cardLessonId = (card as any).lesson_id || '';
-      // Match lessons 1-22
+      // Match lessons 1-22 with exact lesson_id format
       for (let i = 1; i <= 22; i++) {
-        if (cardLessonId.includes(`lesson${i}`)) return true;
+        if (cardLessonId === `lesson${i}`) return true;
       }
       return false;
     });
@@ -1014,9 +989,9 @@ export default function FlashcardsPage() {
   const getLevel2MidtermPrepFlashcards = () => {
     const level2Cards = dbFlashcards.filter(card => {
       const cardLessonId = (card as any).lesson_id || '';
-      // Match level2 lessons 1-4
+      // Match level2 lessons 1-4 with exact lesson_id format
       for (let i = 1; i <= 4; i++) {
-        if (cardLessonId.includes(`level2_lesson${i}`)) return true;
+        if (cardLessonId === `level2_lesson${i}`) return true;
       }
       return false;
     });
@@ -1561,26 +1536,46 @@ export default function FlashcardsPage() {
 
   // Get category-specific lessons with accurate card counts (optimized)
   const getCategoryLessons = (categoryId: string) => {
+    console.log('🔍 [GET CATEGORY LESSONS] Called with:', {
+      categoryId,
+      useDatabaseMode,
+      isDbLoading,
+      databaseLessonsLevel1Length: databaseLessons.level1.length,
+      databaseLessonsLevel2Length: databaseLessons.level2.length,
+      databaseLessonsLevel2Sample: databaseLessons.level2.slice(0, 3)
+    });
+    
     if (useDatabaseMode && categoryId === 'chinese') {
-      // Show loading state if database is still loading OR if databaseLessons is not ready
-      if (isDbLoading || !databaseLessons.level1.length) {
+      // Show loading state if database is still loading OR if no lessons are loaded yet
+      if (isDbLoading || (databaseLessons.level1.length === 0 && databaseLessons.level2.length === 0)) {
+        console.log('🔍 [GET CATEGORY LESSONS] Using loading state');
         return { level1: [], level2: [], isLoading: true };
       }
+      console.log('🔍 [GET CATEGORY LESSONS] Using database lessons:', {
+        level1Count: databaseLessons.level1.length,
+        level2Count: databaseLessons.level2.length,
+        level2Lessons: databaseLessons.level2
+      });
       return { ...databaseLessons, isLoading: false };
     }
+    
+    console.log('🔍 [GET CATEGORY LESSONS] Using hardcoded fallback');
+    
     
     // Fallback to hardcoded lessons
     let level1Lessons: any[] = [];
     let level2Lessons: any[] = [];
     
     const getCardCount = (lessonId: string) => {
-      // If it's a level2 lesson
-      if (lessonId.startsWith('level2_')) {
-        const cards = getLessonFlashcards(lessonId);
-        return cards.length;
-      }
-      // Regular lesson
-      const cards = getLessonFlashcards(lessonId);
+      // Use the same exact matching logic as getLessonFlashcards
+      const { lessonNumber, level } = FlashcardDatabaseService.parseLessonId(lessonId);
+      const expectedLessonId = level === 2 ? `level2_lesson${lessonNumber}` : `lesson${lessonNumber}`;
+      
+      const cards = dbFlashcards.filter(card => {
+        const cardLessonId = (card as any).lesson_id || '';
+        return cardLessonId === expectedLessonId;
+      });
+      
       return cards.length;
     };
 
@@ -1626,6 +1621,7 @@ export default function FlashcardsPage() {
         { id: 'level2_lesson8', title: 'Lesson 8', number: 8, cards: getCardCount('level2_lesson8') },
         { id: 'level2_lesson9', title: 'Lesson 9', number: 9, cards: getCardCount('level2_lesson9') },
         { id: 'level2_lesson10', title: 'Lesson 10', number: 10, cards: getCardCount('level2_lesson10') },
+        { id: 'level2_lesson11', title: 'Lesson 11', number: 11, cards: getCardCount('level2_lesson11') },
       ];
     }
     
@@ -1636,7 +1632,11 @@ export default function FlashcardsPage() {
   const getMidtermPrepCardCount = () => {
     const lessonCounts = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21].map(
       lessonNum => {
-        const cards = getLessonFlashcards(`lesson${lessonNum}`);
+        // Use exact matching for consistency
+        const cards = dbFlashcards.filter(card => {
+          const cardLessonId = (card as any).lesson_id || '';
+          return cardLessonId === `lesson${lessonNum}`;
+        });
         return cards.length;
       }
     );
@@ -2829,31 +2829,9 @@ export default function FlashcardsPage() {
                 <div className="bg-white/20 dark:bg-black/20 px-3 py-1 rounded-full text-sm font-medium text-black dark:text-white">
                   {currentCardIndex + 1} / {currentFlashcards.length}
                   </div>
-                  {useDatabaseMode && (
-                    <div className="bg-green-500/20 px-2 py-1 rounded-full text-xs font-medium text-green-700 dark:text-green-300 border border-green-400/30">
-                      🗄️ DB Mode
-                    </div>
-                  )}
                 </div>
               )}
-              
-              {/* Database Mode Toggle - Only show when not in study mode */}
-              {!isStudyMode && (
-                <button
-                  onClick={() => {
-                    // Database mode is now always enabled
-                    console.log('Database mode is permanently enabled');
-                  }}
-                  className={`px-3 py-2 text-xs font-medium rounded-xl transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-sm ${
-                    useDatabaseMode 
-                      ? 'bg-green-500/20 text-green-700 dark:text-green-300 border border-green-400/30' 
-                      : 'bg-orange-500/20 text-orange-700 dark:text-orange-300 border border-orange-400/30'
-                  }`}
-                  title={useDatabaseMode ? 'Using Database (Click to use hardcoded)' : 'Using Hardcoded (Click to use database)'}
-                >
-                  {useDatabaseMode ? '🗄️ DB' : '📄 Static'}
-                </button>
-              )}
+
               
               <ThemeToggle />
               
@@ -2935,42 +2913,26 @@ export default function FlashcardsPage() {
 
           
           {/* Database Error State */}
-          {useDatabaseMode && dbError && !isStudyMode && (
+          {dbError && !isStudyMode && (
             <div className="mb-6 rounded-xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800/50 p-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center">
                   <svg className="w-5 h-5 text-red-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
-                  <span className="text-red-700 dark:text-red-300 font-medium">Error loading from database: {dbError}</span>
+                  <span className="text-red-700 dark:text-red-300 font-medium">Error loading flashcards: {dbError}</span>
                 </div>
                 <button
-                  onClick={() => {
-                    // Database mode is now always enabled
-                    console.log('Database mode is permanently enabled');
-                  }}
+                  onClick={() => window.location.reload()}
                   className="px-3 py-1 text-xs bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
                 >
-                  Switch to Static Data
+                  Retry
                 </button>
               </div>
             </div>
           )}
           
-          {/* Database Status Indicator - Only show when not in study mode */}
-          {!isStudyMode && hasInitiallyLoaded && (
-            <div className="mb-6 rounded-xl bg-gray-50 dark:bg-gray-900/20 border border-gray-200 dark:border-gray-800/50 p-4">
-                <div className="flex items-center">
-                  <div className={`w-3 h-3 rounded-full mr-3 ${useDatabaseMode ? 'bg-green-500' : 'bg-orange-500'}`}></div>
-                  <span className="text-gray-700 dark:text-gray-300 font-medium">
-                    {useDatabaseMode ? 'Database Mode' : 'Static Data Mode'}
-                  </span>
-                  <span className="ml-2 text-sm text-gray-500 dark:text-gray-400">
-                  ({useDatabaseMode ? dbTotalCount : 0} cards total)
-                  </span>
-              </div>
-            </div>
-          )}
+
           
           {isStudyMode && isDbLoading ? (
             <StudyModeSkeleton />
@@ -3131,17 +3093,14 @@ export default function FlashcardsPage() {
                     <Flashcard 
                       card={currentFlashcards[currentCardIndex]} 
                       onDifficulty={handleCardResult}
-                      isDatabaseMode={useDatabaseMode}
+                      isDatabaseMode={true}
                     />
                   </div>
                 )}
                 
                 {/* Swipe instruction hint */}
                 <div className="text-center text-slate-600 dark:text-white/70 text-sm mb-8">
-                  {useDatabaseMode ? 
-                    "Rate your difficulty: Easy • Normal • Hard • Difficult" : 
-                    "Swipe right for easy, left for hard, or use buttons below"
-                  }
+                  Rate your difficulty: Easy • Normal • Hard • Difficult
                 </div>
               </div>
             </div>
@@ -3571,7 +3530,7 @@ export default function FlashcardsPage() {
                     
                     <div className="mt-4 pt-4 border-t border-blue-100 dark:border-blue-800/50">
                       <div className="flex items-center justify-between">
-                        <span className="text-sm text-blue-600 dark:text-blue-400">{useDatabaseMode ? dbTotalCount : 0} cards total</span>
+                        <span className="text-sm text-blue-600 dark:text-blue-400">{dbTotalCount} cards total</span>
                         <button 
                           className="p-3 rounded-full bg-blue-600 dark:bg-blue-500 text-white hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors"
                           onClick={(e) => {
