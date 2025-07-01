@@ -361,6 +361,48 @@ const AnimationStyles = () => (
     .animate-enhanced-pulse {
       animation: enhanced-pulse 2s ease-in-out infinite;
     }
+
+    /* Drawing card specific styles */
+    @keyframes slideUp {
+      from {
+        transform: translateY(20px);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+    
+    @keyframes slideDown {
+      from {
+        transform: translateY(0);
+        opacity: 1;
+      }
+      to {
+        transform: translateY(20px);
+        opacity: 0;
+      }
+    }
+    
+    .drawing-card-canvas {
+      cursor: crosshair;
+      touch-action: none;
+      transition: all 0.3s ease;
+    }
+    
+    .drawing-card-canvas:hover {
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+    }
+    
+    .slide-up {
+      animation: slideUp 0.5s ease-out forwards;
+    }
+    
+    .slide-down {
+      animation: slideDown 0.5s ease-out forwards;
+    }
   `}</style>
 );
 
@@ -490,6 +532,13 @@ export default function FlashcardsPage() {
   // Multiple canvas pages for drawing
   const [currentDrawingPage, setCurrentDrawingPage] = useState(0);
   const [drawingPages, setDrawingPages] = useState<{ strokes: ImageData[] }[]>([{ strokes: [] }]);
+  
+  // New inline drawing card state
+  const [isDrawingCardOpen, setIsDrawingCardOpen] = useState(false);
+  const drawingCardCanvasRef = useRef<HTMLCanvasElement>(null);
+  const [drawingCardCtx, setDrawingCardCtx] = useState<CanvasRenderingContext2D | null>(null);
+  const [isDrawingOnCard, setIsDrawingOnCard] = useState(false);
+  const [drawingCardStrokeHistory, setDrawingCardStrokeHistory] = useState<ImageData[]>([]);
 
   // Spaced Repetition state management (Supabase-backed)
   const [spacedRepetitionCards, setSpacedRepetitionCards] = useState<FlashcardSR[]>([]);
@@ -1294,6 +1343,9 @@ export default function FlashcardsPage() {
     setIsCompletionPopupVisible(false);
     setIsStudyMode(false);
     setIsSpacedRepetitionMode(false);
+    // Reset drawing card state when exiting study session
+    setIsDrawingCardOpen(false);
+    clearDrawingCard();
   };
 
   // Handle next card with circular navigation and improved stack animation
@@ -1301,6 +1353,10 @@ export default function FlashcardsPage() {
     if (currentFlashcards.length === 0) {
       return;
     }
+
+    // Reset drawing card state when moving to next card
+    setIsDrawingCardOpen(false);
+    clearDrawingCard();
 
     const topCard = document.querySelector('.top-card') as HTMLElement;
     if (topCard) {
@@ -1343,6 +1399,10 @@ export default function FlashcardsPage() {
     if (currentFlashcards.length === 0) {
       return;
     }
+
+    // Reset drawing card state when moving to previous card
+    setIsDrawingCardOpen(false);
+    clearDrawingCard();
 
     const topCard = document.querySelector('.top-card') as HTMLElement;
     if (topCard) {
@@ -1536,30 +1596,13 @@ export default function FlashcardsPage() {
 
   // Get category-specific lessons with accurate card counts (optimized)
   const getCategoryLessons = (categoryId: string) => {
-    console.log('🔍 [GET CATEGORY LESSONS] Called with:', {
-      categoryId,
-      useDatabaseMode,
-      isDbLoading,
-      databaseLessonsLevel1Length: databaseLessons.level1.length,
-      databaseLessonsLevel2Length: databaseLessons.level2.length,
-      databaseLessonsLevel2Sample: databaseLessons.level2.slice(0, 3)
-    });
-    
     if (useDatabaseMode && categoryId === 'chinese') {
       // Show loading state if database is still loading OR if no lessons are loaded yet
       if (isDbLoading || (databaseLessons.level1.length === 0 && databaseLessons.level2.length === 0)) {
-        console.log('🔍 [GET CATEGORY LESSONS] Using loading state');
         return { level1: [], level2: [], isLoading: true };
       }
-      console.log('🔍 [GET CATEGORY LESSONS] Using database lessons:', {
-        level1Count: databaseLessons.level1.length,
-        level2Count: databaseLessons.level2.length,
-        level2Lessons: databaseLessons.level2
-      });
       return { ...databaseLessons, isLoading: false };
     }
-    
-    console.log('🔍 [GET CATEGORY LESSONS] Using hardcoded fallback');
     
     
     // Fallback to hardcoded lessons
@@ -1648,6 +1691,15 @@ export default function FlashcardsPage() {
     ? getCategoryLessons(selectedCategory).level1.find(l => l.id === previewLessonId)?.title || 
       getCategoryLessons(selectedCategory).level2.find(l => l.id === previewLessonId)?.title
     : null;
+
+  // Initialize drawing card canvas when opened
+  useEffect(() => {
+    if (isDrawingCardOpen && drawingCardCanvasRef.current) {
+      setTimeout(() => {
+        initializeDrawingCardCanvas();
+      }, 150); // Small delay to ensure the canvas is fully rendered
+    }
+  }, [isDrawingCardOpen]);
 
   // Initialize canvas context on drawing mode activation
   useEffect(() => {
@@ -1935,6 +1987,99 @@ export default function FlashcardsPage() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       const initialState = ctx.getImageData(0, 0, canvas.width, canvas.height);
       setStrokeHistory([initialState]);
+    }
+  };
+
+  // New inline drawing card functions
+  const toggleDrawingCard = () => {
+    setIsDrawingCardOpen(!isDrawingCardOpen);
+    
+    // If opening, initialize the canvas
+    if (!isDrawingCardOpen && drawingCardCanvasRef.current) {
+      setTimeout(() => {
+        initializeDrawingCardCanvas();
+      }, 100); // Small delay to ensure the canvas is rendered
+    }
+  };
+
+  const initializeDrawingCardCanvas = () => {
+    if (!drawingCardCanvasRef.current) return;
+    
+    const canvas = drawingCardCanvasRef.current;
+    const context = canvas.getContext('2d');
+    
+    if (context) {
+      // Set canvas dimensions to match its display size
+      const rect = canvas.getBoundingClientRect();
+      canvas.width = rect.width;
+      canvas.height = rect.height;
+      
+      // Set drawing style
+      context.strokeStyle = '#3b82f6'; // Blue-500
+      context.lineWidth = 4;
+      context.lineCap = 'round';
+      context.lineJoin = 'round';
+      
+      setDrawingCardCtx(context);
+      
+      // Initialize with blank canvas
+      const initialState = context.getImageData(0, 0, canvas.width, canvas.height);
+      setDrawingCardStrokeHistory([initialState]);
+    }
+  };
+
+  const startDrawingOnCard = (e: React.TouchEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (!drawingCardCtx || !drawingCardCanvasRef.current) return;
+    
+    setIsDrawingOnCard(true);
+    
+    const touch = e.touches[0];
+    const rect = drawingCardCanvasRef.current.getBoundingClientRect();
+    
+    const x = touch.clientX - rect.left;
+    const y = touch.clientY - rect.top;
+    
+    drawingCardCtx.beginPath();
+    drawingCardCtx.moveTo(x, y);
+  };
+
+  const drawOnCard = (e: React.TouchEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (!isDrawingOnCard || !drawingCardCtx || !drawingCardCanvasRef.current) return;
+    
+    const touch = e.touches[0];
+    const rect = drawingCardCanvasRef.current.getBoundingClientRect();
+    
+    const x = touch.clientX - rect.left;
+    const y = touch.clientY - rect.top;
+    
+    drawingCardCtx.lineTo(x, y);
+    drawingCardCtx.stroke();
+  };
+
+  const endDrawingOnCard = () => {
+    setIsDrawingOnCard(false);
+    
+    // Save current state for undo functionality
+    if (drawingCardCtx && drawingCardCanvasRef.current) {
+      const imageData = drawingCardCtx.getImageData(0, 0, drawingCardCanvasRef.current.width, drawingCardCanvasRef.current.height);
+      setDrawingCardStrokeHistory(prev => [...prev, imageData]);
+    }
+  };
+
+  const clearDrawingCard = () => {
+    if (drawingCardCtx && drawingCardCanvasRef.current) {
+      const canvas = drawingCardCanvasRef.current;
+      drawingCardCtx.clearRect(0, 0, canvas.width, canvas.height);
+      
+      // Reset history
+      const blankState = drawingCardCtx.getImageData(0, 0, canvas.width, canvas.height);
+      setDrawingCardStrokeHistory([blankState]);
     }
   };
 
@@ -2637,9 +2782,14 @@ export default function FlashcardsPage() {
   };
 
   const startSpacedRepetitionSession = async (selectedDifficulty?: 'easy' | 'normal' | 'hard' | 'difficult' | 'all') => {
-    console.log('🎯 [NEW DB] Starting spaced repetition with difficulty:', selectedDifficulty);
-    console.log('🎯 [NEW DB] Database flashcards available:', dbFlashcards.length);
-    console.log('🎯 [NEW DB] Current study mode state:', isStudyMode);
+    console.log('🎯 [MAIN PAGE DEBUG] Starting spaced repetition session:', {
+      selectedDifficulty,
+      dbFlashcardsCount: dbFlashcards.length,
+      currentStudyMode: isStudyMode,
+      isDbLoading,
+      dbError,
+      timestamp: new Date().toISOString()
+    });
     
     try {
       setIsDbLoading(true);
@@ -2648,47 +2798,121 @@ export default function FlashcardsPage() {
       let flashcards: FlashcardWithProgress[];
       
       if (!selectedDifficulty || selectedDifficulty === 'all') {
+        console.log('🎯 [MAIN PAGE DEBUG] Fetching all due flashcards');
         // Get all cards that need review
         flashcards = await FlashcardDatabaseService.getDueFlashcards();
-        console.log('🎯 [NEW DB] Got due flashcards (all):', flashcards.length);
+        console.log('🎯 [MAIN PAGE DEBUG] Got due flashcards (all):', {
+          count: flashcards.length,
+          sampleCards: flashcards.slice(0, 3).map(card => ({
+            id: card.id,
+            hanzi: card.hanzi,
+            english: card.english,
+            status: card.status,
+            last_difficulty: card.last_difficulty
+          }))
+        });
       } else {
+        console.log('🎯 [MAIN PAGE DEBUG] Fetching flashcards by difficulty:', selectedDifficulty);
         // Get cards filtered by difficulty
         flashcards = await FlashcardDatabaseService.getFlashcardsByDifficulty(selectedDifficulty);
-        console.log('🎯 [NEW DB] Got flashcards by difficulty:', selectedDifficulty, 'count:', flashcards.length);
+        console.log('🎯 [MAIN PAGE DEBUG] Got flashcards by difficulty:', {
+          difficulty: selectedDifficulty,
+          count: flashcards.length,
+          sampleCards: flashcards.slice(0, 3).map(card => ({
+            id: card.id,
+            hanzi: card.hanzi,
+            english: card.english,
+            status: card.status,
+            last_difficulty: card.last_difficulty,
+            next_review: card.next_review
+          }))
+        });
       }
       
       if (flashcards.length === 0) {
-        console.warn('🎯 [NEW DB] No flashcards available for spaced repetition');
+        console.warn('🎯 [MAIN PAGE DEBUG] No flashcards available for study session:', {
+          selectedDifficulty,
+          totalDbCards: dbFlashcards.length
+        });
         alert(`🎉 Great job! No ${selectedDifficulty === 'all' ? '' : selectedDifficulty} cards need review right now.\n\nStart studying some lessons first, or check back later when your cards are due for review.`);
         setIsDbLoading(false);
         return;
       }
       
       // Set up for study mode using standard system
-      console.log('🎯 [NEW DB] Setting up study mode with', flashcards.length, 'cards');
+      console.log('🎯 [MAIN PAGE DEBUG] Setting up study mode:', {
+        flashcardsCount: flashcards.length,
+        activeLesson: "spaced-repetition",
+        currentCardIndex: 0,
+        firstCard: flashcards[0]
+      });
+      
       setCurrentFlashcards(flashcards);
       setCurrentCardIndex(0);
       setActiveLesson("spaced-repetition");
       setIsStudyMode(true);
       
-      console.log('🎯 [NEW DB] Study mode setup complete');
+      console.log('🎯 [MAIN PAGE DEBUG] Study mode setup complete:', {
+        studyModeActive: true,
+        cardsLoaded: flashcards.length
+      });
       setIsDbLoading(false);
     } catch (error) {
-      console.warn('Error starting database spaced repetition session:', error);
+      console.error('🎯 [MAIN PAGE DEBUG] Error starting spaced repetition session:', error);
       alert('Failed to load spaced repetition cards. Please try again.');
       setIsDbLoading(false);
     }
   };
 
   const handleSRInfoDismiss = () => {
-    // Mark as seen and save to localStorage
-    setHasSeenSRInfo(true);
     setShowSRInfoModal(false);
-    localStorage.setItem('flashqi-sr-info-seen', 'true');
-    localStorage.setItem('flashqi-sr-strength', srStrengthLevel);
-    
-    // Start the session
-    startSpacedRepetitionSession();
+    localStorage.setItem('hasSeenSRInfo', 'true');
+  };
+
+  // Reset progress by difficulty level
+  const resetProgressByDifficulty = async (difficulty: 'easy' | 'normal' | 'hard' | 'difficult' | 'all') => {
+    if (!confirm(`Are you sure you want to reset all ${difficulty === 'all' ? '' : difficulty} flashcard progress? This action cannot be undone.`)) {
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/flashcards/reset', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ difficulty }),
+      });
+
+      const result = await response.json();
+
+             if (response.ok) {
+         alert(result.message);
+         // Refresh the data
+         await refreshDueCardsCount();
+         if (isLoadingSR) {
+           await loadSpacedRepetitionCards();
+         }
+             } else {
+         alert(result.error || 'Failed to reset progress');
+       }
+     } catch (error) {
+       console.error('Error resetting progress:', error);
+       alert('Failed to reset progress. Please try again.');
+     }
+   };
+
+   // Standalone function to refresh due cards count
+   const refreshDueCardsCount = async () => {
+     try {
+       const dueCards = await FlashcardDatabaseService.getDueFlashcards(1000);
+       const newCards = dbFlashcards.filter(card => card.status === 'new');
+       const count = dueCards.length + newCards.length;
+       setDueCardsCount(count);
+     } catch (error) {
+       console.warn('Error refreshing due cards count:', error);
+       setDueCardsCount(0);
+     }
   };
 
   // Status badge component helper for Supabase cards
@@ -2831,7 +3055,7 @@ export default function FlashcardsPage() {
                   </div>
                 </div>
               )}
-
+              
               
               <ThemeToggle />
               
@@ -3087,21 +3311,130 @@ export default function FlashcardsPage() {
               
               <div className="px-4 pt-20 pb-2 flex-1 flex flex-col">
                 
-                {/* Flashcard */}
+                {/* Flashcard Container with Drawing Card */}
                 {currentFlashcards.length > 0 && (
-                  <div className="flex justify-center items-center flex-grow mb-8">
-                    <Flashcard 
-                      card={currentFlashcards[currentCardIndex]} 
-                      onDifficulty={handleCardResult}
-                      isDatabaseMode={true}
-                    />
+                  <div className="flex flex-col justify-start items-center flex-grow mb-8 relative">
+                    {isDrawingCardOpen ? (
+                      /* Drawing Mode Layout */
+                      <div className="flex flex-col items-center w-full max-w-lg space-y-6 pt-20">
+                        {/* Compact Main Card */}
+                        <div className="w-full flex justify-center">
+                          <Flashcard 
+                            card={currentFlashcards[currentCardIndex]} 
+                            onDifficulty={handleCardResult}
+                            isDatabaseMode={true}
+                            onDrawToggle={toggleDrawingCard}
+                            isDrawingOpen={isDrawingCardOpen}
+                            isCompactMode={true}
+                          />
+                        </div>
+                        
+                        {/* Prominent Drawing Card */}
+                        <div className="w-full">
+                          <div className="bg-white dark:bg-gradient-to-br dark:from-[#0a0f2c] dark:via-[#12142b] dark:to-[#000000] rounded-3xl shadow-xl border border-gray-200 dark:border-neutral-700 p-6 w-full">
+                            {/* Drawing Card Header */}
+                            <div className="flex justify-between items-center mb-4">
+                              <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
+                                Draw: —
+                              </h3>
+                              <div className="flex items-center space-x-2">
+                                <button
+                                  onClick={clearDrawingCard}
+                                  className="p-2 rounded-full bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                                  title="Clear Drawing"
+                                >
+                                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-600 dark:text-gray-300">
+                                    <path d="M3 6h18"></path>
+                                    <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
+                                    <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
+                                  </svg>
+                                </button>
+                                <button
+                                  onClick={toggleDrawingCard}
+                                  className="px-4 py-2 rounded-full bg-blue-100 dark:bg-blue-800 text-blue-800 dark:text-blue-200 hover:bg-blue-200 dark:hover:bg-blue-700 transition-colors text-sm font-medium"
+                                  title="Close Drawing Mode"
+                                >
+                                  ✕ Close
+                                </button>
+                              </div>
+                            </div>
+                            
+                            {/* Drawing Canvas */}
+                            <canvas
+                              ref={drawingCardCanvasRef}
+                              className="drawing-card-canvas w-full h-80 bg-white dark:bg-gray-800 rounded-xl border border-gray-300 dark:border-gray-600 shadow-inner"
+                              style={{ touchAction: 'none' }}
+                              onTouchStart={startDrawingOnCard}
+                              onTouchMove={drawOnCard}
+                              onTouchEnd={endDrawingOnCard}
+                              onTouchCancel={endDrawingOnCard}
+                            />
+                            
+                            {/* Drawing Hint */}
+                            <div className="mt-4 text-center">
+                              <p className="text-sm text-gray-600 dark:text-gray-300">
+                                {currentFlashcards[currentCardIndex]?.pinyin} • {currentFlashcards[currentCardIndex]?.english}
+                              </p>
+                            </div>
+                            
+                            {/* Difficulty Rating Buttons for Drawing Mode */}
+                            <div className="mt-6 grid grid-cols-4 gap-2">
+                              <button 
+                                onClick={() => handleCardResult('easy')}
+                                className="px-3 py-2 rounded-lg text-sm font-medium text-green-700 bg-green-100 hover:bg-green-200 dark:bg-green-800 dark:text-green-200 dark:hover:bg-green-700 transition-colors"
+                              >
+                                Easy
+                              </button>
+                              <button 
+                                onClick={() => handleCardResult('normal')}
+                                className="px-3 py-2 rounded-lg text-sm font-medium text-yellow-700 bg-yellow-100 hover:bg-yellow-200 dark:bg-yellow-800 dark:text-yellow-200 dark:hover:bg-yellow-700 transition-colors"
+                              >
+                                Normal
+                              </button>
+                              <button 
+                                onClick={() => handleCardResult('hard')}
+                                className="px-3 py-2 rounded-lg text-sm font-medium text-orange-700 bg-orange-100 hover:bg-orange-200 dark:bg-orange-800 dark:text-orange-200 dark:hover:bg-orange-700 transition-colors"
+                              >
+                                Hard
+                              </button>
+                              <button 
+                                onClick={() => handleCardResult('difficult')}
+                                className="px-3 py-2 rounded-lg text-sm font-medium text-red-700 bg-red-100 hover:bg-red-200 dark:bg-red-800 dark:text-red-200 dark:hover:bg-red-700 transition-colors"
+                              >
+                                Difficult
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ) : (
+                      /* Normal Mode Layout */
+                      <div 
+                        className="flex justify-center items-center w-full h-full"
+                        style={{ 
+                          minHeight: '400px',
+                          width: '100%'
+                        }}
+                      >
+                        <Flashcard 
+                          card={currentFlashcards[currentCardIndex]} 
+                          onDifficulty={handleCardResult}
+                          isDatabaseMode={true}
+                          onDrawToggle={toggleDrawingCard}
+                          isDrawingOpen={isDrawingCardOpen}
+                          isCompactMode={false}
+                        />
+                      </div>
+                    )}
                   </div>
                 )}
                 
-                {/* Swipe instruction hint */}
-                <div className="text-center text-slate-600 dark:text-white/70 text-sm mb-8">
-                  Rate your difficulty: Easy • Normal • Hard • Difficult
-                </div>
+                {/* Swipe instruction hint - only show in normal mode */}
+                {!isDrawingCardOpen && (
+                  <div className="text-center text-slate-600 dark:text-white/70 text-sm mb-8">
+                    Rate your difficulty: Easy • Normal • Hard • Difficult
+                  </div>
+                )}
               </div>
             </div>
           ) : previewLessonId && selectedCategory ? (
@@ -3358,71 +3691,135 @@ export default function FlashcardsPage() {
                     {/* Sub-filters for Spaced Repetition */}
                     <div className="relative z-10 mt-4 pt-4 border-t border-amber-200 dark:border-amber-700/50">
                       <div className="flex gap-2 flex-wrap">
+                        <div className="flex items-center gap-1">
                         <button
                           className={`px-3 py-1 rounded-full text-xs font-medium transition-all ${
-                            spacedRepetitionFilter === 'all' 
-                              ? 'bg-amber-500 text-white shadow-sm' 
-                              : 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 hover:bg-amber-200 dark:hover:bg-amber-800/50'
+                              spacedRepetitionFilter === 'all' 
+                                ? 'bg-amber-500 text-white shadow-sm' 
+                                : 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 hover:bg-amber-200 dark:hover:bg-amber-800/50'
                           }`}
                           onClick={(e) => {
                             e.stopPropagation();
-                            setSpacedRepetitionFilter('all');
+                              setSpacedRepetitionFilter('all');
                           }}
                         >
-                          🎯 All
+                            🎯 All
                         </button>
+                          <button
+                            className="p-1 rounded-full bg-amber-200 dark:bg-amber-800/50 text-amber-700 dark:text-amber-300 hover:bg-amber-300 dark:hover:bg-amber-700/50 transition-all text-xs"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              resetProgressByDifficulty('all');
+                            }}
+                            title="Reset all progress"
+                          >
+                            🗑️
+                          </button>
+                        </div>
+                        
+                        <div className="flex items-center gap-1">
                         <button
                           className={`px-3 py-1 rounded-full text-xs font-medium transition-all ${
-                            spacedRepetitionFilter === 'easy' 
-                              ? 'bg-green-500 text-white shadow-sm' 
-                              : 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-200 dark:hover:bg-green-800/50'
+                              spacedRepetitionFilter === 'easy' 
+                                ? 'bg-green-500 text-white shadow-sm' 
+                                : 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-200 dark:hover:bg-green-800/50'
                           }`}
                           onClick={(e) => {
                             e.stopPropagation();
-                            setSpacedRepetitionFilter('easy');
+                              setSpacedRepetitionFilter('easy');
                           }}
                         >
-                          😊 Easy
+                            😊 Easy
                         </button>
+                          <button
+                            className="p-1 rounded-full bg-green-200 dark:bg-green-800/50 text-green-700 dark:text-green-300 hover:bg-green-300 dark:hover:bg-green-700/50 transition-all text-xs"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              resetProgressByDifficulty('easy');
+                            }}
+                            title="Reset easy cards progress"
+                          >
+                            🗑️
+                          </button>
+                        </div>
+                        
+                        <div className="flex items-center gap-1">
                         <button
                           className={`px-3 py-1 rounded-full text-xs font-medium transition-all ${
-                            spacedRepetitionFilter === 'normal' 
-                              ? 'bg-blue-500 text-white shadow-sm' 
-                              : 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-800/50'
+                              spacedRepetitionFilter === 'normal' 
+                                ? 'bg-blue-500 text-white shadow-sm' 
+                                : 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-800/50'
                           }`}
                           onClick={(e) => {
                             e.stopPropagation();
-                            setSpacedRepetitionFilter('normal');
-                          }}
-                        >
-                          🤔 Normal
+                              setSpacedRepetitionFilter('normal');
+                            }}
+                          >
+                            🤔 Normal
+                          </button>
+                          <button
+                            className="p-1 rounded-full bg-blue-200 dark:bg-blue-800/50 text-blue-700 dark:text-blue-300 hover:bg-blue-300 dark:hover:bg-blue-700/50 transition-all text-xs"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              resetProgressByDifficulty('normal');
+                            }}
+                            title="Reset normal cards progress"
+                          >
+                            🗑️
                         </button>
-                        <button
-                          className={`px-3 py-1 rounded-full text-xs font-medium transition-all ${
-                            spacedRepetitionFilter === 'hard' 
-                              ? 'bg-orange-500 text-white shadow-sm' 
-                              : 'bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 hover:bg-orange-200 dark:hover:bg-orange-800/50'
-                          }`}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setSpacedRepetitionFilter('hard');
-                          }}
-                        >
-                          😰 Hard
-                        </button>
-                        <button
-                          className={`px-3 py-1 rounded-full text-xs font-medium transition-all ${
-                            spacedRepetitionFilter === 'difficult' 
-                              ? 'bg-red-500 text-white shadow-sm' 
-                              : 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 hover:bg-red-200 dark:hover:bg-red-800/50'
-                          }`}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setSpacedRepetitionFilter('difficult');
-                          }}
-                        >
-                          😖 Difficult
-                        </button>
+                      </div>
+                        
+                        <div className="flex items-center gap-1">
+                          <button
+                            className={`px-3 py-1 rounded-full text-xs font-medium transition-all ${
+                              spacedRepetitionFilter === 'hard' 
+                                ? 'bg-orange-500 text-white shadow-sm' 
+                                : 'bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 hover:bg-orange-200 dark:hover:bg-orange-800/50'
+                            }`}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSpacedRepetitionFilter('hard');
+                            }}
+                          >
+                            😰 Hard
+                          </button>
+                          <button
+                            className="p-1 rounded-full bg-orange-200 dark:bg-orange-800/50 text-orange-700 dark:text-orange-300 hover:bg-orange-300 dark:hover:bg-orange-700/50 transition-all text-xs"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              resetProgressByDifficulty('hard');
+                            }}
+                            title="Reset hard cards progress"
+                          >
+                            🗑️
+                          </button>
+                        </div>
+                        
+                        <div className="flex items-center gap-1">
+                          <button
+                            className={`px-3 py-1 rounded-full text-xs font-medium transition-all ${
+                              spacedRepetitionFilter === 'difficult' 
+                                ? 'bg-red-500 text-white shadow-sm' 
+                                : 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 hover:bg-red-200 dark:hover:bg-red-800/50'
+                            }`}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSpacedRepetitionFilter('difficult');
+                            }}
+                          >
+                            😖 Difficult
+                          </button>
+                          <button
+                            className="p-1 rounded-full bg-red-200 dark:bg-red-800/50 text-red-700 dark:text-red-300 hover:bg-red-300 dark:hover:bg-red-700/50 transition-all text-xs"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              resetProgressByDifficulty('difficult');
+                            }}
+                            title="Reset difficult cards progress"
+                          >
+                            🗑️
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>

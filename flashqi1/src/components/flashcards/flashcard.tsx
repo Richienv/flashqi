@@ -12,9 +12,12 @@ interface FlashcardProps {
   onKnown?: () => void;
   onUnknown?: () => void;
   isDatabaseMode?: boolean; // Whether to use 4-button difficulty rating UI
+  onDrawToggle?: () => void; // New prop for drawing functionality
+  isDrawingOpen?: boolean; // New prop to track drawing state
+  isCompactMode?: boolean; // New prop for compact drawing mode
 }
 
-export function Flashcard({ card, onDifficulty, onKnown, onUnknown, isDatabaseMode = true }: FlashcardProps) {
+export function Flashcard({ card, onDifficulty, onKnown, onUnknown, isDatabaseMode = true, onDrawToggle, isDrawingOpen = false, isCompactMode = false }: FlashcardProps) {
   const [isFlipped, setIsFlipped] = useState(false);
   
   const handlers = useSwipeable({
@@ -36,9 +39,17 @@ export function Flashcard({ card, onDifficulty, onKnown, onUnknown, isDatabaseMo
   return (
     <div 
       {...handlers}
-      className="w-full max-w-md mx-auto perspective-1000 h-[340px] sm:h-[400px] cursor-pointer flex flex-col items-center justify-center"
-      onClick={handleFlip}
-      style={{ margin: '0 auto', padding: '0', minHeight: '340px' }}
+      className={`w-full mx-auto perspective-1000 cursor-pointer flex flex-col items-center justify-center ${
+        isCompactMode 
+          ? 'max-w-xs h-[120px]' // Compact mode: smaller size
+          : 'max-w-md h-[340px] sm:h-[400px]' // Normal mode: full size
+      }`}
+      onClick={isCompactMode ? undefined : handleFlip} // Disable flip in compact mode
+      style={{ 
+        margin: '0 auto', 
+        padding: '0', 
+        minHeight: isCompactMode ? '120px' : '340px' 
+      }}
     >
       <style jsx>{`
         .metallic-blue {
@@ -125,40 +136,62 @@ export function Flashcard({ card, onDifficulty, onKnown, onUnknown, isDatabaseMo
       <div 
         className={cn(
           "relative w-full h-full transform-style-3d",
-          isFlipped ? "rotate-y-180" : ""
+          isFlipped && !isCompactMode ? "rotate-y-180" : "" // Disable flip in compact mode
         )}
-        style={{ minHeight: '340px' }}
+        style={{ minHeight: isCompactMode ? '120px' : '340px' }}
       >
         {/* Front of card: Pinyin and English only */}
         <div
           className={cn(
-            "absolute w-full h-full bg-white dark:bg-gradient-to-br dark:from-[#0a0f2c] dark:via-[#12142b] dark:to-[#000000] rounded-3xl shadow-xl p-8 backface-hidden flex flex-col items-center justify-center border border-gray-200 dark:border-neutral-700",
-            "select-none"
+            "absolute w-full h-full bg-white dark:bg-gradient-to-br dark:from-[#0a0f2c] dark:via-[#12142b] dark:to-[#000000] rounded-3xl shadow-xl backface-hidden flex flex-col items-center justify-center border border-gray-200 dark:border-neutral-700",
+            "select-none",
+            isCompactMode ? "p-4" : "p-8" // Less padding in compact mode
           )}
-          style={{ boxShadow: '0 2.8px 2.2px rgba(0,0,0,0.18), 0 6.7px 5.3px rgba(0,0,0,0.22), 0 12.5px 10px rgba(0,0,0,0.24), 0 22.3px 17.9px rgba(0,0,0,0.26), 0 41.8px 33.4px rgba(0,0,0,0.28), 0 100px 80px rgba(0,0,0,0.32)' }}
+          style={{ 
+            boxShadow: isCompactMode 
+              ? '0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24)' // Subtle shadow in compact mode
+              : '0 2.8px 2.2px rgba(0,0,0,0.18), 0 6.7px 5.3px rgba(0,0,0,0.22), 0 12.5px 10px rgba(0,0,0,0.24), 0 22.3px 17.9px rgba(0,0,0,0.26), 0 41.8px 33.4px rgba(0,0,0,0.28), 0 100px 80px rgba(0,0,0,0.32)'
+          }}
         >
-          {/* Spaced Repetition Status Badge */}
-          {(card as any).status && (
+          {/* Spaced Repetition Status Badge or Draw Button - Hidden in compact mode */}
+          {(card as any).status && !isCompactMode && (
             <div className="absolute top-3 right-3 z-10">
-              <div className={`px-2 py-1 rounded-full text-xs font-semibold border backdrop-blur-md shadow-sm ${
-                (card as any).status === 'new' ? 'bg-blue-100 text-blue-800 border-blue-200' :
-                (card as any).status === 'learning' ? 'bg-yellow-100 text-yellow-800 border-yellow-200' :
-                (card as any).status === 'known' ? 'bg-green-100 text-green-800 border-green-200' :
-                'bg-red-100 text-red-800 border-red-200'
-              }`}>
-                {(card as any).status === 'new' && '🆕 New'}
-                {(card as any).status === 'learning' && '📚 Learning'}
-                {(card as any).status === 'known' && '✅ Known'}
-                {(card as any).status === 'due' && '⏰ Due'}
-              </div>
+              {onDrawToggle ? (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onDrawToggle();
+                  }}
+                  className={`px-3 py-2 rounded-full text-xs font-semibold border backdrop-blur-md shadow-sm transition-all duration-300 hover:scale-105 active:scale-95 ${
+                    isDrawingOpen 
+                      ? 'bg-purple-100 text-purple-800 border-purple-200 hover:bg-purple-200' 
+                      : 'bg-blue-100 text-blue-800 border-blue-200 hover:bg-blue-200'
+                  }`}
+                >
+                  ✏️ Draw
+                </button>
+              ) : (
+                <div className={`px-2 py-1 rounded-full text-xs font-semibold border backdrop-blur-md shadow-sm ${
+                  (card as any).status === 'new' ? 'bg-blue-100 text-blue-800 border-blue-200' :
+                  (card as any).status === 'learning' ? 'bg-yellow-100 text-yellow-800 border-yellow-200' :
+                  (card as any).status === 'known' ? 'bg-green-100 text-green-800 border-green-200' :
+                  'bg-red-100 text-red-800 border-red-200'
+                }`}>
+                  {(card as any).status === 'learning' && '📚 Learning'}
+                  {(card as any).status === 'known' && '✅ Known'}
+                  {(card as any).status === 'due' && '⏰ Due'}
+                </div>
+              )}
             </div>
           )}
           
           {/* Glow behind content */}
           {/* <div className="mesh-glow"></div> */}
-          <div className="flex flex-col items-center justify-center h-full w-full space-y-4">
+          <div className={`flex flex-col items-center justify-center h-full w-full ${isCompactMode ? 'space-y-1' : 'space-y-4'}`}>
             {/* Grammar Usage or Pinyin */}
-            <div className="text-2xl sm:text-3xl font-bold mb-2 text-blue-600 dark:text-blue-400 text-center">
+            <div className={`font-bold text-blue-600 dark:text-blue-400 text-center ${
+              isCompactMode ? 'text-lg' : 'text-2xl sm:text-3xl mb-2'
+            }`}>
               {(() => {
                 const isLevel2Card = card.id && card.id.startsWith('l2-');
                 
@@ -168,35 +201,39 @@ export function Flashcard({ card, onDifficulty, onKnown, onUnknown, isDatabaseMo
                   ? card.pinyin || (card as any).grammarUsage
                   : (card as any).grammarUsage || card.pinyin;
                 
-                console.log('🔍 FLASHCARD COMPONENT DEBUG - Card data:', {
-                  id: card.id,
-                  hanzi: card.hanzi,
-                  pinyin: card.pinyin,
-                  grammarUsage: (card as any).grammarUsage,
-                  isLevel2Card,
-                  hasGrammarUsage: !!(card as any).grammarUsage,
-                  hasPinyin: !!card.pinyin,
-                  displayValue
-                });
+                if (!isCompactMode) {
+                  console.log('🔍 FLASHCARD COMPONENT DEBUG - Card data:', {
+                    id: card.id,
+                    hanzi: card.hanzi,
+                    pinyin: card.pinyin,
+                    grammarUsage: (card as any).grammarUsage,
+                    isLevel2Card,
+                    hasGrammarUsage: !!(card as any).grammarUsage,
+                    hasPinyin: !!card.pinyin,
+                    displayValue
+                  });
+                }
                 
                 return displayValue;
               })()}
             </div>
             
             {/* English Meaning */}
-            <div className="text-lg sm:text-xl text-gray-700 dark:text-slate-200 font-medium text-center">
+            <div className={`text-gray-700 dark:text-slate-200 font-medium text-center ${
+              isCompactMode ? 'text-sm' : 'text-lg sm:text-xl'
+            }`}>
               {card.english}
             </div>
             
-            {/* Grammar Tip */}
-            {(card as any).grammarTip && (
+            {/* Grammar Tip - Hidden in compact mode */}
+            {(card as any).grammarTip && !isCompactMode && (
               <div className="text-sm text-gray-600 dark:text-slate-300 text-center italic max-w-xs">
                 {(card as any).grammarTip}
               </div>
             )}
             
-            {/* Color-coded Example */}
-            {(card as any).colorCodedExample && (
+            {/* Color-coded Example - Hidden in compact mode */}
+            {(card as any).colorCodedExample && !isCompactMode && (
               <div className="mt-4 p-4 bg-white/60 dark:bg-black/30 backdrop-blur-sm rounded-xl border border-white/40 dark:border-white/20 max-w-sm shadow-sm">
                 <div className="text-xs text-gray-600 dark:text-gray-300 mb-2 text-center font-medium">Example:</div>
                 <div 
@@ -206,8 +243,8 @@ export function Flashcard({ card, onDifficulty, onKnown, onUnknown, isDatabaseMo
               </div>
             )}
           </div>
-          {/* Database mode - 4 simple buttons at bottom */}
-          {onDifficulty && isDatabaseMode ? (
+          {/* Database mode - 4 simple buttons at bottom - Hidden in compact mode */}
+          {onDifficulty && isDatabaseMode && !isCompactMode ? (
             <div className="absolute bottom-0 left-0 w-full grid grid-cols-4 border-t border-gray-200 dark:border-neutral-700">
               <button 
                 onClick={(e) => {
@@ -250,11 +287,11 @@ export function Flashcard({ card, onDifficulty, onKnown, onUnknown, isDatabaseMo
                 Difficult
               </button>
             </div>
-          ) : (
+          ) : !isCompactMode ? (
           <div className="absolute bottom-4 left-0 w-full flex justify-center">
             <span className="text-xs text-gray-500 dark:text-slate-400">Tap or swipe to flip</span>
           </div>
-          )}
+          ) : null}
         </div>
         {/* Back of card: Hanzi and Example Sentence */}
         <div
@@ -283,8 +320,8 @@ export function Flashcard({ card, onDifficulty, onKnown, onUnknown, isDatabaseMo
               </div>
             ) : null}
           </div>
-          {/* Database mode - 4 simple buttons at bottom */}
-          {onDifficulty && isDatabaseMode ? (
+          {/* Database mode - 4 simple buttons at bottom - Hidden in compact mode */}
+          {onDifficulty && isDatabaseMode && !isCompactMode ? (
             <div className="absolute bottom-0 left-0 w-full grid grid-cols-4 border-t border-gray-200 dark:border-neutral-700">
               <button 
                 onClick={(e) => {
@@ -327,11 +364,11 @@ export function Flashcard({ card, onDifficulty, onKnown, onUnknown, isDatabaseMo
                 Difficult
               </button>
             </div>
-          ) : (
+          ) : !isCompactMode ? (
           <div className="absolute bottom-4 left-0 w-full flex justify-center">
             <span className="text-xs text-gray-500 dark:text-slate-400">Tap or swipe to flip</span>
           </div>
-          )}
+          ) : null}
         </div>
       </div>
       {/* Action buttons below the card */}

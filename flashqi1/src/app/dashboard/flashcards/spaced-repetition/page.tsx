@@ -2,7 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '@/contexts/auth-context';
 import { FlashcardDatabaseService, FlashcardWithProgress } from '@/services/flashcardDatabaseService';
+import { TextShimmer } from '@/components/magicui/text-shimmer';
 
 interface DifficultyOption {
   id: 'easy' | 'normal' | 'hard' | 'difficult' | 'all';
@@ -15,6 +17,7 @@ interface DifficultyOption {
 
 export default function SpacedRepetitionPage() {
   const router = useRouter();
+  const { user } = useAuth();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [difficultyOptions, setDifficultyOptions] = useState<DifficultyOption[]>([
     {
@@ -64,45 +67,88 @@ export default function SpacedRepetitionPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingPreview, setIsLoadingPreview] = useState(false);
 
+  // Standalone function to load card counts
+  const loadCardCounts = async () => {
+    console.log('📊 [CARD COUNT DEBUG] Starting loadCardCounts');
+    setIsLoading(true);
+    try {
+      console.log('📊 [CARD COUNT DEBUG] Current difficulty options:', difficultyOptions.map(opt => ({
+        id: opt.id,
+        currentCardCount: opt.cardCount
+      })));
+      
+      const updatedOptions = await Promise.all(
+        difficultyOptions.map(async (option) => {
+          console.log(`📊 [CARD COUNT DEBUG] Fetching cards for difficulty: ${option.id}`);
+          const cards = await FlashcardDatabaseService.getFlashcardsByDifficulty(option.id, 1000);
+          console.log(`📊 [CARD COUNT DEBUG] ${option.id} returned ${cards.length} cards`);
+          console.log(`📊 [CARD COUNT DEBUG] Sample cards for ${option.id}:`, cards.slice(0, 3).map(card => ({
+            id: card.id,
+            hanzi: card.hanzi,
+            english: card.english,
+            status: card.status,
+            last_difficulty: card.last_difficulty,
+            next_review: card.next_review
+          })));
+          
+          return {
+            ...option,
+            cardCount: cards.length
+          };
+        })
+      );
+      
+      console.log('📊 [CARD COUNT DEBUG] Updated card counts:', updatedOptions.map(opt => ({
+        id: opt.id,
+        newCardCount: opt.cardCount
+      })));
+      
+      setDifficultyOptions(updatedOptions);
+    } catch (error) {
+      console.error('📊 [CARD COUNT DEBUG] Error loading card counts:', error);
+    } finally {
+      setIsLoading(false);
+      console.log('📊 [CARD COUNT DEBUG] loadCardCounts completed');
+    }
+  };
+
   // Load card counts for each difficulty level
   useEffect(() => {
-    const loadCardCounts = async () => {
-      setIsLoading(true);
-      try {
-        const updatedOptions = await Promise.all(
-          difficultyOptions.map(async (option) => {
-            const cards = await FlashcardDatabaseService.getFlashcardsByDifficulty(option.id, 1000);
-            return {
-              ...option,
-              cardCount: cards.length
-            };
-          })
-        );
-        setDifficultyOptions(updatedOptions);
-      } catch (error) {
-        console.warn('Error loading card counts:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
     loadCardCounts();
   }, []);
 
   // Load preview cards when difficulty is selected and open modal
   const handleDifficultySelect = async (difficultyId: string) => {
+    console.log('🔍 [PREVIEW DEBUG] Starting preview for difficulty:', difficultyId);
+    
     setSelectedDifficulty(difficultyId);
     setIsModalOpen(true);
     setIsLoadingPreview(true);
     
     try {
+      console.log('🔍 [PREVIEW DEBUG] Fetching preview cards with limit 20');
       const cards = await FlashcardDatabaseService.getFlashcardsByDifficulty(
         difficultyId as 'easy' | 'normal' | 'hard' | 'difficult' | 'all', 
         20 // Preview first 20 cards
       );
+      
+      console.log('🔍 [PREVIEW DEBUG] Preview cards received:', {
+        difficulty: difficultyId,
+        cardCount: cards.length,
+        sampleCards: cards.slice(0, 3).map(card => ({
+          id: card.id,
+          hanzi: card.hanzi,
+          english: card.english,
+          status: card.status,
+          last_difficulty: card.last_difficulty,
+          next_review: card.next_review,
+          interval_days: card.interval_days
+        }))
+      });
+      
       setPreviewCards(cards);
     } catch (error) {
-      console.warn('Error loading preview cards:', error);
+      console.error('🔍 [PREVIEW DEBUG] Error loading preview cards:', error);
       setPreviewCards([]);
     } finally {
       setIsLoadingPreview(false);
@@ -119,12 +165,98 @@ export default function SpacedRepetitionPage() {
   // Start studying with selected difficulty
   const startStudySession = () => {
     if (selectedDifficulty) {
-      console.log('🚀 [SPACED REP] Starting study session with difficulty:', selectedDifficulty);
-      console.log('🚀 [SPACED REP] Preview cards count:', previewCards.length);
+      console.log('🚀 [STUDY SESSION DEBUG] Starting study session:', {
+        selectedDifficulty,
+        previewCardsCount: previewCards.length,
+        currentCardCounts: difficultyOptions.map(opt => ({
+          id: opt.id,
+          cardCount: opt.cardCount
+        })),
+        redirectUrl: `/dashboard/flashcards?mode=spaced-repetition&difficulty=${selectedDifficulty}`
+      });
+      
       // Navigate back to main flashcards page with spaced repetition mode and difficulty filter
       router.push(`/dashboard/flashcards?mode=spaced-repetition&difficulty=${selectedDifficulty}`);
     } else {
-      console.warn('⚠️ [SPACED REP] No difficulty selected when trying to start study session');
+      console.warn('⚠️ [STUDY SESSION DEBUG] No difficulty selected when trying to start study session');
+    }
+  };
+
+
+
+  // Reset progress by difficulty level
+  const resetProgressByDifficulty = async (difficulty: 'easy' | 'normal' | 'hard' | 'difficult' | 'all') => {
+    const difficultyDisplayName = difficulty === 'all' ? 'all' : difficulty;
+    
+    console.log('🔄 [RESET DEBUG] Starting reset process:', {
+      difficulty,
+      difficultyDisplayName,
+      userId: user?.id,
+      currentCardCounts: difficultyOptions.map(opt => ({
+        id: opt.id,
+        cardCount: opt.cardCount
+      }))
+    });
+    
+    if (!user?.id) {
+      console.error('🔄 [RESET DEBUG] User not authenticated:', user);
+      alert('User not authenticated. Please log in again.');
+      return;
+    }
+    
+    if (!confirm(`Are you sure you want to reset all ${difficultyDisplayName} flashcard progress? This action cannot be undone.`)) {
+      console.log('🔄 [RESET DEBUG] User cancelled reset');
+      return;
+    }
+
+    try {
+      console.log('🔄 [RESET DEBUG] Sending API request to /api/flashcards/reset');
+      
+      const response = await fetch('/api/flashcards/reset', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ 
+          difficulty,
+          userId: user.id 
+        }),
+      });
+
+      console.log('🔄 [RESET DEBUG] API Response received:', {
+        status: response.status,
+        statusText: response.statusText,
+        ok: response.ok
+      });
+
+      const result = await response.json();
+      console.log('🔄 [RESET DEBUG] API Response body:', result);
+
+      if (response.ok) {
+        console.log('🔄 [RESET DEBUG] Reset successful, updating local state');
+        
+        // Update the specific difficulty option's card count
+        const updatedOptions = difficultyOptions.map(option => {
+          if (difficulty === 'all' || option.id === difficulty) {
+            console.log(`🔄 [RESET DEBUG] Updating ${option.id} card count from ${option.cardCount} to 0`);
+            return { ...option, cardCount: 0 };
+          }
+          return option;
+        });
+        
+        setDifficultyOptions(updatedOptions);
+        alert(result.message);
+        
+        console.log('🔄 [RESET DEBUG] Reloading card counts from database');
+        // Reload card counts to get fresh data
+        await loadCardCounts();
+      } else {
+        console.error('🔄 [RESET DEBUG] Reset failed:', result);
+        alert(result.error || 'Failed to reset progress');
+      }
+    } catch (error) {
+      console.error('🔄 [RESET DEBUG] Network error during reset:', error);
+      alert('Failed to reset progress. Please try again.');
     }
   };
 
@@ -135,20 +267,22 @@ export default function SpacedRepetitionPage() {
       {/* Header - Simplified */}
       <header className="bg-white/90 dark:bg-black/95 backdrop-blur-sm border-b border-gray-200 dark:border-blue-500/20 sticky top-0 z-40">
         <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center">
-            <button
-              onClick={() => router.back()}
-              className="mr-4 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-            >
-              <svg className="w-6 h-6 text-gray-700 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-              </svg>
-            </button>
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Spaced Repetition</h1>
-              <p className="text-sm text-gray-600 dark:text-gray-400">
-                {isLoading ? 'Loading...' : `${totalDueCards} cards ready for review`}
-              </p>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center">
+              <button
+                onClick={() => router.back()}
+                className="mr-4 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+              >
+                <svg className="w-6 h-6 text-gray-700 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+              </button>
+              <div>
+                <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Spaced Repetition</h1>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  {isLoading ? 'Loading...' : `${totalDueCards} cards ready for review`}
+                </p>
+              </div>
             </div>
           </div>
         </div>
@@ -162,27 +296,77 @@ export default function SpacedRepetitionPage() {
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {difficultyOptions.map((option) => (
-              <button
+              <div
                 key={option.id}
-                onClick={() => handleDifficultySelect(option.id)}
-                disabled={option.cardCount === 0}
-                className={`p-6 rounded-xl border-2 transition-all duration-200 text-left ${
+                className={`relative p-6 rounded-xl border-2 transition-all duration-200 text-left ${
                   selectedDifficulty === option.id
                     ? option.color + ' ring-2 ring-offset-2 ring-blue-500 dark:ring-offset-gray-800'
                     : option.cardCount === 0
-                    ? 'bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-400 dark:text-gray-600 cursor-not-allowed opacity-50'
+                    ? 'bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-400 dark:text-gray-600 opacity-50'
                     : option.color + ' hover:scale-105 hover:shadow-lg cursor-pointer'
                 }`}
               >
-                <div className="flex items-center justify-between mb-3">
-                  <span className="text-2xl">{option.icon}</span>
-                  <span className="text-lg font-bold">
-                    {isLoading ? '...' : option.cardCount}
-                  </span>
+                {/* Main Card Content - Clickable */}
+                <button
+                  onClick={() => handleDifficultySelect(option.id)}
+                  disabled={option.cardCount === 0}
+                  className="w-full h-full text-left pb-8"
+                >
+                  <div className="flex items-start justify-between mb-3">
+                    <div>
+                      <TextShimmer
+                        as="div"
+                        className={`text-3xl font-light mb-1 ${
+                          option.id === 'easy' 
+                            ? 'text-green-600 dark:text-green-400'
+                            : option.id === 'normal'
+                            ? 'text-blue-600 dark:text-blue-400'
+                            : option.id === 'hard'
+                            ? 'text-orange-600 dark:text-orange-400'
+                            : option.id === 'difficult'
+                            ? 'text-red-600 dark:text-red-400'
+                            : 'text-purple-600 dark:text-purple-400'
+                        }`}
+                        duration={2.5}
+                        spread={2}
+                      >
+                        {isLoading ? '...' : option.cardCount.toString()}
+                      </TextShimmer>
+                      <div className="text-xs text-gray-500 dark:text-gray-400 font-medium opacity-75">
+                        CARDS DUE
+                      </div>
+                    </div>
+                  </div>
+                  <h3 className="font-semibold text-lg mb-2">{option.title}</h3>
+                  <p className="text-sm opacity-80">{option.description}</p>
+                </button>
+
+                {/* Info Button - Bottom Right Corner */}
+                <div
+                  className={`absolute bottom-4 right-4 p-2.5 rounded-full transition-all duration-300 transform hover:scale-110 shadow-lg hover:shadow-xl cursor-help ${
+                    option.id === 'easy' 
+                      ? 'bg-green-500/25 hover:bg-green-500/40 border-2 border-green-500/30 hover:border-green-500/50 text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300'
+                      : option.id === 'normal'
+                      ? 'bg-blue-500/25 hover:bg-blue-500/40 border-2 border-blue-500/30 hover:border-blue-500/50 text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300'
+                      : option.id === 'hard'
+                      ? 'bg-orange-500/25 hover:bg-orange-500/40 border-2 border-orange-500/30 hover:border-orange-500/50 text-orange-600 dark:text-orange-400 hover:text-orange-700 dark:hover:text-orange-300'
+                      : option.id === 'difficult'
+                      ? 'bg-red-500/25 hover:bg-red-500/40 border-2 border-red-500/30 hover:border-red-500/50 text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300'
+                      : 'bg-purple-500/25 hover:bg-purple-500/40 border-2 border-purple-500/30 hover:border-purple-500/50 text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300'
+                  }`}
+                  title={
+                    option.id === 'easy' ? 'Easy: 7 days to next review' :
+                    option.id === 'normal' ? 'Normal: 2 days to next review' :
+                    option.id === 'hard' ? 'Hard: 12 hours to next review' :
+                    option.id === 'difficult' ? 'Difficult: 3 hours to next review' :
+                    'All: Mixed review intervals'
+                  }
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
                 </div>
-                <h3 className="font-semibold text-lg mb-2">{option.title}</h3>
-                <p className="text-sm opacity-80">{option.description}</p>
-              </button>
+              </div>
             ))}
           </div>
         </div>
@@ -295,6 +479,8 @@ export default function SpacedRepetitionPage() {
             </div>
           </div>
         )}
+
+
 
         {/* Info Section */}
         <div className="bg-blue-50 dark:bg-black/50 dark:border dark:border-blue-500/30 dark:shadow-lg dark:shadow-blue-500/10 rounded-xl p-6 backdrop-blur-sm">

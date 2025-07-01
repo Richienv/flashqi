@@ -207,34 +207,64 @@ export class FlashcardDatabaseService {
     });
     
     try {
-      // Note: p_user_id is optional with default auth.uid()
-      const { data, error } = await supabase.rpc('get_flashcards_by_difficulty', {
+      // Call the database function to get flashcards by difficulty
+      const { data, error } = await supabase.rpc('get_user_flashcards_by_difficulty', {
         p_difficulty: difficulty,
         p_limit: limit
       });
       
       console.log('🔍 [DB SERVICE DEBUG] Database response:', {
         error,
+        errorCode: error?.code,
+        errorMessage: error?.message,
         dataLength: data?.length,
         sampleData: data?.slice(0, 2)
       });
       
       if (error) {
-        console.warn('🔍 [DB SERVICE DEBUG] Error fetching flashcards by difficulty:', error);
+        console.error('🔍 [DB SERVICE DEBUG] Database function error:', {
+          error,
+          code: error.code,
+          message: error.message,
+          details: error.details
+        });
+        
+        // Return empty array instead of falling back to all cards
+        console.warn('🔍 [DB SERVICE DEBUG] Returning empty array due to error');
+        return [];
+      }
+      
+      if (!data || !Array.isArray(data)) {
+        console.warn('🔍 [DB SERVICE DEBUG] Invalid data format received:', data);
         return [];
       }
       
       // Convert UUID fields to strings
-      const convertedData = (data || []).map((item: any) => ({
+      const convertedData = data.map((item: any) => ({
         ...item,
         id: String(item.id),
         lesson_id: String(item.lesson_id),
         created_at: item.created_at || new Date().toISOString()
       }));
       
+      console.log('🔍 [DB SERVICE DEBUG] Returning converted data:', {
+        difficulty,
+        cardCount: convertedData.length,
+        sampleCards: convertedData.slice(0, 3).map(c => ({
+          id: c.id,
+          hanzi: c.hanzi,
+          english: c.english,
+          last_difficulty: c.last_difficulty
+        }))
+      });
+      
       return convertedData;
     } catch (error) {
-      console.warn('🔍 [DB SERVICE DEBUG] Network error fetching flashcards by difficulty:', error);
+      console.error('🔍 [DB SERVICE DEBUG] Network error fetching flashcards by difficulty:', {
+        error,
+        difficulty,
+        limit
+      });
       return [];
     }
   }
@@ -312,6 +342,63 @@ export class FlashcardDatabaseService {
     } catch (error) {
       console.warn('Error fetching due cards count:', error);
       return 0;
+    }
+  }
+
+  /**
+   * Reset all flashcard progress for the current user
+   */
+  static async resetAllProgress(): Promise<boolean> {
+    console.log('🔄 [DB SERVICE] resetAllProgress called');
+    
+    try {
+      const { data, error } = await supabase.rpc('reset_all_flashcard_progress');
+      
+      console.log('🔄 [DB SERVICE] resetAllProgress response:', {
+        error,
+        data
+      });
+      
+      if (error) {
+        console.warn('🔄 [DB SERVICE] Error resetting all progress:', error);
+        return false;
+      }
+      
+      return true;
+    } catch (error) {
+      console.warn('🔄 [DB SERVICE] Network error resetting all progress:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Reset flashcard progress for a specific difficulty level
+   */
+  static async resetProgressByDifficulty(
+    difficulty: 'easy' | 'normal' | 'hard' | 'difficult' | 'all'
+  ): Promise<boolean> {
+    console.log('🔄 [DB SERVICE] resetProgressByDifficulty called', { difficulty });
+    
+    try {
+      const { data, error } = await supabase.rpc('reset_flashcard_progress_by_difficulty', {
+        p_difficulty: difficulty
+      });
+      
+      console.log('🔄 [DB SERVICE] resetProgressByDifficulty response:', {
+        difficulty,
+        error,
+        data
+      });
+      
+      if (error) {
+        console.warn('🔄 [DB SERVICE] Error resetting progress by difficulty:', error);
+        return false;
+      }
+      
+      return true;
+    } catch (error) {
+      console.warn('🔄 [DB SERVICE] Network error resetting progress by difficulty:', error);
+      return false;
     }
   }
 } 
