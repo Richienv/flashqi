@@ -270,7 +270,7 @@ export default function SpacedRepetitionPage() {
           <div className="flex items-center justify-between">
             <div className="flex items-center">
               <button
-                onClick={() => router.back()}
+                onClick={() => router.push('/dashboard')}
                 className="mr-4 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
               >
                 <svg className="w-6 h-6 text-gray-700 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">

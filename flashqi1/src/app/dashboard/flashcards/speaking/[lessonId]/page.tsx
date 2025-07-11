@@ -290,7 +290,7 @@ export default function SpeakingLessonPage({ params }: { params: { lessonId: str
               Please use a valid lesson format (e.g., l1-1, l2-3)
             </p>
             <Link 
-              href="/dashboard/flashcards/speaking"
+              href="/dashboard"
               className="inline-flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100"
             >
               <ArrowLeft size={16} />
@@ -319,7 +319,7 @@ export default function SpeakingLessonPage({ params }: { params: { lessonId: str
               Lesson {lesson} for Level {level} does not exist
             </p>
             <Link 
-              href="/dashboard/flashcards/speaking"
+              href="/dashboard"
               className="inline-flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100"
             >
               <ArrowLeft size={16} />
@@ -343,7 +343,7 @@ export default function SpeakingLessonPage({ params }: { params: { lessonId: str
           {/* Header */}
           <div className="mb-6">
             <Link 
-              href="/dashboard/flashcards/speaking"
+              href="/dashboard"
               className="inline-flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 mb-4"
             >
               <ArrowLeft size={16} />

@@ -10,14 +10,14 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
-  const isFlashcardsPage = pathname === '/dashboard/flashcards';
+  const isDetailedFlashcardsPage = pathname.startsWith('/dashboard/flashcards/');
 
   return (
     <RouteGuard>
       <div className="flex flex-col min-h-screen">
-        {!isFlashcardsPage && <Navbar />}
+        {!isDetailedFlashcardsPage && <Navbar />}
         {children}
-        {!isFlashcardsPage && <MobileNav />}
+        {!isDetailedFlashcardsPage && <MobileNav />}
       </div>
     </RouteGuard>
   );

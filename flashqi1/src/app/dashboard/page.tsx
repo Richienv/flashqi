@@ -1,233 +1,228 @@
-import Link from 'next/link';
-import { redirect } from 'next/navigation';
+'use client';
+
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import Image from 'next/image';
+import { useAuth } from "@/contexts/auth-context";
+import { CardSwiper } from '@/components/ui/card-swiper';
 
 export default function DashboardPage() {
-  // Redirect to flashcards as the primary dashboard
-  redirect('/dashboard/flashcards');
+  const router = useRouter();
+  const { user } = useAuth();
+  
+  // State for database flashcard count
+  const [dbTotalCount, setDbTotalCount] = useState(908);
+
+  // Cards data for the swiper
+  const practiceCards = [
+    {
+      id: 'flashcards',
+      title: 'Flashcards',
+      subtitle: 'only took 5 minutes to re-vise 908 words you\'ve learnd. Start now or never',
+      count: `${dbTotalCount} cards created`,
+      bgClass: 'bg-gradient-to-br from-blue-50 to-white dark:from-blue-900/20 dark:to-blue-800/10',
+      borderClass: 'border border-blue-100 dark:border-blue-800/50',
+      hoverBorderClass: 'hover:border-blue-300 dark:hover:border-blue-700',
+      iconBgClass: 'bg-blue-600 dark:bg-blue-500',
+      textClass: 'text-blue-600 dark:text-blue-400',
+      countTextClass: 'text-blue-600 dark:text-blue-400',
+      borderTClass: 'border-blue-100 dark:border-blue-800/50',
+      buttonClass: 'bg-blue-600 dark:bg-blue-500',
+      hoverButtonClass: 'hover:bg-blue-700 dark:hover:bg-blue-600',
+      icon: (
+        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <line x1="4" y1="19" x2="20" y2="19"></line>
+          <line x1="4" y1="15" x2="14" y2="15"></line>
+          <line x1="4" y1="11" x2="20" y2="11"></line>
+          <line x1="4" y1="7" x2="14" y2="7"></line>
+        </svg>
+      ),
+      onClick: () => {
+        console.log('Flashcards clicked');
+        router.push('/dashboard/flashcards');
+      }
+    },
+    {
+      id: 'reading',
+      title: 'Reading',
+      subtitle: 'boost your reading speed by 3x in just 10 minutes daily',
+      count: '2900+ reading passages available',
+      bgClass: 'bg-gradient-to-br from-green-50 to-white dark:from-green-900/20 dark:to-green-800/10',
+      borderClass: 'border border-green-100 dark:border-green-800/50',
+      hoverBorderClass: 'hover:border-green-300 dark:hover:border-green-700',
+      iconBgClass: 'bg-green-600 dark:bg-green-500',
+      textClass: 'text-green-600 dark:text-green-400',
+      countTextClass: 'text-green-600 dark:text-green-400',
+      borderTClass: 'border-green-100 dark:border-green-800/50',
+      buttonClass: 'bg-green-600 dark:bg-green-500',
+      hoverButtonClass: 'hover:bg-green-700 dark:hover:bg-green-600',
+      icon: (
+        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
+          <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
+        </svg>
+      ),
+      onClick: () => {
+        console.log('Reading clicked');
+        router.push('/dashboard/reading');
+      }
+    },
+    {
+      id: 'speaking',
+      title: 'Speaking',
+      subtitle: 'speak like a native in 30 days. no cap fr',
+      count: '1500+ phrases ready to master',
+      bgClass: 'bg-gradient-to-br from-purple-50 to-white dark:from-purple-900/20 dark:to-purple-800/10',
+      borderClass: 'border border-purple-100 dark:border-purple-800/50',
+      hoverBorderClass: 'hover:border-purple-300 dark:hover:border-purple-700',
+      iconBgClass: 'bg-purple-600 dark:bg-purple-500',
+      textClass: 'text-purple-600 dark:text-purple-400',
+      countTextClass: 'text-purple-600 dark:text-purple-400',
+      borderTClass: 'border-purple-100 dark:border-purple-800/50',
+      buttonClass: 'bg-purple-600 dark:bg-purple-500',
+      hoverButtonClass: 'hover:bg-purple-700 dark:hover:bg-purple-600',
+      icon: (
+        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+          <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+          <line x1="12" y1="19" x2="12" y2="23"></line>
+          <line x1="8" y1="23" x2="16" y2="23"></line>
+        </svg>
+      ),
+      onClick: () => {
+        console.log('Speaking clicked');
+        router.push('/dashboard/flashcards/speaking');
+      }
+    },
+    {
+      id: 'battle',
+      title: 'Battle Mode',
+      subtitle: 'challenge your friends and flex your skills',
+      count: 'live battles happening now',
+      bgClass: 'bg-gradient-to-br from-indigo-50 to-white dark:from-indigo-900/20 dark:to-indigo-800/10',
+      borderClass: 'border border-indigo-100 dark:border-indigo-800/50',
+      hoverBorderClass: 'hover:border-indigo-300 dark:hover:border-indigo-700',
+      iconBgClass: 'bg-indigo-600 dark:bg-indigo-500',
+      textClass: 'text-indigo-600 dark:text-indigo-400',
+      countTextClass: 'text-indigo-600 dark:text-indigo-400',
+      borderTClass: 'border-indigo-100 dark:border-indigo-800/50',
+      buttonClass: 'bg-indigo-600 dark:bg-indigo-500',
+      hoverButtonClass: 'hover:bg-indigo-700 dark:hover:bg-indigo-600',
+      hasNewBadge: true,
+      icon: (
+        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M13.5 21v-7.5a.75.75 0 01.75-.75h3a.75.75 0 01.75.75V21m-4.5 0H2.36m11.14 0H18m0 0h3.64m-1.39 0V9.349m-16.5 11.65V9.35m0 0a3.001 3.001 0 003.75-.615A2.993 2.993 0 009.75 9.75c.896 0 1.7-.393 2.25-1.016a2.993 2.993 0 002.25 1.016c.896 0 1.7-.393 2.25-1.016a3.001 3.001 0 003.75.614m-16.5 0a3.004 3.004 0 01-.621-4.72L4.318 3.44A1.5 1.5 0 015.378 3h13.243a1.5 1.5 0 011.06.44l1.19 1.189a3 3 0 01-.621 4.72m-13.5 8.65h3.75a.75.75 0 00.75-.75V13.5a.75.75 0 00-.75-.75H6.75a.75.75 0 00-.75.75v3.75c0 .415.336.75.75.75z" />
+        </svg>
+      ),
+      onClick: () => {
+        console.log('Battle Mode clicked');
+        router.push('/dashboard/battle');
+      }
+    },
+    {
+      id: 'homework',
+      title: 'Homework',
+      subtitle: 'stay on top of your game with smart tracking',
+      count: 'assignments organized perfectly',
+      bgClass: 'bg-gradient-to-br from-amber-50 to-white dark:from-amber-900/20 dark:to-amber-800/10',
+      borderClass: 'border border-amber-100 dark:border-amber-800/50',
+      hoverBorderClass: 'hover:border-amber-300 dark:hover:border-amber-700',
+      iconBgClass: 'bg-amber-600 dark:bg-amber-500',
+      textClass: 'text-amber-600 dark:text-amber-400',
+      countTextClass: 'text-amber-600 dark:text-amber-400',
+      borderTClass: 'border-amber-100 dark:border-amber-800/50',
+      buttonClass: 'bg-amber-600 dark:bg-amber-500',
+      hoverButtonClass: 'hover:bg-amber-700 dark:hover:bg-amber-600',
+      icon: (
+        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
+          <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
+        </svg>
+      ),
+      onClick: () => {
+        console.log('Homework clicked');
+        router.push('/dashboard/homework');
+      }
+    },
+    {
+      id: 'exam',
+      title: 'Exam Test',
+      subtitle: 'ace your exams with confidence and zero stress',
+      count: '850+ practice questions',
+      bgClass: 'bg-gradient-to-br from-orange-50 to-white dark:from-orange-900/20 dark:to-orange-800/10',
+      borderClass: 'border border-orange-100 dark:border-orange-800/50',
+      hoverBorderClass: 'hover:border-orange-300 dark:hover:border-orange-700',
+      iconBgClass: 'bg-orange-600 dark:bg-orange-500',
+      textClass: 'text-orange-600 dark:text-orange-400',
+      countTextClass: 'text-orange-600 dark:text-orange-400',
+      borderTClass: 'border-orange-100 dark:border-orange-800/50',
+      buttonClass: 'bg-orange-600 dark:bg-orange-500',
+      hoverButtonClass: 'hover:bg-orange-700 dark:hover:bg-orange-600',
+      icon: (
+        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
+        </svg>
+      ),
+      onClick: () => {
+        console.log('Exam Test clicked');
+        router.push('/dashboard/exam-test');
+      }
+    }
+  ];
+
   return (
-    <div className="flex flex-col min-h-screen bg-white dark:bg-[#0e0e0e]">
-      <main className="flex-1 pt-24 pb-6">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
-          {/* Header */}
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">Dashboard</h1>
-            <p className="text-gray-600 dark:text-gray-400">Track your progress and continue learning</p>
+    <div className="flex flex-col h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 overflow-hidden">
+      <main className="flex-1 flex items-center justify-center pb-20 md:pb-24 overflow-y-auto overflow-x-hidden">
+        <div className="w-full max-w-2xl mx-auto px-4 py-8 overflow-x-hidden">
+          {/* Back Button */}
+          <div className="flex justify-start mb-6">
+            <button
+              onClick={() => router.back()}
+              className="p-2 rounded-full bg-white/20 dark:bg-black/20 backdrop-blur-sm border border-white/30 dark:border-white/10 text-black dark:text-white hover:bg-white/30 dark:hover:bg-black/30 transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-sm"
+              title="Go Back"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M19 12H5M12 19l-7-7 7-7"></path>
+              </svg>
+            </button>
           </div>
 
-          {/* Stats Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <div className="stats-card">
-              <div className="flex items-center">
-                <div className="p-2 bg-blue-100 dark:bg-blue-900/20 rounded-lg">
-                  <svg className="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                  </svg>
-                </div>
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Cards</p>
-                  <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">1,234</p>
-                </div>
-              </div>
+          {/* Logo and Header */}
+          <div className="text-center mb-8 md:mb-12">
+            <div className="flex items-center justify-center mb-4 md:mb-6">
+              <Image
+                src="/flashqi-main-logo.png"
+                alt="FlashQi"
+                width={48}
+                height={48}
+                className="transition-transform hover:scale-110"
+              />
+              <h1 className="ml-3 text-3xl md:text-4xl font-thin text-gray-900 dark:text-white">FlashQi</h1>
             </div>
-
-            <div className="stats-card">
-              <div className="flex items-center">
-                <div className="p-2 bg-green-100 dark:bg-green-900/20 rounded-lg">
-                  <svg className="w-6 h-6 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                </div>
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Mastered</p>
-                  <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">856</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="stats-card">
-              <div className="flex items-center">
-                <div className="p-2 bg-amber-100 dark:bg-amber-900/20 rounded-lg">
-                  <svg className="w-6 h-6 text-amber-600 dark:text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                </div>
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">In Progress</p>
-                  <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">378</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="stats-card">
-              <div className="flex items-center">
-                <div className="p-2 bg-purple-100 dark:bg-purple-900/20 rounded-lg">
-                  <svg className="w-6 h-6 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                  </svg>
-                </div>
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Streak</p>
-                  <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">7 days</p>
-                </div>
-              </div>
+            <p className="text-gray-600 dark:text-gray-400 font-light text-base md:text-lg">
+              Choose your learning path
+            </p>
+            <div className="mt-2 md:mt-3 text-xs md:text-sm text-gray-500 dark:text-gray-500">
+              Swipe or tap dots to explore options
             </div>
           </div>
 
-          {/* Main Feature Cards - Full Width Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 w-full">
-              {/* Flashcards */}
-              <Link href="/dashboard/flashcards" className="block group">
-              <div className="card card-hover p-8 h-64 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/10 dark:to-indigo-900/10 border-blue-200 dark:border-blue-800/50 group-hover:border-blue-300 dark:group-hover:border-blue-700 transition-all duration-200 flex flex-col justify-between">
-                <div className="flex items-center mb-6">
-                  <div className="p-4 bg-blue-100 dark:bg-blue-900/20 rounded-xl group-hover:bg-blue-200 dark:group-hover:bg-blue-900/30 transition-colors">
-                    <svg className="w-8 h-8 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                      </svg>
-                    </div>
-                  <div className="ml-5">
-                    <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 group-hover:text-blue-700 dark:group-hover:text-blue-300 transition-colors">Flashcards</h3>
-                    <p className="text-base text-gray-600 dark:text-gray-400">Practice with spaced repetition</p>
-                  </div>
-                </div>
-                <div className="text-sm text-blue-600 dark:text-blue-400 font-medium">1,234 cards available</div>
-                </div>
-              </Link>
+          {/* Card Swiper */}
+          <CardSwiper cards={practiceCards} dbTotalCount={dbTotalCount} />
 
-              {/* Reading */}
-              <Link href="/dashboard/reading" className="block group">
-              <div className="card card-hover p-8 h-64 bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/10 dark:to-emerald-900/10 border-green-200 dark:border-green-800/50 group-hover:border-green-300 dark:group-hover:border-green-700 transition-all duration-200 flex flex-col justify-between">
-                <div className="flex items-center mb-6">
-                  <div className="p-4 bg-green-100 dark:bg-green-900/20 rounded-xl group-hover:bg-green-200 dark:group-hover:bg-green-900/30 transition-colors">
-                    <svg className="w-8 h-8 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                      </svg>
-                    </div>
-                  <div className="ml-5">
-                    <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 group-hover:text-green-700 dark:group-hover:text-green-300 transition-colors">Reading</h3>
-                    <p className="text-base text-gray-600 dark:text-gray-400">Comprehension exercises</p>
-                  </div>
-                </div>
-                <div className="text-sm text-green-600 dark:text-green-400 font-medium">15 reading exercises</div>
-                </div>
-              </Link>
-
-              {/* Speaking */}
-              <Link href="/dashboard/speaking" className="block group">
-              <div className="card card-hover p-8 h-64 bg-gradient-to-br from-purple-50 to-violet-50 dark:from-purple-900/10 dark:to-violet-900/10 border-purple-200 dark:border-purple-800/50 group-hover:border-purple-300 dark:group-hover:border-purple-700 transition-all duration-200 flex flex-col justify-between">
-                <div className="flex items-center mb-6">
-                  <div className="p-4 bg-purple-100 dark:bg-purple-900/20 rounded-xl group-hover:bg-purple-200 dark:group-hover:bg-purple-900/30 transition-colors">
-                    <svg className="w-8 h-8 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z M19 10v2a7 7 0 0 1-14 0v-2 M12 19v4 M8 23h8" />
-                      </svg>
-                    </div>
-                  <div className="ml-5">
-                    <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 group-hover:text-purple-700 dark:group-hover:text-purple-300 transition-colors">Speaking</h3>
-                    <p className="text-base text-gray-600 dark:text-gray-400">Practice conversations</p>
-                  </div>
-                </div>
-                <div className="text-sm text-purple-600 dark:text-purple-400 font-medium">Voice recognition enabled</div>
-                </div>
-              </Link>
-
-            {/* Battle Mode */}
-              <Link href="/dashboard/battle" className="block group">
-              <div className="card card-hover p-8 h-64 bg-gradient-to-br from-orange-50 to-amber-50 dark:from-orange-900/10 dark:to-amber-900/10 border-orange-200 dark:border-orange-800/50 group-hover:border-orange-300 dark:group-hover:border-orange-700 transition-all duration-200 flex flex-col justify-between">
-                <div className="flex items-center mb-6">
-                  <div className="p-4 bg-orange-100 dark:bg-orange-900/20 rounded-xl group-hover:bg-orange-200 dark:group-hover:bg-orange-900/30 transition-colors">
-                    <svg className="w-8 h-8 text-orange-600 dark:text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.5 21v-7.5a.75.75 0 01.75-.75h3a.75.75 0 01.75.75V21m-4.5 0H2.36m11.14 0H18m0 0h3.64m-1.39 0V9.349m-16.5 11.65V9.35m0 0a3.001 3.001 0 003.75-.615A2.993 2.993 0 009.75 9.75c.896 0 1.7-.393 2.25-1.016a2.993 2.993 0 002.25 1.016c.896 0 1.7-.393 2.25-1.016a3.001 3.001 0 003.75.614m-16.5 0a3.004 3.004 0 01-.621-4.72L4.318 3.44A1.5 1.5 0 015.378 3h13.243a1.5 1.5 0 011.06.44l1.19 1.189a3 3 0 01-.621 4.72m-13.5 8.65h3.75a.75.75 0 00.75-.75V13.5a.75.75 0 00-.75-.75H6.75a.75.75 0 00-.75.75v3.75c0 .415.336.75.75.75z" />
-                      </svg>
-                    </div>
-                  <div className="ml-5">
-                    <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 group-hover:text-orange-700 dark:group-hover:text-orange-300 transition-colors">Battle Mode</h3>
-                    <p className="text-base text-gray-600 dark:text-gray-400">Competitive learning</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center justify-between">
-                  <div className="text-sm text-orange-600 dark:text-orange-400 font-medium">Battle other learners</div>
-                  <span className="inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium bg-orange-100 dark:bg-orange-900/30 text-orange-800 dark:text-orange-200">
-                      New!
-                    </span>
-                  </div>
-                </div>
-              </Link>
-
-              {/* Homework */}
-              <Link href="/dashboard/homework" className="block group">
-              <div className="card card-hover p-8 h-64 bg-gradient-to-br from-rose-50 to-pink-50 dark:from-rose-900/10 dark:to-pink-900/10 border-rose-200 dark:border-rose-800/50 group-hover:border-rose-300 dark:group-hover:border-rose-700 transition-all duration-200 flex flex-col justify-between">
-                <div className="flex items-center mb-6">
-                  <div className="p-4 bg-rose-100 dark:bg-rose-900/20 rounded-xl group-hover:bg-rose-200 dark:group-hover:bg-rose-900/30 transition-colors">
-                    <svg className="w-8 h-8 text-rose-600 dark:text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                      </svg>
-                    </div>
-                  <div className="ml-5">
-                    <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 group-hover:text-rose-700 dark:group-hover:text-rose-300 transition-colors">Homework</h3>
-                    <p className="text-base text-gray-600 dark:text-gray-400">Assignments & practice</p>
-                  </div>
-                </div>
-                <div className="text-sm text-rose-600 dark:text-rose-400 font-medium">3 assignments pending</div>
-                </div>
-              </Link>
-
-              {/* Exam Test */}
-              <Link href="/dashboard/exam-test" className="block group">
-              <div className="card card-hover p-8 h-64 bg-gradient-to-br from-teal-50 to-cyan-50 dark:from-teal-900/10 dark:to-cyan-900/10 border-teal-200 dark:border-teal-800/50 group-hover:border-teal-300 dark:group-hover:border-teal-700 transition-all duration-200 flex flex-col justify-between">
-                <div className="flex items-center mb-6">
-                  <div className="p-4 bg-teal-100 dark:bg-teal-900/20 rounded-xl group-hover:bg-teal-200 dark:group-hover:bg-teal-900/30 transition-colors">
-                    <svg className="w-8 h-8 text-teal-600 dark:text-teal-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
-                      </svg>
-                    </div>
-                  <div className="ml-5">
-                    <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 group-hover:text-teal-700 dark:group-hover:text-teal-300 transition-colors">Exam Test</h3>
-                    <p className="text-base text-gray-600 dark:text-gray-400">Test your knowledge</p>
-                  </div>
-                </div>
-                <div className="text-sm text-teal-600 dark:text-teal-400 font-medium">Comprehensive assessment</div>
-                </div>
-              </Link>
-          </div>
-
-          {/* Recent Activity Section */}
-          <div className="mt-12">
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-6">Recent Activity</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              <div className="flex items-center p-4 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
-                <div className="p-2 bg-blue-100 dark:bg-blue-900/20 rounded-lg">
-                  <svg className="w-4 h-4 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                  </svg>
-                </div>
-                <div className="ml-3">
-                  <p className="text-sm font-medium text-gray-900 dark:text-gray-100">Completed 25 flashcards</p>
-                  <p className="text-xs text-gray-600 dark:text-gray-400">2 hours ago</p>
-                </div>
-              </div>
-
-              <div className="flex items-center p-4 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
-                <div className="p-2 bg-green-100 dark:bg-green-900/20 rounded-lg">
-                  <svg className="w-4 h-4 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                </div>
-                <div className="ml-3">
-                  <p className="text-sm font-medium text-gray-900 dark:text-gray-100">Mastered "Basic Vocabulary"</p>
-                  <p className="text-xs text-gray-600 dark:text-gray-400">Yesterday</p>
-                </div>
-              </div>
-
-              <div className="flex items-center p-4 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
-                <div className="p-2 bg-purple-100 dark:bg-purple-900/20 rounded-lg">
-                  <svg className="w-4 h-4 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                  </svg>
-                </div>
-                <div className="ml-3">
-                  <p className="text-sm font-medium text-gray-900 dark:text-gray-100">7-day streak achieved!</p>
-                  <p className="text-xs text-gray-600 dark:text-gray-400">3 days ago</p>
-                </div>
-              </div>
+          {/* Quick Stats */}
+          <div className="mt-8 md:mt-16 grid grid-cols-3 gap-3 md:gap-4 text-center">
+            <div className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm border border-gray-200/50 dark:border-gray-700/50 rounded-xl p-3 md:p-4">
+              <div className="text-xl md:text-2xl font-light text-gray-900 dark:text-white mb-1">847</div>
+              <div className="text-xs text-gray-600 dark:text-gray-400 font-light">Characters Mastered</div>
+            </div>
+            <div className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm border border-gray-200/50 dark:border-gray-700/50 rounded-xl p-3 md:p-4">
+              <div className="text-xl md:text-2xl font-light text-gray-900 dark:text-white mb-1">30</div>
+              <div className="text-xs text-gray-600 dark:text-gray-400 font-light">Day Streak</div>
+            </div>
+            <div className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm border border-gray-200/50 dark:border-gray-700/50 rounded-xl p-3 md:p-4">
+              <div className="text-xl md:text-2xl font-light text-gray-900 dark:text-white mb-1">97%</div>
+              <div className="text-xs text-gray-600 dark:text-gray-400 font-light">Accuracy</div>
             </div>
           </div>
         </div>
