@@ -108,17 +108,8 @@ export function ReadingLesson({ lessonId, onLessonComplete, backUrl = '/dashboar
   
   return (
     <div className="min-h-screen bg-white flex flex-col">
-      {/* Header with back button and lesson info */}
+      {/* Header with lesson info */}
       <header className="sticky top-0 z-10 bg-white border-b border-gray-100 px-4 py-3 flex items-center">
-        <Link 
-          href={backUrl}
-          className="mr-4 p-2 rounded-full hover:bg-gray-100 transition-colors"
-          aria-label="Go back"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M19 12H5M12 19l-7-7 7-7"></path>
-          </svg>
-        </Link>
         <h1 className="text-lg font-medium">Reading - Lesson {lessonId.replace('r', '')}</h1>
       </header>
       

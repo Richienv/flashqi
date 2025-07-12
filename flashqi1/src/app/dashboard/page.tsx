@@ -17,18 +17,18 @@ export default function DashboardPage() {
   const practiceCards = [
     {
       id: 'flashcards',
-      title: 'Flashcards',
+      title: 'Master Chinese in Minutes',
       subtitle: 'only took 5 minutes to re-vise 908 words you\'ve learnd. Start now or never',
       count: `${dbTotalCount} cards created`,
-      bgClass: 'bg-gradient-to-br from-blue-50 to-white dark:from-blue-900/20 dark:to-blue-800/10',
-      borderClass: 'border border-blue-100 dark:border-blue-800/50',
-      hoverBorderClass: 'hover:border-blue-300 dark:hover:border-blue-700',
-      iconBgClass: 'bg-blue-600 dark:bg-blue-500',
-      textClass: 'text-blue-600 dark:text-blue-400',
-      countTextClass: 'text-blue-600 dark:text-blue-400',
-      borderTClass: 'border-blue-100 dark:border-blue-800/50',
-      buttonClass: 'bg-blue-600 dark:bg-blue-500',
-      hoverButtonClass: 'hover:bg-blue-700 dark:hover:bg-blue-600',
+      bgClass: 'bg-gradient-to-br from-gray-100 via-gray-50 to-gray-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 border-t border-orange-500/20',
+      borderClass: 'border border-orange-200 dark:border-orange-700/50',
+      hoverBorderClass: 'hover:border-orange-300 dark:hover:border-orange-600',
+      iconBgClass: 'bg-orange-600 dark:bg-orange-500',
+      textClass: 'text-orange-600 dark:text-orange-400',
+      countTextClass: 'text-orange-600 dark:text-orange-400',
+      borderTClass: 'border-orange-200 dark:border-orange-700/50',
+      buttonClass: 'bg-orange-600 dark:bg-orange-500',
+      hoverButtonClass: 'hover:bg-orange-700 dark:hover:bg-orange-600',
       icon: (
         <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <line x1="4" y1="19" x2="20" y2="19"></line>
@@ -44,18 +44,18 @@ export default function DashboardPage() {
     },
     {
       id: 'reading',
-      title: 'Reading',
+      title: 'Read Like Lightning',
       subtitle: 'boost your reading speed by 3x in just 10 minutes daily',
       count: '2900+ reading passages available',
-      bgClass: 'bg-gradient-to-br from-green-50 to-white dark:from-green-900/20 dark:to-green-800/10',
-      borderClass: 'border border-green-100 dark:border-green-800/50',
-      hoverBorderClass: 'hover:border-green-300 dark:hover:border-green-700',
-      iconBgClass: 'bg-green-600 dark:bg-green-500',
-      textClass: 'text-green-600 dark:text-green-400',
-      countTextClass: 'text-green-600 dark:text-green-400',
-      borderTClass: 'border-green-100 dark:border-green-800/50',
-      buttonClass: 'bg-green-600 dark:bg-green-500',
-      hoverButtonClass: 'hover:bg-green-700 dark:hover:bg-green-600',
+      bgClass: 'bg-gradient-to-br from-gray-100 via-gray-50 to-gray-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 border-t border-emerald-500/20',
+      borderClass: 'border border-emerald-200 dark:border-emerald-700/50',
+      hoverBorderClass: 'hover:border-emerald-300 dark:hover:border-emerald-600',
+      iconBgClass: 'bg-emerald-600 dark:bg-emerald-500',
+      textClass: 'text-emerald-600 dark:text-emerald-400',
+      countTextClass: 'text-emerald-600 dark:text-emerald-400',
+      borderTClass: 'border-emerald-200 dark:border-emerald-700/50',
+      buttonClass: 'bg-emerald-600 dark:bg-emerald-500',
+      hoverButtonClass: 'hover:bg-emerald-700 dark:hover:bg-emerald-600',
       icon: (
         <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
@@ -69,16 +69,16 @@ export default function DashboardPage() {
     },
     {
       id: 'speaking',
-      title: 'Speaking',
+      title: 'Talk Like a Native',
       subtitle: 'speak like a native in 30 days. no cap fr',
       count: '1500+ phrases ready to master',
-      bgClass: 'bg-gradient-to-br from-purple-50 to-white dark:from-purple-900/20 dark:to-purple-800/10',
-      borderClass: 'border border-purple-100 dark:border-purple-800/50',
-      hoverBorderClass: 'hover:border-purple-300 dark:hover:border-purple-700',
+      bgClass: 'bg-gradient-to-br from-gray-100 via-gray-50 to-gray-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 border-t border-purple-500/20',
+      borderClass: 'border border-purple-200 dark:border-purple-700/50',
+      hoverBorderClass: 'hover:border-purple-300 dark:hover:border-purple-600',
       iconBgClass: 'bg-purple-600 dark:bg-purple-500',
       textClass: 'text-purple-600 dark:text-purple-400',
       countTextClass: 'text-purple-600 dark:text-purple-400',
-      borderTClass: 'border-purple-100 dark:border-purple-800/50',
+      borderTClass: 'border-purple-200 dark:border-purple-700/50',
       buttonClass: 'bg-purple-600 dark:bg-purple-500',
       hoverButtonClass: 'hover:bg-purple-700 dark:hover:bg-purple-600',
       icon: (
@@ -95,44 +95,19 @@ export default function DashboardPage() {
       }
     },
     {
-      id: 'battle',
-      title: 'Battle Mode',
-      subtitle: 'challenge your friends and flex your skills',
-      count: 'live battles happening now',
-      bgClass: 'bg-gradient-to-br from-indigo-50 to-white dark:from-indigo-900/20 dark:to-indigo-800/10',
-      borderClass: 'border border-indigo-100 dark:border-indigo-800/50',
-      hoverBorderClass: 'hover:border-indigo-300 dark:hover:border-indigo-700',
-      iconBgClass: 'bg-indigo-600 dark:bg-indigo-500',
-      textClass: 'text-indigo-600 dark:text-indigo-400',
-      countTextClass: 'text-indigo-600 dark:text-indigo-400',
-      borderTClass: 'border-indigo-100 dark:border-indigo-800/50',
-      buttonClass: 'bg-indigo-600 dark:bg-indigo-500',
-      hoverButtonClass: 'hover:bg-indigo-700 dark:hover:bg-indigo-600',
-      hasNewBadge: true,
-      icon: (
-        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M13.5 21v-7.5a.75.75 0 01.75-.75h3a.75.75 0 01.75.75V21m-4.5 0H2.36m11.14 0H18m0 0h3.64m-1.39 0V9.349m-16.5 11.65V9.35m0 0a3.001 3.001 0 003.75-.615A2.993 2.993 0 009.75 9.75c.896 0 1.7-.393 2.25-1.016a2.993 2.993 0 002.25 1.016c.896 0 1.7-.393 2.25-1.016a3.001 3.001 0 003.75.614m-16.5 0a3.004 3.004 0 01-.621-4.72L4.318 3.44A1.5 1.5 0 015.378 3h13.243a1.5 1.5 0 011.06.44l1.19 1.189a3 3 0 01-.621 4.72m-13.5 8.65h3.75a.75.75 0 00.75-.75V13.5a.75.75 0 00-.75-.75H6.75a.75.75 0 00-.75.75v3.75c0 .415.336.75.75.75z" />
-        </svg>
-      ),
-      onClick: () => {
-        console.log('Battle Mode clicked');
-        router.push('/dashboard/battle');
-      }
-    },
-    {
       id: 'homework',
-      title: 'Homework',
+      title: 'Stay On Top',
       subtitle: 'stay on top of your game with smart tracking',
       count: 'assignments organized perfectly',
-      bgClass: 'bg-gradient-to-br from-amber-50 to-white dark:from-amber-900/20 dark:to-amber-800/10',
-      borderClass: 'border border-amber-100 dark:border-amber-800/50',
-      hoverBorderClass: 'hover:border-amber-300 dark:hover:border-amber-700',
-      iconBgClass: 'bg-amber-600 dark:bg-amber-500',
-      textClass: 'text-amber-600 dark:text-amber-400',
-      countTextClass: 'text-amber-600 dark:text-amber-400',
-      borderTClass: 'border-amber-100 dark:border-amber-800/50',
-      buttonClass: 'bg-amber-600 dark:bg-amber-500',
-      hoverButtonClass: 'hover:bg-amber-700 dark:hover:bg-amber-600',
+      bgClass: 'bg-gradient-to-br from-gray-100 via-gray-50 to-gray-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 border-t border-yellow-500/20',
+      borderClass: 'border border-yellow-200 dark:border-yellow-700/50',
+      hoverBorderClass: 'hover:border-yellow-300 dark:hover:border-yellow-600',
+      iconBgClass: 'bg-yellow-600 dark:bg-yellow-500',
+      textClass: 'text-yellow-600 dark:text-yellow-400',
+      countTextClass: 'text-yellow-600 dark:text-yellow-400',
+      borderTClass: 'border-yellow-200 dark:border-yellow-700/50',
+      buttonClass: 'bg-yellow-600 dark:bg-yellow-500',
+      hoverButtonClass: 'hover:bg-yellow-700 dark:hover:bg-yellow-600',
       icon: (
         <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
@@ -146,18 +121,18 @@ export default function DashboardPage() {
     },
     {
       id: 'exam',
-      title: 'Exam Test',
+      title: 'Ace Every Test',
       subtitle: 'ace your exams with confidence and zero stress',
       count: '850+ practice questions',
-      bgClass: 'bg-gradient-to-br from-orange-50 to-white dark:from-orange-900/20 dark:to-orange-800/10',
-      borderClass: 'border border-orange-100 dark:border-orange-800/50',
-      hoverBorderClass: 'hover:border-orange-300 dark:hover:border-orange-700',
-      iconBgClass: 'bg-orange-600 dark:bg-orange-500',
-      textClass: 'text-orange-600 dark:text-orange-400',
-      countTextClass: 'text-orange-600 dark:text-orange-400',
-      borderTClass: 'border-orange-100 dark:border-orange-800/50',
-      buttonClass: 'bg-orange-600 dark:bg-orange-500',
-      hoverButtonClass: 'hover:bg-orange-700 dark:hover:bg-orange-600',
+      bgClass: 'bg-gradient-to-br from-gray-100 via-gray-50 to-gray-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 border-t border-red-500/20',
+      borderClass: 'border border-red-200 dark:border-red-700/50',
+      hoverBorderClass: 'hover:border-red-300 dark:hover:border-red-600',
+      iconBgClass: 'bg-red-600 dark:bg-red-500',
+      textClass: 'text-red-600 dark:text-red-400',
+      countTextClass: 'text-red-600 dark:text-red-400',
+      borderTClass: 'border-red-200 dark:border-red-700/50',
+      buttonClass: 'bg-red-600 dark:bg-red-500',
+      hoverButtonClass: 'hover:bg-red-700 dark:hover:bg-red-600',
       icon: (
         <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <path d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
@@ -173,58 +148,15 @@ export default function DashboardPage() {
   return (
     <div className="flex flex-col h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 overflow-hidden">
       <main className="flex-1 flex items-center justify-center pb-20 md:pb-24 overflow-y-auto overflow-x-hidden">
-        <div className="w-full max-w-2xl mx-auto px-4 py-8 overflow-x-hidden">
-          {/* Back Button */}
-          <div className="flex justify-start mb-6">
-            <button
-              onClick={() => router.back()}
-              className="p-2 rounded-full bg-white/20 dark:bg-black/20 backdrop-blur-sm border border-white/30 dark:border-white/10 text-black dark:text-white hover:bg-white/30 dark:hover:bg-black/30 transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-sm"
-              title="Go Back"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M19 12H5M12 19l-7-7 7-7"></path>
-              </svg>
-            </button>
-          </div>
-
-          {/* Logo and Header */}
-          <div className="text-center mb-8 md:mb-12">
-            <div className="flex items-center justify-center mb-4 md:mb-6">
-              <Image
-                src="/flashqi-main-logo.png"
-                alt="FlashQi"
-                width={48}
-                height={48}
-                className="transition-transform hover:scale-110"
-              />
-              <h1 className="ml-3 text-3xl md:text-4xl font-thin text-gray-900 dark:text-white">FlashQi</h1>
-            </div>
-            <p className="text-gray-600 dark:text-gray-400 font-light text-base md:text-lg">
-              Choose your learning path
-            </p>
-            <div className="mt-2 md:mt-3 text-xs md:text-sm text-gray-500 dark:text-gray-500">
-              Swipe or tap dots to explore options
-            </div>
+        <div className="w-full max-w-2xl mx-auto px-4 overflow-x-hidden flex flex-col items-center">
+          
+          {/* Logo and Header - Centered with cards */}
+          <div className="flex items-center justify-center mb-6">
+            <h1 className="text-3xl md:text-4xl font-thin text-gray-900 dark:text-white">FlashQi</h1>
           </div>
 
           {/* Card Swiper */}
           <CardSwiper cards={practiceCards} dbTotalCount={dbTotalCount} />
-
-          {/* Quick Stats */}
-          <div className="mt-8 md:mt-16 grid grid-cols-3 gap-3 md:gap-4 text-center">
-            <div className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm border border-gray-200/50 dark:border-gray-700/50 rounded-xl p-3 md:p-4">
-              <div className="text-xl md:text-2xl font-light text-gray-900 dark:text-white mb-1">847</div>
-              <div className="text-xs text-gray-600 dark:text-gray-400 font-light">Characters Mastered</div>
-            </div>
-            <div className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm border border-gray-200/50 dark:border-gray-700/50 rounded-xl p-3 md:p-4">
-              <div className="text-xl md:text-2xl font-light text-gray-900 dark:text-white mb-1">30</div>
-              <div className="text-xs text-gray-600 dark:text-gray-400 font-light">Day Streak</div>
-            </div>
-            <div className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm border border-gray-200/50 dark:border-gray-700/50 rounded-xl p-3 md:p-4">
-              <div className="text-xl md:text-2xl font-light text-gray-900 dark:text-white mb-1">97%</div>
-              <div className="text-xs text-gray-600 dark:text-gray-400 font-light">Accuracy</div>
-            </div>
-          </div>
         </div>
       </main>
     </div>

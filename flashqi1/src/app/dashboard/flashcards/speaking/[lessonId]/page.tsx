@@ -13,6 +13,7 @@ import {
   LEVEL2_LESSONS, 
   getLevel2PracticeByLesson 
 } from "@/data/practice-level2-data";
+import { MobileNavCustom } from '@/components/ui/navbar';
 import type { PracticeExercise } from "@/data/practice-level1-data";
 
 // Exercise type icons
@@ -289,13 +290,6 @@ export default function SpeakingLessonPage({ params }: { params: { lessonId: str
             <p className="text-gray-600 dark:text-gray-400 mb-4">
               Please use a valid lesson format (e.g., l1-1, l2-3)
             </p>
-            <Link 
-              href="/dashboard"
-              className="inline-flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100"
-            >
-              <ArrowLeft size={16} />
-              <span>Back to Speaking Practice</span>
-            </Link>
           </div>
         </main>
       </div>
@@ -318,13 +312,6 @@ export default function SpeakingLessonPage({ params }: { params: { lessonId: str
             <p className="text-gray-600 dark:text-gray-400 mb-4">
               Lesson {lesson} for Level {level} does not exist
             </p>
-            <Link 
-              href="/dashboard"
-              className="inline-flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100"
-            >
-              <ArrowLeft size={16} />
-              <span>Back to Speaking Practice</span>
-            </Link>
           </div>
         </main>
       </div>
@@ -379,6 +366,9 @@ export default function SpeakingLessonPage({ params }: { params: { lessonId: str
           </div>
         </div>
       </main>
+      
+      {/* Page-specific mobile navigation */}
+      <MobileNavCustom backUrl="/dashboard/flashcards/speaking" />
     </div>
   );
 } 

@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { useState, useRef, useEffect } from "react";
 import { supabase } from "@/lib/supabase/client";
+import { MobileNavCustom } from '@/components/ui/navbar';
 
 // Homework Item Interface
 interface HomeworkItem {
@@ -454,13 +455,8 @@ export default function HomeworkPage() {
     <div className="flex flex-col min-h-screen bg-white dark:bg-[#0e0e0e]">
       <main className="flex-1 pt-24 pb-6">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
-          {/* Header and Back Button */}
+          {/* Header */}
           <div className="flex items-center mb-6">
-            <Link href="/dashboard/flashcards" className="mr-3 p-2 rounded-full bg-white dark:bg-gray-800 border border-blue-200 dark:border-gray-700 hover:bg-blue-50 dark:hover:bg-gray-700">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-900 dark:text-gray-100">
-                <path d="M19 12H5M12 19l-7-7 7-7"></path>
-              </svg>
-            </Link>
             <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Homework</h1>
           </div>
 
@@ -872,6 +868,9 @@ export default function HomeworkPage() {
           </div>
         </div>
       )}
+      
+      {/* Page-specific mobile navigation */}
+      <MobileNavCustom backUrl="/dashboard" />
     </div>
   );
 } 

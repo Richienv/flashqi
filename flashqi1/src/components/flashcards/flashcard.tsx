@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { useSwipeable } from 'react-swipeable';
 import { cn } from '@/lib/utils';
 import { Flashcard as FlashcardType } from '@/types';
 
@@ -19,18 +18,6 @@ interface FlashcardProps {
 
 export function Flashcard({ card, onDifficulty, onKnown, onUnknown, isDatabaseMode = true, onDrawToggle, isDrawingOpen = false, isCompactMode = false }: FlashcardProps) {
   const [isFlipped, setIsFlipped] = useState(false);
-  
-  const handlers = useSwipeable({
-    onSwipedRight: () => {
-      if (onDifficulty) onDifficulty('easy');
-      else if (onKnown) onKnown(); // Legacy support
-    },
-    onSwipedLeft: () => {
-      if (onDifficulty) onDifficulty('hard');
-      else if (onUnknown) onUnknown(); // Legacy support
-    },
-    trackMouse: true
-  });
 
   const handleFlip = () => {
     setIsFlipped(!isFlipped);
@@ -38,7 +25,6 @@ export function Flashcard({ card, onDifficulty, onKnown, onUnknown, isDatabaseMo
 
   return (
     <div 
-      {...handlers}
       className={`w-full mx-auto perspective-1000 cursor-pointer flex flex-col items-center justify-center ${
         isCompactMode 
           ? 'max-w-xs h-[120px]' // Compact mode: smaller size

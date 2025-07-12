@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Navbar, MobileNav } from "@/components/ui/navbar";
+import { Navbar, MobileNavCustom } from "@/components/ui/navbar";
 import { CommentSection } from "@/components/comments/comment";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
@@ -178,7 +178,6 @@ export default function HomeworkDetailPage() {
             <p className="text-gray-900 dark:text-gray-100">Loading homework...</p>
           </div>
         </main>
-        <MobileNav />
       </div>
     );
   }
@@ -206,9 +205,6 @@ export default function HomeworkDetailPage() {
           <div className="mb-8">
             <div className="flex justify-between items-start">
               <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">{homework.title}</h1>
-              <Link href="/dashboard/homework">
-                <Button variant="outline">Back to Homework</Button>
-              </Link>
             </div>
           </div>
 
@@ -274,7 +270,9 @@ export default function HomeworkDetailPage() {
           </div>
         </div>
       </main>
-      <MobileNav />
+      
+      {/* Page-specific mobile navigation */}
+      <MobileNavCustom backUrl="/dashboard/homework" />
     </div>
   );
 } 

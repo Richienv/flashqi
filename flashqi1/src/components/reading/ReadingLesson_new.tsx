@@ -107,18 +107,6 @@ export function ReadingLesson({ lessonId, onLessonComplete, backUrl = '/dashboar
       {/* E-book background with subtle page texture */}
       <div className="absolute inset-0 bg-[url('data:image/png;base64,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')] opacity-10"></div>
       
-      {/* Back button - small, unobtrusive */}
-      <div className="absolute left-6 top-6 z-10">
-        <Link 
-          href={backUrl}
-          className="w-10 h-10 rounded-full bg-black/10 flex items-center justify-center hover:bg-black/20 transition-colors"
-          aria-label="Return to reading lessons"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M19 12H5M12 19l-7-7 7-7"></path>
-          </svg>
-        </Link>
-      </div>
       
       {/* Subtle page counter at the top */}
       <div className="absolute top-6 right-6 text-sm text-gray-500 font-serif">

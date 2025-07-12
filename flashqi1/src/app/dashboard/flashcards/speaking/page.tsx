@@ -14,6 +14,7 @@ import {
   LEVEL2_LESSONS, 
   getLevel2PracticeByLesson 
 } from "@/data/practice-level2-data";
+import { MobileNavCustom } from '@/components/ui/navbar';
 import type { PracticeExercise } from "@/data/practice-level1-data";
 
 // Dot-matrix style numbers component
@@ -410,13 +411,6 @@ export default function SpeakingFlashcardsPage() {
             <>
               {/* Lesson Detail View */}
               <div className="mb-6">
-                                <button
-                  onClick={() => setSelectedLesson(null)}
-                  className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 mb-4 mx-auto"
-                >
-                  <ArrowLeft size={16} />
-                  <span>Back to Lessons</span>
-                                </button>
                 
                 <div className="bg-white dark:bg-[#101010] border border-gray-200 dark:border-gray-800 rounded-2xl p-6 mb-6 text-center max-w-2xl mx-auto">
                   <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
@@ -449,6 +443,9 @@ export default function SpeakingFlashcardsPage() {
           )}
         </div>
       </main>
+      
+      {/* Page-specific mobile navigation */}
+      <MobileNavCustom backUrl="/dashboard/flashcards" />
     </div>
   );
 }

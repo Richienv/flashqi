@@ -54,15 +54,6 @@ export function Navbar() {
                 >
                   Flashcards
                 </Link>
-                <Link 
-                  href="/dashboard/battle" 
-                  className={`text-sm font-medium transition-colors ${pathname.includes('/dashboard/battle') ? 'text-indigo-600 dark:text-indigo-400' : 'text-black/70 dark:text-gray-300 hover:text-black dark:hover:text-white'}`}
-                >
-                  Battle Mode
-                  <span className="ml-1 inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100/80 dark:bg-indigo-900/50 text-indigo-800 dark:text-indigo-200 backdrop-blur-sm">
-                    New!
-                  </span>
-                </Link>
               </nav>
             ) : (
               <nav className="hidden md:ml-10 md:flex md:items-center md:space-x-6">
@@ -194,18 +185,54 @@ export function MobileNav() {
   const pathname = usePathname();
   const isDashboard = pathname.includes('/dashboard');
   const { isAuthenticated } = useAuth();
+  const isMainDashboard = pathname === '/dashboard';
   
   if (!isDashboard || !isAuthenticated) return null;
+  
+  // Debug logging
+  console.log('MobileNav rendering:', { pathname, isMainDashboard });
   
   return (
     <div className="md:hidden fixed bottom-4 left-4 right-4 z-50">
       <div className="bg-white/10 dark:bg-black/10 backdrop-blur-lg border border-white/20 dark:border-white/10 shadow-lg rounded-2xl px-4 py-3">
         <div className="grid h-full max-w-lg grid-cols-3 mx-auto">
-          {/* Spaced Repetition Access */}
+          {/* Spaced Repetition Access - only on main dashboard */}
+          {isMainDashboard ? (
+            <Link
+              href="/dashboard/flashcards/spaced-repetition"
+              className="inline-flex flex-col items-center justify-center font-medium transition-colors text-black/70 dark:text-gray-300"
+            >
+              <svg 
+                xmlns="http://www.w3.org/2000/svg" 
+                fill="none" 
+                viewBox="0 0 24 24" 
+                strokeWidth="1.5" 
+                stroke="currentColor" 
+                className="w-6 h-6 mb-1"
+              >
+                <path 
+                  strokeLinecap="round" 
+                  strokeLinejoin="round" 
+                  d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" 
+                />
+              </svg>
+              <span className="text-xs">Spaced Rep</span>
+            </Link>
+          ) : (
+            <div></div>
+          )}
+          
+          {/* Theme Toggle */}
+          <div className="inline-flex flex-col items-center justify-center font-medium">
+            <ThemeToggle />
+            <span className="text-xs text-black/70 dark:text-gray-300 mt-1">Theme</span>
+          </div>
+          
+          {/* Profile */}
           <Link
-            href="/dashboard/flashcards/spaced-repetition"
+            href="/profile"
             className={`inline-flex flex-col items-center justify-center font-medium transition-colors ${
-              pathname.includes('/spaced-repetition') ? 'text-purple-600 dark:text-purple-400' : 'text-black/70 dark:text-gray-300'
+              pathname.includes('/profile') ? 'text-blue-600 dark:text-blue-400' : 'text-black/70 dark:text-gray-300'
             }`}
           >
             <svg 
@@ -219,11 +246,74 @@ export function MobileNav() {
               <path 
                 strokeLinecap="round" 
                 strokeLinejoin="round" 
-                d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" 
+                d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" 
               />
             </svg>
-            <span className="text-xs">Spaced Rep</span>
+            <span className="text-xs">Profile</span>
           </Link>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Custom Mobile Navigation with specific back URL
+interface MobileNavCustomProps {
+  backUrl: string;
+  showBackButton?: boolean;
+}
+
+export function MobileNavCustom({ backUrl, showBackButton = true }: MobileNavCustomProps) {
+  const pathname = usePathname();
+  const { isAuthenticated } = useAuth();
+  
+  if (!isAuthenticated) return null;
+  
+  // Get context-aware back button text based on current route
+  const getBackButtonText = () => {
+    if (pathname.includes('/study/')) {
+      return 'Back to Lesson';
+    } else if (pathname.includes('/lessons/')) {
+      return 'Back to Levels';
+    } else if (pathname.includes('/levels/')) {
+      return 'Back to Levels';
+    } else if (pathname.includes('/spaced-repetition')) {
+      return 'Back to Levels';
+    } else if (pathname.includes('/flashcards')) {
+      return 'Back to Dashboard';
+    }
+    return 'Back';
+  };
+  
+  return (
+    <div className="md:hidden fixed bottom-4 left-4 right-4 z-[60]">
+      <div className="bg-white/10 dark:bg-black/10 backdrop-blur-lg border border-white/20 dark:border-white/10 shadow-lg rounded-2xl px-4 py-3">
+        <div className="grid h-full max-w-lg grid-cols-3 mx-auto">
+          {/* Custom Back Button */}
+          {showBackButton ? (
+            <Link
+              href={backUrl}
+              className="inline-flex flex-col items-center justify-center font-medium transition-colors text-black/70 dark:text-gray-300"
+            >
+              <svg 
+                xmlns="http://www.w3.org/2000/svg" 
+                fill="none" 
+                viewBox="0 0 24 24" 
+                strokeWidth="1.5" 
+                stroke="currentColor" 
+                className="w-6 h-6 mb-1"
+              >
+                <path 
+                  strokeLinecap="round" 
+                  strokeLinejoin="round" 
+                  d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" 
+                />
+              </svg>
+              <span className="text-xs">{getBackButtonText()}</span>
+            </Link>
+          ) : (
+            <div></div>
+          )}
           
           {/* Theme Toggle */}
           <div className="inline-flex flex-col items-center justify-center font-medium">

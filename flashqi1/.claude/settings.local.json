@@ -6,7 +6,12 @@
       "Bash(npx tsc:*)",
       "Bash(timeout 10s npm run dev)",
       "Bash(true)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(grep:*)",
+      "Bash(rg:*)",
+      "Bash(find:*)",
+      "Bash(npm run build:*)",
+      "Bash(npm run type-check:*)"
     ],
     "deny": []
   }

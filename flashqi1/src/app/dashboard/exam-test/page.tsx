@@ -369,16 +369,7 @@ export default function ExamTestPage() {
             <div className="fixed inset-0 bg-gradient-to-b from-[#001060] via-[#2D41D1] to-[#5E72E4] z-50 overflow-hidden flex flex-col">
               {/* Header */}
               <div className="px-6 pt-8 pb-4 flex-1 flex flex-col">
-                <div className="flex justify-between items-center mb-8">
-                  <button 
-                    className="w-10 h-10 rounded-full bg-white/20 dark:bg-black/20 border border-white/30 dark:border-gray-600 flex items-center justify-center text-white hover:bg-white/30 dark:hover:bg-black/30 elegant-transition"
-                    onClick={exitStudySession}
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M19 12H5M12 19l-7-7 7-7"></path>
-                    </svg>
-                  </button>
-                  
+                <div className="flex justify-center items-center mb-8">
                   <div className="text-center">
                     <h1 className="text-xl font-normal text-white mb-1">
                       {activeLesson === "midterm-prep"
@@ -397,8 +388,6 @@ export default function ExamTestPage() {
                       }
                     </p>
                   </div>
-                  
-                  <div className="w-10 h-10"></div>
                 </div>
                 
                 {/* Progress bar */}
@@ -523,11 +512,6 @@ export default function ExamTestPage() {
               {/* Header */}
               <div className="flex items-center justify-between mb-10">
                 <div className="flex items-center">
-                  <Link href="/dashboard/flashcards" className="mr-3 w-10 h-10 rounded-full bg-white dark:bg-[#101010] border border-gray-200 dark:border-gray-700 flex items-center justify-center hover:bg-gray-50 dark:hover:bg-gray-800 elegant-transition">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-600 dark:text-gray-400">
-                      <path d="M19 12H5M12 19l-7-7 7-7"></path>
-                    </svg>
-                  </Link>
                   <h1 className="text-2xl font-normal text-black dark:text-white">Exam Preparation</h1>
                 </div>
               </div>

@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/auth-context';
 import { FlashcardDatabaseService, FlashcardWithProgress } from '@/services/flashcardDatabaseService';
 import { TextShimmer } from '@/components/magicui/text-shimmer';
+import { MobileNavCustom } from '@/components/ui/navbar';
 
 interface DifficultyOption {
   id: 'easy' | 'normal' | 'hard' | 'difficult' | 'all';
@@ -510,6 +511,9 @@ export default function SpacedRepetitionPage() {
           </div>
         </div>
       </main>
+      
+      {/* Page-specific mobile navigation */}
+      <MobileNavCustom backUrl="/dashboard/flashcards" />
     </div>
   );
 } 

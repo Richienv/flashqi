@@ -77,13 +77,8 @@ export default function ListeningPracticePage() {
     <div className="flex flex-col min-h-screen bg-white">
       <main className="flex-1 py-6">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Header and Back Button */}
-          <div className="flex items-center mb-6">
-            <Link href="/dashboard/flashcards" className="mr-3 p-2 rounded-full bg-white border border-blue-200 hover:bg-blue-50">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M19 12H5M12 19l-7-7 7-7"></path>
-              </svg>
-            </Link>
+          {/* Header */}
+          <div className="mb-6">
             <h1 className="text-2xl font-bold text-black">Listening Practice</h1>
           </div>
           

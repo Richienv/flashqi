@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Navbar, MobileNav } from "@/components/ui/navbar";
+import { Navbar, MobileNavCustom } from "@/components/ui/navbar";
 import { EnhancedFlashcard } from "@/components/flashcards/enhanced-flashcard";
 import { CommentSection } from "@/components/comments/comment";
 import { Button } from "@/components/ui/button";
@@ -157,7 +157,6 @@ export default function FlashcardDetailPage() {
             <p className="text-black dark:text-white">Loading flashcard...</p>
           </div>
         </main>
-        <MobileNav />
       </div>
     );
   }
@@ -168,15 +167,6 @@ export default function FlashcardDetailPage() {
       <header className="fixed top-4 left-1/2 transform -translate-x-1/2 z-10 w-full max-w-md mx-4">
         <div className="bg-white/10 dark:bg-black/10 backdrop-filter backdrop-blur-lg border border-white/20 dark:border-gray-600 rounded-xl p-4">
           <div className="flex items-center justify-between">
-            <Link 
-              href="/dashboard" 
-              className="p-2 rounded-full bg-white/20 dark:bg-black/20 backdrop-blur-sm border border-white/30 dark:border-white/10 text-black dark:text-white hover:bg-white/30 dark:hover:bg-black/30 transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-sm"
-              title="Back to Dashboard"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M19 12H5M12 19l-7-7 7-7"></path>
-              </svg>
-            </Link>
             <div className="text-center flex-1 mx-4">
               <h1 className="text-lg font-semibold text-black dark:text-white">Lesson {flashcard.lesson_id}</h1>
               <p className="text-sm text-black/70 dark:text-white/70">Flashcard Detail</p>
@@ -233,7 +223,9 @@ export default function FlashcardDetailPage() {
           </div>
         </div>
       </main>
-      <MobileNav />
+      
+      {/* Page-specific mobile navigation */}
+      <MobileNavCustom backUrl="/dashboard/flashcards" />
     </div>
   );
 } 
