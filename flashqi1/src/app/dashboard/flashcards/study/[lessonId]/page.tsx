@@ -340,91 +340,174 @@ export default function FlashcardStudyPage() {
 
   // Drawing card functions
   const toggleDrawingCard = () => {
+    console.log('🎨 TOGGLE DRAWING CARD:', { 
+      current: isDrawingCardOpen, 
+      willBe: !isDrawingCardOpen,
+      canvasExists: !!drawingCardCanvasRef.current 
+    });
     setIsDrawingCardOpen(!isDrawingCardOpen);
-    
-    if (!isDrawingCardOpen && drawingCardCanvasRef.current) {
-      setTimeout(() => {
-        initializeDrawingCardCanvas();
-      }, 100);
-    }
   };
 
-  // Add effect to handle passive event listeners and ensure drawing always works
+  // Add effect to handle canvas initialization and event listeners
   useEffect(() => {
+    console.log('🔄 CANVAS EFFECT RUNNING:', {
+      isDrawingCardOpen,
+      canvasExists: !!drawingCardCanvasRef.current,
+      contextExists: !!drawingCardCtx
+    });
+
     const canvas = drawingCardCanvasRef.current;
-    if (!canvas || !isDrawingCardOpen) return;
+    if (!canvas || !isDrawingCardOpen) {
+      console.log('❌ CANVAS EFFECT EARLY RETURN:', { 
+        canvas: !!canvas, 
+        isDrawingCardOpen 
+      });
+      return;
+    }
+
+    // Initialize canvas if not already done
+    let context = drawingCardCtx;
+    if (!context) {
+      console.log('🎯 INITIALIZING CANVAS CONTEXT...');
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        const rect = canvas.getBoundingClientRect();
+        const devicePixelRatio = window.devicePixelRatio || 1;
+        
+        // Set actual canvas size with device pixel ratio for crisp rendering
+        canvas.width = rect.width * devicePixelRatio;
+        canvas.height = rect.height * devicePixelRatio;
+        
+        // Scale CSS size back to original
+        canvas.style.width = rect.width + 'px';
+        canvas.style.height = rect.height + 'px';
+        
+        // Scale the drawing context to match device pixel ratio
+        ctx.scale(devicePixelRatio, devicePixelRatio);
+        
+        // Configure drawing style for smooth pen-like strokes
+        ctx.strokeStyle = '#3b82f6'; // Blue color
+        ctx.lineWidth = 2; // Thinner stroke
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'high';
+        
+        setDrawingCardCtx(ctx);
+        context = ctx;
+        
+        const initialState = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        setDrawingCardStrokeHistory([initialState]);
+        
+        console.log('✅ CANVAS CONTEXT INITIALIZED:', {
+          width: canvas.width,
+          height: canvas.height,
+          devicePixelRatio,
+          strokeStyle: ctx.strokeStyle
+        });
+      }
+    }
+
+    if (!context) {
+      console.log('❌ NO CONTEXT AVAILABLE');
+      return;
+    }
+
+    // Use a local variable for drawing state to avoid React state timing issues
+    let isCurrentlyDrawing = false;
 
     // Add non-passive event listeners with drawing functionality
     const handleTouchStart = (e: TouchEvent) => {
+      console.log('👆 TOUCH START');
       e.preventDefault();
-      if (!drawingCardCtx || !canvas) return;
+      if (!context || !canvas) return;
       
+      isCurrentlyDrawing = true;
       setIsDrawingOnCard(true);
       const rect = canvas.getBoundingClientRect();
       const touch = e.touches[0];
       const x = touch.clientX - rect.left;
       const y = touch.clientY - rect.top;
       
-      drawingCardCtx.beginPath();
-      drawingCardCtx.moveTo(x, y);
+      console.log('🎯 STARTING DRAW AT:', { x, y, canvasWidth: canvas.width, canvasHeight: canvas.height, rectWidth: rect.width, rectHeight: rect.height });
+      context.beginPath();
+      context.moveTo(x, y);
     };
 
     const handleTouchMove = (e: TouchEvent) => {
+      console.log('👆 TOUCH MOVE - isCurrentlyDrawing:', isCurrentlyDrawing);
       e.preventDefault();
-      if (!isDrawingOnCard || !drawingCardCtx || !canvas) return;
+      if (!isCurrentlyDrawing || !context || !canvas) {
+        console.log('❌ TOUCH MOVE BLOCKED:', { isCurrentlyDrawing, context: !!context, canvas: !!canvas });
+        return;
+      }
       
       const rect = canvas.getBoundingClientRect();
       const touch = e.touches[0];
       const x = touch.clientX - rect.left;
       const y = touch.clientY - rect.top;
       
-      drawingCardCtx.lineTo(x, y);
-      drawingCardCtx.stroke();
+      console.log('✏️ DRAWING TO:', { x, y, strokeStyle: context.strokeStyle, lineWidth: context.lineWidth });
+      context.lineTo(x, y);
+      context.stroke();
     };
 
     const handleTouchEnd = (e: TouchEvent) => {
+      console.log('👆 TOUCH END');
       e.preventDefault();
+      isCurrentlyDrawing = false;
       setIsDrawingOnCard(false);
       
-      if (drawingCardCtx && canvas) {
-        const imageData = drawingCardCtx.getImageData(0, 0, canvas.width, canvas.height);
+      if (context && canvas) {
+        const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
         setDrawingCardStrokeHistory(prev => [...prev, imageData]);
       }
     };
 
     // Mouse event handlers for desktop support
     const handleMouseStart = (e: MouseEvent) => {
-      if (!drawingCardCtx || !canvas) return;
+      console.log('🖱️ MOUSE START');
+      if (!context || !canvas) return;
       
+      isCurrentlyDrawing = true;
       setIsDrawingOnCard(true);
       const rect = canvas.getBoundingClientRect();
       const x = e.clientX - rect.left;
       const y = e.clientY - rect.top;
       
-      drawingCardCtx.beginPath();
-      drawingCardCtx.moveTo(x, y);
+      console.log('🎯 STARTING DRAW AT:', { x, y, canvasWidth: canvas.width, canvasHeight: canvas.height });
+      context.beginPath();
+      context.moveTo(x, y);
     };
 
     const handleMouseMove = (e: MouseEvent) => {
-      if (!isDrawingOnCard || !drawingCardCtx || !canvas) return;
+      console.log('🖱️ MOUSE MOVE - isCurrentlyDrawing:', isCurrentlyDrawing);
+      if (!isCurrentlyDrawing || !context || !canvas) {
+        console.log('❌ MOUSE MOVE BLOCKED:', { isCurrentlyDrawing, context: !!context, canvas: !!canvas });
+        return;
+      }
       
       const rect = canvas.getBoundingClientRect();
       const x = e.clientX - rect.left;
       const y = e.clientY - rect.top;
       
-      drawingCardCtx.lineTo(x, y);
-      drawingCardCtx.stroke();
+      console.log('✏️ DRAWING TO:', { x, y, strokeStyle: context.strokeStyle, lineWidth: context.lineWidth });
+      context.lineTo(x, y);
+      context.stroke();
     };
 
     const handleMouseEnd = () => {
+      console.log('🖱️ MOUSE END');
+      isCurrentlyDrawing = false;
       setIsDrawingOnCard(false);
       
-      if (drawingCardCtx && canvas) {
-        const imageData = drawingCardCtx.getImageData(0, 0, canvas.width, canvas.height);
+      if (context && canvas) {
+        const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
         setDrawingCardStrokeHistory(prev => [...prev, imageData]);
       }
     };
 
+    console.log('🔗 ATTACHING EVENT LISTENERS...');
     // Add both touch and mouse event listeners
     canvas.addEventListener('touchstart', handleTouchStart, { passive: false });
     canvas.addEventListener('touchmove', handleTouchMove, { passive: false });
@@ -436,7 +519,10 @@ export default function FlashcardStudyPage() {
     canvas.addEventListener('mouseup', handleMouseEnd);
     canvas.addEventListener('mouseleave', handleMouseEnd);
 
+    console.log('✅ EVENT LISTENERS ATTACHED');
+
     return () => {
+      console.log('🧹 CLEANING UP EVENT LISTENERS');
       canvas.removeEventListener('touchstart', handleTouchStart);
       canvas.removeEventListener('touchmove', handleTouchMove);
       canvas.removeEventListener('touchend', handleTouchEnd);
@@ -447,52 +533,19 @@ export default function FlashcardStudyPage() {
       canvas.removeEventListener('mouseup', handleMouseEnd);
       canvas.removeEventListener('mouseleave', handleMouseEnd);
     };
-  }, [isDrawingCardOpen, drawingCardCtx, isDrawingOnCard]);
-
-  const initializeDrawingCardCanvas = () => {
-    if (!drawingCardCanvasRef.current) return;
-    
-    const canvas = drawingCardCanvasRef.current;
-    const context = canvas.getContext('2d');
-    
-    if (context) {
-      const rect = canvas.getBoundingClientRect();
-      const devicePixelRatio = window.devicePixelRatio || 1;
-      
-      // Set actual canvas size with device pixel ratio for crisp rendering
-      canvas.width = rect.width * devicePixelRatio;
-      canvas.height = rect.height * devicePixelRatio;
-      
-      // Scale CSS size back to original
-      canvas.style.width = rect.width + 'px';
-      canvas.style.height = rect.height + 'px';
-      
-      // Scale the drawing context to match device pixel ratio
-      context.scale(devicePixelRatio, devicePixelRatio);
-      
-      // Configure drawing style for smooth pen-like strokes
-      context.strokeStyle = '#3b82f6';
-      context.lineWidth = 3;
-      context.lineCap = 'round';
-      context.lineJoin = 'round';
-      context.imageSmoothingEnabled = true;
-      context.imageSmoothingQuality = 'high';
-      
-      setDrawingCardCtx(context);
-      
-      const initialState = context.getImageData(0, 0, canvas.width, canvas.height);
-      setDrawingCardStrokeHistory([initialState]);
-    }
-  };
-
+  }, [isDrawingCardOpen]);
 
   const clearDrawingCard = () => {
+    console.log('🧹 CLEARING DRAWING CARD');
     if (drawingCardCtx && drawingCardCanvasRef.current) {
       const canvas = drawingCardCanvasRef.current;
       drawingCardCtx.clearRect(0, 0, canvas.width, canvas.height);
       
       const blankState = drawingCardCtx.getImageData(0, 0, canvas.width, canvas.height);
       setDrawingCardStrokeHistory([blankState]);
+      console.log('✅ DRAWING CARD CLEARED');
+    } else {
+      console.log('❌ CANNOT CLEAR - NO CONTEXT OR CANVAS');
     }
   };
 
@@ -548,9 +601,11 @@ export default function FlashcardStudyPage() {
                   <div className="bg-white dark:bg-gradient-to-br dark:from-[#0a0f2c] dark:via-[#12142b] dark:to-[#000000] rounded-3xl shadow-xl border border-gray-200 dark:border-neutral-700 p-6 w-full">
                     {/* Drawing Card Header */}
                     <div className="flex justify-between items-center mb-4">
-                      <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
-                        Draw: —
-                      </h3>
+                      <div>
+                        <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
+                          Practice Writing
+                        </h3>
+                      </div>
                       <div className="flex items-center space-x-2">
                         <button
                           onClick={clearDrawingCard}
@@ -586,13 +641,6 @@ export default function FlashcardStudyPage() {
                       className="w-full h-80 bg-white dark:bg-gray-800 rounded-xl border border-gray-300 dark:border-gray-600 shadow-inner touch-none"
                       style={{ touchAction: 'none' }}
                     />
-                    
-                    {/* Drawing Hint */}
-                    <div className="mt-4 text-center">
-                      <p className="text-sm text-gray-600 dark:text-gray-300">
-                        {currentFlashcards[currentCardIndex]?.pinyin} • {currentFlashcards[currentCardIndex]?.english}
-                      </p>
-                    </div>
                     
                     {/* Difficulty Rating Buttons for Drawing Mode */}
                     <div className="mt-6 grid grid-cols-4 gap-2">
