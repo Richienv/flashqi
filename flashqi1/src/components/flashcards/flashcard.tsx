@@ -14,9 +14,11 @@ interface FlashcardProps {
   onDrawToggle?: () => void; // New prop for drawing functionality
   isDrawingOpen?: boolean; // New prop to track drawing state
   isCompactMode?: boolean; // New prop for compact drawing mode
+  showHanziHint?: boolean; // New prop for hanzi hint state
+  onHanziHintToggle?: () => void; // New prop for toggling hanzi hint
 }
 
-export function Flashcard({ card, onDifficulty, onKnown, onUnknown, isDatabaseMode = true, onDrawToggle, isDrawingOpen = false, isCompactMode = false }: FlashcardProps) {
+export function Flashcard({ card, onDifficulty, onKnown, onUnknown, isDatabaseMode = true, onDrawToggle, isDrawingOpen = false, isCompactMode = false, showHanziHint = false, onHanziHintToggle }: FlashcardProps) {
   const [isFlipped, setIsFlipped] = useState(false);
 
   const handleFlip = () => {
@@ -28,13 +30,13 @@ export function Flashcard({ card, onDifficulty, onKnown, onUnknown, isDatabaseMo
       className={`w-full mx-auto perspective-1000 cursor-pointer flex flex-col items-center justify-center ${
         isCompactMode 
           ? 'max-w-xs h-[120px]' // Compact mode: smaller size
-          : 'max-w-md h-[340px] sm:h-[400px]' // Normal mode: full size
+          : 'max-w-md h-[420px] sm:h-[480px]' // Normal mode: larger size
       }`}
       onClick={isCompactMode ? undefined : handleFlip} // Disable flip in compact mode
       style={{ 
         margin: '0 auto', 
         padding: '0', 
-        minHeight: isCompactMode ? '120px' : '340px' 
+        minHeight: isCompactMode ? '120px' : '420px' 
       }}
     >
       <style jsx>{`
@@ -124,20 +126,26 @@ export function Flashcard({ card, onDifficulty, onKnown, onUnknown, isDatabaseMo
           "relative w-full h-full transform-style-3d",
           isFlipped && !isCompactMode ? "rotate-y-180" : "" // Disable flip in compact mode
         )}
-        style={{ minHeight: isCompactMode ? '120px' : '340px' }}
+        style={{ minHeight: isCompactMode ? '120px' : '420px' }}
       >
         {/* Front of card: Pinyin and English only */}
         <div
           className={cn(
             "absolute w-full h-full bg-white dark:bg-gradient-to-br dark:from-[#0a0f2c] dark:via-[#12142b] dark:to-[#000000] rounded-3xl shadow-xl backface-hidden flex flex-col items-center justify-center border border-gray-200 dark:border-neutral-700",
             "select-none",
-            isCompactMode ? "p-4" : "p-8" // Less padding in compact mode
+            isCompactMode ? "p-4" : "p-8", // Less padding in compact mode
+            isCompactMode && onHanziHintToggle ? "cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors" : ""
           )}
           style={{ 
             boxShadow: isCompactMode 
               ? '0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24)' // Subtle shadow in compact mode
               : '0 2.8px 2.2px rgba(0,0,0,0.18), 0 6.7px 5.3px rgba(0,0,0,0.22), 0 12.5px 10px rgba(0,0,0,0.24), 0 22.3px 17.9px rgba(0,0,0,0.26), 0 41.8px 33.4px rgba(0,0,0,0.28), 0 100px 80px rgba(0,0,0,0.32)'
           }}
+          onClick={isCompactMode && onHanziHintToggle ? (e) => {
+            e.stopPropagation();
+            onHanziHintToggle();
+          } : undefined}
+          title={isCompactMode && onHanziHintToggle ? "Click to reveal hanzi" : undefined}
         >
           {/* Spaced Repetition Status Badge or Draw Button - Hidden in compact mode */}
           {(card as any).status && !isCompactMode && (
@@ -175,34 +183,53 @@ export function Flashcard({ card, onDifficulty, onKnown, onUnknown, isDatabaseMo
           {/* <div className="mesh-glow"></div> */}
           <div className={`flex flex-col items-center justify-center h-full w-full ${isCompactMode ? 'space-y-1' : 'space-y-4'}`}>
             {/* Grammar Usage or Pinyin */}
-            <div className={`font-bold text-blue-600 dark:text-blue-400 text-center ${
-              isCompactMode ? 'text-lg' : 'text-2xl sm:text-3xl mb-2'
-            }`}>
-              {(() => {
-                const isLevel2Card = card.id && card.id.startsWith('l2-');
-                
-                // For Level 2 cards, show pinyin first (for pronunciation practice)
-                // For regular cards, show grammarUsage first (for grammar learning)
-                const displayValue = isLevel2Card 
-                  ? card.pinyin || (card as any).grammarUsage
-                  : (card as any).grammarUsage || card.pinyin;
-                
-                if (!isCompactMode) {
-                  console.log('🔍 FLASHCARD COMPONENT DEBUG - Card data:', {
-                    id: card.id,
-                    hanzi: card.hanzi,
-                    pinyin: card.pinyin,
-                    grammarUsage: (card as any).grammarUsage,
-                    isLevel2Card,
-                    hasGrammarUsage: !!(card as any).grammarUsage,
-                    hasPinyin: !!card.pinyin,
-                    displayValue
-                  });
-                }
-                
-                return displayValue;
-              })()}
-            </div>
+            {isCompactMode && onHanziHintToggle ? (
+              <div
+                className={`font-bold text-blue-600 dark:text-blue-400 text-center ${
+                  isCompactMode ? 'text-2xl' : 'text-2xl sm:text-3xl mb-2'
+                }`}
+              >
+                {(() => {
+                  if (showHanziHint) {
+                    return card.hanzi;
+                  }
+                  
+                  const isLevel2Card = card.id && card.id.startsWith('l2-');
+                  return isLevel2Card 
+                    ? card.pinyin || (card as any).grammarUsage
+                    : (card as any).grammarUsage || card.pinyin;
+                })()}
+              </div>
+            ) : (
+              <div className={`font-bold text-blue-600 dark:text-blue-400 text-center ${
+                isCompactMode ? 'text-lg' : 'text-2xl sm:text-3xl mb-2'
+              }`}>
+                {(() => {
+                  const isLevel2Card = card.id && card.id.startsWith('l2-');
+                  
+                  // For Level 2 cards, show pinyin first (for pronunciation practice)
+                  // For regular cards, show grammarUsage first (for grammar learning)
+                  const displayValue = isLevel2Card 
+                    ? card.pinyin || (card as any).grammarUsage
+                    : (card as any).grammarUsage || card.pinyin;
+                  
+                  if (!isCompactMode) {
+                    console.log('🔍 FLASHCARD COMPONENT DEBUG - Card data:', {
+                      id: card.id,
+                      hanzi: card.hanzi,
+                      pinyin: card.pinyin,
+                      grammarUsage: (card as any).grammarUsage,
+                      isLevel2Card,
+                      hasGrammarUsage: !!(card as any).grammarUsage,
+                      hasPinyin: !!card.pinyin,
+                      displayValue
+                    });
+                  }
+                  
+                  return displayValue;
+                })()}
+              </div>
+            )}
             
             {/* English Meaning */}
             <div className={`text-gray-700 dark:text-slate-200 font-medium text-center ${
@@ -232,46 +259,46 @@ export function Flashcard({ card, onDifficulty, onKnown, onUnknown, isDatabaseMo
           {/* Database mode - 4 simple buttons at bottom - Hidden in compact mode */}
           {onDifficulty && isDatabaseMode && !isCompactMode ? (
             <div className="absolute bottom-0 left-0 w-full grid grid-cols-4 border-t border-gray-200 dark:border-neutral-700">
-              <button 
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onDifficulty('easy');
-                  setIsFlipped(false);
-                }}
-                className="flex justify-center items-center py-3 border-r border-gray-200 dark:border-neutral-700 hover:bg-gray-50 dark:hover:bg-neutral-700 transition-colors text-xs font-medium text-green-600 dark:text-green-400"
-              >
-                Easy
-              </button>
-              <button 
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onDifficulty('normal');
-                  setIsFlipped(false);
-                }}
-                className="flex justify-center items-center py-3 border-r border-gray-200 dark:border-neutral-700 hover:bg-gray-50 dark:hover:bg-neutral-700 transition-colors text-xs font-medium text-yellow-600 dark:text-yellow-400"
-              >
-                Normal
-              </button>
-              <button 
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onDifficulty('hard');
-                  setIsFlipped(false);
-                }}
-                className="flex justify-center items-center py-3 border-r border-gray-200 dark:border-neutral-700 hover:bg-gray-50 dark:hover:bg-neutral-700 transition-colors text-xs font-medium text-orange-600 dark:text-orange-400"
-              >
-                Hard
-              </button>
-              <button 
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onDifficulty('difficult');
-                  setIsFlipped(false);
-                }}
-                className="flex justify-center items-center py-3 hover:bg-gray-50 dark:hover:bg-neutral-700 transition-colors text-xs font-medium text-red-600 dark:text-red-400"
-              >
-                Difficult
-              </button>
+                <button 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onDifficulty('easy');
+                    setIsFlipped(false);
+                  }}
+                  className="flex justify-center items-center py-3 border-r border-gray-200 dark:border-neutral-700 hover:bg-gray-50 dark:hover:bg-neutral-700 transition-colors text-xs font-medium text-green-600 dark:text-green-400"
+                >
+                  Easy
+                </button>
+                <button 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onDifficulty('normal');
+                    setIsFlipped(false);
+                  }}
+                  className="flex justify-center items-center py-3 border-r border-gray-200 dark:border-neutral-700 hover:bg-gray-50 dark:hover:bg-neutral-700 transition-colors text-xs font-medium text-yellow-600 dark:text-yellow-400"
+                >
+                  Normal
+                </button>
+                <button 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onDifficulty('hard');
+                    setIsFlipped(false);
+                  }}
+                  className="flex justify-center items-center py-3 border-r border-gray-200 dark:border-neutral-700 hover:bg-gray-50 dark:hover:bg-neutral-700 transition-colors text-xs font-medium text-orange-600 dark:text-orange-400"
+                >
+                  Hard
+                </button>
+                <button 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onDifficulty('difficult');
+                    setIsFlipped(false);
+                  }}
+                  className="flex justify-center items-center py-3 hover:bg-gray-50 dark:hover:bg-neutral-700 transition-colors text-xs font-medium text-red-600 dark:text-red-400"
+                >
+                  Difficult
+                </button>
             </div>
           ) : !isCompactMode ? (
           <div className="absolute bottom-4 left-0 w-full flex justify-center">
@@ -309,46 +336,46 @@ export function Flashcard({ card, onDifficulty, onKnown, onUnknown, isDatabaseMo
           {/* Database mode - 4 simple buttons at bottom - Hidden in compact mode */}
           {onDifficulty && isDatabaseMode && !isCompactMode ? (
             <div className="absolute bottom-0 left-0 w-full grid grid-cols-4 border-t border-gray-200 dark:border-neutral-700">
-              <button 
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onDifficulty('easy');
-                  setIsFlipped(false);
-                }}
-                className="flex justify-center items-center py-3 border-r border-gray-200 dark:border-neutral-700 hover:bg-gray-50 dark:hover:bg-neutral-700 transition-colors text-xs font-medium text-green-600 dark:text-green-400"
-              >
-                Easy
-              </button>
-              <button 
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onDifficulty('normal');
-                  setIsFlipped(false);
-                }}
-                className="flex justify-center items-center py-3 border-r border-gray-200 dark:border-neutral-700 hover:bg-gray-50 dark:hover:bg-neutral-700 transition-colors text-xs font-medium text-yellow-600 dark:text-yellow-400"
-              >
-                Normal
-              </button>
-              <button 
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onDifficulty('hard');
-                  setIsFlipped(false);
-                }}
-                className="flex justify-center items-center py-3 border-r border-gray-200 dark:border-neutral-700 hover:bg-gray-50 dark:hover:bg-neutral-700 transition-colors text-xs font-medium text-orange-600 dark:text-orange-400"
-              >
-                Hard
-              </button>
-              <button 
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onDifficulty('difficult');
-                  setIsFlipped(false);
-                }}
-                className="flex justify-center items-center py-3 hover:bg-gray-50 dark:hover:bg-neutral-700 transition-colors text-xs font-medium text-red-600 dark:text-red-400"
-              >
-                Difficult
-              </button>
+                <button 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onDifficulty('easy');
+                    setIsFlipped(false);
+                  }}
+                  className="flex justify-center items-center py-3 border-r border-gray-200 dark:border-neutral-700 hover:bg-gray-50 dark:hover:bg-neutral-700 transition-colors text-xs font-medium text-green-600 dark:text-green-400"
+                >
+                  Easy
+                </button>
+                <button 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onDifficulty('normal');
+                    setIsFlipped(false);
+                  }}
+                  className="flex justify-center items-center py-3 border-r border-gray-200 dark:border-neutral-700 hover:bg-gray-50 dark:hover:bg-neutral-700 transition-colors text-xs font-medium text-yellow-600 dark:text-yellow-400"
+                >
+                  Normal
+                </button>
+                <button 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onDifficulty('hard');
+                    setIsFlipped(false);
+                  }}
+                  className="flex justify-center items-center py-3 border-r border-gray-200 dark:border-neutral-700 hover:bg-gray-50 dark:hover:bg-neutral-700 transition-colors text-xs font-medium text-orange-600 dark:text-orange-400"
+                >
+                  Hard
+                </button>
+                <button 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onDifficulty('difficult');
+                    setIsFlipped(false);
+                  }}
+                  className="flex justify-center items-center py-3 hover:bg-gray-50 dark:hover:bg-neutral-700 transition-colors text-xs font-medium text-red-600 dark:text-red-400"
+                >
+                  Difficult
+                </button>
             </div>
           ) : !isCompactMode ? (
           <div className="absolute bottom-4 left-0 w-full flex justify-center">

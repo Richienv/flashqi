@@ -90,6 +90,7 @@ export default function FlashcardStudyPage() {
   const [drawingCardCtx, setDrawingCardCtx] = useState<CanvasRenderingContext2D | null>(null);
   const [isDrawingOnCard, setIsDrawingOnCard] = useState(false);
   const [drawingCardStrokeHistory, setDrawingCardStrokeHistory] = useState<ImageData[]>([]);
+  const [showHanziHint, setShowHanziHint] = useState(false);
 
   // Load lesson cards and start study session
   useEffect(() => {
@@ -176,6 +177,7 @@ export default function FlashcardStudyPage() {
 
     // Reset drawing card state when moving to next card
     setIsDrawingCardOpen(false);
+    setShowHanziHint(false);
     clearDrawingCard();
 
     const topCard = document.querySelector('.top-card') as HTMLElement;
@@ -208,6 +210,7 @@ export default function FlashcardStudyPage() {
 
     // Reset drawing card state when moving to previous card
     setIsDrawingCardOpen(false);
+    setShowHanziHint(false);
     clearDrawingCard();
 
     const topCard = document.querySelector('.top-card') as HTMLElement;
@@ -332,6 +335,7 @@ export default function FlashcardStudyPage() {
     setCompletedCardIds([]);
     setIsCompletionPopupVisible(false);
     setIsDrawingCardOpen(false);
+    setShowHanziHint(false);
     clearDrawingCard();
     
     // Navigate back to lesson
@@ -560,30 +564,15 @@ export default function FlashcardStudyPage() {
 
   return (
     <div className="fixed inset-0 bg-gradient-to-br from-[#1b1f3b] via-[#2a2e49] to-[#16172f] dark:bg-gradient-to-br dark:from-[#000000] dark:via-[#0a0f2c] dark:to-[#12142b] z-50 overflow-hidden flex flex-col">
-      <div className="px-4 pt-8 pb-32 flex-1 flex flex-col">
+      <div className="px-4 pt-4 pb-32 flex-1 flex flex-col">
         
-        {/* Progress indicator */}
-        <div className="mb-4 px-2">
-          <div className="flex justify-between items-center mb-2">
-            <span className="text-white/70 text-sm">Progress</span>
-            <span className="text-white/70 text-sm">
-              {completedCardIds.length} / {currentFlashcards.length}
-            </span>
-          </div>
-          <div className="w-full bg-white/20 rounded-full h-2">
-            <div 
-              className="bg-white h-2 rounded-full transition-all duration-300" 
-              style={{ width: `${(completedCardIds.length / currentFlashcards.length) * 100}%` }}
-            ></div>
-          </div>
-        </div>
         
         {/* Flashcard Container with Drawing Card */}
         {currentFlashcards.length > 0 && (
-          <div className="flex flex-col justify-center items-center flex-grow mb-8 relative">
+          <div className="flex flex-col justify-center items-center flex-grow mb-4 relative">
             {isDrawingCardOpen ? (
               /* Drawing Mode Layout */
-              <div className="flex flex-col items-center w-full max-w-lg space-y-4">
+              <div className="flex flex-col items-center w-full max-w-lg space-y-2">
                 {/* Compact Main Card */}
                 <div className="w-full flex justify-center">
                   <Flashcard 
@@ -593,6 +582,8 @@ export default function FlashcardStudyPage() {
                     onDrawToggle={toggleDrawingCard}
                     isDrawingOpen={isDrawingCardOpen}
                     isCompactMode={true}
+                    showHanziHint={showHanziHint}
+                    onHanziHintToggle={() => setShowHanziHint(!showHanziHint)}
                   />
                 </div>
                 
@@ -600,37 +591,39 @@ export default function FlashcardStudyPage() {
                 <div className="w-full">
                   <div className="bg-white dark:bg-gradient-to-br dark:from-[#0a0f2c] dark:via-[#12142b] dark:to-[#000000] rounded-3xl shadow-xl border border-gray-200 dark:border-neutral-700 p-6 w-full">
                     {/* Drawing Card Header */}
-                    <div className="flex justify-between items-center mb-4">
-                      <div>
-                        <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
-                          Practice Writing
-                        </h3>
-                      </div>
+                    <div className="flex justify-end items-center mb-4">
                       <div className="flex items-center space-x-2">
                         <button
                           onClick={clearDrawingCard}
                           className="p-2 rounded-full bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
-                          title="Clear Drawing"
+                          title="Erase Drawing"
                         >
                           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-600 dark:text-gray-300">
-                            <path d="M3 6h18"></path>
-                            <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
-                            <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
+                            <path d="M7 21h10"></path>
+                            <path d="M5 21h14"></path>
+                            <path d="M19 21V7a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v14"></path>
+                            <path d="M9 9l6 6"></path>
+                            <path d="M15 9l-6 6"></path>
                           </svg>
                         </button>
                         <button
                           onClick={clearDrawingCard}
-                          className="px-3 py-2 rounded-full bg-green-100 dark:bg-green-800 text-green-800 dark:text-green-200 hover:bg-green-200 dark:hover:bg-green-700 transition-colors text-sm font-medium"
-                          title="Start New Page"
+                          className="p-2 rounded-full bg-green-100 dark:bg-green-800 text-green-800 dark:text-green-200 hover:bg-green-200 dark:hover:bg-green-700 transition-colors"
+                          title="Next Page"
                         >
-                          Next Page
+                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <polyline points="9 18 15 12 9 6"></polyline>
+                          </svg>
                         </button>
                         <button
                           onClick={toggleDrawingCard}
-                          className="px-4 py-2 rounded-full bg-blue-100 dark:bg-blue-800 text-blue-800 dark:text-blue-200 hover:bg-blue-200 dark:hover:bg-blue-700 transition-colors text-sm font-medium"
+                          className="p-2 rounded-full bg-blue-100 dark:bg-blue-800 text-blue-800 dark:text-blue-200 hover:bg-blue-200 dark:hover:bg-blue-700 transition-colors"
                           title="Close Drawing Mode"
                         >
-                          ✕ Close
+                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                          </svg>
                         </button>
                       </div>
                     </div>
@@ -642,8 +635,15 @@ export default function FlashcardStudyPage() {
                       style={{ touchAction: 'none' }}
                     />
                     
+                    {/* Help text */}
+                    <div className="mt-4 text-center">
+                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                        Pick your vibe - how'd this word hit? 💯
+                      </p>
+                    </div>
+                    
                     {/* Difficulty Rating Buttons for Drawing Mode */}
-                    <div className="mt-6 grid grid-cols-4 gap-2">
+                    <div className="mt-4 grid grid-cols-4 gap-2">
                       <button 
                         onClick={() => handleCardResult('easy')}
                         className="px-3 py-2 rounded-lg text-sm font-medium text-green-700 bg-green-100 hover:bg-green-200 dark:bg-green-800 dark:text-green-200 dark:hover:bg-green-700 transition-colors"
@@ -674,32 +674,32 @@ export default function FlashcardStudyPage() {
               </div>
             ) : (
               /* Normal Mode Layout */
-              <div 
-                className="flex justify-center items-center w-full h-full"
-                style={{ 
-                  minHeight: '400px',
-                  width: '100%'
-                }}
-              >
-                <Flashcard 
-                  card={currentFlashcards[currentCardIndex]} 
-                  onDifficulty={handleCardResult}
-                  isDatabaseMode={true}
-                  onDrawToggle={toggleDrawingCard}
-                  isDrawingOpen={isDrawingCardOpen}
-                  isCompactMode={false}
-                />
+              <div className="flex flex-col items-center w-full h-full space-y-4">
+                <div 
+                  className="flex justify-center items-center w-full h-full"
+                  style={{ 
+                    minHeight: '500px',
+                    width: '100%'
+                  }}
+                >
+                  <Flashcard 
+                    card={currentFlashcards[currentCardIndex]} 
+                    onDifficulty={handleCardResult}
+                    isDatabaseMode={true}
+                    onDrawToggle={toggleDrawingCard}
+                    isDrawingOpen={isDrawingCardOpen}
+                    isCompactMode={false}
+                  />
+                </div>
+                {/* Gen-z style instruction */}
+                <div className="text-center text-slate-600 dark:text-white/70 text-sm px-4">
+                  Pick your vibe - how'd this word hit? 💯
+                </div>
               </div>
             )}
           </div>
         )}
         
-        {/* Swipe instruction hint - only show in normal mode */}
-        {!isDrawingCardOpen && (
-          <div className="text-center text-slate-600 dark:text-white/70 text-sm mb-4">
-            Rate your difficulty: Easy • Normal • Hard • Difficult
-          </div>
-        )}
       </div>
       
       {/* Completion popup */}
