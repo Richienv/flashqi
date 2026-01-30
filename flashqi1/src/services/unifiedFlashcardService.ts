@@ -1,5 +1,6 @@
-import { supabase } from '@/lib/supabase/client';
 import { StaticFlashcard, getStaticCards, getStaticCard } from '@/data/flashcardStaticContent';
+import { progressStorage, flashcardStorage } from '@/lib/localStorage';
+import { getCurrentUser } from '@/lib/localAuth';
 
 export interface FlashcardWithStatus extends StaticFlashcard {
   status: 'new' | 'known' | 'due';
@@ -28,54 +29,53 @@ export class UnifiedFlashcardService {
     // Phase 1: Get static cards instantly
     const staticCards = getStaticCards(lessonId);
     
-    // Return cards with loading state
-    const cardsWithLoading: FlashcardWithStatus[] = staticCards.map(card => ({
-      ...card,
-      status: 'new' as const,
-      last_reviewed: null,
-      interval_days: 1,
-      review_count: 0,
-      isLoading: true
-    }));
-
-    // Phase 2: Async load review statuses
-    this.loadReviewStatuses(staticCards.map(c => c.id)).then(statuses => {
-      // This would trigger a re-render in the UI through React Query
-      // The UI component will handle this through the hook
+    // Get current user
+    const user = getCurrentUser();
+    const userId = user?.id || 'demo-user';
+    
+    // Get review statuses
+    const progress = progressStorage.getByUserId(userId);
+    
+    // Merge cards with statuses
+    return staticCards.map(card => {
+      const cardProgress = progress.find(p => p.flashcard_id === card.id);
+      return {
+        ...card,
+        status: cardProgress?.status || 'new',
+        last_reviewed: cardProgress?.last_reviewed || null,
+        interval_days: cardProgress?.interval_days || 1,
+        review_count: cardProgress?.review_count || 0,
+        isLoading: false
+      };
     });
-
-    return cardsWithLoading;
   }
 
   /**
-   * Load review statuses from database
+   * Load review statuses from localStorage
    */
   static async loadReviewStatuses(cardIds: string[]): Promise<Record<string, { status: string; last_reviewed: string | null; interval_days: number; review_count: number }>> {
     if (cardIds.length === 0) return {};
 
     try {
-      const { data, error } = await supabase.rpc('get_cards_review_status', {
-        card_ids: cardIds
-      });
-
-      if (error) {
-        console.error('Error fetching review statuses:', error);
-        return {};
-      }
-
+      const user = getCurrentUser();
+      const userId = user?.id || 'demo-user';
+      
+      const progress = progressStorage.getByUserId(userId);
+      
       const statusMap: Record<string, any> = {};
-      data?.forEach(item => {
-        statusMap[item.card_id] = {
-          status: item.status || 'new',
-          last_reviewed: item.last_reviewed,
-          interval_days: item.interval_days || 1,
-          review_count: item.review_count || 0
+      cardIds.forEach(cardId => {
+        const cardProgress = progress.find(p => p.flashcard_id === cardId);
+        statusMap[cardId] = {
+          status: cardProgress?.status || 'new',
+          last_reviewed: cardProgress?.last_reviewed || null,
+          interval_days: cardProgress?.interval_days || 1,
+          review_count: cardProgress?.review_count || 0
         };
       });
 
       return statusMap;
     } catch (error) {
-      console.error('Network error fetching review statuses:', error);
+      console.error('Error fetching review statuses:', error);
       return {};
     }
   }
@@ -88,62 +88,67 @@ export class UnifiedFlashcardService {
     limit: number = 50
   ): Promise<FlashcardWithStatus[]> {
     try {
-      // First, get cards from database that need review
-      let query = supabase.rpc('get_cards_with_review_status', {
-        p_lesson_id: null, // Get from all lessons
-        p_limit: limit
-      });
-
-      const { data, error } = await query;
-
-      if (error) {
-        console.error('Error fetching spaced repetition cards:', error);
-        return [];
+      const user = getCurrentUser();
+      const userId = user?.id || 'demo-user';
+      
+      const allCards = flashcardStorage.getAll();
+      const progress = progressStorage.getByUserId(userId);
+      const now = new Date();
+      
+      // Filter cards based on status and due date
+      const filteredCards: FlashcardWithStatus[] = [];
+      
+      for (const card of allCards) {
+        const cardProgress = progress.find(p => p.flashcard_id === card.id);
+        const status = cardProgress?.status || 'new';
+        const lastReviewed = cardProgress?.last_reviewed;
+        const intervalDays = cardProgress?.interval_days || 1;
+        
+        let includeCard = false;
+        
+        if (filter === 'new' && status === 'new') {
+          includeCard = true;
+        } else if (filter === 'due') {
+          if (status === 'due') includeCard = true;
+          if (lastReviewed && intervalDays) {
+            const dueDate = new Date(lastReviewed);
+            dueDate.setDate(dueDate.getDate() + intervalDays);
+            if (now >= dueDate) includeCard = true;
+          }
+        } else if (filter === 'both') {
+          if (status === 'new' || status === 'due') includeCard = true;
+          if (lastReviewed && intervalDays) {
+            const dueDate = new Date(lastReviewed);
+            dueDate.setDate(dueDate.getDate() + intervalDays);
+            if (now >= dueDate) includeCard = true;
+          }
+        }
+        
+        if (includeCard) {
+          filteredCards.push({
+            id: card.id,
+            hanzi: card.hanzi,
+            pinyin: card.pinyin,
+            english: card.english,
+            lesson_id: card.lesson_id,
+            example_sentence: typeof card.example_sentence === 'string' 
+              ? card.example_sentence 
+              : card.example_sentence?.hanzi || '',
+            difficulty_level: card.difficulty_level || 1,
+            status: status as 'new' | 'known' | 'due',
+            last_reviewed: lastReviewed || null,
+            interval_days: intervalDays,
+            review_count: cardProgress?.review_count || 0,
+            isLoading: false
+          });
+          
+          if (filteredCards.length >= limit) break;
+        }
       }
 
-      // Filter based on status and due date
-      const now = new Date();
-      const filteredCards = (data || []).filter(card => {
-        if (filter === 'new') return card.status === 'new';
-        if (filter === 'due') {
-          if (card.status === 'due') return true;
-          if (card.last_reviewed && card.interval_days) {
-            const dueDate = new Date(card.last_reviewed);
-            dueDate.setDate(dueDate.getDate() + card.interval_days);
-            return now >= dueDate;
-          }
-          return false;
-        }
-        // For 'both', include new cards and due cards
-        if (card.status === 'new') return true;
-        if (card.status === 'due') return true;
-        if (card.last_reviewed && card.interval_days) {
-          const dueDate = new Date(card.last_reviewed);
-          dueDate.setDate(dueDate.getDate() + card.interval_days);
-          return now >= dueDate;
-        }
-        return false;
-      });
-
-      // Convert to FlashcardWithStatus format
-      return filteredCards.map(card => ({
-        id: card.id,
-        hanzi: card.hanzi,
-        pinyin: card.pinyin,
-        english: card.english,
-        lesson_id: card.lesson_id,
-        example_sentence: typeof card.example_sentence === 'string' 
-          ? card.example_sentence 
-          : card.example_sentence?.hanzi || '',
-        difficulty_level: card.difficulty_level,
-        status: card.status as 'new' | 'known' | 'due',
-        last_reviewed: card.last_reviewed,
-        interval_days: card.interval_days,
-        review_count: card.review_count,
-        isLoading: false
-      }));
+      return filteredCards;
     } catch (error) {
-      console.error('Network error fetching spaced repetition cards:', error);
+      console.error('Error fetching spaced repetition cards:', error);
       return [];
     }
   }
@@ -165,9 +170,13 @@ export class UnifiedFlashcardService {
 
     // Initialize user review record if it doesn't exist
     try {
-      await supabase.rpc('initialize_user_card_review', {
-        p_card_id: cardId
-      });
+      const user = getCurrentUser();
+      const userId = user?.id || 'demo-user';
+      
+      const existingProgress = progressStorage.getByFlashcardId(cardId);
+      if (!existingProgress) {
+        progressStorage.create(cardId, userId);
+      }
     } catch (error) {
       console.error('Error initializing user card review:', error);
     }
@@ -198,7 +207,10 @@ export class UnifiedFlashcardService {
     const batch = this.updateQueue.splice(0, this.BATCH_SIZE);
     
     try {
-      const updates = batch.map(update => {
+      const user = getCurrentUser();
+      const userId = user?.id || 'demo-user';
+      
+      for (const update of batch) {
         const nextInterval = this.calculateNextInterval(
           1, // Default current interval
           update.is_correct,
@@ -206,26 +218,14 @@ export class UnifiedFlashcardService {
           update.strength_level
         );
 
-        return {
-          card_id: update.card_id,
+        progressStorage.update(update.card_id, userId, {
           last_reviewed: new Date().toISOString(),
           status: update.is_correct ? 'known' : 'due',
           interval_days: nextInterval,
-          review_count: 1
-        };
-      });
-
-      const { error } = await supabase.rpc('batch_update_reviews', {
-        updates: JSON.stringify(updates)
-      });
-
-      if (error) {
-        console.error('Batch update failed:', error);
-        // Re-queue failed updates
-        this.updateQueue.unshift(...batch);
+        });
       }
     } catch (error) {
-      console.error('Network error in batch update:', error);
+      console.error('Batch update failed:', error);
       // Re-queue failed updates
       this.updateQueue.unshift(...batch);
     } finally {
@@ -276,12 +276,25 @@ export class UnifiedFlashcardService {
    */
   static async getDueCardsCount(): Promise<number> {
     try {
-      const { count, error } = await supabase
-        .from('flashcard_reviews')
-        .select('card_id', { count: 'exact', head: true })
-        .or('status.eq.new,status.eq.due');
-
-      return count || 0;
+      const user = getCurrentUser();
+      const userId = user?.id || 'demo-user';
+      
+      const allCards = flashcardStorage.getAll();
+      const progress = progressStorage.getByUserId(userId);
+      const now = new Date().toISOString();
+      
+      let count = 0;
+      for (const card of allCards) {
+        const cardProgress = progress.find(p => p.flashcard_id === card.id);
+        
+        if (!cardProgress || cardProgress.status === 'new' || cardProgress.status === 'due') {
+          count++;
+        } else if (cardProgress.next_review && cardProgress.next_review <= now) {
+          count++;
+        }
+      }
+      
+      return count;
     } catch (error) {
       console.error('Error getting due cards count:', error);
       return 0;
@@ -313,4 +326,4 @@ export class UnifiedFlashcardService {
       await this.processBatchQueue();
     }
   }
-} 
+}

@@ -3,11 +3,10 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/auth-context';
 import { Navbar, MobileNav } from '@/components/ui/navbar';
-import { supabase } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
 
 export default function ProfilePage() {
-  const { user, isAuthenticated, isLoading } = useAuth();
+  const { user, isAuthenticated, isLoading: authLoading } = useAuth();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [updating, setUpdating] = useState(false);
@@ -16,7 +15,7 @@ export default function ProfilePage() {
 
   useEffect(() => {
     // Redirect if not authenticated
-    if (!isLoading && !isAuthenticated) {
+    if (!authLoading && !isAuthenticated) {
       router.push('/auth/login');
     }
     
@@ -25,7 +24,7 @@ export default function ProfilePage() {
       setName(user.user_metadata?.name || '');
       setEmail(user.email || '');
     }
-  }, [user, isAuthenticated, isLoading, router]);
+  }, [user, isAuthenticated, authLoading, router]);
 
   const handleUpdateProfile = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,9 +32,8 @@ export default function ProfilePage() {
     setMessage(null);
     
     try {
-      const { error } = await supabase.auth.updateUser({
-        data: { name }
-      });
+      // Update user profile using local auth
+      const { error } = await updateProfile({ name });
       
       if (error) throw error;
       
@@ -54,7 +52,18 @@ export default function ProfilePage() {
     }
   };
 
-  if (isLoading) {
+  // Helper function to update profile
+  const updateProfile = async (updates: { name?: string }) => {
+    try {
+      const { updateUser } = await import('@/lib/localAuth');
+      const result = await updateUser({ user_metadata: updates });
+      return result;
+    } catch (error) {
+      return { user: null, error: error instanceof Error ? error : new Error('Update failed') };
+    }
+  };
+
+  if (authLoading) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center bg-slate-50 dark:bg-[#121212]">
         <div className="animate-spin h-10 w-10 border-4 border-blue-500 dark:border-blue-400 rounded-full border-t-transparent"></div>
@@ -129,14 +138,8 @@ export default function ProfilePage() {
               <div>
                 <h3 className="text-sm font-medium text-slate-700 dark:text-gray-300 mb-1">Change Password</h3>
                 <p className="text-sm text-slate-500 dark:text-gray-400 mb-3">
-                  To change your password, use the password reset function from the login page.
+                  Password management is not available in local storage mode.
                 </p>
-                <a
-                  href="/auth/login?reset=true"
-                  className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-500 dark:hover:text-blue-300 transition-colors"
-                >
-                  Reset password
-                </a>
               </div>
               
               <div className="pt-4 border-t border-slate-200 dark:border-gray-600">
@@ -149,8 +152,12 @@ export default function ProfilePage() {
                   className="px-4 py-2 rounded-md border border-red-600 dark:border-red-500 text-red-600 dark:text-red-400 text-sm font-medium hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors"
                   onClick={() => {
                     if (window.confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
-                      // Implement account deletion functionality
-                      alert('Account deletion functionality would be implemented here.');
+                      // Clear all user data from localStorage
+                      localStorage.removeItem('flashqi_user');
+                      localStorage.removeItem('flashqi_users');
+                      localStorage.removeItem('flashqi_passwords');
+                      alert('Account deleted. Redirecting to home page...');
+                      router.push('/');
                     }
                   }}
                 >
@@ -165,4 +172,4 @@ export default function ProfilePage() {
       <MobileNav />
     </div>
   );
-} 
+}

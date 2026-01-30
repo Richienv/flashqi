@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase/client';
+import { progressStorage, userStatsStorage } from '@/lib/localStorage';
+import { getCurrentUser } from '@/lib/localAuth';
 
 export async function POST(request: NextRequest) {
   console.log('🔄 [RESET API DEBUG] Reset endpoint called');
@@ -24,111 +25,61 @@ export async function POST(request: NextRequest) {
       });
     } catch (parseError) {
       console.error('🔄 [RESET API DEBUG] Failed to parse request body:', parseError);
-      // If no body or invalid JSON, proceed with full reset
     }
 
     if (!userId) {
-      console.error('🔄 [RESET API DEBUG] No user ID provided, authentication failed');
-      return NextResponse.json(
-        { error: 'User not authenticated' },
-        { status: 401 }
-      );
+      // Try to get user from localStorage session
+      const currentUser = getCurrentUser();
+      if (currentUser) {
+        userId = currentUser.id;
+      } else {
+        console.error('🔄 [RESET API DEBUG] No user ID provided, authentication failed');
+        return NextResponse.json(
+          { error: 'User not authenticated' },
+          { status: 401 }
+        );
+      }
     }
 
     if (difficulty && difficulty !== 'all') {
-      console.log('🔄 [RESET API DEBUG] Attempting reset by difficulty:', {
+      console.log('🔄 [RESET API DEBUG] Resetting progress by difficulty:', {
         difficulty,
-        userId,
-        functionName: 'reset_flashcard_progress_by_difficulty'
+        userId
       });
       
-      // Call the database function to reset progress by difficulty
-      const { data, error } = await supabase.rpc('reset_flashcard_progress_by_difficulty', {
-        p_difficulty: difficulty,
-        p_user_id: userId
-      });
+      // Reset progress by difficulty using localStorage
+      progressStorage.resetByDifficulty(userId, difficulty as 'easy' | 'normal' | 'hard' | 'difficult');
       
-      console.log('🔄 [RESET API DEBUG] Database function response:', {
-        difficulty,
-        data,
-        error,
-        hasError: !!error,
-        errorCode: error?.code,
-        errorMessage: error?.message,
-        errorDetails: error?.details
-      });
+      // Recalculate user stats
+      userStatsStorage.recalculate(userId);
       
-      if (error) {
-        console.error('🔄 [RESET API DEBUG] Database error details:', {
-          error,
-          code: error.code,
-          message: error.message,
-          details: error.details,
-          hint: error.hint
-        });
-        return NextResponse.json(
-          { error: `Failed to reset ${difficulty} flashcard progress: ${error.message}` },
-          { status: 500 }
-        );
-      }
-      
-      console.log('🔄 [RESET API DEBUG] Successfully reset progress for difficulty:', {
-        difficulty,
-        responseData: data
-      });
+      console.log('🔄 [RESET API DEBUG] Successfully reset progress for difficulty:', difficulty);
       return NextResponse.json({ 
         message: `${difficulty.charAt(0).toUpperCase() + difficulty.slice(1)} flashcard progress has been reset successfully`,
         reset: true,
-        difficulty,
-        data
+        difficulty
       });
     } else {
-      console.log('🔄 [RESET API DEBUG] Attempting reset all progress:', {
-        userId,
-        functionName: 'reset_all_flashcard_progress'
-      });
+      console.log('🔄 [RESET API DEBUG] Resetting all progress:', { userId });
       
-      // Call the database function to reset all progress
-      const { data, error } = await supabase.rpc('reset_all_flashcard_progress', {
-        p_user_id: userId
-      });
+      // Reset all progress using localStorage
+      progressStorage.reset(userId);
       
-      console.log('🔄 [RESET API DEBUG] Database function response (all):', {
-        data,
-        error,
-        hasError: !!error,
-        errorCode: error?.code,
-        errorMessage: error?.message
-      });
+      // Recalculate user stats
+      userStatsStorage.recalculate(userId);
       
-      if (error) {
-        console.error('🔄 [RESET API DEBUG] Database error details (all):', {
-          error,
-          code: error.code,
-          message: error.message,
-          details: error.details
-        });
-        return NextResponse.json(
-          { error: `Failed to reset flashcard progress: ${error.message}` },
-          { status: 500 }
-        );
-      }
-      
-      console.log('🔄 [RESET API DEBUG] Successfully reset all progress:', {
-        responseData: data
-      });
+      console.log('🔄 [RESET API DEBUG] Successfully reset all progress');
       return NextResponse.json({ 
         message: 'All flashcard progress has been reset successfully',
-        reset: true,
-        data
+        reset: true
       });
     }
     
   } catch (error) {
-    console.error('🔄 [RESET API] Network error:', error);
+    console.error('🔄 [RESET API] Error:', error);
     return NextResponse.json(
-      { error: 'Network error occurred while resetting progress' },
+      { error: 'An error occurred while resetting progress' },
       { status: 500 }
     );
   }
-} 
+}

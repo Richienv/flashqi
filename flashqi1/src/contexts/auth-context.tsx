@@ -1,13 +1,20 @@
 'use client';
 
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
-import { supabase } from '@/lib/supabase/client';
-import { Session, User } from '@supabase/supabase-js';
+import { 
+  getCurrentUser, 
+  signIn as localSignIn, 
+  signUp as localSignUp, 
+  signOut as localSignOut,
+  resendConfirmationEmail as localResendConfirmationEmail,
+  updateUser,
+  LocalUser,
+  createDemoUser
+} from '@/lib/localAuth';
 import { useRouter } from 'next/navigation';
 
 type AuthContextType = {
-  user: User | null;
-  session: Session | null;
+  user: LocalUser | null;
   isLoading: boolean;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signUp: (email: string, password: string, name: string) => Promise<{ error: any }>;
@@ -15,35 +22,16 @@ type AuthContextType = {
   resendConfirmationEmail: (email: string) => Promise<{ error: any }>;
   isAuthenticated: boolean;
   lastError: Error | null;
+  updateProfile: (updates: { name?: string }) => Promise<{ error: any }>;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Maximum number of retry attempts for auth operations
-const MAX_RETRIES = 3;
-// Delay between retries (in ms)
-const RETRY_DELAY = 1000;
-
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
-  const [session, setSession] = useState<Session | null>(null);
+  const [user, setUser] = useState<LocalUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [lastError, setLastError] = useState<Error | null>(null);
   const router = useRouter();
-
-  // Helper function to retry failed operations
-  const retryOperation = async (operation: () => Promise<any>, retries = MAX_RETRIES) => {
-    try {
-      return await operation();
-    } catch (error) {
-      if (retries > 0) {
-        console.log(`Operation failed, retrying... (${retries} attempts left)`);
-        await new Promise(resolve => setTimeout(resolve, RETRY_DELAY));
-        return retryOperation(operation, retries - 1);
-      }
-      throw error;
-    }
-  };
 
   useEffect(() => {
     // Check for active session on mount
@@ -51,48 +39,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setIsLoading(true);
       
       try {
-        console.log('Setting up authentication...');
+        console.log('Setting up local authentication...');
         
-        // Get current session with retry mechanism
-        const getSessionOperation = async () => {
-          console.log('Attempting to get session...');
-          try {
-            const { data: { session } } = await supabase.auth.getSession();
-            console.log('Session retrieved:', session ? 'Active session' : 'No active session');
-            return { session };
-          } catch (error) {
-            console.error('Error getting session:', error);
-            throw error;
-          }
-        };
+        // Get current user from localStorage
+        const currentUser = getCurrentUser();
+        console.log('Current user:', currentUser ? 'Found' : 'Not found');
         
-        try {
-          const { session } = await retryOperation(getSessionOperation);
-          setSession(session);
-          setUser(session?.user || null);
-        } catch (error) {
-          console.error('Failed to get session after retries:', error);
-          // Continue without a session, app will work in reduced functionality mode
-        }
-        
-        // Set up auth state listener
-        try {
-          console.log('Setting up auth state change listener...');
-          const { data: { subscription } } = await supabase.auth.onAuthStateChange(
-            (event, session) => {
-              console.log('Auth state changed:', event);
-              setSession(session);
-              setUser(session?.user || null);
-            }
-          );
-          
-          return () => {
-            console.log('Cleaning up auth subscription...');
-            subscription.unsubscribe();
-          };
-        } catch (error) {
-          console.error('Error setting up auth listener:', error);
-          // Continue without a listener, user might need to refresh for auth state changes
+        // If no user, create a demo user for testing (optional)
+        if (!currentUser) {
+          console.log('No user found, creating demo user...');
+          const demoUser = createDemoUser();
+          setUser(demoUser);
+        } else {
+          setUser(currentUser);
         }
       } catch (error) {
         console.error('Auth setup error:', error);
@@ -111,28 +70,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     
     try {
       console.log('Attempting to sign in...');
-      
-      const signInOperation = async () => {
-        try {
-          return await supabase.auth.signInWithPassword({
-            email,
-            password,
-          });
-        } catch (error) {
-          console.error('Sign in operation error:', error);
-          throw error;
-        }
-      };
-      
-      const { data, error } = await retryOperation(signInOperation);
+      const { user: signedInUser, error } = await localSignIn(email, password);
       
       if (error) {
-        console.error('Sign in error after retries:', error);
+        console.error('Sign in error:', error);
         setLastError(error);
-        throw error;
+        return { error };
       }
       
       console.log('Sign in successful');
+      setUser(signedInUser);
       router.push('/dashboard/flashcards');
       return { error: null };
     } catch (error) {
@@ -148,33 +95,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     
     try {
       console.log('Attempting to sign up...');
-      
-      const signUpOperation = async () => {
-        try {
-          return await supabase.auth.signUp({
-            email,
-            password,
-            options: {
-              data: {
-                name,
-              }
-            }
-          });
-        } catch (error) {
-          console.error('Sign up operation error:', error);
-          throw error;
-        }
-      };
-      
-      const { data, error } = await retryOperation(signUpOperation);
+      const { user: newUser, error } = await localSignUp(email, password, name);
       
       if (error) {
-        console.error('Sign up error after retries:', error);
+        console.error('Sign up error:', error);
         setLastError(error);
-        throw error;
+        return { error };
       }
       
       console.log('Sign up successful');
+      setUser(newUser);
       router.push('/dashboard/flashcards');
       return { error: null };
     } catch (error) {
@@ -184,31 +114,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  // Resend confirmation email
+  // Resend confirmation email (mock)
   const resendConfirmationEmail = async (email: string) => {
     setLastError(null);
     
     try {
       console.log('Attempting to resend confirmation email...');
-      
-      const resendOperation = async () => {
-        try {
-          return await supabase.auth.resend({
-            type: 'signup',
-            email,
-          });
-        } catch (error) {
-          console.error('Resend confirmation email operation error:', error);
-          throw error;
-        }
-      };
-      
-      const { data, error } = await retryOperation(resendOperation);
+      const { error } = await localResendConfirmationEmail(email);
       
       if (error) {
-        console.error('Resend confirmation email error after retries:', error);
+        console.error('Resend confirmation email error:', error);
         setLastError(error);
-        throw error;
+        return { error };
       }
       
       console.log('Confirmation email resent successfully');
@@ -220,19 +137,46 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  // Update profile
+  const updateProfile = async (updates: { name?: string }) => {
+    setLastError(null);
+    
+    try {
+      console.log('Attempting to update profile...');
+      const { user: updatedUser, error } = await updateUser({
+        user_metadata: updates
+      });
+      
+      if (error) {
+        console.error('Update profile error:', error);
+        setLastError(error);
+        return { error };
+      }
+      
+      console.log('Profile updated successfully');
+      setUser(updatedUser);
+      return { error: null };
+    } catch (error) {
+      console.error('Update profile error:', error);
+      setLastError(error instanceof Error ? error : new Error(String(error)));
+      return { error };
+    }
+  };
+
   // Sign out
   const signOut = async () => {
     setLastError(null);
     
     try {
       console.log('Attempting to sign out...');
-      await supabase.auth.signOut();
+      await localSignOut();
       console.log('Sign out successful');
+      setUser(null);
       router.push('/');
     } catch (error) {
       console.error('Sign out error:', error);
       setLastError(error instanceof Error ? error : new Error(String(error)));
-      // Even if the API call fails, we can still redirect the user
+      // Even if the operation fails, we can still redirect the user
       router.push('/');
     }
   };
@@ -241,7 +185,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     <AuthContext.Provider 
       value={{ 
         user, 
-        session, 
         isLoading, 
         signIn, 
         signUp, 
@@ -249,6 +192,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         resendConfirmationEmail,
         isAuthenticated: !!user,
         lastError,
+        updateProfile,
       }}
     >
       {children}
@@ -265,4 +209,4 @@ export function useAuth() {
   }
   
   return context;
-} 
+}

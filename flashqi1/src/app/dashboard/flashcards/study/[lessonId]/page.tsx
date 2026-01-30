@@ -1,732 +1,608 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { useRouter, useParams, useSearchParams } from 'next/navigation';
-import { Button } from "@/components/ui/button";
-import { MobileNavCustom } from '@/components/ui/navbar';
-import { FlashcardDatabaseService, FlashcardWithProgress } from '@/services/flashcardDatabaseService';
-import { Flashcard } from '@/components/flashcards/flashcard';
+import { useRouter, useParams } from 'next/navigation';
+import { FlashcardDatabaseService } from '@/services/flashcardDatabaseService';
 
-// Study mode loading skeleton
-const StudyModeSkeleton = () => (
-  <div className="flex flex-col items-center justify-center min-h-screen bg-white dark:bg-gradient-to-br dark:from-black dark:to-black p-4">
-    <div className="w-full max-w-md">
-      {/* Progress bar skeleton */}
-      <div className="mb-8">
-        <div className="bg-gray-200 dark:bg-gray-800/50 rounded-full h-2 w-full"></div>
-      </div>
-      
-      {/* Card skeleton */}
-      <div className="bg-white dark:bg-black/90 dark:border dark:border-blue-500/30 dark:shadow-xl dark:shadow-blue-500/20 rounded-2xl p-8 min-h-[400px] flex flex-col justify-center items-center animate-pulse">
-        <div className="w-full max-w-md text-center space-y-6">
-          {/* Status badge skeleton */}
-          <div className="flex justify-end mb-4">
-            <div className="bg-gray-200 dark:bg-gray-700/50 rounded-full w-16 h-6"></div>
-          </div>
-          
-          {/* Chinese character skeleton */}
-          <div className="bg-gray-300 dark:bg-gray-600/50 rounded-lg w-24 h-16 mx-auto"></div>
-          
-          {/* Pinyin skeleton */}
-          <div className="bg-gray-200 dark:bg-gray-700/50 rounded w-32 h-5 mx-auto"></div>
-          
-          {/* English skeleton */}
-          <div className="bg-gray-200 dark:bg-gray-700/50 rounded w-40 h-4 mx-auto"></div>
-          
-          {/* Grammar content skeleton */}
-          <div className="space-y-3 mt-8">
-            <div className="bg-gray-200 dark:bg-gray-700/50 rounded w-full h-4"></div>
-            <div className="bg-gray-200 dark:bg-gray-700/50 rounded w-3/4 h-4 mx-auto"></div>
-          </div>
-          
-          {/* Buttons skeleton */}
-          <div className="flex justify-center space-x-3 mt-8">
-            <div className="bg-gray-200 dark:bg-gray-700/50 rounded-lg w-20 h-10"></div>
-            <div className="bg-gray-200 dark:bg-gray-700/50 rounded-lg w-20 h-10"></div>
-            <div className="bg-gray-200 dark:bg-gray-700/50 rounded-lg w-20 h-10"></div>
-          </div>
-        </div>
-      </div>
-      
-      {/* Navigation skeleton */}
-      <div className="flex justify-between mt-8">
-        <div className="bg-gray-200 dark:bg-gray-700/50 rounded-lg w-12 h-12"></div>
-        <div className="bg-gray-200 dark:bg-gray-700/50 rounded-lg w-12 h-12"></div>
-      </div>
-    </div>
-  </div>
-);
-
-// Shuffles an array using Fisher-Yates algorithm
-const shuffleArray = <T,>(array: T[]): T[] => {
-  const shuffled = [...array];
-  for (let i = shuffled.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-  }
-  return shuffled;
+// Hardcoded flashcard data
+const FLASHCARD_DATA: { [key: string]: { title: string; cards: { id: string; hanzi: string; pinyin: string; english: string; }[] } } = {
+  lesson1: {
+    title: '你好 - Greetings',
+    cards: [
+      { id: 'l1_c1', hanzi: '你好', pinyin: 'nǐ hǎo', english: 'Hello' },
+      { id: 'l1_c2', hanzi: '再见', pinyin: 'zài jiàn', english: 'Goodbye' },
+      { id: 'l1_c3', hanzi: '谢谢', pinyin: 'xiè xie', english: 'Thank you' },
+      { id: 'l1_c4', hanzi: '不客气', pinyin: 'bù kè qi', english: 'You\'re welcome' },
+      { id: 'l1_c5', hanzi: '对不起', pinyin: 'duì bu qǐ', english: 'Sorry' },
+      { id: 'l1_c6', hanzi: '没关系', pinyin: 'méi guān xi', english: 'It\'s okay' },
+      { id: 'l1_c7', hanzi: '请', pinyin: 'qǐng', english: 'Please' },
+      { id: 'l1_c8', hanzi: '早上好', pinyin: 'zǎo shang hǎo', english: 'Good morning' },
+      { id: 'l1_c9', hanzi: '晚上好', pinyin: 'wǎn shang hǎo', english: 'Good evening' },
+      { id: 'l1_c10', hanzi: '晚安', pinyin: 'wǎn ān', english: 'Good night' },
+    ],
+  },
+  lesson2: {
+    title: '数字 - Numbers',
+    cards: [
+      { id: 'l2_c1', hanzi: '一', pinyin: 'yī', english: 'One' },
+      { id: 'l2_c2', hanzi: '二', pinyin: 'èr', english: 'Two' },
+      { id: 'l2_c3', hanzi: '三', pinyin: 'sān', english: 'Three' },
+      { id: 'l2_c4', hanzi: '四', pinyin: 'sì', english: 'Four' },
+      { id: 'l2_c5', hanzi: '五', pinyin: 'wǔ', english: 'Five' },
+      { id: 'l2_c6', hanzi: '六', pinyin: 'liù', english: 'Six' },
+      { id: 'l2_c7', hanzi: '七', pinyin: 'qī', english: 'Seven' },
+      { id: 'l2_c8', hanzi: '八', pinyin: 'bā', english: 'Eight' },
+      { id: 'l2_c9', hanzi: '九', pinyin: 'jiǔ', english: 'Nine' },
+      { id: 'l2_c10', hanzi: '十', pinyin: 'shí', english: 'Ten' },
+    ],
+  },
+  lesson3: {
+    title: '家人 - Family',
+    cards: [
+      { id: 'l3_c1', hanzi: '爸爸', pinyin: 'bà ba', english: 'Father' },
+      { id: 'l3_c2', hanzi: '妈妈', pinyin: 'mā ma', english: 'Mother' },
+      { id: 'l3_c3', hanzi: '哥哥', pinyin: 'gē ge', english: 'Older brother' },
+      { id: 'l3_c4', hanzi: '姐姐', pinyin: 'jiě jie', english: 'Older sister' },
+      { id: 'l3_c5', hanzi: '弟弟', pinyin: 'dì di', english: 'Younger brother' },
+      { id: 'l3_c6', hanzi: '妹妹', pinyin: 'mèi mei', english: 'Younger sister' },
+      { id: 'l3_c7', hanzi: '爷爷', pinyin: 'yé ye', english: 'Grandfather' },
+      { id: 'l3_c8', hanzi: '奶奶', pinyin: 'nǎi nai', english: 'Grandmother' },
+    ],
+  },
+  lesson4: {
+    title: '食物 - Food',
+    cards: [
+      { id: 'l4_c1', hanzi: '米饭', pinyin: 'mǐ fàn', english: 'Rice' },
+      { id: 'l4_c2', hanzi: '面条', pinyin: 'miàn tiáo', english: 'Noodles' },
+      { id: 'l4_c3', hanzi: '饺子', pinyin: 'jiǎo zi', english: 'Dumplings' },
+      { id: 'l4_c4', hanzi: '包子', pinyin: 'bāo zi', english: 'Steamed buns' },
+      { id: 'l4_c5', hanzi: '水果', pinyin: 'shuǐ guǒ', english: 'Fruit' },
+      { id: 'l4_c6', hanzi: '蔬菜', pinyin: 'shū cài', english: 'Vegetables' },
+      { id: 'l4_c7', hanzi: '鸡肉', pinyin: 'jī ròu', english: 'Chicken' },
+      { id: 'l4_c8', hanzi: '牛肉', pinyin: 'niú ròu', english: 'Beef' },
+    ],
+  },
+  lesson5: {
+    title: '颜色 - Colors',
+    cards: [
+      { id: 'l5_c1', hanzi: '红色', pinyin: 'hóng sè', english: 'Red' },
+      { id: 'l5_c2', hanzi: '蓝色', pinyin: 'lán sè', english: 'Blue' },
+      { id: 'l5_c3', hanzi: '绿色', pinyin: 'lǜ sè', english: 'Green' },
+      { id: 'l5_c4', hanzi: '黄色', pinyin: 'huáng sè', english: 'Yellow' },
+      { id: 'l5_c5', hanzi: '黑色', pinyin: 'hēi sè', english: 'Black' },
+      { id: 'l5_c6', hanzi: '白色', pinyin: 'bái sè', english: 'White' },
+    ],
+  },
+  lesson6: {
+    title: '时间 - Time',
+    cards: [
+      { id: 'l6_c1', hanzi: '今天', pinyin: 'jīn tiān', english: 'Today' },
+      { id: 'l6_c2', hanzi: '明天', pinyin: 'míng tiān', english: 'Tomorrow' },
+      { id: 'l6_c3', hanzi: '昨天', pinyin: 'zuó tiān', english: 'Yesterday' },
+      { id: 'l6_c4', hanzi: '星期一', pinyin: 'xīng qī yī', english: 'Monday' },
+      { id: 'l6_c5', hanzi: '月', pinyin: 'yuè', english: 'Month' },
+      { id: 'l6_c6', hanzi: '年', pinyin: 'nián', english: 'Year' },
+    ],
+  },
+  lesson7: {
+    title: '地方 - Places',
+    cards: [
+      { id: 'l7_c1', hanzi: '学校', pinyin: 'xué xiào', english: 'School' },
+      { id: 'l7_c2', hanzi: '医院', pinyin: 'yī yuàn', english: 'Hospital' },
+      { id: 'l7_c3', hanzi: '商店', pinyin: 'shāng diàn', english: 'Shop' },
+      { id: 'l7_c4', hanzi: '餐厅', pinyin: 'cān tīng', english: 'Restaurant' },
+      { id: 'l7_c5', hanzi: '机场', pinyin: 'jī chǎng', english: 'Airport' },
+      { id: 'l7_c6', hanzi: '银行', pinyin: 'yín háng', english: 'Bank' },
+    ],
+  },
+  lesson8: {
+    title: '动物 - Animals',
+    cards: [
+      { id: 'l8_c1', hanzi: '狗', pinyin: 'gǒu', english: 'Dog' },
+      { id: 'l8_c2', hanzi: '猫', pinyin: 'māo', english: 'Cat' },
+      { id: 'l8_c3', hanzi: '鸟', pinyin: 'niǎo', english: 'Bird' },
+      { id: 'l8_c4', hanzi: '鱼', pinyin: 'yú', english: 'Fish' },
+      { id: 'l8_c5', hanzi: '马', pinyin: 'mǎ', english: 'Horse' },
+      { id: 'l8_c6', hanzi: '兔子', pinyin: 'tù zi', english: 'Rabbit' },
+    ],
+  },
+  level2_lesson1: {
+    title: '购物 - Shopping',
+    cards: [
+      { id: 'l2l1_c1', hanzi: '多少钱', pinyin: 'duō shao qián', english: 'How much?' },
+      { id: 'l2l1_c2', hanzi: '太贵了', pinyin: 'tài guì le', english: 'Too expensive' },
+      { id: 'l2l1_c3', hanzi: '便宜', pinyin: 'pián yi', english: 'Cheap' },
+      { id: 'l2l1_c4', hanzi: '打折', pinyin: 'dǎ zhé', english: 'Discount' },
+      { id: 'l2l1_c5', hanzi: '信用卡', pinyin: 'xìn yòng kǎ', english: 'Credit card' },
+      { id: 'l2l1_c6', hanzi: '现金', pinyin: 'xiàn jīn', english: 'Cash' },
+    ],
+  },
+  level2_lesson2: {
+    title: '旅行 - Travel',
+    cards: [
+      { id: 'l2l2_c1', hanzi: '飞机', pinyin: 'fēi jī', english: 'Airplane' },
+      { id: 'l2l2_c2', hanzi: '火车', pinyin: 'huǒ chē', english: 'Train' },
+      { id: 'l2l2_c3', hanzi: '护照', pinyin: 'hù zhào', english: 'Passport' },
+      { id: 'l2l2_c4', hanzi: '行李', pinyin: 'xíng li', english: 'Luggage' },
+      { id: 'l2l2_c5', hanzi: '酒店', pinyin: 'jiǔ diàn', english: 'Hotel' },
+      { id: 'l2l2_c6', hanzi: '地图', pinyin: 'dì tú', english: 'Map' },
+    ],
+  },
+  level2_lesson3: {
+    title: '工作 - Work',
+    cards: [
+      { id: 'l2l3_c1', hanzi: '办公室', pinyin: 'bàn gōng shì', english: 'Office' },
+      { id: 'l2l3_c2', hanzi: '会议', pinyin: 'huì yì', english: 'Meeting' },
+      { id: 'l2l3_c3', hanzi: '经理', pinyin: 'jīng lǐ', english: 'Manager' },
+      { id: 'l2l3_c4', hanzi: '同事', pinyin: 'tóng shì', english: 'Colleague' },
+      { id: 'l2l3_c5', hanzi: '工资', pinyin: 'gōng zī', english: 'Salary' },
+      { id: 'l2l3_c6', hanzi: '加班', pinyin: 'jiā bān', english: 'Overtime' },
+    ],
+  },
+  level2_lesson4: {
+    title: '健康 - Health',
+    cards: [
+      { id: 'l2l4_c1', hanzi: '头疼', pinyin: 'tóu téng', english: 'Headache' },
+      { id: 'l2l4_c2', hanzi: '感冒', pinyin: 'gǎn mào', english: 'Cold/Flu' },
+      { id: 'l2l4_c3', hanzi: '药', pinyin: 'yào', english: 'Medicine' },
+      { id: 'l2l4_c4', hanzi: '医生', pinyin: 'yī shēng', english: 'Doctor' },
+      { id: 'l2l4_c5', hanzi: '休息', pinyin: 'xiū xi', english: 'Rest' },
+      { id: 'l2l4_c6', hanzi: '运动', pinyin: 'yùn dòng', english: 'Exercise' },
+    ],
+  },
+  level2_lesson5: {
+    title: '天气 - Weather',
+    cards: [
+      { id: 'l2l5_c1', hanzi: '晴天', pinyin: 'qíng tiān', english: 'Sunny' },
+      { id: 'l2l5_c2', hanzi: '下雨', pinyin: 'xià yǔ', english: 'Rainy' },
+      { id: 'l2l5_c3', hanzi: '下雪', pinyin: 'xià xuě', english: 'Snowy' },
+      { id: 'l2l5_c4', hanzi: '热', pinyin: 'rè', english: 'Hot' },
+      { id: 'l2l5_c5', hanzi: '冷', pinyin: 'lěng', english: 'Cold' },
+      { id: 'l2l5_c6', hanzi: '风', pinyin: 'fēng', english: 'Wind' },
+    ],
+  },
+  level2_lesson6: {
+    title: '爱好 - Hobbies',
+    cards: [
+      { id: 'l2l6_c1', hanzi: '看书', pinyin: 'kàn shū', english: 'Reading' },
+      { id: 'l2l6_c2', hanzi: '看电影', pinyin: 'kàn diàn yǐng', english: 'Watching movies' },
+      { id: 'l2l6_c3', hanzi: '听音乐', pinyin: 'tīng yīn yuè', english: 'Listening to music' },
+      { id: 'l2l6_c4', hanzi: '画画', pinyin: 'huà huà', english: 'Drawing' },
+      { id: 'l2l6_c5', hanzi: '游泳', pinyin: 'yóu yǒng', english: 'Swimming' },
+      { id: 'l2l6_c6', hanzi: '跑步', pinyin: 'pǎo bù', english: 'Running' },
+    ],
+  },
 };
 
 export default function FlashcardStudyPage() {
   const router = useRouter();
   const params = useParams();
-  const searchParams = useSearchParams();
   const lessonId = params.lessonId as string;
-  const startCardIndex = searchParams.get('cardIndex');
-  
-  // State for flashcards and study mode
-  const [currentFlashcards, setCurrentFlashcards] = useState<FlashcardWithProgress[]>([]);
-  const [currentCardIndex, setCurrentCardIndex] = useState(0);
-  const [isCardFlipped, setIsCardFlipped] = useState(false);
-  const [completedCardIds, setCompletedCardIds] = useState<string[]>([]);
-  const [stackPosition, setStackPosition] = useState(3);
-  const [isCompletionPopupVisible, setIsCompletionPopupVisible] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-  const [lessonTitle, setLessonTitle] = useState('');
-  
-  // Drawing state
-  const [isDrawingCardOpen, setIsDrawingCardOpen] = useState(false);
-  const drawingCardCanvasRef = useRef<HTMLCanvasElement>(null);
-  const [drawingCardCtx, setDrawingCardCtx] = useState<CanvasRenderingContext2D | null>(null);
-  const [isDrawingOnCard, setIsDrawingOnCard] = useState(false);
-  const [drawingCardStrokeHistory, setDrawingCardStrokeHistory] = useState<ImageData[]>([]);
-  const [showHanziHint, setShowHanziHint] = useState(false);
 
-  // Load lesson cards and start study session
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [isFlipped, setIsFlipped] = useState(false);
+  const [isDrawingMode, setIsDrawingMode] = useState(false);
+  const [showHint, setShowHint] = useState(false);
+
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [isDrawing, setIsDrawing] = useState(false);
+  const [ctx, setCtx] = useState<CanvasRenderingContext2D | null>(null);
+
+  const [dynamicLessonData, setDynamicLessonData] = useState<{ title: string; cards: any[] } | null>(null);
+  const [isLoading, setIsLoading] = useState(lessonId === 'self-learn');
+
   useEffect(() => {
-    const loadAndStartStudy = async () => {
-      setIsLoading(true);
-      try {
-        // Get all flashcards
-        const allFlashcards = await FlashcardDatabaseService.getAllFlashcards();
-        
-        // Filter cards for this specific lesson
-        const { lessonNumber, level } = FlashcardDatabaseService.parseLessonId(lessonId);
-        const expectedLessonId = level === 2 ? `level2_lesson${lessonNumber}` : `lesson${lessonNumber}`;
-        
-        const filtered = allFlashcards.filter(card => {
-          const cardLessonId = (card as any).lesson_id || '';
-          return cardLessonId === expectedLessonId;
+    if (lessonId === 'self-learn') {
+      const loadSelfLearnData = async () => {
+        setIsLoading(true);
+        const cards = await FlashcardDatabaseService.getSelfLearnCards();
+        setDynamicLessonData({
+          title: 'My Custom Cards',
+          cards: cards
         });
-        
-        if (filtered.length === 0) {
-          // No cards found, redirect back
-          router.push(`/dashboard/flashcards/lessons/${lessonId}`);
-          return;
-        }
-        
-        // Shuffle the cards for study
-        const shuffledCards = shuffleArray(filtered);
-        setCurrentFlashcards(shuffledCards);
-        
-        // Set starting card index if specified
-        if (startCardIndex) {
-          const index = parseInt(startCardIndex);
-          if (index >= 0 && index < shuffledCards.length) {
-            setCurrentCardIndex(index);
-          }
-        }
-        
-        // Set lesson title
-        const title = level === 2 ? `Level 2 - Lesson ${lessonNumber}` : `Lesson ${lessonNumber}`;
-        setLessonTitle(title);
-        
-        // Reset study session state
-        setCompletedCardIds([]);
-        setIsCardFlipped(false);
-        setStackPosition(3);
-        setIsCompletionPopupVisible(false);
-        
-      } catch (error) {
-        console.error('Error loading lesson for study:', error);
-        router.push(`/dashboard/flashcards/lessons/${lessonId}`);
-      } finally {
         setIsLoading(false);
-      }
-    };
-
-    if (lessonId) {
-      loadAndStartStudy();
+      };
+      loadSelfLearnData();
     }
-  }, [lessonId, startCardIndex, router]);
+  }, [lessonId]);
 
-  // Update flashcard progress with database
-  const updateFlashcardProgress = async (flashcardId: string, difficulty: 'easy' | 'normal' | 'hard' | 'difficult') => {
-    try {
-      const isValidDatabaseId = flashcardId.includes('-') && flashcardId.length > 20;
-      
-      if (!isValidDatabaseId) {
-        console.log('Invalid database ID - skipping database update');
-        return false;
-      }
-      
-      const success = await FlashcardDatabaseService.updateProgress(flashcardId, difficulty);
-      if (success) {
-        console.log('Successfully updated progress in database');
-      }
-      return success;
-    } catch (error) {
-      console.warn('Error updating flashcard progress:', error);
-      return false;
-    }
-  };
+  const lessonData = dynamicLessonData || FLASHCARD_DATA[lessonId] || { title: 'Unknown', cards: [] };
+  const currentCard = lessonData.cards[currentIndex];
+  const totalCards = lessonData.cards.length;
 
-  // Handle next card with circular navigation and improved stack animation
-  const handleNextCard = () => {
-    if (currentFlashcards.length === 0) return;
-
-    // Reset drawing card state when moving to next card
-    setIsDrawingCardOpen(false);
-    setShowHanziHint(false);
-    clearDrawingCard();
-
-    const topCard = document.querySelector('.top-card') as HTMLElement;
-    if (topCard) {
-      setStackPosition(1);
-      topCard.classList.add('slide-out-left');
-      
-      const nextIndex = (currentCardIndex + 1) % currentFlashcards.length;
-      
-      setTimeout(() => {
-        setCurrentCardIndex(nextIndex);
-        topCard.classList.remove('slide-out-left');
-        topCard.classList.add('slide-in-right');
-        setStackPosition(2);
-        
-        setTimeout(() => {
-          topCard.classList.remove('slide-in-right');
-          setStackPosition(3);
-        }, 300);
-      }, 250);
-    } else {
-      const nextIndex = (currentCardIndex + 1) % currentFlashcards.length;
-      setCurrentCardIndex(nextIndex);
-    }
-  };
-
-  // Handle previous card with circular navigation and improved stack animation
-  const handlePrevCard = () => {
-    if (currentFlashcards.length === 0) return;
-
-    // Reset drawing card state when moving to previous card
-    setIsDrawingCardOpen(false);
-    setShowHanziHint(false);
-    clearDrawingCard();
-
-    const topCard = document.querySelector('.top-card') as HTMLElement;
-    if (topCard) {
-      setStackPosition(1);
-      topCard.classList.add('slide-out-right');
-      
-      const prevIndex = currentCardIndex === 0 
-        ? currentFlashcards.length - 1 
-        : currentCardIndex - 1;
-      
-      setTimeout(() => {
-        setCurrentCardIndex(prevIndex);
-        topCard.classList.remove('slide-out-right');
-        topCard.classList.add('slide-in-left');
-        setStackPosition(2);
-        
-        setTimeout(() => {
-          topCard.classList.remove('slide-in-left');
-          setStackPosition(3);
-        }, 300);
-      }, 250);
-    } else {
-      const prevIndex = currentCardIndex === 0 
-        ? currentFlashcards.length - 1 
-        : currentCardIndex - 1;
-      setCurrentCardIndex(prevIndex);
-    }
-  };
-
-  // Handle card difficulty rating
-  const handleCardResult = (difficulty: 'easy' | 'normal' | 'hard' | 'difficult') => {
-    const currentCard = currentFlashcards[currentCardIndex];
-    if (!currentCard) return;
-    
-    // Update progress in database
-    if (currentCard.id) {
-      updateFlashcardProgress(currentCard.id, difficulty);
-    }
-    
-    // Add to completed cards
-    setCompletedCardIds(prevCompletedIds => {
-      const newCompletedIds = [...prevCompletedIds, currentCard.id];
-      const updatedCompletedIds = newCompletedIds;
-      
-      // Move to next card with animation
-      const card = document.querySelector('.top-card') as HTMLElement;
-      if (card) {
-        const known = difficulty !== 'hard' && difficulty !== 'difficult';
-        setStackPosition(1);
-        card.classList.add(known ? 'slide-out-right' : 'slide-out-left');
-        
-        // Check if all cards are completed
-        if (updatedCompletedIds.length >= currentFlashcards.length) {
-          setTimeout(() => {
-            setIsCompletionPopupVisible(true);
-            setTimeout(() => {
-              setIsCompletionPopupVisible(false);
-              exitStudySession();
-            }, 5000);
-          }, 500);
-        } else {
-          // Find next uncompleted card
-          setTimeout(() => {
-            let nextIndex = (currentCardIndex + 1) % currentFlashcards.length;
-            let loopCount = 0;
-            const maxLoops = currentFlashcards.length;
-            
-            while (
-              updatedCompletedIds.includes(currentFlashcards[nextIndex].id) && 
-              updatedCompletedIds.length < currentFlashcards.length &&
-              loopCount < maxLoops
-            ) {
-              nextIndex = (nextIndex + 1) % currentFlashcards.length;
-              loopCount++;
-            }
-            
-            if (loopCount >= maxLoops) {
-              setIsCompletionPopupVisible(true);
-              setTimeout(() => {
-                setIsCompletionPopupVisible(false);
-                exitStudySession();
-              }, 5000);
-              return;
-            }
-            
-            card.classList.remove('slide-out-right', 'slide-out-left');
-            setStackPosition(2);
-            setCurrentCardIndex(nextIndex);
-            
-            setTimeout(() => {
-              setStackPosition(3);
-            }, 300);
-          }, 300);
-        }
-      } else {
-        // Without animations
-        if (updatedCompletedIds.length >= currentFlashcards.length) {
-          setIsCompletionPopupVisible(true);
-          setTimeout(() => {
-            setIsCompletionPopupVisible(false);
-            exitStudySession();
-          }, 5000);
-        } else {
-          let nextIndex = (currentCardIndex + 1) % currentFlashcards.length;
-          while (
-            updatedCompletedIds.includes(currentFlashcards[nextIndex].id) && 
-            updatedCompletedIds.length < currentFlashcards.length
-          ) {
-            nextIndex = (nextIndex + 1) % currentFlashcards.length;
-          }
-          setCurrentCardIndex(nextIndex);
-        }
-      }
-      
-      return newCompletedIds;
-    });
-  };
-
-  // Exit study session
-  const exitStudySession = () => {
-    setCompletedCardIds([]);
-    setIsCompletionPopupVisible(false);
-    setIsDrawingCardOpen(false);
-    setShowHanziHint(false);
-    clearDrawingCard();
-    
-    // Navigate back to lesson
-    router.push(`/dashboard/flashcards/lessons/${lessonId}`);
-  };
-
-  // Drawing card functions
-  const toggleDrawingCard = () => {
-    console.log('🎨 TOGGLE DRAWING CARD:', { 
-      current: isDrawingCardOpen, 
-      willBe: !isDrawingCardOpen,
-      canvasExists: !!drawingCardCanvasRef.current 
-    });
-    setIsDrawingCardOpen(!isDrawingCardOpen);
-  };
-
-  // Add effect to handle canvas initialization and event listeners
+  // Initialize canvas
   useEffect(() => {
-    console.log('🔄 CANVAS EFFECT RUNNING:', {
-      isDrawingCardOpen,
-      canvasExists: !!drawingCardCanvasRef.current,
-      contextExists: !!drawingCardCtx
-    });
-
-    const canvas = drawingCardCanvasRef.current;
-    if (!canvas || !isDrawingCardOpen) {
-      console.log('❌ CANVAS EFFECT EARLY RETURN:', { 
-        canvas: !!canvas, 
-        isDrawingCardOpen 
-      });
-      return;
-    }
-
-    // Initialize canvas if not already done
-    let context = drawingCardCtx;
-    if (!context) {
-      console.log('🎯 INITIALIZING CANVAS CONTEXT...');
-      const ctx = canvas.getContext('2d');
-      if (ctx) {
+    if (isDrawingMode && canvasRef.current) {
+      const canvas = canvasRef.current;
+      const context = canvas.getContext('2d');
+      if (context) {
         const rect = canvas.getBoundingClientRect();
-        const devicePixelRatio = window.devicePixelRatio || 1;
-        
-        // Set actual canvas size with device pixel ratio for crisp rendering
-        canvas.width = rect.width * devicePixelRatio;
-        canvas.height = rect.height * devicePixelRatio;
-        
-        // Scale CSS size back to original
-        canvas.style.width = rect.width + 'px';
-        canvas.style.height = rect.height + 'px';
-        
-        // Scale the drawing context to match device pixel ratio
-        ctx.scale(devicePixelRatio, devicePixelRatio);
-        
-        // Configure drawing style for smooth pen-like strokes
-        ctx.strokeStyle = '#3b82f6'; // Blue color
-        ctx.lineWidth = 2; // Thinner stroke
-        ctx.lineCap = 'round';
-        ctx.lineJoin = 'round';
-        ctx.imageSmoothingEnabled = true;
-        ctx.imageSmoothingQuality = 'high';
-        
-        setDrawingCardCtx(ctx);
-        context = ctx;
-        
-        const initialState = ctx.getImageData(0, 0, canvas.width, canvas.height);
-        setDrawingCardStrokeHistory([initialState]);
-        
-        console.log('✅ CANVAS CONTEXT INITIALIZED:', {
-          width: canvas.width,
-          height: canvas.height,
-          devicePixelRatio,
-          strokeStyle: ctx.strokeStyle
-        });
+        const dpr = window.devicePixelRatio || 1;
+        canvas.width = rect.width * dpr;
+        canvas.height = rect.height * dpr;
+        context.scale(dpr, dpr);
+        context.strokeStyle = '#3b82f6';
+        context.lineWidth = 3;
+        context.lineCap = 'round';
+        context.lineJoin = 'round';
+        setCtx(context);
       }
     }
+  }, [isDrawingMode]);
 
-    if (!context) {
-      console.log('❌ NO CONTEXT AVAILABLE');
-      return;
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (!ctx || !canvasRef.current) return;
+    e.preventDefault();
+    setIsDrawing(true);
+    const rect = canvasRef.current.getBoundingClientRect();
+    const touch = e.touches[0];
+    ctx.beginPath();
+    ctx.moveTo(touch.clientX - rect.left, touch.clientY - rect.top);
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (!isDrawing || !ctx || !canvasRef.current) return;
+    e.preventDefault();
+    const rect = canvasRef.current.getBoundingClientRect();
+    const touch = e.touches[0];
+    ctx.lineTo(touch.clientX - rect.left, touch.clientY - rect.top);
+    ctx.stroke();
+  };
+
+  const handleTouchEnd = () => {
+    setIsDrawing(false);
+  };
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (!ctx || !canvasRef.current) return;
+    setIsDrawing(true);
+    const rect = canvasRef.current.getBoundingClientRect();
+    ctx.beginPath();
+    ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDrawing || !ctx || !canvasRef.current) return;
+    const rect = canvasRef.current.getBoundingClientRect();
+    ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
+    ctx.stroke();
+  };
+
+  const handleMouseUp = () => {
+    setIsDrawing(false);
+  };
+
+  const clearCanvas = () => {
+    if (ctx && canvasRef.current) {
+      ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
     }
+  };
 
-    // Use a local variable for drawing state to avoid React state timing issues
-    let isCurrentlyDrawing = false;
+  const nextCard = () => {
+    if (currentIndex < totalCards - 1) {
+      setCurrentIndex(currentIndex + 1);
+      setIsFlipped(false);
+      setShowHint(false);
+      clearCanvas();
+    }
+  };
 
-    // Add non-passive event listeners with drawing functionality
-    const handleTouchStart = (e: TouchEvent) => {
-      console.log('👆 TOUCH START');
-      e.preventDefault();
-      if (!context || !canvas) return;
-      
-      isCurrentlyDrawing = true;
-      setIsDrawingOnCard(true);
-      const rect = canvas.getBoundingClientRect();
-      const touch = e.touches[0];
-      const x = touch.clientX - rect.left;
-      const y = touch.clientY - rect.top;
-      
-      console.log('🎯 STARTING DRAW AT:', { x, y, canvasWidth: canvas.width, canvasHeight: canvas.height, rectWidth: rect.width, rectHeight: rect.height });
-      context.beginPath();
-      context.moveTo(x, y);
-    };
+  const prevCard = () => {
+    if (currentIndex > 0) {
+      setCurrentIndex(currentIndex - 1);
+      setIsFlipped(false);
+      setShowHint(false);
+      clearCanvas();
+    }
+  };
 
-    const handleTouchMove = (e: TouchEvent) => {
-      console.log('👆 TOUCH MOVE - isCurrentlyDrawing:', isCurrentlyDrawing);
-      e.preventDefault();
-      if (!isCurrentlyDrawing || !context || !canvas) {
-        console.log('❌ TOUCH MOVE BLOCKED:', { isCurrentlyDrawing, context: !!context, canvas: !!canvas });
-        return;
-      }
-      
-      const rect = canvas.getBoundingClientRect();
-      const touch = e.touches[0];
-      const x = touch.clientX - rect.left;
-      const y = touch.clientY - rect.top;
-      
-      console.log('✏️ DRAWING TO:', { x, y, strokeStyle: context.strokeStyle, lineWidth: context.lineWidth });
-      context.lineTo(x, y);
-      context.stroke();
-    };
-
-    const handleTouchEnd = (e: TouchEvent) => {
-      console.log('👆 TOUCH END');
-      e.preventDefault();
-      isCurrentlyDrawing = false;
-      setIsDrawingOnCard(false);
-      
-      if (context && canvas) {
-        const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
-        setDrawingCardStrokeHistory(prev => [...prev, imageData]);
-      }
-    };
-
-    // Mouse event handlers for desktop support
-    const handleMouseStart = (e: MouseEvent) => {
-      console.log('🖱️ MOUSE START');
-      if (!context || !canvas) return;
-      
-      isCurrentlyDrawing = true;
-      setIsDrawingOnCard(true);
-      const rect = canvas.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
-      
-      console.log('🎯 STARTING DRAW AT:', { x, y, canvasWidth: canvas.width, canvasHeight: canvas.height });
-      context.beginPath();
-      context.moveTo(x, y);
-    };
-
-    const handleMouseMove = (e: MouseEvent) => {
-      console.log('🖱️ MOUSE MOVE - isCurrentlyDrawing:', isCurrentlyDrawing);
-      if (!isCurrentlyDrawing || !context || !canvas) {
-        console.log('❌ MOUSE MOVE BLOCKED:', { isCurrentlyDrawing, context: !!context, canvas: !!canvas });
-        return;
-      }
-      
-      const rect = canvas.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
-      
-      console.log('✏️ DRAWING TO:', { x, y, strokeStyle: context.strokeStyle, lineWidth: context.lineWidth });
-      context.lineTo(x, y);
-      context.stroke();
-    };
-
-    const handleMouseEnd = () => {
-      console.log('🖱️ MOUSE END');
-      isCurrentlyDrawing = false;
-      setIsDrawingOnCard(false);
-      
-      if (context && canvas) {
-        const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
-        setDrawingCardStrokeHistory(prev => [...prev, imageData]);
-      }
-    };
-
-    console.log('🔗 ATTACHING EVENT LISTENERS...');
-    // Add both touch and mouse event listeners
-    canvas.addEventListener('touchstart', handleTouchStart, { passive: false });
-    canvas.addEventListener('touchmove', handleTouchMove, { passive: false });
-    canvas.addEventListener('touchend', handleTouchEnd, { passive: false });
-    canvas.addEventListener('touchcancel', handleTouchEnd, { passive: false });
-    
-    canvas.addEventListener('mousedown', handleMouseStart);
-    canvas.addEventListener('mousemove', handleMouseMove);
-    canvas.addEventListener('mouseup', handleMouseEnd);
-    canvas.addEventListener('mouseleave', handleMouseEnd);
-
-    console.log('✅ EVENT LISTENERS ATTACHED');
-
-    return () => {
-      console.log('🧹 CLEANING UP EVENT LISTENERS');
-      canvas.removeEventListener('touchstart', handleTouchStart);
-      canvas.removeEventListener('touchmove', handleTouchMove);
-      canvas.removeEventListener('touchend', handleTouchEnd);
-      canvas.removeEventListener('touchcancel', handleTouchEnd);
-      
-      canvas.removeEventListener('mousedown', handleMouseStart);
-      canvas.removeEventListener('mousemove', handleMouseMove);
-      canvas.removeEventListener('mouseup', handleMouseEnd);
-      canvas.removeEventListener('mouseleave', handleMouseEnd);
-    };
-  }, [isDrawingCardOpen]);
-
-  const clearDrawingCard = () => {
-    console.log('🧹 CLEARING DRAWING CARD');
-    if (drawingCardCtx && drawingCardCanvasRef.current) {
-      const canvas = drawingCardCanvasRef.current;
-      drawingCardCtx.clearRect(0, 0, canvas.width, canvas.height);
-      
-      const blankState = drawingCardCtx.getImageData(0, 0, canvas.width, canvas.height);
-      setDrawingCardStrokeHistory([blankState]);
-      console.log('✅ DRAWING CARD CLEARED');
+  const goBack = () => {
+    if (lessonId === 'self-learn') {
+      router.push(`/dashboard/flashcards/levels/self-learn`);
     } else {
-      console.log('❌ CANNOT CLEAR - NO CONTEXT OR CANVAS');
+      router.push(`/dashboard/flashcards/lessons/${lessonId}`);
     }
   };
 
-  // Determine back URL
-  const getBackUrl = () => {
-    return `/dashboard/flashcards/lessons/${lessonId}`;
-  };
+  const isLevel2 = lessonId.startsWith('level2') || lessonId === 'self-learn'; // Treat self-learn as neutral/level 2 styled
+  const gradientColors = isLevel2
+    ? 'from-emerald-400 via-teal-400 to-cyan-400'
+    : 'from-orange-400 via-amber-400 to-yellow-400';
+  const accentColor = isLevel2 ? 'bg-emerald-500' : 'bg-orange-500';
 
   if (isLoading) {
-    return <StudyModeSkeleton />;
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{ background: 'linear-gradient(180deg, #4A9EFF 0%, #87CEEB 50%, #E8F4FF 100%)' }}>
+        <p className="text-white animate-pulse">Loading custom cards...</p>
+      </div>
+    );
+  }
+
+  if (!currentCard) {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{ background: 'linear-gradient(180deg, #4A9EFF 0%, #87CEEB 50%, #E8F4FF 100%)' }}>
+        <p className="text-white">No cards found. Go back and add some!</p>
+        <button onClick={goBack} className="ml-4 px-4 py-2 bg-white/20 rounded-xl text-white">Back</button>
+      </div>
+    );
   }
 
   return (
-    <div className="fixed inset-0 bg-gradient-to-br from-[#1b1f3b] via-[#2a2e49] to-[#16172f] dark:bg-gradient-to-br dark:from-[#000000] dark:via-[#0a0f2c] dark:to-[#12142b] z-50 overflow-hidden flex flex-col">
-      <div className="px-4 pt-4 pb-32 flex-1 flex flex-col">
-        
-        
-        {/* Flashcard Container with Drawing Card */}
-        {currentFlashcards.length > 0 && (
-          <div className="flex flex-col justify-center items-center flex-grow mb-4 relative">
-            {isDrawingCardOpen ? (
-              /* Drawing Mode Layout */
-              <div className="flex flex-col items-center w-full max-w-lg space-y-2">
-                {/* Compact Main Card */}
-                <div className="w-full flex justify-center">
-                  <Flashcard 
-                    card={currentFlashcards[currentCardIndex]} 
-                    onDifficulty={handleCardResult}
-                    isDatabaseMode={true}
-                    onDrawToggle={toggleDrawingCard}
-                    isDrawingOpen={isDrawingCardOpen}
-                    isCompactMode={true}
-                    showHanziHint={showHanziHint}
-                    onHanziHintToggle={() => setShowHanziHint(!showHanziHint)}
-                  />
-                </div>
-                
-                {/* Prominent Drawing Card */}
+    <div
+      className="relative min-h-screen overflow-hidden font-sans"
+      style={{
+        background: 'linear-gradient(180deg, #4A9EFF 0%, #87CEEB 40%, #B8E0FF 70%, #E8F4FF 100%)',
+      }}
+    >
+      {/* Clouds */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div
+          className="absolute w-[400px] h-[140px] rounded-full opacity-70 animate-cloud-drift"
+          style={{
+            background: 'radial-gradient(ellipse, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0) 70%)',
+            left: '-5%',
+            top: '3%',
+          }}
+        />
+        <div
+          className="absolute w-[300px] h-[100px] rounded-full opacity-60 animate-cloud-drift-slow"
+          style={{
+            background: 'radial-gradient(ellipse, rgba(255,255,255,0.85) 0%, rgba(255,255,255,0) 70%)',
+            right: '-3%',
+            top: '6%',
+          }}
+        />
+      </div>
+
+      {/* Green base */}
+      <div className="absolute bottom-0 left-0 right-0 h-16 pointer-events-none">
+        <div
+          className="absolute inset-0"
+          style={{
+            background: 'linear-gradient(180deg, transparent 0%, rgba(76,175,80,0.2) 50%, rgba(56,142,60,0.3) 100%)',
+            borderRadius: '100% 100% 0 0',
+            transform: 'scaleX(1.5)',
+          }}
+        />
+      </div>
+
+      {/* Main content */}
+      <main className="relative z-10 min-h-screen px-4 py-6 flex flex-col">
+        <div className="max-w-5xl mx-auto w-full flex-1 flex flex-col">
+          {/* Header */}
+          <div className="flex items-center justify-between mb-4 max-w-md mx-auto w-full">
+            <button
+              onClick={goBack}
+              className="flex items-center text-white/70 hover:text-white transition-colors text-sm"
+            >
+              <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+              Back
+            </button>
+            <span className="text-white/60 text-sm font-light">
+              {currentIndex + 1} / {totalCards}
+            </span>
+          </div>
+
+          {/* Progress bar */}
+          <div className="w-full h-1.5 bg-white/30 rounded-full mb-8 overflow-hidden max-w-md mx-auto">
+            <div
+              className={`h-full ${accentColor} rounded-full transition-all duration-300`}
+              style={{ width: `${((currentIndex + 1) / totalCards) * 100}%` }}
+            />
+          </div>
+
+          {/* Main Content Row with Side Buttons */}
+          <div className="flex-1 flex items-center justify-center w-full gap-8">
+
+            {/* Desktop Prev Button */}
+            <button
+              onClick={prevCard}
+              disabled={currentIndex === 0}
+              className={`hidden md:flex w-14 h-14 rounded-full items-center justify-center transition-all ${currentIndex === 0
+                  ? 'bg-white/10 text-white/20 cursor-not-allowed'
+                  : 'bg-white/20 hover:bg-white/30 text-white shadow-lg hover:scale-110 backdrop-blur-md'
+                }`}
+            >
+              <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+            </button>
+
+            {/* Main Card Column */}
+            <div className="flex-1 flex flex-col items-center justify-center max-w-sm w-full">
+              {isDrawingMode ? (
+                /* Drawing Mode */
                 <div className="w-full">
-                  <div className="bg-white dark:bg-gradient-to-br dark:from-[#0a0f2c] dark:via-[#12142b] dark:to-[#000000] rounded-3xl shadow-xl border border-gray-200 dark:border-neutral-700 p-6 w-full">
-                    {/* Drawing Card Header */}
-                    <div className="flex justify-end items-center mb-4">
-                      <div className="flex items-center space-x-2">
+                  {/* Mini card showing character */}
+                  <div className="mb-4 text-center">
+                    <span className="text-4xl text-white drop-shadow-lg">{currentCard.hanzi}</span>
+                    <p className="text-white/60 text-sm mt-1">{currentCard.pinyin}</p>
+                  </div>
+
+                  {/* Drawing canvas */}
+                  <div className="relative rounded-3xl overflow-hidden shadow-2xl">
+                    <div className={`absolute inset-0 bg-gradient-to-r ${gradientColors} opacity-90`} />
+                    <div className="absolute inset-[2px] rounded-[22px] bg-white" />
+
+                    <div className="relative p-4">
+                      {/* Hint overlay */}
+                      {showHint && (
+                        <div className="absolute inset-4 flex items-center justify-center pointer-events-none z-10">
+                          <span className="text-8xl text-gray-200/50">{currentCard.hanzi}</span>
+                        </div>
+                      )}
+
+                      <canvas
+                        ref={canvasRef}
+                        className="w-full h-64 bg-gray-50 rounded-2xl touch-none"
+                        style={{ touchAction: 'none' }}
+                        onTouchStart={handleTouchStart}
+                        onTouchMove={handleTouchMove}
+                        onTouchEnd={handleTouchEnd}
+                        onMouseDown={handleMouseDown}
+                        onMouseMove={handleMouseMove}
+                        onMouseUp={handleMouseUp}
+                        onMouseLeave={handleMouseUp}
+                      />
+
+                      {/* Drawing controls */}
+                      <div className="flex justify-center gap-3 mt-4">
                         <button
-                          onClick={clearDrawingCard}
-                          className="p-2 rounded-full bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
-                          title="Erase Drawing"
+                          onClick={() => setShowHint(!showHint)}
+                          className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${showHint
+                              ? 'bg-blue-100 text-blue-600'
+                              : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                            }`}
                         >
-                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-600 dark:text-gray-300">
-                            <path d="M7 21h10"></path>
-                            <path d="M5 21h14"></path>
-                            <path d="M19 21V7a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v14"></path>
-                            <path d="M9 9l6 6"></path>
-                            <path d="M15 9l-6 6"></path>
-                          </svg>
+                          {showHint ? '👁️ Hide' : '👁️ Hint'}
                         </button>
                         <button
-                          onClick={clearDrawingCard}
-                          className="p-2 rounded-full bg-green-100 dark:bg-green-800 text-green-800 dark:text-green-200 hover:bg-green-200 dark:hover:bg-green-700 transition-colors"
-                          title="Next Page"
+                          onClick={clearCanvas}
+                          className="px-4 py-2 rounded-xl bg-gray-100 text-gray-600 hover:bg-gray-200 text-sm font-medium transition-all"
                         >
-                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <polyline points="9 18 15 12 9 6"></polyline>
-                          </svg>
+                          🗑️ Clear
                         </button>
                         <button
-                          onClick={toggleDrawingCard}
-                          className="p-2 rounded-full bg-blue-100 dark:bg-blue-800 text-blue-800 dark:text-blue-200 hover:bg-blue-200 dark:hover:bg-blue-700 transition-colors"
-                          title="Close Drawing Mode"
+                          onClick={() => setIsDrawingMode(false)}
+                          className="px-4 py-2 rounded-xl bg-gray-100 text-gray-600 hover:bg-gray-200 text-sm font-medium transition-all"
                         >
-                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <line x1="18" y1="6" x2="6" y2="18"></line>
-                            <line x1="6" y1="6" x2="18" y2="18"></line>
-                          </svg>
+                          ✕ Close
                         </button>
                       </div>
                     </div>
-                    
-                    {/* Drawing Canvas */}
-                    <canvas
-                      ref={drawingCardCanvasRef}
-                      className="w-full h-80 bg-white dark:bg-gray-800 rounded-xl border border-gray-300 dark:border-gray-600 shadow-inner touch-none"
-                      style={{ touchAction: 'none' }}
-                    />
-                    
-                    {/* Help text */}
-                    <div className="mt-4 text-center">
-                      <p className="text-sm text-gray-600 dark:text-gray-400">
-                        Pick your vibe - how'd this word hit? 💯
-                      </p>
+                  </div>
+                </div>
+              ) : (
+                /* Normal Flashcard Mode */
+                <div
+                  className="w-full cursor-pointer perspective-1000"
+                  onClick={() => setIsFlipped(!isFlipped)}
+                >
+                  <div
+                    className="relative w-full h-96 transition-all duration-500"
+                    style={{
+                      transformStyle: 'preserve-3d',
+                      transform: isFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)',
+                    }}
+                  >
+                    {/* Front - Chinese */}
+                    <div
+                      className="absolute inset-0 rounded-3xl overflow-hidden shadow-2xl backface-hidden"
+                      style={{ backfaceVisibility: 'hidden' }}
+                    >
+                      <div className={`absolute inset-0 bg-gradient-to-r ${gradientColors} opacity-95`} />
+                      <div className="absolute inset-[2px] rounded-[22px] bg-white" />
+                      <div className="absolute inset-0 bg-gradient-to-br from-white/50 via-transparent to-transparent" />
+
+                      <div className="relative h-full flex flex-col items-center justify-center p-6 text-center">
+                        <span className="text-7xl font-medium text-gray-800 mb-6">{currentCard.hanzi}</span>
+                        <span className="text-2xl text-gray-500 font-light">{currentCard.pinyin}</span>
+                        <p className="text-gray-300 text-xs mt-8 font-light tracking-widest uppercase">tap to flip</p>
+                      </div>
                     </div>
-                    
-                    {/* Difficulty Rating Buttons for Drawing Mode */}
-                    <div className="mt-4 grid grid-cols-4 gap-2">
-                      <button 
-                        onClick={() => handleCardResult('easy')}
-                        className="px-3 py-2 rounded-lg text-sm font-medium text-green-700 bg-green-100 hover:bg-green-200 dark:bg-green-800 dark:text-green-200 dark:hover:bg-green-700 transition-colors"
-                      >
-                        Easy
-                      </button>
-                      <button 
-                        onClick={() => handleCardResult('normal')}
-                        className="px-3 py-2 rounded-lg text-sm font-medium text-yellow-700 bg-yellow-100 hover:bg-yellow-200 dark:bg-yellow-800 dark:text-yellow-200 dark:hover:bg-yellow-700 transition-colors"
-                      >
-                        Normal
-                      </button>
-                      <button 
-                        onClick={() => handleCardResult('hard')}
-                        className="px-3 py-2 rounded-lg text-sm font-medium text-orange-700 bg-orange-100 hover:bg-orange-200 dark:bg-orange-800 dark:text-orange-200 dark:hover:bg-orange-700 transition-colors"
-                      >
-                        Hard
-                      </button>
-                      <button 
-                        onClick={() => handleCardResult('difficult')}
-                        className="px-3 py-2 rounded-lg text-sm font-medium text-red-700 bg-red-100 hover:bg-red-200 dark:bg-red-800 dark:text-red-200 dark:hover:bg-red-700 transition-colors"
-                      >
-                        Difficult
-                      </button>
+
+                    {/* Back - English */}
+                    <div
+                      className="absolute inset-0 rounded-3xl overflow-hidden shadow-2xl backface-hidden"
+                      style={{ backfaceVisibility: 'hidden', transform: 'rotateY(180deg)' }}
+                    >
+                      <div className="absolute inset-0 bg-gradient-to-br from-gray-200 to-gray-300" />
+                      <div className="absolute inset-[2px] rounded-[22px] bg-white" />
+
+                      <div className="relative h-full flex flex-col items-center justify-center p-6 text-center">
+                        <span className="text-4xl font-medium text-gray-700 mb-2">{currentCard.english}</span>
+                        <div className="w-12 h-1 bg-gray-100 rounded-full my-4" />
+                        <span className="text-xl text-gray-400 font-light">{currentCard.pinyin}</span>
+                        <span className="text-5xl text-gray-200 mt-6 opacity-30 select-none">{currentCard.hanzi}</span>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            ) : (
-              /* Normal Mode Layout */
-              <div className="flex flex-col items-center w-full h-full space-y-4">
-                <div 
-                  className="flex justify-center items-center w-full h-full"
-                  style={{ 
-                    minHeight: '500px',
-                    width: '100%'
-                  }}
+              )}
+
+              {/* Write button (when not in drawing mode) */}
+              {!isDrawingMode && (
+                <button
+                  onClick={() => setIsDrawingMode(true)}
+                  className="mt-8 flex items-center gap-2 px-6 py-3 rounded-2xl bg-white/90 shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all backdrop-blur-sm"
                 >
-                  <Flashcard 
-                    card={currentFlashcards[currentCardIndex]} 
-                    onDifficulty={handleCardResult}
-                    isDatabaseMode={true}
-                    onDrawToggle={toggleDrawingCard}
-                    isDrawingOpen={isDrawingCardOpen}
-                    isCompactMode={false}
-                  />
-                </div>
-                {/* Gen-z style instruction */}
-                <div className="text-center text-slate-600 dark:text-white/70 text-sm px-4">
-                  Pick your vibe - how'd this word hit? 💯
-                </div>
-              </div>
-            )}
-          </div>
-        )}
-        
-      </div>
-      
-      {/* Completion popup */}
-      {isCompletionPopupVisible && (
-        <div className="fixed inset-0 flex items-center justify-center z-50 bg-black/50 backdrop-blur-sm">
-          <div className="bg-white dark:bg-[#0e0e0e] rounded-2xl p-8 shadow-xl max-w-md w-full text-center animate-bounce-in border dark:border-gray-800">
-            <div className="w-20 h-20 bg-gradient-to-r from-blue-500 to-blue-600 dark:from-blue-400 dark:to-blue-500 rounded-full flex items-center justify-center mx-auto mb-5">
-              <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-                <polyline points="22 4 12 14.01 9 11.01"></polyline>
-              </svg>
+                  <span className="text-xl">✏️</span>
+                  <span className="text-sm font-medium text-gray-700">Practice Writing</span>
+                </button>
+              )}
             </div>
-            <h2 className="text-2xl font-bold mb-2 text-gray-900 dark:text-gray-100">Congratulations! 🎉</h2>
-            <p className="text-gray-600 dark:text-gray-400 mb-6">You've completed all the flashcards in this lesson!</p>
-            <Button 
-              variant="primary" 
-              className="w-full"
-              onClick={exitStudySession}
+
+            {/* Desktop Next Button */}
+            <button
+              onClick={nextCard}
+              disabled={currentIndex >= totalCards - 1}
+              className={`hidden md:flex w-14 h-14 rounded-full items-center justify-center transition-all ${currentIndex >= totalCards - 1
+                  ? 'bg-white/10 text-white/20 cursor-not-allowed'
+                  : 'bg-white/20 hover:bg-white/30 text-white shadow-lg hover:scale-110 backdrop-blur-md'
+                }`}
             >
-              Continue
-            </Button>
+              <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
+
+          </div>
+
+          {/* Mobile Navigation (Bottom) */}
+          <div className="md:hidden flex justify-between items-center mt-auto pt-4 pb-2 max-w-md mx-auto w-full">
+            <button
+              onClick={prevCard}
+              disabled={currentIndex === 0}
+              className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all ${currentIndex === 0
+                  ? 'bg-white/30 text-white/40 cursor-not-allowed'
+                  : 'bg-white/90 text-gray-600 shadow-lg hover:shadow-xl hover:scale-105'
+                }`}
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+            </button>
+
+            <button
+              onClick={nextCard}
+              disabled={currentIndex >= totalCards - 1}
+              className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all ${currentIndex >= totalCards - 1
+                  ? 'bg-white/30 text-white/40 cursor-not-allowed'
+                  : 'bg-white/90 text-gray-600 shadow-lg hover:shadow-xl hover:scale-105'
+                }`}
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
           </div>
         </div>
-      )}
-      
-      {/* Mobile Navigation */}
-      <MobileNavCustom backUrl={getBackUrl()} />
+      </main>
+
+      <style jsx>{`
+        @keyframes cloud-drift {
+          0%, 100% { transform: translateX(0); }
+          50% { transform: translateX(15px); }
+        }
+        @keyframes cloud-drift-slow {
+          0%, 100% { transform: translateX(0); }
+          50% { transform: translateX(-12px); }
+        }
+        .animate-cloud-drift {
+          animation: cloud-drift 8s ease-in-out infinite;
+        }
+        .animate-cloud-drift-slow {
+          animation: cloud-drift-slow 12s ease-in-out infinite;
+        }
+        .perspective-1000 {
+          perspective: 1000px;
+        }
+        .backface-hidden {
+          backface-visibility: hidden;
+        }
+      `}</style>
     </div>
   );
 }

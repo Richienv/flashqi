@@ -1,5 +1,6 @@
-import { supabase } from '@/lib/supabase/client';
-import { StaticFlashcard, getStaticCard, getStaticCards } from '@/data/flashcardStaticContent';
+import { StaticFlashcard, getStaticCards } from '@/data/flashcardStaticContent';
+import { progressStorage, flashcardStorage } from '@/lib/localStorage';
+import { getCurrentUser } from '@/lib/localAuth';
 
 export interface ReviewStatus {
   card_id: string;
@@ -43,19 +44,22 @@ export class OptimizedSpacedRepetitionService {
     if (cardIds.length === 0) return [];
 
     try {
-      // Use RPC function for optimized batch fetch
-      const { data, error } = await supabase.rpc('get_cards_review_status', {
-        card_ids: cardIds
+      const user = getCurrentUser();
+      const userId = user?.id || 'demo-user';
+      
+      const progress = progressStorage.getByUserId(userId);
+      
+      return cardIds.map(cardId => {
+        const cardProgress = progress.find(p => p.flashcard_id === cardId);
+        return {
+          card_id: cardId,
+          status: cardProgress?.status || 'new',
+          last_reviewed: cardProgress?.last_reviewed || null,
+          interval_days: cardProgress?.interval_days || 1
+        };
       });
-
-      if (error) {
-        console.error('Error fetching review statuses:', error);
-        return [];
-      }
-
-      return data || [];
     } catch (error) {
-      console.error('Network error fetching review statuses:', error);
+      console.error('Error fetching review statuses:', error);
       return [];
     }
   }
@@ -105,7 +109,10 @@ export class OptimizedSpacedRepetitionService {
     const batch = this.updateQueue.splice(0, this.BATCH_SIZE);
     
     try {
-      const updates = batch.map(update => {
+      const user = getCurrentUser();
+      const userId = user?.id || 'demo-user';
+      
+      for (const update of batch) {
         const currentInterval = 1; // Get from cache or default
         const nextInterval = this.calculateNextInterval(
           currentInterval,
@@ -114,26 +121,14 @@ export class OptimizedSpacedRepetitionService {
           update.strength_level
         );
 
-        return {
-          card_id: update.card_id,
+        progressStorage.update(update.card_id, userId, {
           last_reviewed: new Date().toISOString(),
           status: update.is_correct ? 'known' : 'due',
           interval_days: nextInterval,
-          review_count: 1
-        };
-      });
-
-      const { error } = await supabase.rpc('batch_update_reviews', {
-        updates: JSON.stringify(updates)
-      });
-
-      if (error) {
-        console.error('Batch update failed:', error);
-        // Re-queue failed updates
-        this.updateQueue.unshift(...batch);
+        });
       }
     } catch (error) {
-      console.error('Network error in batch update:', error);
+      console.error('Batch update failed:', error);
       // Re-queue failed updates
       this.updateQueue.unshift(...batch);
     } finally {
@@ -184,12 +179,25 @@ export class OptimizedSpacedRepetitionService {
    */
   static async getDueCardsCount(): Promise<number> {
     try {
-      const { count, error } = await supabase
-        .from('flashcard_reviews')
-        .select('card_id', { count: 'exact', head: true })
-        .or('status.eq.new,status.eq.due');
-
-      return count || 0;
+      const user = getCurrentUser();
+      const userId = user?.id || 'demo-user';
+      
+      const allCards = flashcardStorage.getAll();
+      const progress = progressStorage.getByUserId(userId);
+      const now = new Date().toISOString();
+      
+      let count = 0;
+      for (const card of allCards) {
+        const cardProgress = progress.find(p => p.flashcard_id === card.id);
+        
+        if (!cardProgress || cardProgress.status === 'new' || cardProgress.status === 'due') {
+          count++;
+        } else if (cardProgress.next_review && cardProgress.next_review <= now) {
+          count++;
+        }
+      }
+      
+      return count;
     } catch (error) {
       console.error('Error getting due cards count:', error);
       return 0;
@@ -203,7 +211,7 @@ export class OptimizedSpacedRepetitionService {
     const staticCards = getStaticCards(lessonId);
     const cardIds = staticCards.map(card => card.id);
     
-    // Fetch in background and cache in React Query
+    // Fetch in background
     await this.fetchReviewStatuses(cardIds);
   }
 
@@ -215,4 +223,4 @@ export class OptimizedSpacedRepetitionService {
       await this.processBatchQueue();
     }
   }
-} 
+}

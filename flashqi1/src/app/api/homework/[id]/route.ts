@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase/client';
+import { homeworkStorage } from '@/lib/localStorage';
 
 // GET /api/homework/:id - Get a single homework item
 export async function GET(
@@ -9,19 +9,7 @@ export async function GET(
   try {
     const homeworkId = params.id;
     
-    const { data, error } = await supabase
-      .from('homework')
-      .select('*')
-      .eq('id', homeworkId)
-      .single();
-    
-    if (error) {
-      console.error('Error fetching homework:', error);
-      return NextResponse.json(
-        { error: 'Failed to fetch homework assignment' },
-        { status: 500 }
-      );
-    }
+    const data = homeworkStorage.getById(homeworkId);
     
     if (!data) {
       return NextResponse.json(
@@ -69,29 +57,25 @@ export async function PUT(
       }
     }
     
-    const { data, error } = await supabase
-      .from('homework')
-      .update(homeworkData)
-      .eq('id', homeworkId)
-      .select()
-      .single();
+    const updatedHomework = homeworkStorage.update(homeworkId, {
+      lesson_id: homeworkData.lesson_id,
+      title: homeworkData.title,
+      description: homeworkData.description,
+      due_date: homeworkData.due_date,
+      lesson_number: homeworkData.lesson_number,
+      lesson_title: homeworkData.lesson_title,
+      lesson_type: homeworkData.lesson_type,
+      completed: homeworkData.completed,
+    });
     
-    if (error) {
-      console.error('Error updating homework:', error);
-      return NextResponse.json(
-        { error: 'Failed to update homework assignment' },
-        { status: 500 }
-      );
-    }
-    
-    if (!data) {
+    if (!updatedHomework) {
       return NextResponse.json(
         { error: 'Homework assignment not found' },
         { status: 404 }
       );
     }
     
-    return NextResponse.json(data);
+    return NextResponse.json(updatedHomework);
   } catch (error) {
     console.error('Unexpected error:', error);
     return NextResponse.json(
@@ -109,16 +93,12 @@ export async function DELETE(
   try {
     const homeworkId = params.id;
     
-    const { error } = await supabase
-      .from('homework')
-      .delete()
-      .eq('id', homeworkId);
+    const success = homeworkStorage.delete(homeworkId);
     
-    if (error) {
-      console.error('Error deleting homework:', error);
+    if (!success) {
       return NextResponse.json(
-        { error: 'Failed to delete homework assignment' },
-        { status: 500 }
+        { error: 'Homework assignment not found' },
+        { status: 404 }
       );
     }
     
@@ -133,4 +113,4 @@ export async function DELETE(
       { status: 500 }
     );
   }
-} 
+}

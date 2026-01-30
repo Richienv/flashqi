@@ -3,22 +3,8 @@
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { useState, useRef, useEffect } from "react";
-import { supabase } from "@/lib/supabase/client";
+import { homeworkStorage, generateUUID, type HomeworkItem } from "@/lib/localStorage";
 import { MobileNavCustom } from '@/components/ui/navbar';
-
-// Homework Item Interface
-interface HomeworkItem {
-  id: string;
-  lesson_id: string;
-  title: string;
-  description: string;
-  due_date: string;
-  created_at: string;
-  lesson_number: number;
-  lesson_title: string;
-  lesson_type: "comprehensive" | "speaking" | "listening";
-  completed: boolean;
-}
 
 export default function HomeworkPage() {
   const [homeworkData, setHomeworkData] = useState<HomeworkItem[]>([]);
@@ -41,50 +27,29 @@ export default function HomeworkPage() {
   useEffect(() => {
     fetchHomework();
 
-    // Set up real-time subscription for homework changes
-    const homeworkSubscription = supabase
-      .channel('homework-changes')
-      .on('postgres_changes', 
-        { event: '*', schema: 'public', table: 'homework' }, 
-        (payload) => {
-          console.log('Real-time update:', payload);
-          fetchHomework(); // Refresh the homework list when changes occur
-        }
-      )
-      .subscribe();
+    // Set up polling for homework changes (simulating real-time)
+    const interval = setInterval(() => {
+      fetchHomework();
+    }, 5000);
 
-    return () => {
-      supabase.removeChannel(homeworkSubscription);
-    };
+    return () => clearInterval(interval);
   }, []);
 
-  // Function to fetch homework data from the API
-  const fetchHomework = async () => {
+  // Function to fetch homework data from localStorage
+  const fetchHomework = () => {
     setIsLoading(true);
     try {
-      // In a real implementation, fetch from the API
-      // const response = await fetch('/api/homework');
-      // if (!response.ok) throw new Error('Failed to fetch homework data');
-      // const data = await response.json();
-      // setHomeworkData(data);
-
-      // For development, use the Supabase client directly
-      const { data, error } = await supabase
-        .from('homework')
-        .select('*')
-        .order('due_date', { ascending: true });
+      const data = homeworkStorage.getAll();
       
-      if (error) throw error;
-      
-      // For now, if no data is returned from Supabase, use mock data
+      // If no data, use mock data
       if (!data || data.length === 0) {
-        setHomeworkData([
+        const mockData: HomeworkItem[] = [
           {
             id: "4",
             lesson_id: "3",
             title: "Family Tree",
             description: "Create a family tree and label each member in Chinese using the vocabulary from Lesson 3.",
-            due_date: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(), // 2 days ago (overdue)
+            due_date: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
             created_at: new Date().toISOString(),
             lesson_number: 3,
             lesson_title: "Family Members",
@@ -96,7 +61,7 @@ export default function HomeworkPage() {
             lesson_id: "1",
             title: "Practice Greetings",
             description: "Practice the greetings we learned in Lesson 1. Try to use them in conversations with friends or family.",
-            due_date: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString(), // 3 days from now
+            due_date: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString(),
             created_at: new Date().toISOString(),
             lesson_number: 1,
             lesson_title: "Greetings and Introduction",
@@ -108,7 +73,7 @@ export default function HomeworkPage() {
             lesson_id: "1",
             title: "Write Characters",
             description: "Practice writing the Chinese characters from Lesson 1. Try to write each character at least 5 times.",
-            due_date: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(), // 1 day ago
+            due_date: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
             created_at: new Date().toISOString(),
             lesson_number: 1,
             lesson_title: "Greetings and Introduction",
@@ -120,70 +85,23 @@ export default function HomeworkPage() {
             lesson_id: "2",
             title: "Count to 100",
             description: "Practice counting from 1 to 100 in Chinese. Record yourself and listen to check your pronunciation.",
-            due_date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(), // 7 days from now
+            due_date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
             created_at: new Date().toISOString(),
             lesson_number: 2,
             lesson_title: "Numbers and Counting",
             lesson_type: "listening",
             completed: false
           },
-        ]);
+        ];
+        setHomeworkData(mockData);
+        // Save mock data to localStorage
+        mockData.forEach(item => homeworkStorage.create(item));
       } else {
         setHomeworkData(data);
       }
     } catch (error) {
       console.error('Error fetching homework:', error);
-      // Fallback to mock data if API fails
-      setHomeworkData([
-        {
-          id: "4",
-          lesson_id: "3",
-          title: "Family Tree",
-          description: "Create a family tree and label each member in Chinese using the vocabulary from Lesson 3.",
-          due_date: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-          created_at: new Date().toISOString(),
-          lesson_number: 3,
-          lesson_title: "Family Members",
-          lesson_type: "comprehensive",
-          completed: false
-        },
-        {
-          id: "1",
-          lesson_id: "1",
-          title: "Practice Greetings",
-          description: "Practice the greetings we learned in Lesson 1. Try to use them in conversations with friends or family.",
-          due_date: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString(),
-          created_at: new Date().toISOString(),
-          lesson_number: 1,
-          lesson_title: "Greetings and Introduction",
-          lesson_type: "speaking",
-          completed: false
-        },
-        {
-          id: "2",
-          lesson_id: "1",
-          title: "Write Characters",
-          description: "Practice writing the Chinese characters from Lesson 1. Try to write each character at least 5 times.",
-          due_date: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
-          created_at: new Date().toISOString(),
-          lesson_number: 1,
-          lesson_title: "Greetings and Introduction",
-          lesson_type: "comprehensive",
-          completed: true
-        },
-        {
-          id: "3",
-          lesson_id: "2",
-          title: "Count to 100",
-          description: "Practice counting from 1 to 100 in Chinese. Record yourself and listen to check your pronunciation.",
-          due_date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
-          created_at: new Date().toISOString(),
-          lesson_number: 2,
-          lesson_title: "Numbers and Counting",
-          lesson_type: "listening",
-          completed: false
-        },
-      ]);
+      setHomeworkData([]);
     } finally {
       setIsLoading(false);
     }
@@ -192,14 +110,9 @@ export default function HomeworkPage() {
   // Function to mark homework as completed
   const markAsCompleted = async (id: string, completed: boolean) => {
     try {
-      const { error } = await supabase
-        .from('homework')
-        .update({ completed })
-        .eq('id', id);
+      homeworkStorage.update(id, { completed });
       
-      if (error) throw error;
-      
-      // Update local state to reflect the change
+      // Update local state
       setHomeworkData(prev => 
         prev.map(item => 
           item.id === id ? { ...item, completed } : item
@@ -212,7 +125,6 @@ export default function HomeworkPage() {
       }
     } catch (error) {
       console.error('Error updating homework status:', error);
-      // You could add a toast notification here for error feedback
     }
   };
 
@@ -230,7 +142,7 @@ export default function HomeworkPage() {
       const generatedTitle = `${newHomework.lesson_type.charAt(0).toUpperCase() + newHomework.lesson_type.slice(1)} Assignment`;
       const generatedLessonTitle = `Lesson ${newHomework.lesson_number}`;
       
-      const homeworkItem = {
+      const homeworkItem = homeworkStorage.create({
         lesson_id: `lesson-${newHomework.lesson_number}`,
         title: generatedTitle,
         description: newHomework.description,
@@ -238,28 +150,11 @@ export default function HomeworkPage() {
         lesson_number: newHomework.lesson_number,
         lesson_title: generatedLessonTitle,
         lesson_type: newHomework.lesson_type,
-        completed: false,
-        created_at: new Date().toISOString()
-      };
+        completed: false
+      });
 
-      const { data, error } = await supabase
-        .from('homework')
-        .insert(homeworkItem)
-        .select()
-        .single();
-
-      if (error) {
-        console.error('Error creating homework:', error);
-        // If database insert fails, add to local state as fallback
-        const localHomework = {
-          id: `hw-${Date.now()}`,
-          ...homeworkItem
-        };
-        setHomeworkData(prev => [...prev, localHomework]);
-      } else {
-        // Add the new homework to local state
-        setHomeworkData(prev => [...prev, data]);
-      }
+      // Add the new homework to local state
+      setHomeworkData(prev => [...prev, homeworkItem]);
 
       // Reset form and close modal
       setNewHomework({
@@ -286,16 +181,9 @@ export default function HomeworkPage() {
     setIsDeleting(id);
     
     try {
-      const { error } = await supabase
-        .from('homework')
-        .delete()
-        .eq('id', id);
+      homeworkStorage.delete(id);
 
-      if (error) {
-        console.error('Error deleting homework:', error);
-      }
-
-      // Remove from local state regardless of database result
+      // Remove from local state
       setHomeworkData(prev => prev.filter(item => item.id !== id));
       
       // Close modal if the deleted item was selected
@@ -442,13 +330,6 @@ export default function HomeworkPage() {
         document.removeEventListener('keydown', handleEscapeKey);
       };
     }
-    
-    if (selectedHomework) {
-      document.addEventListener('keydown', handleEscapeKey);
-      return () => {
-        document.removeEventListener('keydown', handleEscapeKey);
-      };
-    }
   }, [selectedHomework, isCreating]);
 
   return (
@@ -540,7 +421,7 @@ export default function HomeworkPage() {
           
           {/* Homework Assignments */}
           <div className="space-y-4">
-            {homeworkData.map((assignment, index) => (
+            {homeworkData.map((assignment) => (
               <div key={assignment.id} className="bg-white dark:bg-gray-900 rounded-xl p-6 border border-gray-200 dark:border-gray-800 hover:border-gray-300 dark:hover:border-gray-700 hover:shadow-sm transition-all">
                 <div className="flex justify-between items-start">
                   <div className="flex-1 min-w-0">
@@ -635,7 +516,7 @@ export default function HomeworkPage() {
                   </svg>
                 </div>
                 <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">No assignments yet</h3>
-                <p className="text-gray-500 dark:text-gray-400 mb-4">Your homework assignments will appear here when they're available.</p>
+                <p className="text-gray-500 dark:text-gray-400 mb-4">Your homework assignments will appear here when they&apos;re available.</p>
                 <button 
                   onClick={() => setIsCreating(true)}
                   className="inline-flex items-center px-4 py-2 bg-blue-600 dark:bg-blue-500 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors"
@@ -873,4 +754,4 @@ export default function HomeworkPage() {
       <MobileNavCustom backUrl="/dashboard" />
     </div>
   );
-} 
+}

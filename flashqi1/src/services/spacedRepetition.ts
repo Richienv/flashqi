@@ -1,4 +1,5 @@
-import { supabase } from '@/lib/supabase/client';
+import { progressStorage, flashcardStorage } from '@/lib/localStorage';
+import { getCurrentUser } from '@/lib/localAuth';
 
 export interface FlashcardSR {
   id: string;
@@ -64,29 +65,47 @@ export class SpacedRepetitionService {
    */
   static async fetchSpacedRepetitionCards(limit: number = 20): Promise<FlashcardSR[]> {
     try {
-      const { data, error } = await supabase
-        .from('flashcards')
-        .select('*')
-        .or('status.eq.new,status.eq.due,last_reviewed.is.null')
-        .order('last_reviewed', { ascending: true, nullsFirst: true })
-        .limit(limit);
-
-      if (error) {
-        // Silently handle database errors - spaced repetition is optional
-        return [];
-      }
-
-      // Filter due cards on the client side for more accurate timing
+      const user = getCurrentUser();
+      const userId = user?.id || 'demo-user';
+      
+      // Get all cards
+      const allCards = flashcardStorage.getAll();
+      const progress = progressStorage.getByUserId(userId);
+      
+      // Get due cards
       const now = new Date();
-      return (data || []).filter(card => {
-        if (!card.last_reviewed || card.status === 'new') return true;
+      const dueCards: FlashcardSR[] = [];
+      
+      for (const card of allCards) {
+        const cardProgress = progress.find(p => p.flashcard_id === card.id);
         
-        const lastReviewed = new Date(card.last_reviewed);
-        const nextReview = new Date(lastReviewed.getTime() + (card.interval_days * 24 * 60 * 60 * 1000));
-        return now >= nextReview;
-      });
+        if (!cardProgress || cardProgress.status === 'new' || cardProgress.status === 'due') {
+          dueCards.push({
+            ...card,
+            last_reviewed: cardProgress?.last_reviewed || null,
+            status: cardProgress?.status || 'new',
+            interval_days: cardProgress?.interval_days || 1,
+            user_id: userId,
+          });
+        } else if (cardProgress.next_review) {
+          const nextReview = new Date(cardProgress.next_review);
+          if (now >= nextReview) {
+            dueCards.push({
+              ...card,
+              last_reviewed: cardProgress.last_reviewed,
+              status: cardProgress.status,
+              interval_days: cardProgress.interval_days,
+              user_id: userId,
+            });
+          }
+        }
+        
+        if (dueCards.length >= limit) break;
+      }
+      
+      return dueCards;
     } catch (error) {
-      // Silently handle network errors - spaced repetition is optional
+      console.warn('Error fetching spaced repetition cards:', error);
       return [];
     }
   }
@@ -101,43 +120,39 @@ export class SpacedRepetitionService {
     strengthLevel: 'low' | 'medium' | 'high' = 'medium'
   ): Promise<boolean> {
     try {
-      // Get current card data to calculate review count
-      const { data: currentCard } = await supabase
-        .from('flashcards')
-        .select('interval_days, last_reviewed')
-        .eq('id', cardId)
-        .single();
-
-      const reviewCount = currentCard?.last_reviewed ? 
-        Math.floor((Date.now() - new Date(currentCard.last_reviewed).getTime()) / (1000 * 60 * 60 * 24 * currentInterval)) + 1 : 
-        0;
+      const user = getCurrentUser();
+      const userId = user?.id || 'demo-user';
+      
+      // Get current progress
+      let progress = progressStorage.getByFlashcardId(cardId);
+      
+      if (!progress) {
+        // Create initial progress
+        progress = progressStorage.create(cardId, userId);
+      }
+      
+      const reviewCount = progress.review_count;
 
       const nextInterval = this.calculateNextInterval(
-        currentInterval || currentCard?.interval_days || 1,
+        currentInterval || progress.interval_days || 1,
         isCorrect,
         reviewCount,
         strengthLevel
       );
 
-      const updateData: SpacedRepetitionUpdate = {
-        last_reviewed: new Date().toISOString(),
+      const now = new Date().toISOString();
+
+      progressStorage.update(cardId, userId, {
+        last_reviewed: now,
         status: isCorrect ? 'known' : 'due',
-        interval_days: nextInterval
-      };
-
-      const { error } = await supabase
-        .from('flashcards')
-        .update(updateData)
-        .eq('id', cardId);
-
-      if (error) {
-        // Silently handle database errors - spaced repetition is optional
-        return false;
-      }
+        interval_days: nextInterval,
+        review_count: reviewCount + 1,
+        correct_count: isCorrect ? progress.correct_count + 1 : progress.correct_count,
+      });
 
       return true;
     } catch (error) {
-      // Silently handle network errors - spaced repetition is optional
+      console.warn('Error updating card review:', error);
       return false;
     }
   }
@@ -147,19 +162,27 @@ export class SpacedRepetitionService {
    */
   static async getDueCardsCount(): Promise<number> {
     try {
-      const { count, error } = await supabase
-        .from('flashcards')
-        .select('*', { count: 'exact', head: true })
-        .or('status.eq.new,status.eq.due,last_reviewed.is.null');
-
-      if (error) {
-        // Silently handle database errors - spaced repetition is optional
-        return 0;
+      const user = getCurrentUser();
+      const userId = user?.id || 'demo-user';
+      
+      const allCards = flashcardStorage.getAll();
+      const progress = progressStorage.getByUserId(userId);
+      const now = new Date().toISOString();
+      
+      let count = 0;
+      for (const card of allCards) {
+        const cardProgress = progress.find(p => p.flashcard_id === card.id);
+        
+        if (!cardProgress || cardProgress.status === 'new' || cardProgress.status === 'due') {
+          count++;
+        } else if (cardProgress.next_review && cardProgress.next_review <= now) {
+          count++;
+        }
       }
-
-      return count || 0;
+      
+      return count;
     } catch (error) {
-      // Silently handle network errors - spaced repetition is optional
+      console.warn('Error getting due cards count:', error);
       return 0;
     }
   }
@@ -169,28 +192,54 @@ export class SpacedRepetitionService {
    */
   static async getCardsByStatus(status: 'new' | 'due' | 'both', limit: number = 20): Promise<FlashcardSR[]> {
     try {
-      let query = supabase.from('flashcards').select('*');
-
-      if (status === 'new') {
-        query = query.or('status.eq.new,last_reviewed.is.null');
-      } else if (status === 'due') {
-        query = query.eq('status', 'due');
-      } else {
-        query = query.or('status.eq.new,status.eq.due,last_reviewed.is.null');
+      const user = getCurrentUser();
+      const userId = user?.id || 'demo-user';
+      
+      const allCards = flashcardStorage.getAll();
+      const progress = progressStorage.getByUserId(userId);
+      const now = new Date().toISOString();
+      
+      const filteredCards: FlashcardSR[] = [];
+      
+      for (const card of allCards) {
+        const cardProgress = progress.find(p => p.flashcard_id === card.id);
+        const cardStatus = cardProgress?.status || 'new';
+        const isDue = !cardProgress || 
+                       cardStatus === 'due' || 
+                       (cardProgress.next_review && cardProgress.next_review <= now);
+        
+        if (status === 'new' && (cardStatus === 'new' || !cardProgress)) {
+          filteredCards.push({
+            ...card,
+            last_reviewed: cardProgress?.last_reviewed || null,
+            status: 'new',
+            interval_days: cardProgress?.interval_days || 1,
+            user_id: userId,
+          });
+        } else if (status === 'due' && isDue) {
+          filteredCards.push({
+            ...card,
+            last_reviewed: cardProgress?.last_reviewed || null,
+            status: cardStatus,
+            interval_days: cardProgress?.interval_days || 1,
+            user_id: userId,
+          });
+        } else if (status === 'both' && (cardStatus === 'new' || cardStatus === 'due' || isDue)) {
+          filteredCards.push({
+            ...card,
+            last_reviewed: cardProgress?.last_reviewed || null,
+            status: cardStatus,
+            interval_days: cardProgress?.interval_days || 1,
+            user_id: userId,
+          });
+        }
+        
+        if (filteredCards.length >= limit) break;
       }
-
-      const { data, error } = await query
-        .order('last_reviewed', { ascending: true, nullsFirst: true })
-        .limit(limit);
-
-      if (error) {
-        // Silently handle database errors - spaced repetition is optional
-        return [];
-      }
-
-      return data || [];
+      
+      return filteredCards;
     } catch (error) {
-      // Silently handle network errors - spaced repetition is optional
+      console.warn('Error getting cards by status:', error);
       return [];
     }
   }
@@ -200,18 +249,20 @@ export class SpacedRepetitionService {
    */
   static async resetCard(cardId: string): Promise<boolean> {
     try {
-      const { error } = await supabase
-        .from('flashcards')
-        .update({
-          last_reviewed: null,
-          status: 'new',
-          interval_days: 1
-        })
-        .eq('id', cardId);
+      const user = getCurrentUser();
+      const userId = user?.id || 'demo-user';
+      
+      progressStorage.update(cardId, userId, {
+        last_reviewed: null,
+        status: 'new',
+        interval_days: 1,
+        review_count: 0,
+        correct_count: 0,
+      });
 
-      return !error;
+      return true;
     } catch (error) {
-      // Silently handle network errors - spaced repetition is optional
+      console.warn('Error resetting card:', error);
       return false;
     }
   }
@@ -228,10 +279,10 @@ export class SpacedRepetitionService {
       const results = await Promise.all(promises);
       return results.every(result => result === true);
     } catch (error) {
-      // Silently handle network errors - spaced repetition is optional
+      console.warn('Error in bulk update:', error);
       return false;
     }
   }
 }
 
-export default SpacedRepetitionService; 
+export default SpacedRepetitionService;

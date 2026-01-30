@@ -1,4 +1,10 @@
-import { supabase } from '@/lib/supabase/client';
+import {
+  flashcardStorage,
+  progressStorage,
+  userStatsStorage,
+  lessonStorage
+} from '@/lib/localStorage';
+import { getCurrentUser } from '@/lib/localAuth';
 
 export interface FlashcardWithProgress {
   id: string;
@@ -39,38 +45,51 @@ export class FlashcardDatabaseService {
    */
   static async getAllFlashcards(): Promise<FlashcardWithProgress[]> {
     console.log('🔍 [DB SERVICE DEBUG] getAllFlashcards called');
-    
+
     try {
-      const { data, error } = await supabase.rpc('get_user_flashcards_with_progress');
-      
-      console.log('🔍 [DB SERVICE DEBUG] getAllFlashcards response:', {
-        error,
-        dataLength: data?.length,
-        sampleData: data?.slice(0, 2)
+      const user = getCurrentUser();
+      const userId = user?.id || 'demo-user';
+
+      const cards = flashcardStorage.getAll();
+      const progress = progressStorage.getByUserId(userId);
+
+      console.log('🔍 [DB SERVICE DEBUG] Found cards:', cards.length, 'progress:', progress.length);
+
+      // Combine cards with their progress
+      const cardsWithProgress: FlashcardWithProgress[] = cards.map(card => {
+        const cardProgress = progress.find(p => p.flashcard_id === card.id);
+
+        if (cardProgress) {
+          return {
+            ...card,
+            status: cardProgress.status,
+            last_reviewed: cardProgress.last_reviewed,
+            next_review: cardProgress.next_review,
+            interval_days: cardProgress.interval_days,
+            ease_factor: cardProgress.ease_factor,
+            review_count: cardProgress.review_count,
+            correct_count: cardProgress.correct_count,
+            last_difficulty: cardProgress.last_difficulty,
+          };
+        }
+
+        // Return card with default progress
+        return {
+          ...card,
+          status: 'new' as const,
+          last_reviewed: null,
+          next_review: null,
+          interval_days: 0,
+          ease_factor: 2.5,
+          review_count: 0,
+          correct_count: 0,
+          last_difficulty: undefined,
+        };
       });
-      
-      if (error) {
-        console.warn('🔍 [DB SERVICE DEBUG] Error fetching all flashcards:', error);
-        return [];
-      }
-      
-      // Convert UUID fields to strings and ensure proper typing
-      const convertedData = (data || []).map((item: any) => ({
-        ...item,
-        id: String(item.id),
-        lesson_id: String(item.lesson_id),
-        created_at: item.created_at || new Date().toISOString()
-      }));
-      
-      console.log('🔍 [DB SERVICE DEBUG] Converted data sample:', {
-        originalSample: data?.[0],
-        convertedSample: convertedData[0],
-        lessonIdType: typeof convertedData[0]?.lesson_id
-      });
-      
-      return convertedData;
+
+      return cardsWithProgress;
     } catch (error) {
-      console.warn('🔍 [DB SERVICE DEBUG] Network error fetching all flashcards:', error);
+      console.warn('🔍 [DB SERVICE DEBUG] Error fetching all flashcards:', error);
       return [];
     }
   }
@@ -79,31 +98,55 @@ export class FlashcardDatabaseService {
    * Get flashcards by lesson number and level
    */
   static async getFlashcardsByLesson(
-    lessonNumber: number, 
+    lessonNumber: number,
     level: number = 1
   ): Promise<FlashcardWithProgress[]> {
     try {
-      const { data, error } = await supabase.rpc('get_flashcards_by_lesson', {
-        p_lesson_number: lessonNumber,
-        p_level: level
-      });
-      
-      if (error) {
-        console.warn('Error fetching lesson flashcards:', error);
+      const user = getCurrentUser();
+      const userId = user?.id || 'demo-user';
+
+      // Get the lesson
+      const lesson = lessonStorage.getByNumber(lessonNumber, level);
+      if (!lesson) {
+        console.warn('Lesson not found:', lessonNumber, level);
         return [];
       }
-      
-      // Convert UUID fields to strings
-      const convertedData = (data || []).map((item: any) => ({
-        ...item,
-        id: String(item.id),
-        lesson_id: String(item.lesson_id),
-        created_at: item.created_at || new Date().toISOString()
-      }));
-      
-      return convertedData;
+
+      const cards = flashcardStorage.getByLessonId(lesson.id);
+      const progress = progressStorage.getByUserId(userId);
+
+      // Combine cards with their progress
+      return cards.map(card => {
+        const cardProgress = progress.find(p => p.flashcard_id === card.id);
+
+        if (cardProgress) {
+          return {
+            ...card,
+            status: cardProgress.status,
+            last_reviewed: cardProgress.last_reviewed,
+            next_review: cardProgress.next_review,
+            interval_days: cardProgress.interval_days,
+            ease_factor: cardProgress.ease_factor,
+            review_count: cardProgress.review_count,
+            correct_count: cardProgress.correct_count,
+            last_difficulty: cardProgress.last_difficulty,
+          };
+        }
+
+        return {
+          ...card,
+          status: 'new' as const,
+          last_reviewed: null,
+          next_review: null,
+          interval_days: 0,
+          ease_factor: 2.5,
+          review_count: 0,
+          correct_count: 0,
+          last_difficulty: undefined,
+        };
+      });
     } catch (error) {
-      console.warn('Network error fetching lesson flashcards:', error);
+      console.warn('Error fetching lesson flashcards:', error);
       return [];
     }
   }
@@ -112,14 +155,14 @@ export class FlashcardDatabaseService {
    * Get flashcards for multiple lessons (for midterm prep, etc.)
    */
   static async getFlashcardsForLessons(
-    lessonNumbers: number[], 
+    lessonNumbers: number[],
     level: number = 1
   ): Promise<FlashcardWithProgress[]> {
     try {
-      const promises = lessonNumbers.map(lessonNum => 
+      const promises = lessonNumbers.map(lessonNum =>
         this.getFlashcardsByLesson(lessonNum, level)
       );
-      
+
       const results = await Promise.all(promises);
       return results.flat();
     } catch (error) {
@@ -132,23 +175,19 @@ export class FlashcardDatabaseService {
    * Update flashcard progress when user answers
    */
   static async updateProgress(
-    flashcardId: string, 
+    flashcardId: string,
     difficulty: 'easy' | 'normal' | 'hard' | 'difficult'
   ): Promise<boolean> {
     try {
-      const { error } = await supabase.rpc('update_flashcard_progress', {
-        p_flashcard_id: flashcardId,
-        p_difficulty: difficulty
-      });
-      
-      if (error) {
-        console.warn('Error updating flashcard progress:', error);
-        return false;
-      }
-      
+      const user = getCurrentUser();
+      const userId = user?.id || 'demo-user';
+
+      progressStorage.updateProgress(flashcardId, userId, difficulty);
+      userStatsStorage.recalculate(userId);
+
       return true;
     } catch (error) {
-      console.warn('Network error updating flashcard progress:', error);
+      console.warn('Error updating flashcard progress:', error);
       return false;
     }
   }
@@ -157,38 +196,28 @@ export class FlashcardDatabaseService {
    * Get due flashcards for spaced repetition
    */
   static async getDueFlashcards(limit: number = 50): Promise<FlashcardWithProgress[]> {
-    console.log('🔍 [DB SERVICE DEBUG] getDueFlashcards called', {
-      limit,
-      timestamp: new Date().toISOString()
-    });
-    
+    console.log('🔍 [DB SERVICE DEBUG] getDueFlashcards called', { limit });
+
     try {
-      const { data, error } = await supabase.rpc('get_due_flashcards', {
-        p_limit: limit
+      const user = getCurrentUser();
+      const userId = user?.id || 'demo-user';
+
+      const allCards = await this.getAllFlashcards();
+      const now = new Date().toISOString();
+
+      // Filter cards that are due for review
+      const dueCards = allCards.filter(card => {
+        if (card.status === 'new') return true;
+        if (card.status === 'due') return true;
+        if (card.next_review && card.next_review <= now) return true;
+        return false;
       });
-      
-      console.log('🔍 [DB SERVICE DEBUG] getDueFlashcards response:', {
-        error,
-        dataLength: data?.length,
-        sampleData: data?.slice(0, 2)
-      });
-      
-      if (error) {
-        console.warn('🔍 [DB SERVICE DEBUG] Error fetching due flashcards:', error);
-        return [];
-      }
-      
-      // Convert UUID fields to strings
-      const convertedData = (data || []).map((item: any) => ({
-        ...item,
-        id: String(item.id),
-        lesson_id: String(item.lesson_id),
-        created_at: item.created_at || new Date().toISOString()
-      }));
-      
-      return convertedData;
+
+      console.log('🔍 [DB SERVICE DEBUG] Due cards:', dueCards.length);
+
+      return dueCards.slice(0, limit);
     } catch (error) {
-      console.warn('🔍 [DB SERVICE DEBUG] Network error fetching due flashcards:', error);
+      console.warn('🔍 [DB SERVICE DEBUG] Error fetching due flashcards:', error);
       return [];
     }
   }
@@ -200,71 +229,22 @@ export class FlashcardDatabaseService {
     difficulty: 'easy' | 'normal' | 'hard' | 'difficult' | 'all',
     limit: number = 50
   ): Promise<FlashcardWithProgress[]> {
-    console.log('🔍 [DB SERVICE DEBUG] getFlashcardsByDifficulty called', {
-      difficulty,
-      limit,
-      timestamp: new Date().toISOString()
-    });
-    
+    console.log('🔍 [DB SERVICE DEBUG] getFlashcardsByDifficulty called', { difficulty, limit });
+
     try {
-      // Call the database function to get flashcards by difficulty
-      const { data, error } = await supabase.rpc('get_user_flashcards_by_difficulty', {
-        p_difficulty: difficulty,
-        p_limit: limit
-      });
-      
-      console.log('🔍 [DB SERVICE DEBUG] Database response:', {
-        error,
-        errorCode: error?.code,
-        errorMessage: error?.message,
-        dataLength: data?.length,
-        sampleData: data?.slice(0, 2)
-      });
-      
-      if (error) {
-        console.error('🔍 [DB SERVICE DEBUG] Database function error:', {
-          error,
-          code: error.code,
-          message: error.message,
-          details: error.details
-        });
-        
-        // Return empty array instead of falling back to all cards
-        console.warn('🔍 [DB SERVICE DEBUG] Returning empty array due to error');
-        return [];
+      if (difficulty === 'all') {
+        const cards = await this.getAllFlashcards();
+        return cards.slice(0, limit);
       }
-      
-      if (!data || !Array.isArray(data)) {
-        console.warn('🔍 [DB SERVICE DEBUG] Invalid data format received:', data);
-        return [];
-      }
-      
-      // Convert UUID fields to strings
-      const convertedData = data.map((item: any) => ({
-        ...item,
-        id: String(item.id),
-        lesson_id: String(item.lesson_id),
-        created_at: item.created_at || new Date().toISOString()
-      }));
-      
-      console.log('🔍 [DB SERVICE DEBUG] Returning converted data:', {
-        difficulty,
-        cardCount: convertedData.length,
-        sampleCards: convertedData.slice(0, 3).map(c => ({
-          id: c.id,
-          hanzi: c.hanzi,
-          english: c.english,
-          last_difficulty: c.last_difficulty
-        }))
-      });
-      
-      return convertedData;
+
+      const allCards = await this.getAllFlashcards();
+      const filtered = allCards.filter(card => card.last_difficulty === difficulty);
+
+      console.log('🔍 [DB SERVICE DEBUG] Filtered by difficulty:', filtered.length);
+
+      return filtered.slice(0, limit);
     } catch (error) {
-      console.error('🔍 [DB SERVICE DEBUG] Network error fetching flashcards by difficulty:', {
-        error,
-        difficulty,
-        limit
-      });
+      console.error('🔍 [DB SERVICE DEBUG] Error fetching flashcards by difficulty:', error);
       return [];
     }
   }
@@ -274,16 +254,12 @@ export class FlashcardDatabaseService {
    */
   static async getStudyStats(): Promise<StudyStats | null> {
     try {
-      const { data, error } = await supabase.rpc('get_study_stats');
-      
-      if (error) {
-        console.warn('Error fetching study stats:', error);
-        return null;
-      }
-      
-      return data;
+      const user = getCurrentUser();
+      const userId = user?.id || 'demo-user';
+
+      return userStatsStorage.get(userId);
     } catch (error) {
-      console.warn('Network error fetching study stats:', error);
+      console.warn('Error fetching study stats:', error);
       return null;
     }
   }
@@ -299,7 +275,7 @@ export class FlashcardDatabaseService {
       const lessonNumber = parseInt(lessonId.replace('lesson', ''));
       return { lessonNumber, level: 1 };
     }
-    
+
     // Fallback
     return { lessonNumber: 1, level: 1 };
   }
@@ -309,14 +285,7 @@ export class FlashcardDatabaseService {
    */
   static async getFlashcardsByLessonId(lessonId: string): Promise<FlashcardWithProgress[]> {
     const { lessonNumber, level } = this.parseLessonId(lessonId);
-    const cards = await this.getFlashcardsByLesson(lessonNumber, level);
-    
-    // Ensure all cards have proper string IDs
-    return cards.map(card => ({
-      ...card,
-      id: String(card.id),
-      lesson_id: String(card.lesson_id)
-    }));
+    return this.getFlashcardsByLesson(lessonNumber, level);
   }
 
   /**
@@ -350,23 +319,17 @@ export class FlashcardDatabaseService {
    */
   static async resetAllProgress(): Promise<boolean> {
     console.log('🔄 [DB SERVICE] resetAllProgress called');
-    
+
     try {
-      const { data, error } = await supabase.rpc('reset_all_flashcard_progress');
-      
-      console.log('🔄 [DB SERVICE] resetAllProgress response:', {
-        error,
-        data
-      });
-      
-      if (error) {
-        console.warn('🔄 [DB SERVICE] Error resetting all progress:', error);
-        return false;
-      }
-      
+      const user = getCurrentUser();
+      const userId = user?.id || 'demo-user';
+
+      progressStorage.reset(userId);
+      userStatsStorage.recalculate(userId);
+
       return true;
     } catch (error) {
-      console.warn('🔄 [DB SERVICE] Network error resetting all progress:', error);
+      console.warn('🔄 [DB SERVICE] Error resetting all progress:', error);
       return false;
     }
   }
@@ -378,27 +341,63 @@ export class FlashcardDatabaseService {
     difficulty: 'easy' | 'normal' | 'hard' | 'difficult' | 'all'
   ): Promise<boolean> {
     console.log('🔄 [DB SERVICE] resetProgressByDifficulty called', { difficulty });
-    
+
     try {
-      const { data, error } = await supabase.rpc('reset_flashcard_progress_by_difficulty', {
-        p_difficulty: difficulty
-      });
-      
-      console.log('🔄 [DB SERVICE] resetProgressByDifficulty response:', {
-        difficulty,
-        error,
-        data
-      });
-      
-      if (error) {
-        console.warn('🔄 [DB SERVICE] Error resetting progress by difficulty:', error);
-        return false;
-      }
-      
+      const user = getCurrentUser();
+      const userId = user?.id || 'demo-user';
+
+      progressStorage.resetByDifficulty(userId, difficulty);
+      userStatsStorage.recalculate(userId);
+
       return true;
     } catch (error) {
-      console.warn('🔄 [DB SERVICE] Network error resetting progress by difficulty:', error);
+      console.warn('🔄 [DB SERVICE] Error resetting progress by difficulty:', error);
       return false;
     }
   }
-} 
+
+  /**
+   * Add a custom self-learn flashcard
+   */
+  static async addSelfLearnCard(card: { hanzi: string; pinyin: string; english: string }): Promise<FlashcardWithProgress | null> {
+    try {
+      const newCard = flashcardStorage.add({
+        ...card,
+        lesson_id: 'self-learn', // Special lesson ID for self-learn
+      });
+
+      // Initialize progress
+      const user = getCurrentUser();
+      const userId = user?.id || 'demo-user';
+      const progress = progressStorage.create(newCard.id, userId);
+
+      return {
+        ...newCard,
+        status: progress.status,
+        last_reviewed: progress.last_reviewed,
+        next_review: progress.next_review,
+        interval_days: progress.interval_days,
+        ease_factor: progress.ease_factor,
+        review_count: progress.review_count,
+        correct_count: progress.correct_count,
+        last_difficulty: progress.last_difficulty,
+      };
+    } catch (error) {
+      console.error('Error adding self-learn card:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Get all self-learn flashcards
+   */
+  static async getSelfLearnCards(): Promise<FlashcardWithProgress[]> {
+    try {
+      const allCards = await this.getAllFlashcards();
+      return allCards.filter(card => card.lesson_id === 'self-learn');
+    } catch (error) {
+      console.warn('Error fetching self-learn cards:', error);
+      return [];
+    }
+  }
+}

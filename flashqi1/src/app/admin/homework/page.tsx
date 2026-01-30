@@ -2,25 +2,12 @@
 
 import { useState, useEffect, Fragment } from 'react';
 import Link from 'next/link';
-import { supabase } from '@/lib/supabase/client';
-
-// Homework types
-interface HomeworkItem {
-  id?: string;
-  lesson_id: string;
-  title: string;
-  description: string;
-  due_date: string;
-  created_at?: string;
-  lesson_number: number;
-  lesson_title: string;
-  lesson_type: 'comprehensive' | 'speaking' | 'listening';
-  completed?: boolean;
-}
+import { homeworkStorage, lessonStorage, generateUUID } from '@/lib/localStorage';
+import type { HomeworkItem, Lesson } from '@/lib/localStorage';
 
 // Form data type without requiring lesson_id
 interface HomeworkFormData {
-  lesson_id?: string; // Optional as it will be auto-generated
+  lesson_id?: string;
   title: string;
   description: string;
   due_date: string;
@@ -33,8 +20,7 @@ interface HomeworkFormData {
 export default function AdminHomeworkPage() {
   // State for homework list and form
   const [homeworkItems, setHomeworkItems] = useState<HomeworkItem[]>([]);
-  // Add state for available lessons
-  const [lessons, setLessons] = useState<{id: string; title: string; lesson_number: number}[]>([]);
+  const [lessons, setLessons] = useState<Lesson[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showForm, setShowForm] = useState(false);
@@ -43,148 +29,60 @@ export default function AdminHomeworkPage() {
 
   // Form state
   const [formData, setFormData] = useState<HomeworkFormData>({
-    lesson_id: '', // This will be selected from existing lessons
+    lesson_id: '',
     title: '',
     description: '',
-    due_date: new Date().toISOString().split('T')[0], // Default to today's date in YYYY-MM-DD format
+    due_date: new Date().toISOString().split('T')[0],
     lesson_number: 1,
     lesson_title: '',
     lesson_type: 'comprehensive',
-    completed: false // Explicit default
+    completed: false
   });
-
-  // Simple UUID generator function
-  const generateUUID = () => {
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-      const r = Math.random() * 16 | 0, 
-            v = c === 'x' ? r : (r & 0x3 | 0x8);
-      return v.toString(16);
-    });
-  };
 
   // Fetch homework and lessons on component mount
   useEffect(() => {
-    fetchLessons(); // Fetch available lessons first
+    fetchLessons();
     fetchHomework();
 
-    // Set up real-time subscription for homework changes
-    const homeworkSubscription = supabase
-      .channel('homework-changes')
-      .on('postgres_changes', 
-        { event: '*', schema: 'public', table: 'homework' }, 
-        () => {
-          fetchHomework();
-        }
-      )
-      .subscribe();
+    // Set up polling for homework changes (simulating real-time)
+    const interval = setInterval(() => {
+      fetchHomework();
+    }, 5000);
 
-    return () => {
-      supabase.removeChannel(homeworkSubscription);
-    };
+    return () => clearInterval(interval);
   }, []);
 
-  // Fetch or generate simple numbered lessons
-  const fetchLessons = async () => {
+  // Fetch or generate lessons
+  const fetchLessons = () => {
     try {
-      console.log('Checking for existing lessons...');
+      // Initialize default lessons if none exist
+      lessonStorage.initializeDefaultLessons();
       
-      // First check what lessons exist
-      const { data: existingLessons, error: checkError } = await supabase
-        .from('lessons')
-        .select('id, title, lesson_number')
-        .order('lesson_number', { ascending: true });
-      
-      if (checkError) {
-        console.error('Error checking existing lessons:', checkError);
-      }
-      
-      // If we have lessons at all, let's attempt to delete them
-      // BUT be aware this may fail if they're referenced by homework items
-      if (existingLessons && existingLessons.length > 0) {
-        console.log(`Found ${existingLessons.length} existing lessons, attempting cleanup...`);
-        
-        try {
-          // STEP 1: Try to delete all existing lessons
-          const { error: deleteError } = await supabase
-            .from('lessons')
-            .delete()
-            .neq('id', 'dummy_value'); // This will match all rows
-          
-          if (deleteError) {
-            console.error('Error deleting existing lessons:', deleteError);
-            console.log('This is likely because lessons are referenced by homework items.');
-            console.log('Using existing lessons but removing duplicates...');
-            
-            // If we can't delete, use existing but remove duplicates
-            // Create a map of lesson numbers to their first occurrence
-            const uniqueLessons = new Map();
-            existingLessons.forEach(lesson => {
-              if (!uniqueLessons.has(lesson.lesson_number)) {
-                uniqueLessons.set(lesson.lesson_number, lesson);
-              }
-            });
-            
-            // Use only unique lessons by number
-            const dedupedLessons = Array.from(uniqueLessons.values());
-            console.log(`Removed duplicates, using ${dedupedLessons.length} lessons`);
-            setLessons(dedupedLessons);
-            return;
-          } else {
-            console.log('Successfully cleared existing lessons');
-          }
-        } catch (deleteErr) {
-          console.error('Exception clearing lessons:', deleteErr);
-          // If we can't delete, continue with creation but return at the end
-        }
-      }
-      
-      // STEP 2: Create 10 simple numbered lessons
-      const simpleLessons = Array.from({ length: 10 }, (_, i) => ({
-        id: generateUUID(),
-        title: `Lesson ${i + 1}`,
-        lesson_number: i + 1
-      }));
-      
-      // STEP 3: Insert them into the database
-      const { data: insertedData, error: insertError } = await supabase
-        .from('lessons')
-        .insert(simpleLessons)
-        .select(); // Get back the inserted data
-      
-      if (insertError) {
-        console.error('Error inserting lessons:', insertError);
-        // If insertion fails, still use the generated lessons
-        setLessons(simpleLessons);
-      } else {
-        console.log('Successfully inserted fresh set of lessons');
-        // Use the data returned from the database
-        setLessons(insertedData || simpleLessons);
-      }
+      // Get lessons from storage
+      const existingLessons = lessonStorage.getAll();
+      setLessons(existingLessons);
     } catch (error) {
       console.error('Error in fetchLessons:', error);
-      
-      // Fallback: Generate simple lessons even if there's an error
-      const simpleLessons = Array.from({ length: 10 }, (_, i) => ({
+      // Fallback: Generate simple lessons
+      const simpleLessons: Lesson[] = Array.from({ length: 10 }, (_, i) => ({
         id: generateUUID(),
         title: `Lesson ${i + 1}`,
-        lesson_number: i + 1
+        lesson_number: i + 1,
+        level: 1,
+        created_at: new Date().toISOString(),
       }));
-      
       setLessons(simpleLessons);
     }
   };
 
   // Fetch all homework assignments
-  const fetchHomework = async () => {
+  const fetchHomework = () => {
     setIsLoading(true);
     try {
-      const { data, error } = await supabase
-        .from('homework')
-        .select('*')
-        .order('due_date', { ascending: true });
-      
-      if (error) throw error;
-      setHomeworkItems(data || []);
+      const data = homeworkStorage.getAll();
+      // Sort by due date
+      data.sort((a, b) => new Date(a.due_date).getTime() - new Date(b.due_date).getTime());
+      setHomeworkItems(data);
     } catch (error) {
       console.error('Error fetching homework:', error);
       setHomeworkItems([]);
@@ -211,7 +109,7 @@ export default function AdminHomeworkPage() {
       setFormData(prev => ({
         ...prev,
         lesson_id: lessonId,
-        lesson_title: `Lesson ${selectedLesson.lesson_number}`, // Simplify to just "Lesson X"
+        lesson_title: `Lesson ${selectedLesson.lesson_number}`,
         lesson_number: selectedLesson.lesson_number
       }));
     } else {
@@ -233,7 +131,7 @@ export default function AdminHomeworkPage() {
     try {
       // Validate required fields
       const requiredFields = [
-        'lesson_id', // Now this is required since it's selected from dropdown
+        'lesson_id',
         'title', 
         'description', 
         'due_date', 
@@ -251,9 +149,7 @@ export default function AdminHomeworkPage() {
       }
 
       // Format the data for submission
-      // Make sure due_date is a valid ISO string
       const dueDate = new Date(formData.due_date);
-      // Check if date is valid
       if (isNaN(dueDate.getTime())) {
         setFormError('Invalid due date format');
         setIsSubmitting(false);
@@ -261,41 +157,29 @@ export default function AdminHomeworkPage() {
       }
 
       const submissionData = {
-        ...formData,
-        due_date: dueDate.toISOString(), // Convert to ISO string for consistency
-        completed: formData.completed ?? false, // Default to false if not set
+        lesson_id: formData.lesson_id!,
+        title: formData.title,
+        description: formData.description,
+        due_date: dueDate.toISOString(),
+        lesson_number: formData.lesson_number,
+        lesson_title: formData.lesson_title,
+        lesson_type: formData.lesson_type,
+        completed: formData.completed ?? false,
       };
 
       console.log('Submitting homework data:', submissionData);
 
       // Update existing homework or create new one
       if (editingId) {
-        // Update existing homework
-        const { error } = await supabase
-          .from('homework')
-          .update(submissionData)
-          .eq('id', editingId);
-        
-        if (error) {
-          console.error('Supabase update error details:', error);
-          throw error;
-        }
+        homeworkStorage.update(editingId, submissionData);
       } else {
-        // Create new homework
-        const { error } = await supabase
-          .from('homework')
-          .insert(submissionData);
-        
-        if (error) {
-          console.error('Supabase insert error details:', error);
-          throw error;
-        }
+        homeworkStorage.create(submissionData);
       }
 
       // Reset form and refresh data
       resetForm();
       setShowForm(false);
-      await fetchHomework();
+      fetchHomework();
     } catch (error) {
       console.error('Error submitting homework:', error);
       setFormError('Failed to save homework. Please try again.');
@@ -306,9 +190,8 @@ export default function AdminHomeworkPage() {
 
   // Edit homework item
   const handleEdit = (item: HomeworkItem) => {
-    // Make sure we're editing with all the original data, including IDs
     setFormData({
-      lesson_id: item.lesson_id, // Set the lesson ID for the dropdown
+      lesson_id: item.lesson_id,
       title: item.title,
       description: item.description,
       due_date: new Date(item.due_date).toISOString().split('T')[0],
@@ -329,14 +212,7 @@ export default function AdminHomeworkPage() {
     }
 
     try {
-      const { error } = await supabase
-        .from('homework')
-        .delete()
-        .eq('id', id);
-      
-      if (error) throw error;
-      
-      // Refresh the list
+      homeworkStorage.delete(id);
       fetchHomework();
     } catch (error) {
       console.error('Error deleting homework:', error);
@@ -348,11 +224,11 @@ export default function AdminHomeworkPage() {
     setFormData({
       title: '',
       description: '',
-      due_date: new Date().toISOString().split('T')[0], // Default to today's date in YYYY-MM-DD format
+      due_date: new Date().toISOString().split('T')[0],
       lesson_number: 1,
       lesson_title: '',
       lesson_type: 'comprehensive',
-      completed: false // Explicit default
+      completed: false
     });
     setEditingId(null);
     setShowForm(false);
@@ -637,4 +513,4 @@ export default function AdminHomeworkPage() {
       </div>
     </div>
   );
-} 
+}

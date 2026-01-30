@@ -1,4 +1,5 @@
-import { supabase } from '@/lib/supabase/client';
+import { flashcardStorage, lessonStorage, progressStorage } from '@/lib/localStorage';
+import { getCurrentUser } from '@/lib/localAuth';
 
 export interface DatabaseFlashcard {
   id: string;
@@ -6,7 +7,7 @@ export interface DatabaseFlashcard {
   hanzi: string;
   pinyin: string;
   english: string;
-  example_sentence?: any; // JSONB field
+  example_sentence?: any;
   difficulty_level: number;
   created_at: string;
   updated_at?: string;
@@ -32,20 +33,23 @@ export class DatabaseFlashcardService {
    */
   static async getFlashcardsByLesson(lessonId: string): Promise<DatabaseFlashcard[]> {
     try {
-      const { data, error } = await supabase
-        .from('flashcards')
-        .select('*')
-        .eq('lesson_id', lessonId)
-        .order('id');
-
-      if (error) {
-        console.error('Error fetching flashcards for lesson:', lessonId, error);
-        return [];
-      }
-
-      return data || [];
+      const cards = flashcardStorage.getByLessonId(lessonId);
+      const user = getCurrentUser();
+      const userId = user?.id || 'demo-user';
+      const progress = progressStorage.getByUserId(userId);
+      
+      // Merge with progress data
+      return cards.map(card => {
+        const cardProgress = progress.find(p => p.flashcard_id === card.id);
+        return {
+          ...card,
+          last_reviewed: cardProgress?.last_reviewed,
+          status: cardProgress?.status || 'new',
+          interval_days: cardProgress?.interval_days || 1,
+        };
+      });
     } catch (error) {
-      console.error('Network error fetching flashcards:', error);
+      console.error('Error fetching flashcards for lesson:', lessonId, error);
       return [];
     }
   }
@@ -55,21 +59,24 @@ export class DatabaseFlashcardService {
    */
   static async getFlashcardsByLessons(lessonIds: string[]): Promise<DatabaseFlashcard[]> {
     try {
-      const { data, error } = await supabase
-        .from('flashcards')
-        .select('*')
-        .in('lesson_id', lessonIds)
-        .order('lesson_id', { ascending: true })
-        .order('id', { ascending: true });
-
-      if (error) {
-        console.error('Error fetching flashcards for lessons:', lessonIds, error);
-        return [];
-      }
-
-      return data || [];
+      const allCards = flashcardStorage.getAll();
+      const cards = allCards.filter(c => lessonIds.includes(c.lesson_id));
+      const user = getCurrentUser();
+      const userId = user?.id || 'demo-user';
+      const progress = progressStorage.getByUserId(userId);
+      
+      // Merge with progress data
+      return cards.map(card => {
+        const cardProgress = progress.find(p => p.flashcard_id === card.id);
+        return {
+          ...card,
+          last_reviewed: cardProgress?.last_reviewed,
+          status: cardProgress?.status || 'new',
+          interval_days: cardProgress?.interval_days || 1,
+        };
+      });
     } catch (error) {
-      console.error('Network error fetching flashcards:', error);
+      console.error('Error fetching flashcards for lessons:', lessonIds, error);
       return [];
     }
   }
@@ -79,20 +86,23 @@ export class DatabaseFlashcardService {
    */
   static async getAllFlashcards(): Promise<DatabaseFlashcard[]> {
     try {
-      const { data, error } = await supabase
-        .from('flashcards')
-        .select('*')
-        .order('lesson_id', { ascending: true })
-        .order('id', { ascending: true });
-
-      if (error) {
-        console.error('Error fetching all flashcards:', error);
-        return [];
-      }
-
-      return data || [];
+      const cards = flashcardStorage.getAll();
+      const user = getCurrentUser();
+      const userId = user?.id || 'demo-user';
+      const progress = progressStorage.getByUserId(userId);
+      
+      // Merge with progress data
+      return cards.map(card => {
+        const cardProgress = progress.find(p => p.flashcard_id === card.id);
+        return {
+          ...card,
+          last_reviewed: cardProgress?.last_reviewed,
+          status: cardProgress?.status || 'new',
+          interval_days: cardProgress?.interval_days || 1,
+        };
+      });
     } catch (error) {
-      console.error('Network error fetching all flashcards:', error);
+      console.error('Error fetching all flashcards:', error);
       return [];
     }
   }
@@ -102,20 +112,9 @@ export class DatabaseFlashcardService {
    */
   static async getAllLessons(): Promise<DatabaseLesson[]> {
     try {
-      const { data, error } = await supabase
-        .from('lessons')
-        .select('*')
-        .order('level', { ascending: true })
-        .order('lesson_number', { ascending: true });
-
-      if (error) {
-        console.error('Error fetching lessons:', error);
-        return [];
-      }
-
-      return data || [];
+      return lessonStorage.getAll();
     } catch (error) {
-      console.error('Network error fetching lessons:', error);
+      console.error('Error fetching lessons:', error);
       return [];
     }
   }
@@ -125,20 +124,10 @@ export class DatabaseFlashcardService {
    */
   static async getLessonsByLevel(level: number): Promise<DatabaseLesson[]> {
     try {
-      const { data, error } = await supabase
-        .from('lessons')
-        .select('*')
-        .eq('level', level)
-        .order('lesson_number', { ascending: true });
-
-      if (error) {
-        console.error('Error fetching lessons by level:', level, error);
-        return [];
-      }
-
-      return data || [];
+      const lessons = lessonStorage.getAll();
+      return lessons.filter(l => l.level === level);
     } catch (error) {
-      console.error('Network error fetching lessons by level:', error);
+      console.error('Error fetching lessons by level:', level, error);
       return [];
     }
   }
@@ -148,19 +137,9 @@ export class DatabaseFlashcardService {
    */
   static async getFlashcardCount(lessonId: string): Promise<number> {
     try {
-      const { count, error } = await supabase
-        .from('flashcards')
-        .select('id', { count: 'exact', head: true })
-        .eq('lesson_id', lessonId);
-
-      if (error) {
-        console.error('Error getting flashcard count for lesson:', lessonId, error);
-        return 0;
-      }
-
-      return count || 0;
+      return flashcardStorage.getByLessonId(lessonId).length;
     } catch (error) {
-      console.error('Network error getting flashcard count:', error);
+      console.error('Error getting flashcard count for lesson:', lessonId, error);
       return 0;
     }
   }
@@ -170,18 +149,9 @@ export class DatabaseFlashcardService {
    */
   static async getTotalFlashcardCount(): Promise<number> {
     try {
-      const { count, error } = await supabase
-        .from('flashcards')
-        .select('id', { count: 'exact', head: true });
-
-      if (error) {
-        console.error('Error getting total flashcard count:', error);
-        return 0;
-      }
-
-      return count || 0;
+      return flashcardStorage.getAll().length;
     } catch (error) {
-      console.error('Network error getting total flashcard count:', error);
+      console.error('Error getting total flashcard count:', error);
       return 0;
     }
   }
@@ -222,4 +192,4 @@ export class DatabaseFlashcardService {
       return { level1: [], level2: [] };
     }
   }
-} 
+}

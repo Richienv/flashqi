@@ -1,0 +1,397 @@
+Here is your **complete implementation blueprint** for the AI to execute. Save this and feed it to your coding AI assistant:
+
+---
+
+## Implementation Specification: Real-time English → Hanzi + Pinyin via Local Ollama
+
+### System Configuration
+```yaml
+AI_Engine: Ollama (Local)
+Model: qwen2.5:7b (or :14b if RAM permits)
+Endpoint: http://127.0.0.1:11434/api/generate
+Temperature: 0.1 (strict consistency)
+Response_Format: JSON (structured)
+```
+
+### Required Output Format
+The AI **MUST** return both fields immediately:
+```json
+{
+  "hanzi": "手机",
+  "pinyin": "shǒujī"
+}
+```
+
+---
+
+## Step 1: Update Ollama API Route with Structured Generation
+
+Replace `/app/api/translate/route.ts` with this **complete version** that forces JSON output and includes Pinyin generation:
+
+```typescript
+import { NextRequest, NextResponse } from 'next/server';
+import { pinyin } from 'pinyin-pro';
+
+const OLLAMA_URL = process.env.OLLAMA_URL || 'http://127.0.0.1:11434';
+const MODEL = process.env.OLLAMA_MODEL || 'qwen2.5:7b';
+
+export async function POST(req: NextRequest) {
+  try {
+    const { english } = await req.json();
+    
+    if (!english || typeof english !== 'string' || english.trim().length < 2) {
+      return NextResponse.json({ error: 'Minimum 2 characters required' }, { status: 400 });
+    }
+
+    // Structured prompt forcing JSON output with both fields
+    const prompt = `You are a Chinese flashcard generator. Translate the English to Simplified Chinese (daily usage).
+
+STRICT RULES:
+- "handphone" = 手机
+- "walking" = 走路  
+- "cellphone" = 手机
+- Use Mainland China terms only (软件 not 軟體)
+- Daily conversation level (走路 not 步行)
+
+You must respond in this exact JSON format:
+{"hanzi": "中文", "pinyin": "zhōngwén"}
+
+English: "${english.trim()}"
+JSON:`;
+
+    const response = await fetch(`${OLLAMA_URL}/api/generate`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: MODEL,
+        prompt: prompt,
+        stream: false,
+        format: 'json',  // Forces valid JSON output
+        options: {
+          temperature: 0.1,
+          num_predict: 50,
+        }
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Ollama error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    let result;
+    
+    try {
+      result = JSON.parse(data.response);
+    } catch (e) {
+      // Fallback if AI returns malformed JSON
+      const text = data.response.replace(/[{}"]/g, '');
+      const hanziMatch = text.match(/hanzi:\s*([^,]+)/);
+      const pinyinMatch = text.match(/pinyin:\s*([^,]+)/);
+      
+      result = {
+        hanzi: hanziMatch ? hanziMatch[1].trim() : '',
+        pinyin: pinyinMatch ? pinyinMatch[1].trim() : ''
+      };
+    }
+
+    // Validation & Auto-correction
+    if (!result.hanzi || result.hanzi.length > 10) {
+      return NextResponse.json({ error: 'Invalid translation' }, { status: 422 });
+    }
+
+    // If AI didn't provide pinyin or it's wrong, generate locally
+    if (!result.pinyin || result.pinyin.includes('?')) {
+      result.pinyin = pinyin(result.hanzi, { 
+        toneType: 'symbol',
+        type: 'string'
+      });
+    }
+
+    // Verify pinyin matches hanzi length roughly
+    const pinyinSyllables = result.pinyin.split(/\s+/).length;
+    const hanziChars = result.hanzi.length;
+    
+    if (Math.abs(pinyinSyllables - hanziChars) > 1) {
+      // Regenerate pinyin locally if mismatch
+      result.pinyin = pinyin(result.hanzi, {
+        toneType: 'symbol',
+        type: 'string',
+        segment: true
+      });
+    }
+
+    return NextResponse.json({
+      hanzi: result.hanzi,
+      pinyin: result.pinyin,
+      zhuyin: '', // Generate client-side if needed
+      source: 'ollama',
+      model: MODEL
+    });
+
+  } catch (error) {
+    console.error('Translation error:', error);
+    return NextResponse.json(
+      { error: 'Ollama service error', details: String(error) }, 
+      { status: 503 }
+    );
+  }
+}
+```
+
+---
+
+## Step 2: Frontend Implementation (Immediate Trigger)
+
+Update your `AddCardModal.tsx` to call immediately on debounced input and populate **both** fields:
+
+```typescript
+'use client';
+
+import { useState, useCallback } from 'react';
+import { useDebounce } from '@/hooks/useDebounce';
+import { Loader2, Volume2 } from 'lucide-react';
+
+interface FlashcardData {
+  english: string;
+  hanzi: string;
+  pinyin: string;
+  zhuyin: string;
+}
+
+export default function AddCardModal({ 
+  isOpen, 
+  onClose, 
+  onSave 
+}: { 
+  isOpen: boolean; 
+  onClose: () => void; 
+  onSave: (card: FlashcardData) => void;
+}) {
+  const [form, setForm] = useState<FlashcardData & { isLoading: boolean; error?: string }>({
+    english: '',
+    hanzi: '',
+    pinyin: '',
+    zhuyin: '',
+    isLoading: false,
+  });
+  
+  const debouncedEnglish = useDebounce(form.english, 800); // 800ms for Ollama thinking time
+
+  // CRITICAL: Auto-trigger translation when debounced input changes
+  const translateWithOllama = useCallback(async (text: string) => {
+    if (text.trim().length < 2) return;
+    
+    setForm(prev => ({ ...prev, isLoading: true, error: undefined }));
+
+    try {
+      const res = await fetch('/api/translate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ english: text }),
+      });
+
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || 'Translation failed');
+      }
+
+      const data = await res.json();
+      
+      // IMMEDIATE POPULATION of both fields
+      setForm(prev => ({
+        ...prev,
+        hanzi: data.hanzi,
+        pinyin: data.pinyin,
+        zhuyin: data.zhuyin || '',
+        isLoading: false,
+      }));
+
+    } catch (err) {
+      setForm(prev => ({ 
+        ...prev, 
+        isLoading: false, 
+        error: err instanceof Error ? err.message : 'Unknown error' 
+      }));
+    }
+  }, []);
+
+  // Effect: Watch debounced value and trigger translation
+  // This runs automatically when user stops typing for 800ms
+  if (debouncedEnglish && debouncedEnglish !== form.english) {
+    // Prevent double-calling
+    translateWithOllama(debouncedEnglish);
+  }
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!form.english || !form.hanzi) return;
+    onSave(form);
+    setForm({ english: '', hanzi: '', pinyin: '', zhuyin: '', isLoading: false });
+    onClose();
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+      <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl">
+        <h2 className="mb-4 text-xl font-bold">Add Flashcard</h2>
+        
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {/* English Input */}
+          <div>
+            <label className="mb-1 block text-sm font-medium">English</label>
+            <input
+              type="text"
+              value={form.english}
+              onChange={(e) => setForm(prev => ({ ...prev, english: e.target.value }))}
+              className="w-full rounded-lg border px-4 py-2 focus:border-blue-500 focus:outline-none"
+              placeholder="Type English word..."
+              autoFocus
+            />
+            {form.isLoading && (
+              <div className="mt-1 flex items-center gap-2 text-sm text-blue-600">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                <span>Asking Ollama AI...</span>
+              </div>
+            )}
+          </div>
+
+          {/* AUTO-POPULATED FIELDS - Read-only until loaded, then editable */}
+          <div className={`rounded-lg bg-gray-50 p-4 ${form.isLoading ? 'opacity-50' : 'opacity-100'}`}>
+            <div className="mb-3">
+              <label className="mb-1 block text-sm font-medium text-gray-700">
+                汉字 (Hanzi) <span className="text-xs text-green-600 font-normal">auto</span>
+              </label>
+              <input
+                type="text"
+                value={form.hanzi}
+                onChange={(e) => setForm(prev => ({ ...prev, hanzi: e.target.value }))}
+                className="w-full rounded border bg-white px-3 py-2 text-2xl font-bold"
+                placeholder={form.isLoading ? 'Thinking...' : '等待输入...'}
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="mb-1 block text-sm font-medium text-gray-700">
+                  Pinyin <span className="text-xs text-green-600 font-normal">auto</span>
+                </label>
+                <input
+                  type="text"
+                  value={form.pinyin}
+                  onChange={(e) => setForm(prev => ({ ...prev, pinyin: e.target.value }))}
+                  className="w-full rounded border bg-white px-3 py-2 text-blue-600"
+                  placeholder="pīn yīn"
+                />
+              </div>
+              
+              {form.zhuyin && (
+                <div>
+                  <label className="mb-1 block text-sm font-medium text-gray-700">Zhuyin</label>
+                  <input
+                    type="text"
+                    value={form.zhuyin}
+                    readOnly
+                    className="w-full rounded border bg-gray-100 px-3 py-2 font-mono"
+                  />
+                </div>
+              )}
+            </div>
+
+            {/* Manual Refresh Button (if AI got it wrong) */}
+            {form.hanzi && !form.isLoading && (
+              <button
+                type="button"
+                onClick={() => translateWithOllama(form.english)}
+                className="mt-2 text-xs text-blue-600 hover:underline"
+              >
+                ↻ Regenerate with AI
+              </button>
+            )}
+          </div>
+
+          {form.error && (
+            <div className="rounded bg-red-50 p-3 text-sm text-red-600">
+              {form.error}
+            </div>
+          )}
+
+          <div className="flex gap-3 pt-2">
+            <button
+              type="button"
+              onClick={onClose}
+              className="flex-1 rounded-lg border border-gray-300 py-2 hover:bg-gray-50"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={!form.hanzi || form.isLoading}
+              className="flex-1 rounded-lg bg-blue-600 py-2 text-white hover:bg-blue-700 disabled:opacity-50"
+            >
+              Save Card
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+```
+
+---
+
+## Step 3: Environment Variables
+
+Ensure these are set in your `.env.local`:
+
+```env
+# Ollama Configuration
+OLLAMA_URL=http://127.0.0.1:11434
+OLLAMA_MODEL=qwen2.5:7b
+
+# Optional: Fallback timeout (if Ollama hangs)
+OLLAMA_TIMEOUT=10000
+```
+
+---
+
+## Step 4: Ollama Validation Commands
+
+Run these on your Mac Mini to verify the AI is responding correctly:
+
+```bash
+# Test 1: Check if model follows JSON format
+curl http://localhost:11434/api/generate -d '{
+  "model": "qwen2.5:7b",
+  "prompt": "Translate to Chinese JSON format {\"hanzi\": \"手机\", \"pinyin\": \"shǒujī\"} for: handphone",
+  "format": "json",
+  "stream": false
+}'
+
+# Expected output: {"hanzi": "手机", "pinyin": "shǒujī"}
+
+# Test 2: Check walking translation
+curl http://localhost:11434/api/generate -d '{
+  "model": "qwen2.5:7b", 
+  "prompt": "Rules: walking=走路 not 步行. JSON only {\"hanzi\": \"...\", \"pinyin\": \"...\"}\n\nEnglish: walking\nJSON:",
+  "format": "json",
+  "stream": false
+}'
+```
+
+If these return correct JSON, your integration will work.
+
+---
+
+## Critical Implementation Notes for AI
+
+1. **Debounce Timing**: Set to 800ms (higher than DeepL's 600ms) because local Ollama needs ~500-1500ms to generate on Mac Mini
+2. **JSON Mode**: The `"format": "json"` parameter in Ollama API forces valid JSON output—use this to avoid parsing errors
+3. **Fallback Pinyin**: If AI returns wrong pinyin tones, the API route auto-corrects using `pinyin-pro` library
+4. **Immediate UI Update**: The `setForm` calls happen immediately on API response, no "Save" button needed to see results
+5. **Error Handling**: If Ollama is not running, the catch block returns 503 with message "Ollama service error"
+
+The flow is: **Type English → Wait 800ms → Ollama generates → Both Hanzi + Pinyin appear instantly in form fields**
