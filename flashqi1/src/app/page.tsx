@@ -39,40 +39,54 @@ export default function Home() {
   return (
     <div
       ref={containerRef}
-      className="relative min-h-screen overflow-hidden bg-[#030014]"
+      className="relative min-h-screen overflow-hidden font-sans"
+      style={{
+        background: "linear-gradient(180deg, #4A9EFF 0%, #87CEEB 40%, #B8E0FF 70%, #E8F4FF 100%)",
+      }}
     >
-      {/* Animated gradient background */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-1/2 -left-1/2 w-full h-full bg-gradient-conic from-violet-500/20 via-transparent to-transparent animate-spin-slow" />
-        <div className="absolute -bottom-1/2 -right-1/2 w-full h-full bg-gradient-conic from-cyan-500/20 via-transparent to-transparent animate-spin-reverse" />
+      {/* Sunny sky clouds */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div
+          className="absolute w-[700px] h-[240px] rounded-full opacity-80 animate-cloud-drift"
+          style={{
+            background: "radial-gradient(ellipse, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0) 70%)",
+            left: "-15%",
+            top: "6%",
+          }}
+        />
+        <div
+          className="absolute w-[520px] h-[190px] rounded-full opacity-70 animate-cloud-drift-slow"
+          style={{
+            background: "radial-gradient(ellipse, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0) 70%)",
+            right: "-10%",
+            top: "14%",
+          }}
+        />
+        <div
+          className="absolute w-[560px] h-[210px] rounded-full opacity-60 animate-cloud-drift"
+          style={{
+            background: "radial-gradient(ellipse, rgba(255,255,255,0.85) 0%, rgba(255,255,255,0) 70%)",
+            left: "30%",
+            top: "10%",
+            animationDelay: "2s",
+          }}
+        />
       </div>
 
-      {/* Grid pattern overlay */}
+      {/* Sun glow + sky orbs */}
       <div
-        className="absolute inset-0 opacity-20"
+        className="absolute w-96 h-96 rounded-full blur-[140px] transition-transform duration-1000 ease-out"
         style={{
-          backgroundImage: `
-            linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px)
-          `,
-          backgroundSize: "100px 100px",
-        }}
-      />
-
-      {/* Floating orbs that follow mouse */}
-      <div
-        className="absolute w-96 h-96 rounded-full blur-[120px] transition-transform duration-1000 ease-out"
-        style={{
-          background: "radial-gradient(circle, rgba(139,92,246,0.4) 0%, transparent 70%)",
-          left: "20%",
-          top: "30%",
+          background: "radial-gradient(circle, rgba(255,221,128,0.55) 0%, rgba(255,221,128,0) 70%)",
+          left: "12%",
+          top: "8%",
           transform: `translate(${mousePosition.x * 2}px, ${mousePosition.y * 2}px)`,
         }}
       />
       <div
         className="absolute w-80 h-80 rounded-full blur-[100px] transition-transform duration-1000 ease-out"
         style={{
-          background: "radial-gradient(circle, rgba(34,211,238,0.3) 0%, transparent 70%)",
+          background: "radial-gradient(circle, rgba(59,130,246,0.25) 0%, transparent 70%)",
           right: "15%",
           top: "40%",
           transform: `translate(${-mousePosition.x * 1.5}px, ${-mousePosition.y * 1.5}px)`,
@@ -81,7 +95,7 @@ export default function Home() {
       <div
         className="absolute w-64 h-64 rounded-full blur-[80px] transition-transform duration-1000 ease-out"
         style={{
-          background: "radial-gradient(circle, rgba(244,114,182,0.25) 0%, transparent 70%)",
+          background: "radial-gradient(circle, rgba(125,211,252,0.25) 0%, transparent 70%)",
           left: "50%",
           bottom: "20%",
           transform: `translate(${mousePosition.x}px, ${-mousePosition.y * 2}px)`,
@@ -108,7 +122,7 @@ export default function Home() {
         <nav className="flex justify-between items-center p-6 sm:p-10">
           <Link href="/" className="flex items-center space-x-3 group">
             <div className="relative">
-              <div className="absolute inset-0 bg-violet-500/50 blur-xl rounded-full group-hover:bg-violet-400/60 transition-all" />
+              <div className="absolute inset-0 bg-yellow-300/60 blur-xl rounded-full group-hover:bg-yellow-200/70 transition-all" />
               <Image
                 src="/flashqi-main-logo.png"
                 alt="FlashQi"
@@ -117,14 +131,14 @@ export default function Home() {
                 className="relative transition-transform group-hover:scale-110 group-hover:rotate-12"
               />
             </div>
-            <span className="text-lg font-light text-white/90 tracking-widest uppercase">
+            <span className="text-lg font-light text-white/90 tracking-widest uppercase drop-shadow">
               FlashQi
             </span>
           </Link>
 
           <Link
             href="/auth/login"
-            className="text-white/70 hover:text-white text-sm tracking-wider transition-all hover:tracking-widest"
+            className="text-white/80 hover:text-white text-sm tracking-wider transition-all hover:tracking-widest drop-shadow"
           >
             Sign In →
           </Link>
@@ -157,28 +171,25 @@ export default function Home() {
 
             {/* Main headline with gradient text */}
             <h1 className="relative">
-              <span className="block text-5xl sm:text-7xl lg:text-8xl font-extralight text-transparent bg-clip-text bg-gradient-to-r from-white via-white to-white/50 leading-[1.1] tracking-tight mb-4">
+              <span className="block text-5xl sm:text-7xl lg:text-8xl font-extralight text-transparent bg-clip-text bg-gradient-to-r from-white via-white to-white/70 leading-[1.1] tracking-tight mb-4 drop-shadow">
                 Master Chinese
-              </span>
-              <span className="block text-4xl sm:text-6xl lg:text-7xl font-thin text-transparent bg-clip-text bg-gradient-to-r from-violet-400 via-cyan-400 to-pink-400 animate-gradient-x">
-                Without the pain
               </span>
             </h1>
 
             {/* Subtle description */}
-            <p className="mt-8 text-lg sm:text-xl text-white/40 font-light max-w-xl mx-auto leading-relaxed">
+            <p className="mt-8 text-lg sm:text-xl text-white/70 font-light max-w-xl mx-auto leading-relaxed drop-shadow">
               AI-powered spaced repetition. 2,900+ characters.
-              <span className="text-white/60"> Actually works.</span>
+              <span className="text-white/90"> Actually works.</span>
             </p>
 
             {/* CTA Button - 2026 flat glass style */}
             <div className="mt-12">
               <Link
                 href="/dashboard/flashcards"
-                className="group relative inline-flex items-center gap-3 px-8 py-4 rounded-2xl bg-white/[0.05] backdrop-blur-sm border border-white/[0.08] text-white/90 font-light text-lg tracking-wide transition-all duration-500 hover:bg-white/[0.08] hover:border-white/[0.15] hover:text-white"
+                className="group relative inline-flex items-center gap-3 px-8 py-4 rounded-2xl bg-white/70 backdrop-blur-md border border-white/70 text-black font-light text-lg tracking-wide transition-all duration-500 hover:bg-white/85 hover:border-white/90 hover:text-black shadow-xl"
               >
                 <span className="relative z-10">Start Learning</span>
-                <span className="text-white/40 group-hover:text-white/70 group-hover:translate-x-1 transition-all duration-300">→</span>
+                <span className="text-black/50 group-hover:text-black/80 group-hover:translate-x-1 transition-all duration-300">→</span>
 
                 {/* Subtle gradient line at bottom */}
                 <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1/3 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent group-hover:w-2/3 transition-all duration-500" />
@@ -186,17 +197,17 @@ export default function Home() {
             </div>
 
             {/* Subtle stats */}
-            <div className="mt-16 flex items-center justify-center gap-12 text-white/30 text-sm tracking-wider">
+            <div className="mt-16 flex items-center justify-center gap-12 text-white/70 text-sm tracking-wider drop-shadow">
               <div className="flex items-center gap-2">
-                <span className="w-2 h-2 bg-green-400/50 rounded-full animate-pulse" />
+                <span className="w-2 h-2 bg-green-300 rounded-full animate-pulse" />
                 <span>6,800+ learners</span>
               </div>
               <div className="hidden sm:flex items-center gap-2">
-                <span className="w-2 h-2 bg-violet-400/50 rounded-full animate-pulse" style={{ animationDelay: "0.5s" }} />
+                <span className="w-2 h-2 bg-yellow-200 rounded-full animate-pulse" style={{ animationDelay: "0.5s" }} />
                 <span>97% retention</span>
               </div>
               <div className="hidden sm:flex items-center gap-2">
-                <span className="w-2 h-2 bg-cyan-400/50 rounded-full animate-pulse" style={{ animationDelay: "1s" }} />
+                <span className="w-2 h-2 bg-sky-200 rounded-full animate-pulse" style={{ animationDelay: "1s" }} />
                 <span>15 min/day</span>
               </div>
             </div>
@@ -204,13 +215,13 @@ export default function Home() {
         </div>
 
         {/* Bottom accent */}
-        <div className="h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+        <div className="h-px bg-gradient-to-r from-transparent via-white/30 to-transparent" />
       </div>
 
       {/* Scroll indicator */}
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce opacity-30">
-        <div className="w-6 h-10 border border-white/30 rounded-full flex justify-center">
-          <div className="w-1 h-2 bg-white/50 rounded-full mt-2 animate-pulse" />
+      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce opacity-60">
+        <div className="w-6 h-10 border border-white/60 rounded-full flex justify-center">
+          <div className="w-1 h-2 bg-white/80 rounded-full mt-2 animate-pulse" />
         </div>
       </div>
 
@@ -248,12 +259,6 @@ export default function Home() {
             background-position: 100% 50%;
           }
         }
-        .animate-spin-slow {
-          animation: spin-slow 30s linear infinite;
-        }
-        .animate-spin-reverse {
-          animation: spin-reverse 25s linear infinite;
-        }
         .animate-float {
           animation: float 4s ease-in-out infinite;
         }
@@ -261,8 +266,19 @@ export default function Home() {
           background-size: 200% 200%;
           animation: gradient-x 4s ease infinite;
         }
-        .bg-gradient-conic {
-          background: conic-gradient(from 0deg, var(--tw-gradient-stops));
+        .animate-cloud-drift {
+          animation: cloud-drift 24s ease-in-out infinite;
+        }
+        .animate-cloud-drift-slow {
+          animation: cloud-drift 38s ease-in-out infinite;
+        }
+        @keyframes cloud-drift {
+          0%, 100% {
+            transform: translateX(0px);
+          }
+          50% {
+            transform: translateX(60px);
+          }
         }
       `}</style>
     </div>

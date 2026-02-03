@@ -417,8 +417,7 @@ export default function FlashcardStudyPage() {
                 <div className="w-full">
                   {/* Mini card showing character */}
                   <div className="mb-4 text-center">
-                    <span className="text-4xl text-white drop-shadow-lg">{currentCard.hanzi}</span>
-                    <p className="text-white/60 text-sm mt-1">{currentCard.pinyin}</p>
+                    <p className="text-white/80 text-lg mt-1 drop-shadow-lg">{currentCard.pinyin}</p>
                   </div>
 
                   {/* Drawing canvas */}
