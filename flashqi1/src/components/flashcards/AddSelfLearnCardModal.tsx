@@ -27,7 +27,6 @@ export default function AddSelfLearnCardModal({
     const [error, setError] = useState('');
     const [loadingStep, setLoadingStep] = useState(0);
     const [revealIndex, setRevealIndex] = useState(0);
-    const [revealComplete, setRevealComplete] = useState(false);
     const [categories, setCategories] = useState<string[]>([]);
     const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
     const [newCategory, setNewCategory] = useState('');
@@ -96,9 +95,9 @@ export default function AddSelfLearnCardModal({
             // Immediate population of both fields from API
             setHanzi(data.hanzi || '');
             setPinyin(data.pinyin || '');
-            setSentences(Array.isArray(data.sentences) ? data.sentences : []);
-            setRevealIndex(0);
-            setRevealComplete(false);
+            const nextSentences = Array.isArray(data.sentences) ? data.sentences : [];
+            setSentences(nextSentences);
+            setRevealIndex(nextSentences.length);
 
         } catch (err) {
             console.warn('Groq translation error:', err);
@@ -116,38 +115,11 @@ export default function AddSelfLearnCardModal({
         }
         setLoadingStep(0);
         playTick();
-        const id = window.setInterval(() => {
-            setLoadingStep((prev) => (prev + 1) % 4);
-        }, 5000);
-        return () => window.clearInterval(id);
     }, [isLoading, playTick]);
 
     useEffect(() => {
-        if (!isLoading) return;
-        playTick();
-    }, [loadingStep, isLoading, playTick]);
-
-    useEffect(() => {
         if (isLoading) return;
-        if (sentences.length === 0) {
-            setRevealIndex(0);
-            setRevealComplete(true);
-            return;
-        }
-        setRevealIndex(0);
-        setRevealComplete(false);
-        const id = window.setInterval(() => {
-            setRevealIndex((prev) => {
-                const next = prev + 1;
-                if (next >= sentences.length) {
-                    window.clearInterval(id);
-                    setRevealComplete(true);
-                    return prev;
-                }
-                return next;
-            });
-        }, 12000);
-        return () => window.clearInterval(id);
+        setRevealIndex(sentences.length);
     }, [isLoading, sentences]);
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -195,16 +167,6 @@ export default function AddSelfLearnCardModal({
                             <div className="absolute left-1/2 top-1/2 h-6 w-6 -translate-x-1/2 -translate-y-1/2 rounded-full bg-blue-500/10" />
                             <span className="droplet" />
                         </div>
-                        <div className="mt-6 text-xs uppercase tracking-[0.18em] shimmer-text relative">
-                            <span>
-                                {[
-                                    'Finding the English',
-                                    'Writing the Hanzi',
-                                    'Adjusting the Tone',
-                                    'Crafting Sentences'
-                                ][loadingStep]}
-                            </span>
-                        </div>
                     </div>
                 )}
                 <button
@@ -240,7 +202,7 @@ export default function AddSelfLearnCardModal({
                         </div>
                     </div>
 
-                    {!isLoading && revealComplete && (hanzi || pinyin || sentences.length > 0) && (
+                    {!isLoading && (hanzi || pinyin || sentences.length > 0) && (
                         <div className="mt-4 space-y-3">
                             {hanzi && (
                                 <div>
