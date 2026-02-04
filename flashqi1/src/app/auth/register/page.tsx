@@ -214,9 +214,10 @@ export default function RegisterPage() {
                 type="submit"
                 variant="primary"
                 className="w-full"
-                disabled={loading}
+                isLoading={loading}
+                loadingText="Creating account..."
               >
-                {loading ? 'Creating account...' : 'Create account'}
+                Create account
               </Button>
             </div>
           </form>

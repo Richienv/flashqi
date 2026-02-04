@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 
 // Fixed particle positions to avoid hydration mismatch
@@ -39,68 +38,24 @@ export default function Home() {
   return (
     <div
       ref={containerRef}
-      className="relative min-h-screen overflow-hidden font-sans"
-      style={{
-        background: "linear-gradient(180deg, #4A9EFF 0%, #87CEEB 40%, #B8E0FF 70%, #E8F4FF 100%)",
-      }}
+      className="relative min-h-screen overflow-hidden font-sans bg-white"
     >
-      {/* Sunny sky clouds */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div
-          className="absolute w-[700px] h-[240px] rounded-full opacity-80 animate-cloud-drift"
-          style={{
-            background: "radial-gradient(ellipse, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0) 70%)",
-            left: "-15%",
-            top: "6%",
-          }}
-        />
-        <div
-          className="absolute w-[520px] h-[190px] rounded-full opacity-70 animate-cloud-drift-slow"
-          style={{
-            background: "radial-gradient(ellipse, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0) 70%)",
-            right: "-10%",
-            top: "14%",
-          }}
-        />
-        <div
-          className="absolute w-[560px] h-[210px] rounded-full opacity-60 animate-cloud-drift"
-          style={{
-            background: "radial-gradient(ellipse, rgba(255,255,255,0.85) 0%, rgba(255,255,255,0) 70%)",
-            left: "30%",
-            top: "10%",
-            animationDelay: "2s",
-          }}
-        />
-      </div>
-
-      {/* Sun glow + sky orbs */}
+      {/* Minimal animated light wash */}
       <div
-        className="absolute w-96 h-96 rounded-full blur-[140px] transition-transform duration-1000 ease-out"
+        className="absolute -left-24 top-24 h-80 w-80 rounded-full blur-[140px] opacity-70 animate-soft-float"
         style={{
-          background: "radial-gradient(circle, rgba(255,221,128,0.55) 0%, rgba(255,221,128,0) 70%)",
-          left: "12%",
-          top: "8%",
+          background: "radial-gradient(circle, rgba(96,165,250,0.22) 0%, rgba(96,165,250,0) 70%)",
           transform: `translate(${mousePosition.x * 2}px, ${mousePosition.y * 2}px)`,
         }}
       />
       <div
-        className="absolute w-80 h-80 rounded-full blur-[100px] transition-transform duration-1000 ease-out"
+        className="absolute -right-24 top-1/2 h-72 w-72 rounded-full blur-[140px] opacity-60 animate-soft-float-delayed"
         style={{
-          background: "radial-gradient(circle, rgba(59,130,246,0.25) 0%, transparent 70%)",
-          right: "15%",
-          top: "40%",
+          background: "radial-gradient(circle, rgba(147,197,253,0.18) 0%, rgba(147,197,253,0) 70%)",
           transform: `translate(${-mousePosition.x * 1.5}px, ${-mousePosition.y * 1.5}px)`,
         }}
       />
-      <div
-        className="absolute w-64 h-64 rounded-full blur-[80px] transition-transform duration-1000 ease-out"
-        style={{
-          background: "radial-gradient(circle, rgba(125,211,252,0.25) 0%, transparent 70%)",
-          left: "50%",
-          bottom: "20%",
-          transform: `translate(${mousePosition.x}px, ${-mousePosition.y * 2}px)`,
-        }}
-      />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_1px_1px,rgba(148,163,184,0.18)_1px,transparent_0)] [background-size:28px_28px] opacity-40" />
 
       {/* Floating particles */}
       {PARTICLE_POSITIONS.map((pos, i) => (
@@ -118,167 +73,97 @@ export default function Home() {
 
       {/* Main content */}
       <div className="relative z-10 min-h-screen flex flex-col">
-        {/* Minimal navigation */}
-        <nav className="flex justify-between items-center p-6 sm:p-10">
-          <Link href="/" className="flex items-center space-x-3 group">
-            <div className="relative">
-              <div className="absolute inset-0 bg-yellow-300/60 blur-xl rounded-full group-hover:bg-yellow-200/70 transition-all" />
-              <Image
-                src="/flashqi-main-logo.png"
-                alt="FlashQi"
-                width={32}
-                height={32}
-                className="relative transition-transform group-hover:scale-110 group-hover:rotate-12"
-              />
-            </div>
-            <span className="text-lg font-light text-white/90 tracking-widest uppercase drop-shadow">
-              FlashQi
-            </span>
-          </Link>
-
-          <Link
-            href="/auth/login"
-            className="text-white/80 hover:text-white text-sm tracking-wider transition-all hover:tracking-widest drop-shadow"
-          >
-            Sign In →
-          </Link>
-        </nav>
+        <nav className="p-6 sm:p-10" />
 
         {/* Hero - Center of the universe */}
         <div className="flex-1 flex items-center justify-center px-6">
           <div className="text-center max-w-5xl">
             {/* Floating Chinese characters */}
-            <div className="relative mb-8">
-              <span
-                className="absolute -left-20 -top-16 text-7xl sm:text-9xl font-bold text-white/[0.03] select-none animate-float"
-                style={{ animationDelay: "0s" }}
-              >
-                中
-              </span>
-              <span
-                className="absolute -right-16 -top-8 text-6xl sm:text-8xl font-bold text-white/[0.03] select-none animate-float"
-                style={{ animationDelay: "1s" }}
-              >
-                文
-              </span>
-              <span
-                className="absolute left-1/4 -bottom-20 text-5xl sm:text-7xl font-bold text-white/[0.03] select-none animate-float"
-                style={{ animationDelay: "2s" }}
-              >
-                学
-              </span>
-            </div>
-
             {/* Main headline with gradient text */}
             <h1 className="relative">
-              <span className="block text-5xl sm:text-7xl lg:text-8xl font-extralight text-transparent bg-clip-text bg-gradient-to-r from-white via-white to-white/70 leading-[1.1] tracking-tight mb-4 drop-shadow">
-                Master Chinese
+              <span className="block text-5xl sm:text-7xl lg:text-8xl font-extralight text-transparent bg-clip-text bg-gradient-to-r from-blue-700 via-sky-500 to-blue-700 leading-[1.1] tracking-tight mb-4">
+                Chinese with ZJU Curriculum + AI
               </span>
             </h1>
 
             {/* Subtle description */}
-            <p className="mt-8 text-lg sm:text-xl text-white/70 font-light max-w-xl mx-auto leading-relaxed drop-shadow">
-              AI-powered spaced repetition. 2,900+ characters.
-              <span className="text-white/90"> Actually works.</span>
+            <p className="mt-8 text-lg sm:text-xl text-slate-500 font-light max-w-xl mx-auto leading-relaxed">
+              Learn Zhejiang University Mandarin with focused AI practice.
+              <span className="text-slate-800"> Simple. Minimal. Effective.</span>
             </p>
 
             {/* CTA Button - 2026 flat glass style */}
             <div className="mt-12">
               <Link
                 href="/dashboard/flashcards"
-                className="group relative inline-flex items-center gap-3 px-8 py-4 rounded-2xl bg-white/70 backdrop-blur-md border border-white/70 text-black font-light text-lg tracking-wide transition-all duration-500 hover:bg-white/85 hover:border-white/90 hover:text-black shadow-xl"
+                className="group relative inline-flex items-center gap-3 px-8 py-4 rounded-2xl text-slate-900 font-light text-lg tracking-wide transition-all duration-500"
               >
-                <span className="relative z-10">Start Learning</span>
-                <span className="text-black/50 group-hover:text-black/80 group-hover:translate-x-1 transition-all duration-300">→</span>
-
-                {/* Subtle gradient line at bottom */}
-                <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1/3 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent group-hover:w-2/3 transition-all duration-500" />
+                <span className="relative z-10 shimmer-text">Start Learning</span>
+                <span className="text-slate-400 group-hover:text-slate-700 group-hover:translate-x-1 transition-all duration-300">→</span>
               </Link>
             </div>
 
             {/* Subtle stats */}
-            <div className="mt-16 flex items-center justify-center gap-12 text-white/70 text-sm tracking-wider drop-shadow">
+            <div className="mt-16 flex items-center justify-center gap-12 text-slate-400 text-sm tracking-wider">
               <div className="flex items-center gap-2">
-                <span className="w-2 h-2 bg-green-300 rounded-full animate-pulse" />
+                <span className="w-2 h-2 bg-blue-300 rounded-full animate-pulse" />
                 <span>6,800+ learners</span>
               </div>
               <div className="hidden sm:flex items-center gap-2">
-                <span className="w-2 h-2 bg-yellow-200 rounded-full animate-pulse" style={{ animationDelay: "0.5s" }} />
+                <span className="w-2 h-2 bg-sky-300 rounded-full animate-pulse" style={{ animationDelay: "0.5s" }} />
                 <span>97% retention</span>
               </div>
               <div className="hidden sm:flex items-center gap-2">
-                <span className="w-2 h-2 bg-sky-200 rounded-full animate-pulse" style={{ animationDelay: "1s" }} />
+                <span className="w-2 h-2 bg-blue-200 rounded-full animate-pulse" style={{ animationDelay: "1s" }} />
                 <span>15 min/day</span>
               </div>
+            </div>
+            <div className="mt-4 text-[10px] tracking-widest shimmer-text text-center">
+              -created by Richie Kid novell
             </div>
           </div>
         </div>
 
         {/* Bottom accent */}
-        <div className="h-px bg-gradient-to-r from-transparent via-white/30 to-transparent" />
+        <div className="h-px bg-gradient-to-r from-transparent via-slate-200 to-transparent" />
       </div>
 
       {/* Scroll indicator */}
       <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce opacity-60">
-        <div className="w-6 h-10 border border-white/60 rounded-full flex justify-center">
-          <div className="w-1 h-2 bg-white/80 rounded-full mt-2 animate-pulse" />
+        <div className="w-6 h-10 border border-slate-300 rounded-full flex justify-center">
+          <div className="w-1 h-2 bg-slate-400 rounded-full mt-2 animate-pulse" />
         </div>
       </div>
 
       {/* CSS for custom animations */}
       <style jsx>{`
-        @keyframes spin-slow {
-          from {
-            transform: rotate(0deg);
-          }
-          to {
-            transform: rotate(360deg);
-          }
+        .shimmer-text {
+          display: inline-block;
+          background: linear-gradient(120deg, rgba(15,61,150,0.9) 0%, rgba(86,171,255,0.95) 35%, rgba(15,61,150,0.85) 60%, rgba(86,171,255,1) 100%);
+          background-size: 200% 100%;
+          -webkit-background-clip: text;
+          background-clip: text;
+          color: transparent;
+          animation: shimmer 6s ease-in-out infinite;
         }
-        @keyframes spin-reverse {
-          from {
-            transform: rotate(360deg);
-          }
-          to {
-            transform: rotate(0deg);
-          }
+        @keyframes shimmer {
+          0% { background-position: 120% 0; }
+          100% { background-position: -120% 0; }
         }
-        @keyframes float {
+        @keyframes soft-float {
           0%, 100% {
             transform: translateY(0px);
           }
           50% {
-            transform: translateY(-20px);
+            transform: translateY(-18px);
           }
         }
-        @keyframes gradient-x {
-          0%, 100% {
-            background-position: 0% 50%;
-          }
-          50% {
-            background-position: 100% 50%;
-          }
+        .animate-soft-float {
+          animation: soft-float 12s ease-in-out infinite;
         }
-        .animate-float {
-          animation: float 4s ease-in-out infinite;
-        }
-        .animate-gradient-x {
-          background-size: 200% 200%;
-          animation: gradient-x 4s ease infinite;
-        }
-        .animate-cloud-drift {
-          animation: cloud-drift 24s ease-in-out infinite;
-        }
-        .animate-cloud-drift-slow {
-          animation: cloud-drift 38s ease-in-out infinite;
-        }
-        @keyframes cloud-drift {
-          0%, 100% {
-            transform: translateX(0px);
-          }
-          50% {
-            transform: translateX(60px);
-          }
+        .animate-soft-float-delayed {
+          animation: soft-float 16s ease-in-out infinite;
+          animation-delay: 2s;
         }
       `}</style>
     </div>

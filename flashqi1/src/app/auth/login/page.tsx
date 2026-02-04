@@ -214,9 +214,10 @@ export default function LoginPage() {
                 type="submit"
                 variant="primary"
                 className="w-full"
-                disabled={loading}
+                isLoading={loading}
+                loadingText="Signing in..."
               >
-                {loading ? 'Signing in...' : 'Sign in'}
+                Sign in
               </Button>
             </div>
           </form>

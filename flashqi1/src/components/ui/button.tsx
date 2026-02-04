@@ -6,7 +6,7 @@ import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '@/lib/utils';
 
 const buttonVariants = cva(
-  'inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-950 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50',
+  'inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-white transition-[color,background-color,border-color,transform,box-shadow,filter] duration-200 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-950 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 active:translate-y-[1px] active:scale-[0.98] data-[loading=true]:cursor-wait',
   {
     variants: {
       variant: {
@@ -36,17 +36,59 @@ export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>,
     VariantProps<typeof buttonVariants> {
   asChild?: boolean;
+  isLoading?: boolean;
+  loadingText?: string;
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, asChild = false, ...props }, ref) => {
+  (
+    {
+      className,
+      variant,
+      size,
+      asChild = false,
+      isLoading = false,
+      loadingText,
+      children,
+      disabled,
+      ...props
+    },
+    ref
+  ) => {
     const Comp = asChild ? Slot : 'button';
+    const content = isLoading && loadingText ? loadingText : children;
+    const mergedDisabled = disabled || isLoading;
+
+    if (asChild) {
+      return (
+        <Comp
+          className={cn(buttonVariants({ variant, size, className }))}
+          ref={ref}
+          aria-busy={isLoading || undefined}
+          data-loading={isLoading ? 'true' : undefined}
+          {...props}
+        >
+          {children}
+        </Comp>
+      );
+    }
+
     return (
       <Comp
         className={cn(buttonVariants({ variant, size, className }))}
         ref={ref}
+        disabled={mergedDisabled}
+        aria-busy={isLoading || undefined}
+        data-loading={isLoading ? 'true' : undefined}
         {...props}
-      />
+      >
+        <span className="inline-flex items-center justify-center gap-2">
+          {isLoading ? (
+            <span className="spinner h-4 w-4 border-2 rounded-full" aria-hidden="true" />
+          ) : null}
+          <span>{content}</span>
+        </span>
+      </Comp>
     );
   }
 );

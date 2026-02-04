@@ -1,26 +1,79 @@
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
-import { useDebounce } from '@/hooks/useDebounce';
-import { pinyin as pinyinPro } from 'pinyin-pro'; // Still keep for client-side fallback if needed
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { FlashcardDatabaseService } from '@/services/flashcardDatabaseService';
+import { categoryStorage } from '@/lib/localStorage';
 
 interface AddSelfLearnCardModalProps {
     isOpen: boolean;
     onClose: () => void;
     onCardAdded: () => void;
+    initialCategories?: string[];
+    availableCategories?: string[];
 }
 
-export default function AddSelfLearnCardModal({ isOpen, onClose, onCardAdded }: AddSelfLearnCardModalProps) {
+export default function AddSelfLearnCardModal({
+    isOpen,
+    onClose,
+    onCardAdded,
+    initialCategories = [],
+    availableCategories = [],
+}: AddSelfLearnCardModalProps) {
     const [english, setEnglish] = useState('');
     const [hanzi, setHanzi] = useState('');
     const [pinyin, setPinyin] = useState('');
+    const [sentences, setSentences] = useState<string[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
+    const [loadingStep, setLoadingStep] = useState(0);
+    const [revealIndex, setRevealIndex] = useState(0);
+    const [revealComplete, setRevealComplete] = useState(false);
+    const [categories, setCategories] = useState<string[]>([]);
+    const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+    const [newCategory, setNewCategory] = useState('');
+    const audioRef = useRef<AudioContext | null>(null);
 
-    const debouncedEnglish = useDebounce(english, 800); // 800ms for Ollama
+    const splitSentence = useCallback((sentence: string) => {
+        const match = sentence.match(/^(.*?)(?:\s*\((.*?)\)\s*)?$/);
+        if (!match) return { hanziText: sentence, pinyinText: '' };
+        return {
+            hanziText: (match[1] || '').trim(),
+            pinyinText: (match[2] || '').trim(),
+        };
+    }, []);
 
-    const translateWithOllama = useCallback(async (text: string) => {
+    const playTick = useCallback(() => {
+        try {
+            if (!audioRef.current) {
+                audioRef.current = new AudioContext();
+            }
+            const ctx = audioRef.current;
+            if (ctx.state === 'suspended') {
+                ctx.resume();
+            }
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'sine';
+            osc.frequency.value = 520;
+            gain.gain.value = 0.04;
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start();
+            gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.12);
+            osc.stop(ctx.currentTime + 0.14);
+        } catch {
+            // Ignore audio errors
+        }
+    }, []);
+
+    useEffect(() => {
+        if (!isOpen) return;
+        availableCategories.forEach((cat) => categoryStorage.add(cat));
+        setCategories(categoryStorage.getAll());
+        setSelectedCategories(initialCategories);
+    }, [isOpen, initialCategories, availableCategories]);
+
+    const translateWithGroq = useCallback(async (text: string) => {
         if (text.trim().length < 2) return;
 
         setIsLoading(true);
@@ -43,12 +96,13 @@ export default function AddSelfLearnCardModal({ isOpen, onClose, onCardAdded }: 
             // Immediate population of both fields from API
             setHanzi(data.hanzi || '');
             setPinyin(data.pinyin || '');
+            setSentences(Array.isArray(data.sentences) ? data.sentences : []);
+            setRevealIndex(0);
+            setRevealComplete(false);
 
         } catch (err) {
-            console.warn('Ollama translation error:', err);
-            // Silent failure or light warning on auto-translate?
-            // Let's set error so user knows to try again or type manually
-            setError('AI translation failed. Is Ollama running?');
+            console.warn('Groq translation error:', err);
+            setError('AI translation failed. Please try again.');
         } finally {
             setIsLoading(false);
         }
@@ -56,13 +110,45 @@ export default function AddSelfLearnCardModal({ isOpen, onClose, onCardAdded }: 
 
     // Effect: Watch debounced value and trigger translation
     useEffect(() => {
-        if (debouncedEnglish && debouncedEnglish.trim().length >= 2) {
-            // Only trigger if it changed? useDebounce handles the change.
-            // But we need to make sure we don't re-trigger if user just corrected a typo and came back to same word?
-            // Actually simple useEffect is fine.
-            translateWithOllama(debouncedEnglish);
+        if (!isLoading) {
+            setLoadingStep(0);
+            return;
         }
-    }, [debouncedEnglish, translateWithOllama]);
+        setLoadingStep(0);
+        playTick();
+        const id = window.setInterval(() => {
+            setLoadingStep((prev) => (prev + 1) % 4);
+        }, 5000);
+        return () => window.clearInterval(id);
+    }, [isLoading, playTick]);
+
+    useEffect(() => {
+        if (!isLoading) return;
+        playTick();
+    }, [loadingStep, isLoading, playTick]);
+
+    useEffect(() => {
+        if (isLoading) return;
+        if (sentences.length === 0) {
+            setRevealIndex(0);
+            setRevealComplete(true);
+            return;
+        }
+        setRevealIndex(0);
+        setRevealComplete(false);
+        const id = window.setInterval(() => {
+            setRevealIndex((prev) => {
+                const next = prev + 1;
+                if (next >= sentences.length) {
+                    window.clearInterval(id);
+                    setRevealComplete(true);
+                    return prev;
+                }
+                return next;
+            });
+        }, 12000);
+        return () => window.clearInterval(id);
+    }, [isLoading, sentences]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -76,7 +162,9 @@ export default function AddSelfLearnCardModal({ isOpen, onClose, onCardAdded }: 
             await FlashcardDatabaseService.addSelfLearnCard({
                 english,
                 hanzi,
-                pinyin
+                pinyin,
+                example_sentence: sentences,
+                categories: selectedCategories,
             });
             onCardAdded();
             onClose();
@@ -84,6 +172,9 @@ export default function AddSelfLearnCardModal({ isOpen, onClose, onCardAdded }: 
             setEnglish('');
             setHanzi('');
             setPinyin('');
+            setSentences([]);
+            setSelectedCategories([]);
+            setNewCategory('');
         } catch (err) {
             setError('Failed to add card');
         } finally {
@@ -94,97 +185,217 @@ export default function AddSelfLearnCardModal({ isOpen, onClose, onCardAdded }: 
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
-            <div className="w-full max-w-md bg-white rounded-3xl shadow-2xl p-6 relative animate-in fade-in zoom-in duration-200">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/20 backdrop-blur-sm">
+            <div className="w-full max-w-md bg-white rounded-2xl border border-slate-200 p-6 relative animate-in fade-in zoom-in duration-200">
+                {isLoading && (
+                    <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-white/85 backdrop-blur-xl rounded-2xl">
+                        <div className="relative h-16 w-16">
+                            <div className="absolute inset-0 rounded-full border border-blue-200/60" />
+                            <div className="absolute inset-2 rounded-full border border-blue-300/80 animate-spin-slow" />
+                            <div className="absolute left-1/2 top-1/2 h-6 w-6 -translate-x-1/2 -translate-y-1/2 rounded-full bg-blue-500/10" />
+                            <span className="droplet" />
+                        </div>
+                        <div className="mt-6 text-xs uppercase tracking-[0.18em] shimmer-text relative">
+                            <span>
+                                {[
+                                    'Finding the English',
+                                    'Writing the Hanzi',
+                                    'Adjusting the Tone',
+                                    'Crafting Sentences'
+                                ][loadingStep]}
+                            </span>
+                        </div>
+                    </div>
+                )}
                 <button
                     onClick={onClose}
-                    className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
+                    className="absolute top-4 right-4 text-slate-400 hover:text-slate-700 transition-colors"
                 >
                     <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                     </svg>
                 </button>
 
-                <h2 className="text-2xl font-light text-gray-800 mb-1">Add New Card</h2>
-                <p className="text-sm text-gray-400 mb-6">Using local AI (Ollama) for translation</p>
+                <h2 className="text-2xl font-light text-slate-900 mb-1 shimmer-text">Add New Card</h2>
+                <p className="text-xs uppercase tracking-[0.2em] text-slate-400 mb-6">FlashQi AI</p>
 
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <div>
-                        <label className="block text-xs font-medium text-gray-400 uppercase tracking-wider mb-1">English / meaning</label>
+                        <label className="block text-xs uppercase tracking-[0.2em] text-slate-400 mb-2">English / meaning</label>
                         <div className="relative">
                             <input
                                 type="text"
                                 value={english}
                                 onChange={(e) => setEnglish(e.target.value)}
                                 placeholder="e.g. Apple"
-                                className="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all text-gray-700"
+                                className="w-full border-b border-slate-200 bg-transparent pb-2 text-lg font-light text-slate-900 placeholder:text-slate-400 focus:border-slate-900 focus:outline-none"
                                 autoFocus
                             />
                             {isLoading && (
-                                <div className="absolute right-3 top-3.5 flex items-center gap-2">
-                                    <span className="text-xs text-blue-400">Thinking...</span>
-                                    <div className="w-4 h-4 border-2 border-blue-400 border-t-transparent rounded-full animate-spin"></div>
+                                <div className="absolute right-0 top-1 flex items-center gap-2">
+                                    <span className="text-xs text-slate-400">Thinking...</span>
+                                    <div className="w-4 h-4 border border-slate-300 border-t-transparent rounded-full animate-spin"></div>
                                 </div>
                             )}
                         </div>
                     </div>
 
-                    <div className="flex gap-4">
-                        <div className="flex-1">
-                            <div className="flex justify-between items-center mb-1">
-                                <label className="block text-xs font-medium text-gray-400 uppercase tracking-wider">Hanzi (Chinese)</label>
-                                {!isLoading && hanzi && (
-                                    <span className="text-[10px] text-green-500 font-medium">Auto-generated</span>
-                                )}
-                            </div>
-                            <input
-                                type="text"
-                                value={hanzi}
-                                onChange={(e) => setHanzi(e.target.value)}
-                                placeholder="e.g. 苹果"
-                                className="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all text-gray-700 text-lg font-medium"
-                            />
+                    {!isLoading && revealComplete && (hanzi || pinyin || sentences.length > 0) && (
+                        <div className="mt-4 space-y-3">
+                            {hanzi && (
+                                <div>
+                                    <div className="text-xs uppercase tracking-[0.2em] text-slate-400 mb-1">Hanzi</div>
+                                    <div className="text-lg font-light shimmer-text">{hanzi}</div>
+                                </div>
+                            )}
+                            {pinyin && (
+                                <div>
+                                    <div className="text-xs uppercase tracking-[0.2em] text-slate-400 mb-1">Pinyin</div>
+                                    <div className="text-lg font-light shimmer-text">{pinyin}</div>
+                                </div>
+                            )}
+                            {sentences.length > 0 && (
+                                <div>
+                                    <div className="text-xs uppercase tracking-[0.2em] text-slate-400 mb-1">Sentences</div>
+                                    <ul className="space-y-3 text-sm text-slate-600">
+                                        {sentences.map((s, i) => {
+                                            const { hanziText, pinyinText } = splitSentence(s);
+                                            return (
+                                            <li
+                                                key={`${s}-${i}`}
+                                                className={`pb-2 transition-opacity duration-300 ${i <= revealIndex ? 'opacity-100' : 'opacity-0'}`}
+                                            >
+                                                <div className="shimmer-text shimmer-slow">{hanziText}</div>
+                                                    {pinyinText ? (
+                                                        <div className="text-xs text-slate-400 mt-1">{pinyinText}</div>
+                                                    ) : null}
+                                                </li>
+                                            );
+                                        })}
+                                    </ul>
+                                </div>
+                            )}
                         </div>
-                        <div className="flex-1">
-                            <label className="block text-xs font-medium text-gray-400 uppercase tracking-wider mb-1">Pinyin</label>
+                    )}
+
+                    <div className="mt-4 space-y-2">
+                        <div className="text-xs uppercase tracking-[0.2em] text-slate-400">Categories</div>
+                        <div className="flex flex-wrap gap-2">
+                            {categories.map((cat) => {
+                                const active = selectedCategories.includes(cat);
+                                return (
+                                    <button
+                                        key={cat}
+                                        type="button"
+                                        onClick={() => {
+                                            setSelectedCategories((prev) =>
+                                                active ? prev.filter((c) => c !== cat) : [...prev, cat]
+                                            );
+                                        }}
+                                        className={`px-3 py-1 rounded-full border text-xs tracking-wide ${
+                                            active ? 'border-slate-900 text-slate-900' : 'border-slate-200 text-slate-500'
+                                        }`}
+                                    >
+                                        {cat}
+                                    </button>
+                                );
+                            })}
+                        </div>
+                        <div className="flex items-center gap-2">
                             <input
                                 type="text"
-                                value={pinyin}
-                                onChange={(e) => setPinyin(e.target.value)}
-                                placeholder="e.g. píng guǒ"
-                                className="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all text-gray-700"
+                                value={newCategory}
+                                onChange={(e) => setNewCategory(e.target.value)}
+                                placeholder="New category"
+                                className="flex-1 border-b border-slate-200 bg-transparent pb-2 text-sm font-light text-slate-900 placeholder:text-slate-400 focus:border-slate-900 focus:outline-none"
                             />
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    const next = categoryStorage.add(newCategory);
+                                    setCategories(next);
+                                    if (newCategory.trim()) {
+                                        setSelectedCategories((prev) => [...prev, newCategory.trim()]);
+                                        setNewCategory('');
+                                    }
+                                }}
+                                className="text-xs text-slate-500 hover:text-slate-900"
+                            >
+                                Add
+                            </button>
                         </div>
                     </div>
 
-                    {/* Manual Refresh Button */}
-                    {!isLoading && english && (
-                        <div className="flex justify-end">
-                            <button
-                                type="button"
-                                onClick={() => translateWithOllama(english)}
-                                className="text-xs text-blue-500 hover:text-blue-600 flex items-center gap-1"
-                            >
-                                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
-                                Regenerate with Ollama
-                            </button>
-                        </div>
-                    )}
-
                     {error && (
-                        <p className="text-xs text-red-400 bg-red-50 p-2 rounded-lg border border-red-100">{error}</p>
+                        <p className="text-xs text-red-500">{error}</p>
                     )}
 
-                    <button
-                        type="submit"
-                        disabled={isLoading || !english || !hanzi}
-                        className="w-full py-4 mt-4 rounded-xl bg-gradient-to-r from-blue-400 to-cyan-400 text-white font-medium shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                        {isLoading ? 'Processing...' : 'Add Flashcard'}
-                    </button>
+                    {!isLoading && (!hanzi || !pinyin || sentences.length === 0) && (
+                        <button
+                            type="button"
+                            onClick={() => translateWithGroq(english)}
+                            disabled={!english}
+                            className="w-full py-3 mt-2 text-center disabled:opacity-40 disabled:cursor-not-allowed"
+                        >
+                            <span className="shimmer-text text-lg font-light tracking-wide">
+                                Generate
+                            </span>
+                        </button>
+                    )}
+
+                    {!isLoading && hanzi && pinyin && sentences.length > 0 && (
+                        <button
+                            type="submit"
+                            className="w-full py-3 mt-2 text-center"
+                        >
+                            <span className="shimmer-text text-lg font-light tracking-wide">
+                                Add Flashcard
+                            </span>
+                        </button>
+                    )}
                 </form>
             </div>
+
+            <style jsx>{`
+        .shimmer-text {
+            display: inline-block;
+            background: linear-gradient(120deg, rgba(15,61,150,0.9) 0%, rgba(86,171,255,0.95) 35%, rgba(15,61,150,0.85) 60%, rgba(86,171,255,1) 100%);
+            background-size: 200% 100%;
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            animation: shimmer 3.5s ease-in-out infinite;
+        }
+                @keyframes shimmer {
+            0% { background-position: 120% 0; }
+            100% { background-position: -120% 0; }
+        }
+        .animate-spin-slow {
+            animation: spin 2.8s linear infinite;
+        }
+        .droplet {
+            position: absolute;
+            left: 50%;
+            top: -6px;
+            width: 8px;
+            height: 8px;
+            margin-left: -4px;
+            border-radius: 999px;
+            background: rgba(59, 130, 246, 0.45);
+            animation: drip 1.6s ease-in-out infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        @keyframes drip {
+            0% { transform: translateY(0); opacity: 0.2; }
+            50% { transform: translateY(20px); opacity: 0.7; }
+            100% { transform: translateY(40px); opacity: 0; }
+        }
+        .shimmer-slow {
+            animation-duration: 6s;
+        }
+            `}</style>
         </div>
     );
 }
-

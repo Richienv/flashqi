@@ -359,7 +359,7 @@ export class FlashcardDatabaseService {
   /**
    * Add a custom self-learn flashcard
    */
-  static async addSelfLearnCard(card: { hanzi: string; pinyin: string; english: string }): Promise<FlashcardWithProgress | null> {
+  static async addSelfLearnCard(card: { hanzi: string; pinyin: string; english: string; example_sentence?: string[]; categories?: string[] }): Promise<FlashcardWithProgress | null> {
     try {
       const newCard = flashcardStorage.add({
         ...card,

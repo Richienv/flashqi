@@ -1,8 +1,9 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { useRouter, useParams } from 'next/navigation';
+import { useRouter, useParams, useSearchParams } from 'next/navigation';
 import { FlashcardDatabaseService } from '@/services/flashcardDatabaseService';
+import { Button } from '@/components/ui/button';
 
 // Hardcoded flashcard data
 const FLASHCARD_DATA: { [key: string]: { title: string; cards: { id: string; hanzi: string; pinyin: string; english: string; }[] } } = {
@@ -178,6 +179,8 @@ export default function FlashcardStudyPage() {
   const router = useRouter();
   const params = useParams();
   const lessonId = params.lessonId as string;
+  const searchParams = useSearchParams();
+  const startId = searchParams.get('start');
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
@@ -197,7 +200,7 @@ export default function FlashcardStudyPage() {
         setIsLoading(true);
         const cards = await FlashcardDatabaseService.getSelfLearnCards();
         setDynamicLessonData({
-          title: 'My Custom Cards',
+          title: 'Self Learn',
           cards: cards
         });
         setIsLoading(false);
@@ -229,6 +232,14 @@ export default function FlashcardStudyPage() {
       }
     }
   }, [isDrawingMode]);
+
+  useEffect(() => {
+    if (!startId) return;
+    const idx = lessonData.cards.findIndex((card: any) => card.id === startId);
+    if (idx >= 0) {
+      setCurrentIndex(idx);
+    }
+  }, [startId, lessonData.cards]);
 
   const handleTouchStart = (e: React.TouchEvent) => {
     if (!ctx || !canvasRef.current) return;
@@ -299,96 +310,67 @@ export default function FlashcardStudyPage() {
   const goBack = () => {
     if (lessonId === 'self-learn') {
       router.push(`/dashboard/flashcards/levels/self-learn`);
-    } else {
-      router.push(`/dashboard/flashcards/lessons/${lessonId}`);
+      return;
     }
-  };
 
-  const isLevel2 = lessonId.startsWith('level2') || lessonId === 'self-learn'; // Treat self-learn as neutral/level 2 styled
-  const gradientColors = isLevel2
-    ? 'from-emerald-400 via-teal-400 to-cyan-400'
-    : 'from-orange-400 via-amber-400 to-yellow-400';
-  const accentColor = isLevel2 ? 'bg-emerald-500' : 'bg-orange-500';
+    if (lessonId.startsWith('level2_')) {
+      router.push('/dashboard/flashcards/levels/level2');
+      return;
+    }
+
+    router.push('/dashboard/flashcards/levels/level1');
+  };
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: 'linear-gradient(180deg, #4A9EFF 0%, #87CEEB 50%, #E8F4FF 100%)' }}>
-        <p className="text-white animate-pulse">Loading custom cards...</p>
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <p className="text-slate-400 animate-pulse">Loading...</p>
       </div>
     );
   }
 
   if (!currentCard) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: 'linear-gradient(180deg, #4A9EFF 0%, #87CEEB 50%, #E8F4FF 100%)' }}>
-        <p className="text-white">No cards found. Go back and add some!</p>
-        <button onClick={goBack} className="ml-4 px-4 py-2 bg-white/20 rounded-xl text-white">Back</button>
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <p className="text-slate-500">No cards found.</p>
+        <Button
+          asChild
+          variant="ghost"
+          className="h-auto w-auto p-0 ml-4 bg-transparent hover:bg-transparent"
+        >
+          <button onClick={goBack} type="button" className="shimmer-text text-sm font-light">
+            Back
+          </button>
+        </Button>
       </div>
     );
   }
 
   return (
-    <div
-      className="relative min-h-screen overflow-hidden font-sans"
-      style={{
-        background: 'linear-gradient(180deg, #4A9EFF 0%, #87CEEB 40%, #B8E0FF 70%, #E8F4FF 100%)',
-      }}
-    >
-      {/* Clouds */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div
-          className="absolute w-[400px] h-[140px] rounded-full opacity-70 animate-cloud-drift"
-          style={{
-            background: 'radial-gradient(ellipse, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0) 70%)',
-            left: '-5%',
-            top: '3%',
-          }}
-        />
-        <div
-          className="absolute w-[300px] h-[100px] rounded-full opacity-60 animate-cloud-drift-slow"
-          style={{
-            background: 'radial-gradient(ellipse, rgba(255,255,255,0.85) 0%, rgba(255,255,255,0) 70%)',
-            right: '-3%',
-            top: '6%',
-          }}
-        />
-      </div>
-
-      {/* Green base */}
-      <div className="absolute bottom-0 left-0 right-0 h-16 pointer-events-none">
-        <div
-          className="absolute inset-0"
-          style={{
-            background: 'linear-gradient(180deg, transparent 0%, rgba(76,175,80,0.2) 50%, rgba(56,142,60,0.3) 100%)',
-            borderRadius: '100% 100% 0 0',
-            transform: 'scaleX(1.5)',
-          }}
-        />
-      </div>
-
+    <div className="min-h-screen bg-white font-sans">
       {/* Main content */}
-      <main className="relative z-10 min-h-screen px-4 py-6 flex flex-col">
+      <main className="min-h-screen px-4 py-8 flex flex-col">
         <div className="max-w-5xl mx-auto w-full flex-1 flex flex-col">
           {/* Header */}
           <div className="flex items-center justify-between mb-4 max-w-md mx-auto w-full">
-            <button
-              onClick={goBack}
-              className="flex items-center text-white/70 hover:text-white transition-colors text-sm"
+            <Button
+              asChild
+              variant="ghost"
+              className="h-auto w-auto p-0 bg-transparent hover:bg-transparent"
             >
-              <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-              </svg>
-              Back
-            </button>
-            <span className="text-white/60 text-sm font-light">
+              <button onClick={goBack} type="button" className="text-slate-500 hover:text-slate-900 text-sm font-light">
+                Back
+              </button>
+            </Button>
+            <span className="text-slate-400 text-sm font-light">
               {currentIndex + 1} / {totalCards}
             </span>
           </div>
 
           {/* Progress bar */}
-          <div className="w-full h-1.5 bg-white/30 rounded-full mb-8 overflow-hidden max-w-md mx-auto">
+          <div className="w-full h-px bg-slate-200 mb-8 overflow-hidden max-w-md mx-auto">
             <div
-              className={`h-full ${accentColor} rounded-full transition-all duration-300`}
+              className="h-full bg-slate-900/80 transition-all duration-300"
               style={{ width: `${((currentIndex + 1) / totalCards) * 100}%` }}
             />
           </div>
@@ -397,18 +379,14 @@ export default function FlashcardStudyPage() {
           <div className="flex-1 flex items-center justify-center w-full gap-8">
 
             {/* Desktop Prev Button */}
-            <button
+            <Button
               onClick={prevCard}
               disabled={currentIndex === 0}
-              className={`hidden md:flex w-14 h-14 rounded-full items-center justify-center transition-all ${currentIndex === 0
-                  ? 'bg-white/10 text-white/20 cursor-not-allowed'
-                  : 'bg-white/20 hover:bg-white/30 text-white shadow-lg hover:scale-110 backdrop-blur-md'
-                }`}
+              variant="ghost"
+              className="hidden md:inline-flex h-auto w-auto p-0 bg-transparent hover:bg-transparent"
             >
-              <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-              </svg>
-            </button>
+              <span className="shimmer-text text-2xl font-light">←</span>
+            </Button>
 
             {/* Main Card Column */}
             <div className="flex-1 flex flex-col items-center justify-center max-w-sm w-full">
@@ -417,25 +395,24 @@ export default function FlashcardStudyPage() {
                 <div className="w-full">
                   {/* Mini card showing character */}
                   <div className="mb-4 text-center">
-                    <p className="text-white/80 text-lg mt-1 drop-shadow-lg">{currentCard.pinyin}</p>
+                    <p className="shimmer-text text-2xl sm:text-3xl font-light mt-1">
+                      {currentCard.pinyin}
+                    </p>
                   </div>
 
                   {/* Drawing canvas */}
-                  <div className="relative rounded-3xl overflow-hidden shadow-2xl">
-                    <div className={`absolute inset-0 bg-gradient-to-r ${gradientColors} opacity-90`} />
-                    <div className="absolute inset-[2px] rounded-[22px] bg-white" />
-
+                  <div className="relative rounded-3xl overflow-hidden border border-slate-200">
                     <div className="relative p-4">
                       {/* Hint overlay */}
                       {showHint && (
                         <div className="absolute inset-4 flex items-center justify-center pointer-events-none z-10">
-                          <span className="text-8xl text-gray-200/50">{currentCard.hanzi}</span>
+                          <span className="shimmer-text text-8xl">{currentCard.hanzi}</span>
                         </div>
                       )}
 
                       <canvas
                         ref={canvasRef}
-                        className="w-full h-64 bg-gray-50 rounded-2xl touch-none"
+                        className="w-full h-64 bg-white rounded-2xl touch-none"
                         style={{ touchAction: 'none' }}
                         onTouchStart={handleTouchStart}
                         onTouchMove={handleTouchMove}
@@ -447,28 +424,28 @@ export default function FlashcardStudyPage() {
                       />
 
                       {/* Drawing controls */}
-                      <div className="flex justify-center gap-3 mt-4">
-                        <button
+                      <div className="flex justify-center gap-4 mt-4 text-sm font-light">
+                        <Button
                           onClick={() => setShowHint(!showHint)}
-                          className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${showHint
-                              ? 'bg-blue-100 text-blue-600'
-                              : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                            }`}
+                          variant="ghost"
+                          className="h-auto w-auto p-0 bg-transparent hover:bg-transparent text-slate-500 hover:text-slate-900"
                         >
-                          {showHint ? '👁️ Hide' : '👁️ Hint'}
-                        </button>
-                        <button
+                          {showHint ? 'Hide' : 'Hint'}
+                        </Button>
+                        <Button
                           onClick={clearCanvas}
-                          className="px-4 py-2 rounded-xl bg-gray-100 text-gray-600 hover:bg-gray-200 text-sm font-medium transition-all"
+                          variant="ghost"
+                          className="h-auto w-auto p-0 bg-transparent hover:bg-transparent text-slate-500 hover:text-slate-900"
                         >
-                          🗑️ Clear
-                        </button>
-                        <button
+                          Clear
+                        </Button>
+                        <Button
                           onClick={() => setIsDrawingMode(false)}
-                          className="px-4 py-2 rounded-xl bg-gray-100 text-gray-600 hover:bg-gray-200 text-sm font-medium transition-all"
+                          variant="ghost"
+                          className="h-auto w-auto p-0 bg-transparent hover:bg-transparent text-slate-500 hover:text-slate-900"
                         >
-                          ✕ Close
-                        </button>
+                          Close
+                        </Button>
                       </div>
                     </div>
                   </div>
@@ -488,33 +465,38 @@ export default function FlashcardStudyPage() {
                   >
                     {/* Front - Chinese */}
                     <div
-                      className="absolute inset-0 rounded-3xl overflow-hidden shadow-2xl backface-hidden"
+                      className="absolute inset-0 rounded-3xl overflow-hidden border border-slate-200 backface-hidden"
                       style={{ backfaceVisibility: 'hidden' }}
                     >
-                      <div className={`absolute inset-0 bg-gradient-to-r ${gradientColors} opacity-95`} />
-                      <div className="absolute inset-[2px] rounded-[22px] bg-white" />
-                      <div className="absolute inset-0 bg-gradient-to-br from-white/50 via-transparent to-transparent" />
-
                       <div className="relative h-full flex flex-col items-center justify-center p-6 text-center">
-                        <span className="text-7xl font-medium text-gray-800 mb-6">{currentCard.hanzi}</span>
-                        <span className="text-2xl text-gray-500 font-light">{currentCard.pinyin}</span>
-                        <p className="text-gray-300 text-xs mt-8 font-light tracking-widest uppercase">tap to flip</p>
+                        <span className="text-7xl font-light text-slate-900 mb-6">{currentCard.hanzi}</span>
+                        <span className="text-2xl text-slate-500 font-light">{currentCard.pinyin}</span>
+                        <p className="text-slate-300 text-xs mt-8 font-light tracking-widest uppercase">tap to flip</p>
                       </div>
                     </div>
 
                     {/* Back - English */}
                     <div
-                      className="absolute inset-0 rounded-3xl overflow-hidden shadow-2xl backface-hidden"
+                      className="absolute inset-0 rounded-3xl overflow-hidden border border-slate-200 backface-hidden"
                       style={{ backfaceVisibility: 'hidden', transform: 'rotateY(180deg)' }}
                     >
-                      <div className="absolute inset-0 bg-gradient-to-br from-gray-200 to-gray-300" />
-                      <div className="absolute inset-[2px] rounded-[22px] bg-white" />
-
                       <div className="relative h-full flex flex-col items-center justify-center p-6 text-center">
-                        <span className="text-4xl font-medium text-gray-700 mb-2">{currentCard.english}</span>
-                        <div className="w-12 h-1 bg-gray-100 rounded-full my-4" />
-                        <span className="text-xl text-gray-400 font-light">{currentCard.pinyin}</span>
-                        <span className="text-5xl text-gray-200 mt-6 opacity-30 select-none">{currentCard.hanzi}</span>
+                        <span className="text-4xl font-light text-slate-900 mb-2">{currentCard.english}</span>
+                        <div className="w-10 h-px bg-slate-200 my-4" />
+                        {Array.isArray(currentCard?.example_sentence) && currentCard.example_sentence.length > 0 ? (
+                          <div className="mt-6 w-full text-sm text-slate-500 space-y-2">
+                            {currentCard.example_sentence.slice(0, 3).map((s: string, i: number) => {
+                              const match = s.match(/^(.*?)(?:\s*\((.*?)\)\s*)?$/);
+                              const hanziText = (match?.[1] || '').trim();
+                              return (
+                                <div key={`${s}-${i}`} className="shimmer-text">
+                                  {hanziText || s}
+                                </div>
+                              );
+                            })}
+                          </div>
+                        ) : null}
+                        <span className="text-5xl text-slate-100 mt-6 select-none">{currentCard.hanzi}</span>
                       </div>
                     </div>
                   </div>
@@ -523,83 +505,72 @@ export default function FlashcardStudyPage() {
 
               {/* Write button (when not in drawing mode) */}
               {!isDrawingMode && (
-                <button
+                <Button
                   onClick={() => setIsDrawingMode(true)}
-                  className="mt-8 flex items-center gap-2 px-6 py-3 rounded-2xl bg-white/90 shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all backdrop-blur-sm"
+                  variant="ghost"
+                  className="mt-8 h-auto w-auto p-0 bg-transparent hover:bg-transparent"
                 >
-                  <span className="text-xl">✏️</span>
-                  <span className="text-sm font-medium text-gray-700">Practice Writing</span>
-                </button>
+                  <span className="shimmer-text text-sm font-light tracking-wide">
+                    Practice Writing
+                  </span>
+                </Button>
               )}
             </div>
 
             {/* Desktop Next Button */}
-            <button
+            <Button
               onClick={nextCard}
               disabled={currentIndex >= totalCards - 1}
-              className={`hidden md:flex w-14 h-14 rounded-full items-center justify-center transition-all ${currentIndex >= totalCards - 1
-                  ? 'bg-white/10 text-white/20 cursor-not-allowed'
-                  : 'bg-white/20 hover:bg-white/30 text-white shadow-lg hover:scale-110 backdrop-blur-md'
-                }`}
+              variant="ghost"
+              className="hidden md:inline-flex h-auto w-auto p-0 bg-transparent hover:bg-transparent"
             >
-              <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </button>
+              <span className="shimmer-text text-2xl font-light">→</span>
+            </Button>
 
           </div>
 
           {/* Mobile Navigation (Bottom) */}
           <div className="md:hidden flex justify-between items-center mt-auto pt-4 pb-2 max-w-md mx-auto w-full">
-            <button
+            <Button
               onClick={prevCard}
               disabled={currentIndex === 0}
-              className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all ${currentIndex === 0
-                  ? 'bg-white/30 text-white/40 cursor-not-allowed'
-                  : 'bg-white/90 text-gray-600 shadow-lg hover:shadow-xl hover:scale-105'
-                }`}
+              variant="ghost"
+              className="h-auto w-auto p-0 bg-transparent hover:bg-transparent"
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-              </svg>
-            </button>
+              <span className="shimmer-text text-xl font-light">←</span>
+            </Button>
 
-            <button
+            <Button
               onClick={nextCard}
               disabled={currentIndex >= totalCards - 1}
-              className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all ${currentIndex >= totalCards - 1
-                  ? 'bg-white/30 text-white/40 cursor-not-allowed'
-                  : 'bg-white/90 text-gray-600 shadow-lg hover:shadow-xl hover:scale-105'
-                }`}
+              variant="ghost"
+              className="h-auto w-auto p-0 bg-transparent hover:bg-transparent"
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </button>
+              <span className="shimmer-text text-xl font-light">→</span>
+            </Button>
           </div>
         </div>
       </main>
 
       <style jsx>{`
-        @keyframes cloud-drift {
-          0%, 100% { transform: translateX(0); }
-          50% { transform: translateX(15px); }
-        }
-        @keyframes cloud-drift-slow {
-          0%, 100% { transform: translateX(0); }
-          50% { transform: translateX(-12px); }
-        }
-        .animate-cloud-drift {
-          animation: cloud-drift 8s ease-in-out infinite;
-        }
-        .animate-cloud-drift-slow {
-          animation: cloud-drift-slow 12s ease-in-out infinite;
-        }
         .perspective-1000 {
           perspective: 1000px;
         }
         .backface-hidden {
           backface-visibility: hidden;
+        }
+        .shimmer-text {
+          display: inline-block;
+          background: linear-gradient(120deg, rgba(15,61,150,0.9) 0%, rgba(86,171,255,0.95) 35%, rgba(15,61,150,0.85) 60%, rgba(86,171,255,1) 100%);
+          background-size: 200% 100%;
+          -webkit-background-clip: text;
+          background-clip: text;
+          color: transparent;
+          animation: shimmer 3.5s ease-in-out infinite;
+        }
+        @keyframes shimmer {
+          0% { background-position: 120% 0; }
+          100% { background-position: -120% 0; }
         }
       `}</style>
     </div>

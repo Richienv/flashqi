@@ -1,126 +1,78 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { pinyin } from 'pinyin-pro';
+import { NextResponse } from 'next/server';
 
-const OLLAMA_URL = process.env.OLLAMA_URL || 'http://127.0.0.1:11434';
-const MODEL = process.env.OLLAMA_MODEL || 'qwen2.5:7b';
+const OPENROUTER_API_URL = 'https://openrouter.ai/api/v1/chat/completions';
+const DEFAULT_MODEL = 'openrouter/free';
 
-export async function POST(req: NextRequest) {
-    try {
-        const { english } = await req.json();
+function extractJson(content: string) {
+  const match = content.match(/\{[\s\S]*\}/);
+  if (!match) return null;
+  try {
+    return JSON.parse(match[0]);
+  } catch {
+    return null;
+  }
+}
 
-        if (!english || typeof english !== 'string' || english.trim().length < 2) {
-            return NextResponse.json({ error: 'Minimum 2 characters required' }, { status: 400 });
-        }
-
-        // Structured prompt forcing JSON output with both fields
-        const prompt = `You are a Chinese flashcard generator. Translate the English to Simplified Chinese (daily usage).
-
-STRICT RULES:
-- "handphone" = 手机
-- "walking" = 走路  
-- "cellphone" = 手机
-- Use Mainland China terms only (软件 not 軟體)
-- Daily conversation level (走路 not 步行)
-
-You must respond in this exact JSON format:
-{"hanzi": "中文", "pinyin": "zhōngwén"}
-
-English: "${english.trim()}"
-JSON:`;
-
-        // Attempt to call Ollama
-        let data;
-        try {
-            const response = await fetch(`${OLLAMA_URL}/api/generate`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    model: MODEL,
-                    prompt: prompt,
-                    stream: false,
-                    format: 'json',  // Forces valid JSON output
-                    options: {
-                        temperature: 0.1,
-                        num_predict: 50,
-                    }
-                }),
-            });
-
-            if (!response.ok) {
-                // If 404, maybe model not pulled? Or server not running
-                console.warn(`Ollama call failed with ${response.status}. Is Ollama running?`);
-                throw new Error(`Ollama error: ${response.status}`);
-            }
-
-            data = await response.json();
-
-        } catch (e) {
-            console.error('Ollama fetch error:', e);
-            // Fallback for demo purposes if Ollama isn't actually reachable during this turn
-            return NextResponse.json(
-                { error: 'Ollama service error - ensure Ollama is running on port 11434' },
-                { status: 503 }
-            );
-        }
-
-        let result;
-
-        try {
-            result = JSON.parse(data.response);
-        } catch (e) {
-            // Fallback if AI returns malformed JSON
-            const text = data.response.replace(/[{}"]/g, '');
-            const hanziMatch = text.match(/hanzi:\s*([^,]+)/);
-            const pinyinMatch = text.match(/pinyin:\s*([^,]+)/);
-
-            result = {
-                hanzi: hanziMatch ? hanziMatch[1].trim() : '',
-                pinyin: pinyinMatch ? pinyinMatch[1].trim() : ''
-            };
-        }
-
-        // Validation & Auto-correction
-        if (!result.hanzi || result.hanzi.length > 20) { // increased length slightly just in case
-            return NextResponse.json({ error: 'Invalid translation' }, { status: 422 });
-        }
-
-        // If AI didn't provide pinyin or it's wrong, generate locally
-        if (!result.pinyin || result.pinyin.includes('?')) {
-            result.pinyin = pinyin(result.hanzi, {
-                toneType: 'symbol',
-                type: 'string',
-                nonZh: 'consecutive'
-            });
-        }
-
-        // Verify pinyin matches hanzi length roughly (heuristic)
-        const pinyinSyllables = result.pinyin.split(/\s+/).length;
-        const hanziChars = result.hanzi.length;
-
-        // Loosen mismatch check slightly?
-        if (Math.abs(pinyinSyllables - hanziChars) > 2) {
-            // Regenerate pinyin locally if mismatch suspicious
-            result.pinyin = pinyin(result.hanzi, {
-                toneType: 'symbol',
-                type: 'string',
-                nonZh: 'consecutive'
-            });
-        }
-
-        return NextResponse.json({
-            chinese: result.hanzi, // Keep 'chinese' key for compatibility with frontend or update frontend to read 'hanzi'
-            hanzi: result.hanzi,
-            pinyin: result.pinyin,
-            zhuyin: '', // Generate client-side if needed
-            source: 'ollama',
-            model: MODEL
-        });
-
-    } catch (error) {
-        console.error('Translation error:', error);
-        return NextResponse.json(
-            { error: 'Translation service error', details: String(error) },
-            { status: 503 }
-        );
+export async function POST(req: Request) {
+  try {
+    const { english } = await req.json();
+    if (!english || typeof english !== 'string' || english.trim().length < 1) {
+      return NextResponse.json({ error: 'Missing english text' }, { status: 400 });
     }
+
+    const apiKey = process.env.OPENROUTER_API_KEY;
+    if (!apiKey) {
+      return NextResponse.json({ error: 'OPENROUTER_API_KEY is not set' }, { status: 500 });
+    }
+
+    const model = process.env.OPENROUTER_MODEL || DEFAULT_MODEL;
+
+    const systemPrompt = [
+      'You are a translation assistant.',
+      'Translate the English phrase into simplified Chinese (hanzi) and pinyin.',
+      'Also create 3 short, natural example sentences in Chinese with pinyin in parentheses.',
+      'Return ONLY JSON with keys: hanzi, pinyin, sentences.',
+      'sentences must be an array of 3 strings like "再见 (zài jiàn)".',
+      'No markdown, no extra text.'
+    ].join(' ');
+
+    const openRouterRes = await fetch(OPENROUTER_API_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${apiKey}`,
+        'HTTP-Referer': process.env.OPENROUTER_SITE_URL || 'http://localhost:3000',
+        'X-Title': process.env.OPENROUTER_APP_NAME || 'FlashQi',
+      },
+      body: JSON.stringify({
+        model,
+        temperature: 0.2,
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: english },
+        ],
+      }),
+    });
+
+    if (!openRouterRes.ok) {
+      const errorText = await openRouterRes.text();
+      return NextResponse.json({ error: errorText || 'OpenRouter request failed' }, { status: 500 });
+    }
+
+    const data = await openRouterRes.json();
+    const content = data?.choices?.[0]?.message?.content ?? '';
+    const parsed = extractJson(content);
+
+    if (!parsed?.hanzi || !parsed?.pinyin || !Array.isArray(parsed?.sentences)) {
+      return NextResponse.json({ error: 'Invalid translation response' }, { status: 500 });
+    }
+
+    return NextResponse.json({
+      hanzi: String(parsed.hanzi).trim(),
+      pinyin: String(parsed.pinyin).trim(),
+      sentences: parsed.sentences.map((s: string) => String(s).trim()).filter(Boolean).slice(0, 3),
+    });
+  } catch (error) {
+    return NextResponse.json({ error: 'Translation failed' }, { status: 500 });
+  }
 }

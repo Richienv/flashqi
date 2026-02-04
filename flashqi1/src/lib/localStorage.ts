@@ -13,6 +13,7 @@ const STORAGE_KEYS = {
   USER_STATS: 'flashqi_user_stats',
   GAME_ROOMS: 'flashqi_game_rooms',
   GAME_PLAYERS: 'flashqi_game_players',
+  CATEGORIES: 'flashqi_categories',
 } as const;
 
 // Types
@@ -23,6 +24,7 @@ export interface Flashcard {
   pinyin: string;
   english: string;
   example_sentence?: any;
+  categories?: string[];
   difficulty_level?: number;
   grammar_usage?: string;
   grammar_tip?: string;
@@ -195,6 +197,36 @@ export const flashcardStorage = {
 
   clear(): void {
     removeItem(STORAGE_KEYS.FLASHCARDS);
+  },
+};
+
+// ==================== CATEGORIES ====================
+
+export const categoryStorage = {
+  getAll(): string[] {
+    return getItem<string[]>(STORAGE_KEYS.CATEGORIES) || [];
+  },
+
+  save(categories: string[]): void {
+    setItem(STORAGE_KEYS.CATEGORIES, categories);
+  },
+
+  add(name: string): string[] {
+    const trimmed = name.trim();
+    if (!trimmed) return this.getAll();
+    const current = this.getAll();
+    if (current.includes(trimmed)) return current;
+    const next = [...current, trimmed];
+    this.save(next);
+    return next;
+  },
+
+  remove(name: string): string[] {
+    const trimmed = name.trim();
+    const current = this.getAll();
+    const next = current.filter((c) => c !== trimmed);
+    this.save(next);
+    return next;
   },
 };
 
