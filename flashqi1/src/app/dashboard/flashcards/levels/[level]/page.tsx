@@ -251,36 +251,6 @@ export default function FlashcardLevelPage() {
                   </div>
 
                   <div className="hidden sm:block w-px bg-slate-200 self-stretch" />
-
-                  <div className="hidden sm:flex flex-col gap-4 text-xs text-slate-500">
-                    <button
-                      type="button"
-                      onClick={() => setIsAddModalOpen(true)}
-                      className="hover:text-slate-900"
-                    >
-                      Add Card
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        const name = window.prompt('New category name');
-                        if (!name) return;
-                        const next = categoryStorage.add(name);
-                        setCategories(next);
-                        setActiveCategory(name.trim());
-                      }}
-                      className="hover:text-slate-900"
-                    >
-                      Add Category
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setSelectMode((prev) => !prev)}
-                      className="hover:text-slate-900"
-                    >
-                      {selectMode ? 'Done' : 'Edit'}
-                    </button>
-                  </div>
                 </div>
               ) : (
                 <>

@@ -1,7 +1,9 @@
 import { NextResponse } from 'next/server';
 
 const OPENROUTER_API_URL = 'https://openrouter.ai/api/v1/chat/completions';
-const DEFAULT_MODEL = 'openrouter/free';
+const DEFAULT_OPENROUTER_MODEL = 'openrouter/free';
+const DEFAULT_KIMI_BASE_URL = 'https://api.kimi.com/coding/v1';
+const DEFAULT_KIMI_MODEL = 'kimi-for-coding';
 
 function extractJson(content: string) {
   const match = content.match(/\{[\s\S]*\}/);
@@ -20,12 +22,19 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Missing english text' }, { status: 400 });
     }
 
-    const apiKey = process.env.OPENROUTER_API_KEY;
+    const openRouterKey = process.env.OPENROUTER_API_KEY;
+    const kimiApiKey = process.env.KIMICODE_API_KEY || process.env.KIMI_CODE_API_KEY;
+    const useKimi = !openRouterKey && Boolean(kimiApiKey);
+    const apiKey = useKimi ? kimiApiKey : openRouterKey;
     if (!apiKey) {
-      return NextResponse.json({ error: 'OPENROUTER_API_KEY is not set' }, { status: 500 });
+      return NextResponse.json({ error: 'Missing API key for translation provider' }, { status: 500 });
     }
 
-    const model = process.env.OPENROUTER_MODEL || DEFAULT_MODEL;
+    const kimiBaseUrl = process.env.KIMICODE_BASE_URL || DEFAULT_KIMI_BASE_URL;
+    const kimiModel = process.env.KIMICODE_MODEL || DEFAULT_KIMI_MODEL;
+    const openRouterModel = process.env.OPENROUTER_MODEL || DEFAULT_OPENROUTER_MODEL;
+    const apiUrl = useKimi ? `${kimiBaseUrl}/chat/completions` : OPENROUTER_API_URL;
+    const model = useKimi ? kimiModel : openRouterModel;
 
     const systemPrompt = [
       'You are a translation assistant.',
@@ -36,13 +45,17 @@ export async function POST(req: Request) {
       'No markdown, no extra text.'
     ].join(' ');
 
-    const openRouterRes = await fetch(OPENROUTER_API_URL, {
+    const openRouterRes = await fetch(apiUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${apiKey}`,
-        'HTTP-Referer': process.env.OPENROUTER_SITE_URL || 'http://localhost:3000',
-        'X-Title': process.env.OPENROUTER_APP_NAME || 'FlashQi',
+        ...(useKimi
+          ? {}
+          : {
+              'HTTP-Referer': process.env.OPENROUTER_SITE_URL || 'http://localhost:3000',
+              'X-Title': process.env.OPENROUTER_APP_NAME || 'FlashQi',
+            }),
       },
       body: JSON.stringify({
         model,

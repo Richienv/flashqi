@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useCallback, useEffect, useRef } from 'react';
+import { gsap } from 'gsap';
 import { FlashcardDatabaseService } from '@/services/flashcardDatabaseService';
 import { categoryStorage } from '@/lib/localStorage';
 
@@ -30,7 +31,12 @@ export default function AddSelfLearnCardModal({
     const [categories, setCategories] = useState<string[]>([]);
     const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
     const [newCategory, setNewCategory] = useState('');
+    const [isCategoryDialogOpen, setIsCategoryDialogOpen] = useState(false);
+    const [categoryFilter, setCategoryFilter] = useState('');
     const audioRef = useRef<AudioContext | null>(null);
+    const ringOuterRef = useRef<HTMLDivElement | null>(null);
+    const ringInnerRef = useRef<HTMLDivElement | null>(null);
+    const dropletRef = useRef<HTMLSpanElement | null>(null);
 
     const splitSentence = useCallback((sentence: string) => {
         const match = sentence.match(/^(.*?)(?:\s*\((.*?)\)\s*)?$/);
@@ -118,6 +124,41 @@ export default function AddSelfLearnCardModal({
     }, [isLoading, playTick]);
 
     useEffect(() => {
+        if (!isLoading) return;
+        const ctx = gsap.context(() => {
+            if (ringInnerRef.current) {
+                gsap.to(ringInnerRef.current, {
+                    rotation: 360,
+                    duration: 2.8,
+                    ease: 'none',
+                    repeat: -1,
+                });
+            }
+            if (ringOuterRef.current) {
+                gsap.to(ringOuterRef.current, {
+                    scale: 1.03,
+                    duration: 2,
+                    ease: 'sine.inOut',
+                    yoyo: true,
+                    repeat: -1,
+                });
+            }
+            if (dropletRef.current) {
+                gsap.set(dropletRef.current, { y: 0, opacity: 0.2 });
+                gsap.to(dropletRef.current, {
+                    y: 42,
+                    opacity: 0,
+                    duration: 1.8,
+                    ease: 'power1.in',
+                    repeat: -1,
+                    repeatDelay: 0.2,
+                });
+            }
+        });
+        return () => ctx.revert();
+    }, [isLoading]);
+
+    useEffect(() => {
         if (isLoading) return;
         setRevealIndex(sentences.length);
     }, [isLoading, sentences]);
@@ -147,6 +188,7 @@ export default function AddSelfLearnCardModal({
             setSentences([]);
             setSelectedCategories([]);
             setNewCategory('');
+            setIsCategoryDialogOpen(false);
         } catch (err) {
             setError('Failed to add card');
         } finally {
@@ -162,10 +204,10 @@ export default function AddSelfLearnCardModal({
                 {isLoading && (
                     <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-white/85 backdrop-blur-xl rounded-2xl">
                         <div className="relative h-16 w-16">
-                            <div className="absolute inset-0 rounded-full border border-blue-200/60" />
-                            <div className="absolute inset-2 rounded-full border border-blue-300/80 animate-spin-slow" />
+                            <div ref={ringOuterRef} className="absolute inset-0 rounded-full border border-blue-200/60" />
+                            <div ref={ringInnerRef} className="absolute inset-2 rounded-full border border-blue-300/80" />
                             <div className="absolute left-1/2 top-1/2 h-6 w-6 -translate-x-1/2 -translate-y-1/2 rounded-full bg-blue-500/10" />
-                            <span className="droplet" />
+                            <span ref={dropletRef} className="droplet" />
                         </div>
                     </div>
                 )}
@@ -240,53 +282,113 @@ export default function AddSelfLearnCardModal({
                         </div>
                     )}
 
-                    <div className="mt-4 space-y-2">
-                        <div className="text-xs uppercase tracking-[0.2em] text-slate-400">Categories</div>
-                        <div className="flex flex-wrap gap-2">
-                            {categories.map((cat) => {
-                                const active = selectedCategories.includes(cat);
-                                return (
-                                    <button
-                                        key={cat}
-                                        type="button"
-                                        onClick={() => {
-                                            setSelectedCategories((prev) =>
-                                                active ? prev.filter((c) => c !== cat) : [...prev, cat]
-                                            );
-                                        }}
-                                        className={`px-3 py-1 rounded-full border text-xs tracking-wide ${
-                                            active ? 'border-slate-900 text-slate-900' : 'border-slate-200 text-slate-500'
-                                        }`}
-                                    >
-                                        {cat}
-                                    </button>
-                                );
-                            })}
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <input
-                                type="text"
-                                value={newCategory}
-                                onChange={(e) => setNewCategory(e.target.value)}
-                                placeholder="New category"
-                                className="flex-1 border-b border-slate-200 bg-transparent pb-2 text-sm font-light text-slate-900 placeholder:text-slate-400 focus:border-slate-900 focus:outline-none"
-                            />
+                    {!isLoading && (hanzi || pinyin || sentences.length > 0) && (
+                        <div className="mt-4 relative">
                             <button
                                 type="button"
-                                onClick={() => {
-                                    const next = categoryStorage.add(newCategory);
-                                    setCategories(next);
-                                    if (newCategory.trim()) {
-                                        setSelectedCategories((prev) => [...prev, newCategory.trim()]);
-                                        setNewCategory('');
-                                    }
-                                }}
-                                className="text-xs text-slate-500 hover:text-slate-900"
+                                onClick={() => setIsCategoryDialogOpen((prev) => !prev)}
+                                className="w-full py-3 text-center"
                             >
-                                Add
+                                <span className="shimmer-text text-lg font-light tracking-wide">
+                                    {selectedCategories.length > 0
+                                        ? selectedCategories.join(' · ')
+                                        : 'Choose Categories'}
+                                </span>
                             </button>
+
+                            {isCategoryDialogOpen && (
+                                <div className="absolute left-0 right-0 mt-2 rounded-xl border border-slate-200 bg-white/95 backdrop-blur p-4 shadow-sm z-20">
+                                    {selectedCategories.length > 0 && (
+                                        <div className="flex flex-wrap gap-2 mb-3">
+                                            {selectedCategories.map((cat) => (
+                                                <button
+                                                    key={`selected-${cat}`}
+                                                    type="button"
+                                                    onClick={() =>
+                                                        setSelectedCategories((prev) => prev.filter((c) => c !== cat))
+                                                    }
+                                                    className="px-2.5 py-1 rounded-full border border-slate-200 text-xs text-slate-600 hover:text-slate-900 transition-colors inline-flex items-center gap-1"
+                                                    aria-label={`Remove ${cat}`}
+                                                >
+                                                    <span>{cat}</span>
+                                                    <span className="text-[11px] leading-none">×</span>
+                                                </button>
+                                            ))}
+                                        </div>
+                                    )}
+
+                                    <div className="flex items-center gap-2 mb-3">
+                                        <input
+                                            type="text"
+                                            value={categoryFilter}
+                                            onChange={(e) => setCategoryFilter(e.target.value)}
+                                            placeholder="Type to search..."
+                                            className="flex-1 border-b border-slate-200 bg-transparent pb-2 text-sm font-light text-slate-900 placeholder:text-slate-400 focus:border-slate-900 focus:outline-none"
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => setIsCategoryDialogOpen(false)}
+                                            className="text-xs text-slate-500 hover:text-slate-900"
+                                        >
+                                            Done
+                                        </button>
+                                    </div>
+
+                                    <div className="max-h-36 overflow-auto space-y-2 mb-3">
+                                        {categories
+                                            .filter((cat) =>
+                                                cat.toLowerCase().includes(categoryFilter.trim().toLowerCase())
+                                            )
+                                            .map((cat) => {
+                                                const active = selectedCategories.includes(cat);
+                                                return (
+                                                    <button
+                                                        key={cat}
+                                                        type="button"
+                                                        onClick={() => {
+                                                            setSelectedCategories((prev) =>
+                                                                active
+                                                                    ? prev.filter((c) => c !== cat)
+                                                                    : [...prev, cat]
+                                                            );
+                                                        }}
+                                                        className={`w-full text-left text-sm px-2 py-1 rounded ${
+                                                            active ? 'text-slate-900' : 'text-slate-500'
+                                                        }`}
+                                                    >
+                                                        {cat}
+                                                    </button>
+                                                );
+                                            })}
+                                    </div>
+
+                                    <div className="flex items-center gap-2">
+                                        <input
+                                            type="text"
+                                            value={newCategory}
+                                            onChange={(e) => setNewCategory(e.target.value)}
+                                            placeholder="New category"
+                                            className="flex-1 border-b border-slate-200 bg-transparent pb-2 text-sm font-light text-slate-900 placeholder:text-slate-400 focus:border-slate-900 focus:outline-none"
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                const next = categoryStorage.add(newCategory);
+                                                setCategories(next);
+                                                if (newCategory.trim()) {
+                                                    setSelectedCategories((prev) => [...prev, newCategory.trim()]);
+                                                    setNewCategory('');
+                                                }
+                                            }}
+                                            className="text-xs text-slate-500 hover:text-slate-900"
+                                        >
+                                            Add
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
                         </div>
-                    </div>
+                    )}
 
                     {error && (
                         <p className="text-xs text-red-500">{error}</p>
@@ -318,6 +420,8 @@ export default function AddSelfLearnCardModal({
                 </form>
             </div>
 
+            {/* Category dropdown now rendered inline above */}
+
             <style jsx>{`
         .shimmer-text {
             display: inline-block;
@@ -332,9 +436,6 @@ export default function AddSelfLearnCardModal({
             0% { background-position: 120% 0; }
             100% { background-position: -120% 0; }
         }
-        .animate-spin-slow {
-            animation: spin 2.8s linear infinite;
-        }
         .droplet {
             position: absolute;
             left: 50%;
@@ -344,15 +445,6 @@ export default function AddSelfLearnCardModal({
             margin-left: -4px;
             border-radius: 999px;
             background: rgba(59, 130, 246, 0.45);
-            animation: drip 1.6s ease-in-out infinite;
-        }
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-        @keyframes drip {
-            0% { transform: translateY(0); opacity: 0.2; }
-            50% { transform: translateY(20px); opacity: 0.7; }
-            100% { transform: translateY(40px); opacity: 0; }
         }
         .shimmer-slow {
             animation-duration: 6s;
