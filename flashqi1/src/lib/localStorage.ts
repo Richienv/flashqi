@@ -14,6 +14,7 @@ const STORAGE_KEYS = {
   GAME_ROOMS: 'flashqi_game_rooms',
   GAME_PLAYERS: 'flashqi_game_players',
   CATEGORIES: 'flashqi_categories',
+  TRANSLATIONS: 'flashqi_translations',
 } as const;
 
 // Types
@@ -88,6 +89,14 @@ export interface GameRoom {
   max_players: number;
   created_at: string;
   updated_at: string;
+}
+
+export interface TranslationCacheEntry {
+  english: string;
+  hanzi: string;
+  pinyin: string;
+  sentences: string[];
+  created_at: string;
 }
 
 export interface GamePlayer {
@@ -227,6 +236,42 @@ export const categoryStorage = {
     const next = current.filter((c) => c !== trimmed);
     this.save(next);
     return next;
+  },
+};
+
+// ==================== TRANSLATIONS (DICTIONARY CACHE) ====================
+
+export const translationStorage = {
+  getAll(): TranslationCacheEntry[] {
+    return getItem<TranslationCacheEntry[]>(STORAGE_KEYS.TRANSLATIONS) || [];
+  },
+
+  getByEnglish(english: string): TranslationCacheEntry | null {
+    const normalized = english.trim().toLowerCase();
+    if (!normalized) return null;
+    const entries = this.getAll();
+    return entries.find((e) => e.english.trim().toLowerCase() === normalized) || null;
+  },
+
+  save(entries: TranslationCacheEntry[]): void {
+    setItem(STORAGE_KEYS.TRANSLATIONS, entries);
+  },
+
+  upsert(entry: Omit<TranslationCacheEntry, 'created_at'>): TranslationCacheEntry {
+    const entries = this.getAll();
+    const normalized = entry.english.trim().toLowerCase();
+    const existingIndex = entries.findIndex((e) => e.english.trim().toLowerCase() === normalized);
+    const nextEntry: TranslationCacheEntry = {
+      ...entry,
+      created_at: new Date().toISOString(),
+    };
+    if (existingIndex >= 0) {
+      entries[existingIndex] = nextEntry;
+    } else {
+      entries.unshift(nextEntry);
+    }
+    this.save(entries);
+    return nextEntry;
   },
 };
 

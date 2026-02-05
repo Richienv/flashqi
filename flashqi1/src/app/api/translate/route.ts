@@ -39,9 +39,7 @@ export async function POST(req: Request) {
     const systemPrompt = [
       'You are a translation assistant.',
       'Translate the English phrase into simplified Chinese (hanzi) and pinyin.',
-      'Also create 3 short, natural example sentences in Chinese with pinyin in parentheses.',
-      'Return ONLY JSON with keys: hanzi, pinyin, sentences.',
-      'sentences must be an array of 3 strings like "再见 (zài jiàn)".',
+      'Return ONLY JSON with keys: hanzi, pinyin.',
       'No markdown, no extra text.'
     ].join(' ');
 
@@ -60,6 +58,7 @@ export async function POST(req: Request) {
       body: JSON.stringify({
         model,
         temperature: 0.2,
+        max_tokens: 120,
         messages: [
           { role: 'system', content: systemPrompt },
           { role: 'user', content: english },
@@ -76,14 +75,13 @@ export async function POST(req: Request) {
     const content = data?.choices?.[0]?.message?.content ?? '';
     const parsed = extractJson(content);
 
-    if (!parsed?.hanzi || !parsed?.pinyin || !Array.isArray(parsed?.sentences)) {
+    if (!parsed?.hanzi || !parsed?.pinyin) {
       return NextResponse.json({ error: 'Invalid translation response' }, { status: 500 });
     }
 
     return NextResponse.json({
       hanzi: String(parsed.hanzi).trim(),
       pinyin: String(parsed.pinyin).trim(),
-      sentences: parsed.sentences.map((s: string) => String(s).trim()).filter(Boolean).slice(0, 3),
     });
   } catch (error) {
     return NextResponse.json({ error: 'Translation failed' }, { status: 500 });

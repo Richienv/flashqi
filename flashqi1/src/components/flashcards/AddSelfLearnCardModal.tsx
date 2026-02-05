@@ -3,7 +3,7 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { gsap } from 'gsap';
 import { FlashcardDatabaseService } from '@/services/flashcardDatabaseService';
-import { categoryStorage } from '@/lib/localStorage';
+import { categoryStorage, translationStorage } from '@/lib/localStorage';
 
 interface AddSelfLearnCardModalProps {
     isOpen: boolean;
@@ -23,11 +23,10 @@ export default function AddSelfLearnCardModal({
     const [english, setEnglish] = useState('');
     const [hanzi, setHanzi] = useState('');
     const [pinyin, setPinyin] = useState('');
-    const [sentences, setSentences] = useState<string[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
+    const [manualMode, setManualMode] = useState(false);
     const [loadingStep, setLoadingStep] = useState(0);
-    const [revealIndex, setRevealIndex] = useState(0);
     const [categories, setCategories] = useState<string[]>([]);
     const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
     const [newCategory, setNewCategory] = useState('');
@@ -37,15 +36,6 @@ export default function AddSelfLearnCardModal({
     const ringOuterRef = useRef<HTMLDivElement | null>(null);
     const ringInnerRef = useRef<HTMLDivElement | null>(null);
     const dropletRef = useRef<HTMLSpanElement | null>(null);
-
-    const splitSentence = useCallback((sentence: string) => {
-        const match = sentence.match(/^(.*?)(?:\s*\((.*?)\)\s*)?$/);
-        if (!match) return { hanziText: sentence, pinyinText: '' };
-        return {
-            hanziText: (match[1] || '').trim(),
-            pinyinText: (match[2] || '').trim(),
-        };
-    }, []);
 
     const playTick = useCallback(() => {
         try {
@@ -81,15 +71,26 @@ export default function AddSelfLearnCardModal({
     const translateWithGroq = useCallback(async (text: string) => {
         if (text.trim().length < 2) return;
 
+        const cached = translationStorage.getByEnglish(text);
+        if (cached) {
+            setHanzi(cached.hanzi || '');
+            setPinyin(cached.pinyin || '');
+            return;
+        }
+
         setIsLoading(true);
         setError('');
 
         try {
+            const controller = new AbortController();
+            const timeoutId = window.setTimeout(() => controller.abort(), 8000);
             const res = await fetch('/api/translate', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
+                signal: controller.signal,
                 body: JSON.stringify({ english: text }),
             });
+            window.clearTimeout(timeoutId);
 
             if (!res.ok) {
                 const err = await res.json();
@@ -101,13 +102,17 @@ export default function AddSelfLearnCardModal({
             // Immediate population of both fields from API
             setHanzi(data.hanzi || '');
             setPinyin(data.pinyin || '');
-            const nextSentences = Array.isArray(data.sentences) ? data.sentences : [];
-            setSentences(nextSentences);
-            setRevealIndex(nextSentences.length);
+            translationStorage.upsert({
+                english: text,
+                hanzi: data.hanzi || '',
+                pinyin: data.pinyin || '',
+                sentences: [],
+            });
 
         } catch (err) {
             console.warn('Groq translation error:', err);
             setError('AI translation failed. Please try again.');
+            setManualMode(true);
         } finally {
             setIsLoading(false);
         }
@@ -126,23 +131,6 @@ export default function AddSelfLearnCardModal({
     useEffect(() => {
         if (!isLoading) return;
         const ctx = gsap.context(() => {
-            if (ringInnerRef.current) {
-                gsap.to(ringInnerRef.current, {
-                    rotation: 360,
-                    duration: 2.8,
-                    ease: 'none',
-                    repeat: -1,
-                });
-            }
-            if (ringOuterRef.current) {
-                gsap.to(ringOuterRef.current, {
-                    scale: 1.03,
-                    duration: 2,
-                    ease: 'sine.inOut',
-                    yoyo: true,
-                    repeat: -1,
-                });
-            }
             if (dropletRef.current) {
                 gsap.set(dropletRef.current, { y: 0, opacity: 0.2 });
                 gsap.to(dropletRef.current, {
@@ -158,11 +146,6 @@ export default function AddSelfLearnCardModal({
         return () => ctx.revert();
     }, [isLoading]);
 
-    useEffect(() => {
-        if (isLoading) return;
-        setRevealIndex(sentences.length);
-    }, [isLoading, sentences]);
-
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!english || !hanzi || !pinyin) {
@@ -176,8 +159,14 @@ export default function AddSelfLearnCardModal({
                 english,
                 hanzi,
                 pinyin,
-                example_sentence: sentences,
+                example_sentence: [],
                 categories: selectedCategories,
+            });
+            translationStorage.upsert({
+                english,
+                hanzi,
+                pinyin,
+                sentences: [],
             });
             onCardAdded();
             onClose();
@@ -185,7 +174,7 @@ export default function AddSelfLearnCardModal({
             setEnglish('');
             setHanzi('');
             setPinyin('');
-            setSentences([]);
+            setManualMode(false);
             setSelectedCategories([]);
             setNewCategory('');
             setIsCategoryDialogOpen(false);
@@ -199,13 +188,13 @@ export default function AddSelfLearnCardModal({
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/20 backdrop-blur-sm">
-            <div className="w-full max-w-md bg-white rounded-2xl border border-slate-200 p-6 relative animate-in fade-in zoom-in duration-200">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/15 backdrop-blur-sm">
+            <div className="w-full max-w-sm bg-white rounded-2xl border border-slate-200 p-5 relative animate-in fade-in zoom-in duration-200">
                 {isLoading && (
-                    <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-white/85 backdrop-blur-xl rounded-2xl">
+                    <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-white/85 backdrop-blur-sm rounded-2xl">
                         <div className="relative h-16 w-16">
-                            <div ref={ringOuterRef} className="absolute inset-0 rounded-full border border-blue-200/60" />
-                            <div ref={ringInnerRef} className="absolute inset-2 rounded-full border border-blue-300/80" />
+                            <div ref={ringOuterRef} className="absolute inset-0 rounded-full border border-blue-200/60 ring-pulse" />
+                            <div ref={ringInnerRef} className="absolute inset-2 rounded-full border border-blue-300/80 ring-spin" />
                             <div className="absolute left-1/2 top-1/2 h-6 w-6 -translate-x-1/2 -translate-y-1/2 rounded-full bg-blue-500/10" />
                             <span ref={dropletRef} className="droplet" />
                         </div>
@@ -220,19 +209,19 @@ export default function AddSelfLearnCardModal({
                     </svg>
                 </button>
 
-                <h2 className="text-2xl font-light text-slate-900 mb-1 shimmer-text">Add New Card</h2>
-                <p className="text-xs uppercase tracking-[0.2em] text-slate-400 mb-6">FlashQi AI</p>
+                <h2 className="text-xl font-light text-slate-900 mb-1 shimmer-text">Add New Card</h2>
+                <p className="text-[10px] uppercase tracking-[0.2em] text-slate-400 mb-4">FlashQi AI</p>
 
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <div>
-                        <label className="block text-xs uppercase tracking-[0.2em] text-slate-400 mb-2">English / meaning</label>
+                        <label className="block text-[10px] uppercase tracking-[0.2em] text-slate-400 mb-2">English / meaning</label>
                         <div className="relative">
                             <input
                                 type="text"
                                 value={english}
                                 onChange={(e) => setEnglish(e.target.value)}
                                 placeholder="e.g. Apple"
-                                className="w-full border-b border-slate-200 bg-transparent pb-2 text-lg font-light text-slate-900 placeholder:text-slate-400 focus:border-slate-900 focus:outline-none"
+                                className="w-full border-b border-slate-200 bg-transparent pb-2 text-base font-light text-slate-900 placeholder:text-slate-400 focus:border-slate-900 focus:outline-none"
                                 autoFocus
                             />
                             {isLoading && (
@@ -244,46 +233,35 @@ export default function AddSelfLearnCardModal({
                         </div>
                     </div>
 
-                    {!isLoading && (hanzi || pinyin || sentences.length > 0) && (
-                        <div className="mt-4 space-y-3">
-                            {hanzi && (
-                                <div>
-                                    <div className="text-xs uppercase tracking-[0.2em] text-slate-400 mb-1">Hanzi</div>
-                                    <div className="text-lg font-light shimmer-text">{hanzi}</div>
-                                </div>
-                            )}
-                            {pinyin && (
-                                <div>
-                                    <div className="text-xs uppercase tracking-[0.2em] text-slate-400 mb-1">Pinyin</div>
-                                    <div className="text-lg font-light shimmer-text">{pinyin}</div>
-                                </div>
-                            )}
-                            {sentences.length > 0 && (
-                                <div>
-                                    <div className="text-xs uppercase tracking-[0.2em] text-slate-400 mb-1">Sentences</div>
-                                    <ul className="space-y-3 text-sm text-slate-600">
-                                        {sentences.map((s, i) => {
-                                            const { hanziText, pinyinText } = splitSentence(s);
-                                            return (
-                                            <li
-                                                key={`${s}-${i}`}
-                                                className={`pb-2 transition-opacity duration-300 ${i <= revealIndex ? 'opacity-100' : 'opacity-0'}`}
-                                            >
-                                                <div className="shimmer-text shimmer-slow">{hanziText}</div>
-                                                    {pinyinText ? (
-                                                        <div className="text-xs text-slate-400 mt-1">{pinyinText}</div>
-                                                    ) : null}
-                                                </li>
-                                            );
-                                        })}
-                                    </ul>
-                                </div>
-                            )}
+                    {!isLoading && (manualMode || hanzi || pinyin) && (
+                        <div className="mt-3 space-y-3 min-h-[140px]">
+                            <div>
+                                <div className="text-[10px] uppercase tracking-[0.2em] text-slate-400 mb-1">Hanzi</div>
+                                <input
+                                    type="text"
+                                    value={hanzi}
+                                    onChange={(e) => setHanzi(e.target.value)}
+                                    className="w-full border-b border-slate-200 bg-transparent pb-2 text-base font-light text-slate-900 placeholder:text-slate-400 focus:border-slate-900 focus:outline-none shimmer-text"
+                                    placeholder="Hanzi"
+                                />
+                            </div>
+
+                            <div>
+                                <div className="text-[10px] uppercase tracking-[0.2em] text-slate-400 mb-1">Pinyin</div>
+                                <input
+                                    type="text"
+                                    value={pinyin}
+                                    onChange={(e) => setPinyin(e.target.value)}
+                                    className="w-full border-b border-slate-200 bg-transparent pb-2 text-base font-light text-slate-900 placeholder:text-slate-400 focus:border-slate-900 focus:outline-none shimmer-text"
+                                    placeholder="Pinyin"
+                                />
+                            </div>
+
                         </div>
                     )}
 
-                    {!isLoading && (hanzi || pinyin || sentences.length > 0) && (
-                        <div className="mt-4 relative">
+                    {!isLoading && (manualMode || hanzi || pinyin) && (
+                        <div className="mt-3 relative min-h-[48px]">
                             <button
                                 type="button"
                                 onClick={() => setIsCategoryDialogOpen((prev) => !prev)}
@@ -297,7 +275,7 @@ export default function AddSelfLearnCardModal({
                             </button>
 
                             {isCategoryDialogOpen && (
-                                <div className="absolute left-0 right-0 mt-2 rounded-xl border border-slate-200 bg-white/95 backdrop-blur p-4 shadow-sm z-20">
+                                <div className="absolute left-0 right-0 mt-2 rounded-xl border border-slate-200 bg-white/95 backdrop-blur-sm p-4 shadow-sm z-20">
                                     {selectedCategories.length > 0 && (
                                         <div className="flex flex-wrap gap-2 mb-3">
                                             {selectedCategories.map((cat) => (
@@ -391,28 +369,37 @@ export default function AddSelfLearnCardModal({
                     )}
 
                     {error && (
-                        <p className="text-xs text-red-500">{error}</p>
+                        <div className="flex items-center justify-between gap-3">
+                            <p className="text-xs text-red-500">{error}</p>
+                            <button
+                                type="button"
+                                onClick={() => setManualMode(true)}
+                                className="text-xs text-slate-500 hover:text-slate-900"
+                            >
+                                Enter manually
+                            </button>
+                        </div>
                     )}
 
-                    {!isLoading && (!hanzi || !pinyin || sentences.length === 0) && (
+                    {!isLoading && !manualMode && (!hanzi || !pinyin) && (
                         <button
                             type="button"
                             onClick={() => translateWithGroq(english)}
                             disabled={!english}
-                            className="w-full py-3 mt-2 text-center disabled:opacity-40 disabled:cursor-not-allowed"
+                            className="w-full py-2 mt-2 text-center disabled:opacity-40 disabled:cursor-not-allowed"
                         >
-                            <span className="shimmer-text text-lg font-light tracking-wide">
+                            <span className="shimmer-text text-base font-light tracking-wide">
                                 Generate
                             </span>
                         </button>
                     )}
 
-                    {!isLoading && hanzi && pinyin && sentences.length > 0 && (
+                    {!isLoading && hanzi && pinyin && (
                         <button
                             type="submit"
-                            className="w-full py-3 mt-2 text-center"
+                            className="w-full py-2 mt-2 text-center"
                         >
-                            <span className="shimmer-text text-lg font-light tracking-wide">
+                            <span className="shimmer-text text-base font-light tracking-wide">
                                 Add Flashcard
                             </span>
                         </button>
@@ -445,6 +432,19 @@ export default function AddSelfLearnCardModal({
             margin-left: -4px;
             border-radius: 999px;
             background: rgba(59, 130, 246, 0.45);
+        }
+        .ring-spin {
+            animation: spin 2.8s linear infinite;
+        }
+        .ring-pulse {
+            animation: pulse 2.2s ease-in-out infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.03); }
         }
         .shimmer-slow {
             animation-duration: 6s;

@@ -412,8 +412,13 @@ export default function FlashcardStudyPage() {
 
                       <canvas
                         ref={canvasRef}
-                        className="w-full h-64 bg-white rounded-2xl touch-none"
-                        style={{ touchAction: 'none' }}
+                        className="w-full h-64 bg-white rounded-2xl touch-none select-none"
+                        style={{
+                          touchAction: 'none',
+                          userSelect: 'none',
+                          WebkitUserSelect: 'none',
+                          WebkitTouchCallout: 'none',
+                        }}
                         onTouchStart={handleTouchStart}
                         onTouchMove={handleTouchMove}
                         onTouchEnd={handleTouchEnd}
@@ -483,19 +488,6 @@ export default function FlashcardStudyPage() {
                       <div className="relative h-full flex flex-col items-center justify-center p-6 text-center">
                         <span className="text-4xl font-light text-slate-900 mb-2">{currentCard.english}</span>
                         <div className="w-10 h-px bg-slate-200 my-4" />
-                        {Array.isArray(currentCard?.example_sentence) && currentCard.example_sentence.length > 0 ? (
-                          <div className="mt-6 w-full text-sm text-slate-500 space-y-2">
-                            {currentCard.example_sentence.slice(0, 3).map((s: string, i: number) => {
-                              const match = s.match(/^(.*?)(?:\s*\((.*?)\)\s*)?$/);
-                              const hanziText = (match?.[1] || '').trim();
-                              return (
-                                <div key={`${s}-${i}`} className="shimmer-text">
-                                  {hanziText || s}
-                                </div>
-                              );
-                            })}
-                          </div>
-                        ) : null}
                         <span className="text-5xl text-slate-100 mt-6 select-none">{currentCard.hanzi}</span>
                       </div>
                     </div>
