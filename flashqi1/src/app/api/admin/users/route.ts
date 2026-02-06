@@ -52,3 +52,58 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: 'Server error' }, { status: 500 });
   }
 }
+
+export async function POST(req: Request) {
+  try {
+    const { adminKey, userId, action } = await req.json();
+
+    if (adminKey !== process.env.ADMIN_SECRET) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    if (!userId || !action) {
+      return NextResponse.json({ error: 'Missing userId or action' }, { status: 400 });
+    }
+
+    if (action === 'upgrade') {
+      const now = new Date();
+      const expiresAt = new Date(now);
+      expiresAt.setFullYear(expiresAt.getFullYear() + 1);
+
+      const { error } = await supabase
+        .from('premium_subscriptions')
+        .upsert({
+          user_id: userId,
+          plan_type: 'yearly',
+          started_at: now.toISOString(),
+          expires_at: expiresAt.toISOString(),
+          coupon_code: 'ADMIN',
+          is_active: true,
+        }, { onConflict: 'user_id' });
+
+      if (error) {
+        return NextResponse.json({ error: error.message }, { status: 500 });
+      }
+
+      return NextResponse.json({ success: true, message: 'User upgraded to premium' });
+    }
+
+    if (action === 'downgrade') {
+      const { error } = await supabase
+        .from('premium_subscriptions')
+        .delete()
+        .eq('user_id', userId);
+
+      if (error) {
+        return NextResponse.json({ error: error.message }, { status: 500 });
+      }
+
+      return NextResponse.json({ success: true, message: 'User downgraded to free' });
+    }
+
+    return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
+  } catch (error) {
+    console.error('Admin users POST error:', error);
+    return NextResponse.json({ error: 'Server error' }, { status: 500 });
+  }
+}
