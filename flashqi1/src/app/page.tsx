@@ -81,7 +81,7 @@ export default function Home() {
             {/* Floating Chinese characters */}
             {/* Main headline with gradient text */}
             <h1 className="relative">
-              <span className="block text-5xl sm:text-7xl lg:text-8xl font-extralight text-transparent bg-clip-text bg-gradient-to-r from-blue-700 via-sky-500 to-blue-700 leading-[1.1] tracking-tight mb-4">
+              <span className="block text-5xl sm:text-7xl lg:text-8xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-700 via-sky-500 to-blue-700 leading-[1.1] tracking-tight mb-4">
                 Chinese with ZJU Curriculum + AI
               </span>
             </h1>
@@ -98,26 +98,11 @@ export default function Home() {
                 href="/dashboard/flashcards"
                 className="group relative inline-flex items-center gap-3 px-8 py-4 rounded-2xl text-slate-900 font-light text-lg tracking-wide transition-all duration-500"
               >
-                <span className="relative z-10 shimmer-text">Start Learning</span>
+                <span className="relative z-10 shimmer-text font-bold">Start Learning</span>
                 <span className="text-slate-400 group-hover:text-slate-700 group-hover:translate-x-1 transition-all duration-300">→</span>
               </Link>
             </div>
 
-            {/* Subtle stats */}
-            <div className="mt-16 flex items-center justify-center gap-12 text-slate-400 text-sm tracking-wider">
-              <div className="flex items-center gap-2">
-                <span className="w-2 h-2 bg-blue-300 rounded-full animate-pulse" />
-                <span>6,800+ learners</span>
-              </div>
-              <div className="hidden sm:flex items-center gap-2">
-                <span className="w-2 h-2 bg-sky-300 rounded-full animate-pulse" style={{ animationDelay: "0.5s" }} />
-                <span>97% retention</span>
-              </div>
-              <div className="hidden sm:flex items-center gap-2">
-                <span className="w-2 h-2 bg-blue-200 rounded-full animate-pulse" style={{ animationDelay: "1s" }} />
-                <span>15 min/day</span>
-              </div>
-            </div>
             <div className="mt-4 text-[10px] tracking-widest shimmer-text text-center">
               -created by Richie Kid novell
             </div>

@@ -74,8 +74,9 @@ export default function FlashcardsPage() {
                     {/* HSK Levels Section */}
                     <div className="h-px bg-slate-200/80 my-4" />
 
-                    <div className="text-center">
+                    <div className="text-center flex items-center justify-center gap-2">
                         <span className="text-[10px] uppercase tracking-[0.25em] text-slate-400">HSK Vocabulary</span>
+                        <span className="premium-badge text-[7px] font-medium tracking-wider uppercase px-1.5 py-0.5 rounded-full">Premium</span>
                     </div>
 
                     {HSK_LEVELS.map((hsk) => (
@@ -86,15 +87,10 @@ export default function FlashcardsPage() {
                             className="h-auto w-full p-0 bg-transparent hover:bg-transparent"
                         >
                             <button type="button" onClick={() => handleHskClick(hsk)} className="w-full group">
-                                <div className="flex items-center justify-center gap-3">
+                                <div className="flex items-center justify-center">
                                     <span className="shimmer-text text-2xl sm:text-3xl font-light tracking-wide">
                                         {hsk.title}
                                     </span>
-                                    {hsk.isPremium && (
-                                        <span className="premium-badge text-[9px] font-semibold tracking-widest uppercase px-2.5 py-1 rounded-full">
-                                            Premium
-                                        </span>
-                                    )}
                                 </div>
                             </button>
                         </Button>

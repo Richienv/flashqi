@@ -11,7 +11,9 @@ export default function RegisterPage() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { signUp } = useAuth();
+  const [showConfirmPopup, setShowConfirmPopup] = useState(false);
+  const { signUp, resendConfirmationEmail } = useAuth();
+  const [resending, setResending] = useState(false);
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -32,6 +34,7 @@ export default function RegisterPage() {
     try {
       const { error: signUpError } = await signUp(email, password, name);
       if (signUpError) throw signUpError;
+      setShowConfirmPopup(true);
     } catch (error: any) {
       if (error.message?.includes('User already registered')) {
         setError('This email is already registered. Try signing in.');
@@ -44,6 +47,61 @@ export default function RegisterPage() {
       setLoading(false);
     }
   };
+
+  const handleResend = async () => {
+    setResending(true);
+    await resendConfirmationEmail(email);
+    setResending(false);
+  };
+
+  if (showConfirmPopup) {
+    return (
+      <div className="min-h-screen bg-white flex flex-col items-center justify-center px-6">
+        <div className="w-full max-w-sm text-center">
+          <div className="w-16 h-16 mx-auto mb-6 rounded-full bg-blue-50 flex items-center justify-center">
+            <svg className="w-8 h-8 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+            </svg>
+          </div>
+          <h1 className="shimmer-text text-2xl font-light tracking-wide mb-3">Check Your Email</h1>
+          <p className="text-sm text-slate-500 font-light mb-2">
+            We sent a confirmation link to
+          </p>
+          <p className="text-sm text-slate-900 font-medium mb-6">{email}</p>
+          <p className="text-xs text-slate-400 font-light mb-6">
+            Click the link in your email to activate your account. You won't be able to access FlashQi until your email is confirmed.
+          </p>
+          <button
+            onClick={handleResend}
+            disabled={resending}
+            className="text-sm text-slate-500 hover:text-slate-900 transition-colors disabled:opacity-40"
+          >
+            {resending ? 'Sending...' : 'Resend confirmation email'}
+          </button>
+          <div className="mt-8">
+            <Link href="/auth/login" className="shimmer-text text-sm font-light">
+              Back to Sign In
+            </Link>
+          </div>
+        </div>
+        <style jsx>{`
+          .shimmer-text {
+            display: inline-block;
+            background: linear-gradient(120deg, rgba(15,61,150,0.9) 0%, rgba(86,171,255,0.95) 35%, rgba(15,61,150,0.85) 60%, rgba(86,171,255,1) 100%);
+            background-size: 200% 100%;
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            animation: shimmer 3.5s ease-in-out infinite;
+          }
+          @keyframes shimmer {
+            0% { background-position: 120% 0; }
+            100% { background-position: -120% 0; }
+          }
+        `}</style>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-white flex flex-col items-center justify-center px-6">

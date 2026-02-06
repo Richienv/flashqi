@@ -91,7 +91,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
       if (data.user) {
         setUser(toAppUser(data.user));
-        router.push('/dashboard/flashcards');
+        // Check if user has completed welcome survey
+        const { data: survey } = await supabase
+          .from('user_surveys')
+          .select('completed_at')
+          .eq('user_id', data.user.id)
+          .single();
+        
+        if (!survey?.completed_at) {
+          router.push('/auth/welcome');
+        } else {
+          router.push('/dashboard/flashcards');
+        }
       }
       return { error: null };
     } catch (error) {
@@ -115,7 +126,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
       if (data.user) {
         setUser(toAppUser(data.user));
-        router.push('/dashboard/flashcards');
       }
       return { error: null };
     } catch (error) {

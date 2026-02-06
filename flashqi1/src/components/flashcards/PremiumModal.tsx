@@ -154,7 +154,7 @@ export default function PremiumModal({ isOpen, onClose, featureName = 'HSK Vocab
                   }}
                   placeholder="XXXXXXXX"
                   maxLength={8}
-                  className="flex-1 border border-slate-200 rounded-lg px-3 py-2 text-sm font-mono tracking-widest text-center text-slate-900 placeholder:text-slate-300 focus:border-amber-400 focus:outline-none focus:ring-1 focus:ring-amber-400/30"
+                  className={`flex-1 rounded-lg px-3 py-2 text-sm font-mono tracking-widest text-center placeholder:text-slate-300 focus:outline-none transition-all duration-300 ${couponCode.length > 0 ? 'coupon-input-gold text-white border-amber-400' : 'border border-slate-200 text-slate-900 focus:border-amber-400 focus:ring-1 focus:ring-amber-400/30'}`}
                 />
                 <button
                   onClick={handleRedeemCoupon}
@@ -190,7 +190,7 @@ export default function PremiumModal({ isOpen, onClose, featureName = 'HSK Vocab
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
-            animation: goldShimmer 4s linear infinite;
+            animation: goldShimmer 30s linear infinite;
           }
           .gold-shimmer-bar {
             background: linear-gradient(
@@ -202,7 +202,7 @@ export default function PremiumModal({ isOpen, onClose, featureName = 'HSK Vocab
               #b8860b 82%, #ffd700 86%, #fff5c0 90%, #ffd700 94%, transparent 100%
             );
             background-size: 300% 100%;
-            animation: goldShimmer 4s linear infinite;
+            animation: goldShimmer 30s linear infinite;
           }
           .gold-shimmer-btn {
             background: linear-gradient(
@@ -214,7 +214,7 @@ export default function PremiumModal({ isOpen, onClose, featureName = 'HSK Vocab
               #b8860b 85%, #daa520 90%, #ffd700 94%, #fff1a8 97%, #8b6914 100%
             );
             background-size: 300% 100%;
-            animation: goldShimmer 4s linear infinite;
+            animation: goldShimmer 30s linear infinite;
             box-shadow: 0 0 14px rgba(255, 215, 0, 0.35), inset 0 0 6px rgba(255, 255, 255, 0.15);
             text-shadow: 0 1px 2px rgba(139, 105, 20, 0.6);
           }
@@ -224,11 +224,20 @@ export default function PremiumModal({ isOpen, onClose, featureName = 'HSK Vocab
               #b8860b 0%, #ffd700 20%, #fff1a8 40%, #ffd700 60%, #b8860b 80%, #ffd700 100%
             );
             background-size: 300% 100%;
-            animation: goldShimmer 4s linear infinite;
+            animation: goldShimmer 30s linear infinite;
           }
           @keyframes goldShimmer {
             0% { background-position: 300% 0; }
             100% { background-position: -300% 0; }
+          }
+          .coupon-input-gold {
+            background: linear-gradient(
+              120deg,
+              #8b6914 0%, #b8860b 15%, #daa520 30%, #ffd700 45%, #ffe066 55%, #ffd700 70%, #b8860b 85%, #8b6914 100%
+            );
+            background-size: 200% 100%;
+            animation: goldShimmer 30s linear infinite;
+            box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
           }
         `}</style>
       </div>

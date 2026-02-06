@@ -74,6 +74,25 @@ export async function POST() {
   });
   results.push(e4 ? `daily_usage: ${e4.message}` : 'daily_usage: OK');
 
+  // Create user_surveys table
+  const { error: e5 } = await supabase.rpc('exec_sql', {
+    sql: `
+      CREATE TABLE IF NOT EXISTS user_surveys (
+        id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+        user_id UUID UNIQUE NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+        source VARCHAR(50),
+        apps_used TEXT[],
+        campus VARCHAR(100),
+        role VARCHAR(50),
+        country VARCHAR(100),
+        target VARCHAR(100),
+        completed_at TIMESTAMPTZ,
+        created_at TIMESTAMPTZ DEFAULT now()
+      );
+    `,
+  });
+  results.push(e5 ? `user_surveys: ${e5.message}` : 'user_surveys: OK');
+
   return NextResponse.json({
     message: 'Database setup attempted',
     results,
@@ -122,11 +141,25 @@ CREATE TABLE IF NOT EXISTS daily_usage (
   UNIQUE(ip_address, usage_date)
 );
 
+CREATE TABLE IF NOT EXISTS user_surveys (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id UUID UNIQUE NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  source VARCHAR(50),
+  apps_used TEXT[],
+  campus VARCHAR(100),
+  role VARCHAR(50),
+  country VARCHAR(100),
+  target VARCHAR(100),
+  completed_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+
 -- Enable RLS
 ALTER TABLE coupon_codes ENABLE ROW LEVEL SECURITY;
 ALTER TABLE premium_subscriptions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE daily_usage ENABLE ROW LEVEL SECURITY;
+ALTER TABLE user_surveys ENABLE ROW LEVEL SECURITY;
 
 -- Policies: allow authenticated users to read their own data
 CREATE POLICY "Users can read own profile" ON profiles FOR SELECT USING (auth.uid() = id);
@@ -135,6 +168,9 @@ CREATE POLICY "Users can read own subscription" ON premium_subscriptions FOR SEL
 CREATE POLICY "Anyone can check coupon codes" ON coupon_codes FOR SELECT USING (true);
 CREATE POLICY "Service can update coupons" ON coupon_codes FOR UPDATE USING (true);
 CREATE POLICY "Users can read own usage" ON daily_usage FOR SELECT USING (auth.uid() = user_id);
+CREATE POLICY "Users can read own survey" ON user_surveys FOR SELECT USING (auth.uid() = user_id);
+CREATE POLICY "Users can insert own survey" ON user_surveys FOR INSERT WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "Users can update own survey" ON user_surveys FOR UPDATE USING (auth.uid() = user_id);
 
 -- Insert some sample coupon codes (replace with your own)
 INSERT INTO coupon_codes (code, plan_type) VALUES
