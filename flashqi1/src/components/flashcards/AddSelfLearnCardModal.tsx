@@ -3,6 +3,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import { FlashcardDatabaseService } from '@/services/flashcardDatabaseService';
 import { categoryStorage, translationStorage } from '@/lib/localStorage';
+import PremiumModal from '@/components/flashcards/PremiumModal';
 
 interface AddSelfLearnCardModalProps {
     isOpen: boolean;
@@ -32,6 +33,10 @@ export default function AddSelfLearnCardModal({
     const [isCategoryDialogOpen, setIsCategoryDialogOpen] = useState(false);
     const [categoryFilter, setCategoryFilter] = useState('');
     const [loadingText, setLoadingText] = useState('Translating');
+    const [suggestions, setSuggestions] = useState<string[]>([]);
+    const [limitReached, setLimitReached] = useState(false);
+    const [dailyUsage, setDailyUsage] = useState<{ usage: number; limit: number } | null>(null);
+    const [showPremiumModal, setShowPremiumModal] = useState(false);
 
     useEffect(() => {
         if (!isOpen) return;
@@ -52,6 +57,8 @@ export default function AddSelfLearnCardModal({
 
         setIsLoading(true);
         setError('');
+        setSuggestions([]);
+        setLimitReached(false);
 
         try {
             const controller = new AbortController();
@@ -68,6 +75,21 @@ export default function AddSelfLearnCardModal({
             if (!res.ok) {
                 const errData = await res.json();
                 console.error('[FlashQi] API error:', errData);
+
+                // Handle daily limit reached
+                if (errData.limitReached) {
+                    setLimitReached(true);
+                    setDailyUsage({ usage: errData.usage, limit: errData.limit });
+                    setError(`Daily limit reached (${errData.limit} words/day)`);
+                    setManualMode(true);
+                    return;
+                }
+
+                // Handle suggestions for typos
+                if (errData.suggestions && errData.suggestions.length > 0) {
+                    setSuggestions(errData.suggestions);
+                }
+
                 const debugInfo = errData.debug
                     ? `\n${typeof errData.debug === 'string' ? errData.debug : JSON.stringify(errData.debug, null, 2)}`
                     : '';
@@ -76,6 +98,16 @@ export default function AddSelfLearnCardModal({
 
             const data = await res.json();
             console.log(`[FlashQi] Success (${data.source}): ${data.hanzi} / ${data.pinyin}`);
+
+            // Track usage
+            if (data.usage !== undefined) {
+                setDailyUsage({ usage: data.usage, limit: data.limit });
+            }
+
+            // Store suggestions if returned
+            if (data.suggestions && data.suggestions.length > 0) {
+                setSuggestions(data.suggestions);
+            }
 
             // Immediate population of both fields from API
             setHanzi(data.hanzi || '');
@@ -339,6 +371,56 @@ export default function AddSelfLearnCardModal({
                         </div>
                     )}
 
+                    {/* "Did you mean?" typo suggestions */}
+                    {!isLoading && suggestions.length > 0 && (
+                        <div className="rounded-lg bg-amber-50/80 border border-amber-200/60 px-3 py-2.5">
+                            <p className="text-[10px] uppercase tracking-[0.15em] text-amber-600 mb-1.5 font-medium">Did you mean?</p>
+                            <div className="flex flex-wrap gap-1.5">
+                                {suggestions.map((s) => (
+                                    <button
+                                        key={s}
+                                        type="button"
+                                        onClick={() => {
+                                            setEnglish(s);
+                                            setSuggestions([]);
+                                            setError('');
+                                            setManualMode(false);
+                                            setHanzi('');
+                                            setPinyin('');
+                                            translateWithGroq(s);
+                                        }}
+                                        className="px-2.5 py-1 rounded-full bg-white border border-amber-200 text-xs text-amber-800 hover:bg-amber-100 transition-colors font-light"
+                                    >
+                                        {s}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Daily limit warning */}
+                    {limitReached && (
+                        <div className="rounded-lg bg-slate-50 border border-slate-200 px-3 py-2.5 text-center">
+                            <p className="text-xs text-slate-500 mb-2">You&apos;ve used all {dailyUsage?.limit} translations today</p>
+                            <button
+                                type="button"
+                                onClick={() => setShowPremiumModal(true)}
+                                className="premium-upgrade-btn text-[10px] font-semibold tracking-widest uppercase px-4 py-1.5 rounded-full text-white"
+                            >
+                                Upgrade to Premium
+                            </button>
+                        </div>
+                    )}
+
+                    {/* Daily usage counter */}
+                    {dailyUsage && !limitReached && (
+                        <div className="text-center">
+                            <span className="text-[10px] text-slate-400">
+                                {dailyUsage.usage}/{dailyUsage.limit} translations today
+                            </span>
+                        </div>
+                    )}
+
                     {error && (
                         <div className="flex items-center justify-between gap-3">
                             <p className="text-xs text-red-500">{error}</p>
@@ -378,7 +460,12 @@ export default function AddSelfLearnCardModal({
                 </form>
             </div>
 
-            {/* Category dropdown now rendered inline above */}
+            {/* Premium Modal */}
+            <PremiumModal
+                isOpen={showPremiumModal}
+                onClose={() => setShowPremiumModal(false)}
+                featureName="Unlimited Translations"
+            />
 
             <style jsx>{`
         .shimmer-text {
@@ -418,6 +505,16 @@ export default function AddSelfLearnCardModal({
         @keyframes textFade {
             0%, 100% { opacity: 0.5; }
             50% { opacity: 1; }
+        }
+        .premium-upgrade-btn {
+            background: linear-gradient(120deg, #b8860b 0%, #ffd700 30%, #b8860b 50%, #ffd700 80%, #b8860b 100%);
+            background-size: 200% 100%;
+            animation: goldShimmer 3s ease-in-out infinite;
+            box-shadow: 0 0 8px rgba(255, 215, 0, 0.3);
+        }
+        @keyframes goldShimmer {
+            0% { background-position: 120% 0; }
+            100% { background-position: -120% 0; }
         }
             `}</style>
         </div>

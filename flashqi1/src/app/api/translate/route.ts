@@ -5,6 +5,65 @@ import path from 'path';
 const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
 const OPENROUTER_API_URL = 'https://openrouter.ai/api/v1/chat/completions';
 
+const DAILY_LIMIT = 20;
+
+// --- Levenshtein distance for fuzzy matching ---
+function levenshtein(a: string, b: string): number {
+  const m = a.length, n = b.length;
+  if (m === 0) return n;
+  if (n === 0) return m;
+  const dp: number[][] = Array.from({ length: m + 1 }, () => Array(n + 1).fill(0));
+  for (let i = 0; i <= m; i++) dp[i][0] = i;
+  for (let j = 0; j <= n; j++) dp[0][j] = j;
+  for (let i = 1; i <= m; i++) {
+    for (let j = 1; j <= n; j++) {
+      dp[i][j] = a[i - 1] === b[j - 1]
+        ? dp[i - 1][j - 1]
+        : 1 + Math.min(dp[i - 1][j], dp[i][j - 1], dp[i - 1][j - 1]);
+    }
+  }
+  return dp[m][n];
+}
+
+function findSuggestions(input: string, maxResults = 3): string[] {
+  const dict = loadDict();
+  const keys = Object.keys(dict.entries);
+  const lower = input.trim().toLowerCase();
+  if (lower.length < 2) return [];
+  const maxDist = Math.max(1, Math.floor(lower.length * 0.4));
+  const scored: { word: string; dist: number }[] = [];
+  for (const key of keys) {
+    if (Math.abs(key.length - lower.length) > maxDist) continue;
+    const dist = levenshtein(lower, key);
+    if (dist > 0 && dist <= maxDist) {
+      scored.push({ word: key, dist });
+    }
+  }
+  scored.sort((a, b) => a.dist - b.dist);
+  return scored.slice(0, maxResults).map((s) => s.word);
+}
+
+// --- Server-side daily usage tracking (per-IP, resets daily) ---
+const usageMap = new Map<string, { date: string; count: number }>();
+
+function getUsage(ip: string): number {
+  const today = new Date().toISOString().slice(0, 10);
+  const entry = usageMap.get(ip);
+  if (!entry || entry.date !== today) return 0;
+  return entry.count;
+}
+
+function incrementUsage(ip: string): number {
+  const today = new Date().toISOString().slice(0, 10);
+  const entry = usageMap.get(ip);
+  if (!entry || entry.date !== today) {
+    usageMap.set(ip, { date: today, count: 1 });
+    return 1;
+  }
+  entry.count++;
+  return entry.count;
+}
+
 // --- Server-side dictionary (shared across all users) ---
 const DICT_PATH = path.join(process.cwd(), 'src', 'data', 'dictionary-cache.json');
 
@@ -133,13 +192,34 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Missing english text', debug }, { status: 400 });
     }
 
+    // 0) Daily usage limit check
+    const ip = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || 'unknown';
+    const currentUsage = getUsage(ip);
+    if (currentUsage >= DAILY_LIMIT) {
+      log(`RATE LIMITED: ${currentUsage}/${DAILY_LIMIT} used today`);
+      return NextResponse.json({
+        error: `Daily limit reached (${DAILY_LIMIT} words/day). Upgrade to Premium for unlimited translations.`,
+        limitReached: true,
+        usage: currentUsage,
+        limit: DAILY_LIMIT,
+        debug,
+      }, { status: 429 });
+    }
+
     // 1) Dictionary lookup (instant)
     const cached = lookupDict(english);
     if (cached) {
       log(`DICT HIT: "${english}" -> ${cached.hanzi} (${cached.pinyin})`);
-      return NextResponse.json({ hanzi: cached.hanzi, pinyin: cached.pinyin, source: 'dictionary', debug });
+      const usage = incrementUsage(ip);
+      return NextResponse.json({ hanzi: cached.hanzi, pinyin: cached.pinyin, source: 'dictionary', usage, limit: DAILY_LIMIT, debug });
     }
     log(`DICT MISS (${Object.keys(loadDict().entries).length} entries)`);
+
+    // 1.5) Fuzzy match - suggest corrections for typos
+    const suggestions = findSuggestions(english);
+    if (suggestions.length > 0) {
+      log(`SUGGESTIONS for "${english}": ${suggestions.join(', ')}`);
+    }
 
     // 2) AI translation with 12s timeout
     const geminiKey = process.env.GEMINI_API_KEY;
@@ -168,12 +248,13 @@ export async function POST(req: Request) {
 
     if (result) {
       saveDictEntry(english.trim().toLowerCase(), result.hanzi, result.pinyin);
+      const usage = incrementUsage(ip);
       log(`SUCCESS: "${english}" -> ${result.hanzi} (${result.pinyin})`);
-      return NextResponse.json({ hanzi: result.hanzi, pinyin: result.pinyin, source: geminiKey ? 'gemini' : 'openrouter', debug });
+      return NextResponse.json({ hanzi: result.hanzi, pinyin: result.pinyin, source: geminiKey ? 'gemini' : 'openrouter', usage, limit: DAILY_LIMIT, suggestions, debug });
     }
 
     log('FAIL: All providers failed');
-    return NextResponse.json({ error: 'Translation failed. All providers returned errors.', debug }, { status: 500 });
+    return NextResponse.json({ error: 'Translation failed. All providers returned errors.', suggestions, debug }, { status: 500 });
   } catch (error: unknown) {
     const errMsg = error instanceof Error ? error.message : String(error);
     const isAbort = error instanceof Error && error.name === 'AbortError';
