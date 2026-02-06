@@ -96,7 +96,6 @@ export default function FlashcardsPage() {
                                         </span>
                                     )}
                                 </div>
-                                <div className="text-[10px] text-slate-400 mt-0.5 font-light">{hsk.subtitle}</div>
                             </button>
                         </Button>
                     ))}
@@ -139,15 +138,44 @@ export default function FlashcardsPage() {
           100% { background-position: -120% 0; }
         }
         .premium-badge {
-          background: linear-gradient(120deg, #b8860b 0%, #ffd700 30%, #b8860b 50%, #ffd700 80%, #b8860b 100%);
-          background-size: 200% 100%;
+          background: linear-gradient(
+            120deg,
+            #8b6914 0%,
+            #b8860b 5%,
+            #daa520 10%,
+            #ffd700 14%,
+            #fff1a8 17%,
+            #ffd700 20%,
+            #b8860b 25%,
+            #daa520 30%,
+            #ffd700 34%,
+            #ffe066 37%,
+            #ffd700 40%,
+            #b8860b 45%,
+            #daa520 50%,
+            #ffd700 54%,
+            #fff1a8 57%,
+            #ffd700 60%,
+            #b8860b 65%,
+            #daa520 70%,
+            #ffd700 74%,
+            #ffe066 77%,
+            #ffd700 80%,
+            #b8860b 85%,
+            #daa520 90%,
+            #ffd700 94%,
+            #fff1a8 97%,
+            #8b6914 100%
+          );
+          background-size: 300% 100%;
           color: white;
-          animation: goldShimmer 3s ease-in-out infinite;
-          box-shadow: 0 0 8px rgba(255, 215, 0, 0.3);
+          animation: goldShimmer 4s linear infinite;
+          box-shadow: 0 0 12px rgba(255, 215, 0, 0.35), inset 0 0 4px rgba(255, 255, 255, 0.15);
+          text-shadow: 0 0 2px rgba(139, 105, 20, 0.5);
         }
         @keyframes goldShimmer {
-          0% { background-position: 120% 0; }
-          100% { background-position: -120% 0; }
+          0% { background-position: 300% 0; }
+          100% { background-position: -300% 0; }
         }
       `}</style>
         </div>
