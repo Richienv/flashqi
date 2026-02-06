@@ -81,7 +81,7 @@ export default function Home() {
             {/* Floating Chinese characters */}
             {/* Main headline with gradient text */}
             <h1 className="relative">
-              <span className="block text-5xl sm:text-7xl lg:text-8xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-700 via-sky-500 to-blue-700 leading-[1.1] tracking-tight mb-4">
+              <span className="block text-5xl sm:text-7xl lg:text-8xl font-semibold text-transparent bg-clip-text bg-gradient-to-r from-blue-700 via-sky-500 to-blue-700 leading-[1.1] tracking-tight mb-4">
                 Chinese with ZJU Curriculum + AI
               </span>
             </h1>

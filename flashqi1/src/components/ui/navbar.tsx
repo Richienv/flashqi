@@ -3,18 +3,40 @@
 import { useState, useRef, useEffect } from 'react';
 import Link from "next/link";
 import Image from "next/image";
-// Commented out because it's not being used
-// import { Button } from "./button";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/contexts/auth-context";
 import { ThemeToggle } from './theme-toggle';
+import { supabase } from '@/lib/supabase';
 
 export function Navbar() {
   const pathname = usePathname();
   const isDashboard = pathname.includes('/dashboard');
   const { user, signOut, isAuthenticated } = useAuth();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isPremium, setIsPremium] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const checkPremium = async () => {
+      if (!user) {
+        setIsPremium(false);
+        return;
+      }
+      try {
+        const { data } = await supabase
+          .from('premium_subscriptions')
+          .select('is_active, expires_at')
+          .eq('user_id', user.id)
+          .single();
+        
+        const active = data?.is_active && (!data.expires_at || new Date(data.expires_at) > new Date());
+        setIsPremium(active || false);
+      } catch {
+        setIsPremium(false);
+      }
+    };
+    checkPremium();
+  }, [user]);
   
 
   
@@ -102,12 +124,17 @@ export function Navbar() {
                   className="flex items-center px-3 py-2 text-sm font-medium bg-white/20 dark:bg-black/20 backdrop-filter backdrop-blur-md border border-white/20 dark:border-white/10 rounded-xl text-black dark:text-white hover:bg-white/30 dark:hover:bg-black/30 transition-all duration-300 ease-out transform hover:scale-105 active:scale-95 shadow-sm"
                 >
                   <div className="flex items-center">
-                    <div className="w-6 h-6 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-xs font-semibold mr-2">
+                    <div className={`w-6 h-6 rounded-full flex items-center justify-center text-white text-xs font-semibold mr-2 ${isPremium ? 'bg-gradient-to-br from-amber-400 to-yellow-500' : 'bg-gradient-to-br from-blue-500 to-purple-600'}`}>
                       {user.user_metadata?.name ? user.user_metadata.name.charAt(0).toUpperCase() : user.email?.charAt(0).toUpperCase()}
                     </div>
                     <span className="hidden sm:inline-block mr-1 font-medium">
                       {user.user_metadata?.name || user.email?.split('@')[0]}
                     </span>
+                    {isPremium && (
+                      <span className="hidden sm:inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold bg-gradient-to-r from-amber-400 to-yellow-500 text-white ml-1">
+                        PRO
+                      </span>
+                    )}
                   </div>
                   <svg
                     className={`ml-1 h-4 w-4 text-gray-600 dark:text-gray-300 transition-transform duration-300 ${isDropdownOpen ? 'rotate-180' : ''}`}
@@ -128,16 +155,21 @@ export function Navbar() {
                   <div className="absolute right-0 mt-2 w-56 rounded-xl bg-white/10 dark:bg-black/10 backdrop-filter backdrop-blur-md py-2 shadow-xl ring-1 ring-white/20 dark:ring-white/10 focus:outline-none border border-white/20 dark:border-gray-600 animate-in fade-in-0 zoom-in-95 duration-200">
                     <div className="px-4 py-3 text-sm border-b border-white/30 dark:border-white/20">
                       <div className="flex items-center">
-                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-sm font-semibold mr-3">
+                        <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-semibold mr-3 ${isPremium ? 'bg-gradient-to-br from-amber-400 to-yellow-500' : 'bg-gradient-to-br from-blue-500 to-purple-600'}`}>
                           {user.user_metadata?.name ? user.user_metadata.name.charAt(0).toUpperCase() : user.email?.charAt(0).toUpperCase()}
                         </div>
                         <div>
-                          <div className="font-semibold text-black dark:text-white drop-shadow-sm">
+                          <div className="font-semibold text-black dark:text-white drop-shadow-sm flex items-center gap-1.5">
                             {user.user_metadata?.name || 'User'}
+                            {isPremium && (
+                              <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold bg-gradient-to-r from-amber-400 to-yellow-500 text-white">
+                                PRO
+                              </span>
+                            )}
                           </div>
                           <div className="text-xs text-gray-700 dark:text-gray-200 truncate drop-shadow-sm">
-                        {user.email}
-                      </div>
+                            {user.email}
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -151,6 +183,18 @@ export function Navbar() {
                       </svg>
                       Profile
                     </Link>
+                    {!isPremium && (
+                      <Link
+                        href="/premium"
+                        className="flex items-center px-4 py-2 text-sm text-amber-600 dark:text-amber-400 hover:bg-amber-50/20 dark:hover:bg-amber-900/20 transition-colors duration-200"
+                        onClick={() => setIsDropdownOpen(false)}
+                      >
+                        <svg className="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                        </svg>
+                        Upgrade to Premium
+                      </Link>
+                    )}
                     <button
                       onClick={() => {
                         signOut();
