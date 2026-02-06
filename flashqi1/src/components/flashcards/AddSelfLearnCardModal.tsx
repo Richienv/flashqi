@@ -1,7 +1,6 @@
 'use client';
 
-import { useState, useCallback, useEffect, useRef } from 'react';
-import { gsap } from 'gsap';
+import { useState, useCallback, useEffect } from 'react';
 import { FlashcardDatabaseService } from '@/services/flashcardDatabaseService';
 import { categoryStorage, translationStorage } from '@/lib/localStorage';
 
@@ -32,34 +31,7 @@ export default function AddSelfLearnCardModal({
     const [newCategory, setNewCategory] = useState('');
     const [isCategoryDialogOpen, setIsCategoryDialogOpen] = useState(false);
     const [categoryFilter, setCategoryFilter] = useState('');
-    const audioRef = useRef<AudioContext | null>(null);
-    const ringOuterRef = useRef<HTMLDivElement | null>(null);
-    const ringInnerRef = useRef<HTMLDivElement | null>(null);
-    const dropletRef = useRef<HTMLSpanElement | null>(null);
-
-    const playTick = useCallback(() => {
-        try {
-            if (!audioRef.current) {
-                audioRef.current = new AudioContext();
-            }
-            const ctx = audioRef.current;
-            if (ctx.state === 'suspended') {
-                ctx.resume();
-            }
-            const osc = ctx.createOscillator();
-            const gain = ctx.createGain();
-            osc.type = 'sine';
-            osc.frequency.value = 520;
-            gain.gain.value = 0.04;
-            osc.connect(gain);
-            gain.connect(ctx.destination);
-            osc.start();
-            gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.12);
-            osc.stop(ctx.currentTime + 0.14);
-        } catch {
-            // Ignore audio errors
-        }
-    }, []);
+    const [loadingText, setLoadingText] = useState('Translating');
 
     useEffect(() => {
         if (!isOpen) return;
@@ -83,7 +55,8 @@ export default function AddSelfLearnCardModal({
 
         try {
             const controller = new AbortController();
-            const timeoutId = window.setTimeout(() => controller.abort(), 8000);
+            const timeoutId = window.setTimeout(() => controller.abort(), 15000);
+            console.log(`[FlashQi] Translating: "${text}"`);
             const res = await fetch('/api/translate', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -93,11 +66,16 @@ export default function AddSelfLearnCardModal({
             window.clearTimeout(timeoutId);
 
             if (!res.ok) {
-                const err = await res.json();
-                throw new Error(err.error || 'Translation failed');
+                const errData = await res.json();
+                console.error('[FlashQi] API error:', errData);
+                const debugInfo = errData.debug
+                    ? `\n${typeof errData.debug === 'string' ? errData.debug : JSON.stringify(errData.debug, null, 2)}`
+                    : '';
+                throw new Error(`${errData.error || 'Translation failed'}${debugInfo}`);
             }
 
             const data = await res.json();
+            console.log(`[FlashQi] Success (${data.source}): ${data.hanzi} / ${data.pinyin}`);
 
             // Immediate population of both fields from API
             setHanzi(data.hanzi || '');
@@ -109,41 +87,33 @@ export default function AddSelfLearnCardModal({
                 sentences: [],
             });
 
-        } catch (err) {
-            console.warn('Groq translation error:', err);
-            setError('AI translation failed. Please try again.');
+        } catch (err: unknown) {
+            const isAbort = err instanceof Error && err.name === 'AbortError';
+            const msg = isAbort
+                ? 'Request timed out (15s). AI provider may be slow.'
+                : err instanceof Error ? err.message : 'Translation failed';
+            console.error('[FlashQi] Translation error:', msg);
+            setError(msg);
             setManualMode(true);
         } finally {
             setIsLoading(false);
         }
     }, []);
 
-    // Effect: Watch debounced value and trigger translation
+    // Cycle loading text for a polished feel
     useEffect(() => {
         if (!isLoading) {
             setLoadingStep(0);
+            setLoadingText('Translating');
             return;
         }
-        setLoadingStep(0);
-        playTick();
-    }, [isLoading, playTick]);
-
-    useEffect(() => {
-        if (!isLoading) return;
-        const ctx = gsap.context(() => {
-            if (dropletRef.current) {
-                gsap.set(dropletRef.current, { y: 0, opacity: 0.2 });
-                gsap.to(dropletRef.current, {
-                    y: 42,
-                    opacity: 0,
-                    duration: 1.8,
-                    ease: 'power1.in',
-                    repeat: -1,
-                    repeatDelay: 0.2,
-                });
-            }
-        });
-        return () => ctx.revert();
+        const messages = ['Translating', 'Looking up', 'Generating'];
+        let i = 0;
+        const interval = setInterval(() => {
+            i = (i + 1) % messages.length;
+            setLoadingText(messages[i]);
+        }, 2000);
+        return () => clearInterval(interval);
     }, [isLoading]);
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -191,13 +161,13 @@ export default function AddSelfLearnCardModal({
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/15 backdrop-blur-sm">
             <div className="w-full max-w-sm bg-white rounded-2xl border border-slate-200 p-5 relative animate-in fade-in zoom-in duration-200">
                 {isLoading && (
-                    <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-white/85 backdrop-blur-sm rounded-2xl">
-                        <div className="relative h-16 w-16">
-                            <div ref={ringOuterRef} className="absolute inset-0 rounded-full border border-blue-200/60 ring-pulse" />
-                            <div ref={ringInnerRef} className="absolute inset-2 rounded-full border border-blue-300/80 ring-spin" />
-                            <div className="absolute left-1/2 top-1/2 h-6 w-6 -translate-x-1/2 -translate-y-1/2 rounded-full bg-blue-500/10" />
-                            <span ref={dropletRef} className="droplet" />
+                    <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-white/90 backdrop-blur-sm rounded-2xl gap-3">
+                        <div className="flex items-center gap-1.5">
+                            <span className="thinking-dot" style={{ animationDelay: '0ms' }} />
+                            <span className="thinking-dot" style={{ animationDelay: '160ms' }} />
+                            <span className="thinking-dot" style={{ animationDelay: '320ms' }} />
                         </div>
+                        <span className="text-sm font-light text-slate-500 tracking-wide loading-text">{loadingText}</span>
                     </div>
                 )}
                 <button
@@ -225,9 +195,10 @@ export default function AddSelfLearnCardModal({
                                 autoFocus
                             />
                             {isLoading && (
-                                <div className="absolute right-0 top-1 flex items-center gap-2">
-                                    <span className="text-xs text-slate-400">Thinking...</span>
-                                    <div className="w-4 h-4 border border-slate-300 border-t-transparent rounded-full animate-spin"></div>
+                                <div className="absolute right-0 top-1 flex items-center gap-1">
+                                    <span className="thinking-dot-sm" style={{ animationDelay: '0ms' }} />
+                                    <span className="thinking-dot-sm" style={{ animationDelay: '160ms' }} />
+                                    <span className="thinking-dot-sm" style={{ animationDelay: '320ms' }} />
                                 </div>
                             )}
                         </div>
@@ -419,35 +390,34 @@ export default function AddSelfLearnCardModal({
             color: transparent;
             animation: shimmer 3.5s ease-in-out infinite;
         }
-                @keyframes shimmer {
+        @keyframes shimmer {
             0% { background-position: 120% 0; }
             100% { background-position: -120% 0; }
         }
-        .droplet {
-            position: absolute;
-            left: 50%;
-            top: -6px;
+        .thinking-dot {
             width: 8px;
             height: 8px;
-            margin-left: -4px;
-            border-radius: 999px;
-            background: rgba(59, 130, 246, 0.45);
+            border-radius: 50%;
+            background: #94a3b8;
+            animation: thinking 1.4s ease-in-out infinite;
         }
-        .ring-spin {
-            animation: spin 2.8s linear infinite;
+        .thinking-dot-sm {
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            background: #94a3b8;
+            animation: thinking 1.4s ease-in-out infinite;
         }
-        .ring-pulse {
-            animation: pulse 2.2s ease-in-out infinite;
+        @keyframes thinking {
+            0%, 80%, 100% { opacity: 0.25; transform: scale(0.8); }
+            40% { opacity: 1; transform: scale(1); }
         }
-        @keyframes spin {
-            to { transform: rotate(360deg); }
+        .loading-text {
+            animation: textFade 2s ease-in-out infinite;
         }
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.03); }
-        }
-        .shimmer-slow {
-            animation-duration: 6s;
+        @keyframes textFade {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
         }
             `}</style>
         </div>
