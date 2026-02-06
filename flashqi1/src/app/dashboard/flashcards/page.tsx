@@ -169,7 +169,7 @@ export default function FlashcardsPage() {
           );
           background-size: 300% 100%;
           color: white;
-          animation: goldShimmer 4s linear infinite;
+          animation: goldShimmer 40s linear infinite;
           box-shadow: 0 0 12px rgba(255, 215, 0, 0.35), inset 0 0 4px rgba(255, 255, 255, 0.15);
           text-shadow: 0 0 2px rgba(139, 105, 20, 0.5);
         }

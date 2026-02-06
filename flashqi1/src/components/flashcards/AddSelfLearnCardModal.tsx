@@ -509,7 +509,7 @@ export default function AddSelfLearnCardModal({
         .premium-upgrade-btn {
             background: linear-gradient(120deg, #b8860b 0%, #ffd700 30%, #b8860b 50%, #ffd700 80%, #b8860b 100%);
             background-size: 200% 100%;
-            animation: goldShimmer 3s ease-in-out infinite;
+            animation: goldShimmer 40s linear infinite;
             box-shadow: 0 0 8px rgba(255, 215, 0, 0.3);
         }
         @keyframes goldShimmer {
