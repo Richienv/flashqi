@@ -72,7 +72,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     setupAuth();
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'PASSWORD_RECOVERY') {
+        // Don't set user during password recovery - let the reset page handle it
+        return;
+      }
       if (session?.user) {
         setUser(toAppUser(session.user));
       } else {
@@ -117,15 +121,41 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signUp = async (email: string, password: string, name: string) => {
     setLastError(null);
     try {
+      console.log('=== SIGNUP DEBUG START ===');
+      console.log('Attempting signup for:', email);
+      
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: { data: { name } },
       });
+
+      console.log('=== SIGNUP RESPONSE ===');
+      console.log('Error:', error);
+      console.log('Error message:', error?.message);
+      console.log('Error status:', (error as any)?.status);
+      console.log('User ID:', data?.user?.id);
+      console.log('User email:', data?.user?.email);
+      console.log('Identities:', data?.user?.identities);
+      console.log('Identities length:', data?.user?.identities?.length);
+      console.log('Confirmation sent at:', data?.user?.confirmation_sent_at);
+      console.log('Full data:', JSON.stringify(data, null, 2));
+      console.log('=== SIGNUP DEBUG END ===');
+
       if (error) {
+        console.error('Supabase returned error:', error.message);
         setLastError(error);
         return { error };
       }
+
+      // Supabase returns a fake user with empty identities when email already exists
+      if (data?.user?.identities?.length === 0) {
+        console.warn('Empty identities detected - email may already exist');
+        const existsError = new Error('User already registered');
+        setLastError(existsError);
+        return { error: existsError };
+      }
+
       if (data.user) {
         setUser(toAppUser(data.user));
       }
@@ -177,9 +207,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const resetPassword = async (email: string) => {
     setLastError(null);
     try {
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/auth/reset-password`,
+      const redirectUrl = `${window.location.origin}/auth/reset-password`;
+      console.log('Reset password redirectTo:', redirectUrl);
+      const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: redirectUrl,
       });
+      console.log('Reset password API call completed - check email');
+      console.log('Reset password response:', { data, error: error?.message });
       if (error) {
         setLastError(error);
         return { error };
