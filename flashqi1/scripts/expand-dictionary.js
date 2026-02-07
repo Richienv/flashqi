@@ -1,0 +1,287 @@
+const fs = require('fs');
+const path = require('path');
+
+// Paths
+const hsk5Path = path.join(__dirname, '../../hsk-5.json');
+const dictPath = path.join(__dirname, '../src/data/dictionary-cache.json');
+
+// Load files
+const hsk5 = JSON.parse(fs.readFileSync(hsk5Path, 'utf-8'));
+const dict = JSON.parse(fs.readFileSync(dictPath, 'utf-8'));
+
+console.log(`Current dictionary entries: ${Object.keys(dict.entries).length}`);
+console.log(`HSK-5 words: ${hsk5.length}`);
+
+// Add all HSK-5 words to dictionary
+let added = 0;
+let skipped = 0;
+
+hsk5.forEach(item => {
+  const key = item.english.toLowerCase().trim();
+  if (!dict.entries[key]) {
+    dict.entries[key] = {
+      hanzi: item.chinese,
+      pinyin: item.pinyin
+    };
+    added++;
+  } else {
+    skipped++;
+  }
+});
+
+// Add additional high-frequency words not in HSK-5
+const additionalWords = [
+  { english: "make", hanzi: "做", pinyin: "zuò" },
+  { english: "take", hanzi: "拿", pinyin: "ná" },
+  { english: "come", hanzi: "来", pinyin: "lái" },
+  { english: "go", hanzi: "去", pinyin: "qù" },
+  { english: "get", hanzi: "得到", pinyin: "dé dào" },
+  { english: "see", hanzi: "看见", pinyin: "kàn jiàn" },
+  { english: "know", hanzi: "知道", pinyin: "zhī dào" },
+  { english: "think", hanzi: "想", pinyin: "xiǎng" },
+  { english: "look", hanzi: "看", pinyin: "kàn" },
+  { english: "want", hanzi: "想要", pinyin: "xiǎng yào" },
+  { english: "give", hanzi: "给", pinyin: "gěi" },
+  { english: "use", hanzi: "用", pinyin: "yòng" },
+  { english: "find", hanzi: "找", pinyin: "zhǎo" },
+  { english: "tell", hanzi: "告诉", pinyin: "gào sù" },
+  { english: "ask", hanzi: "问", pinyin: "wèn" },
+  { english: "seem", hanzi: "似乎", pinyin: "sì hū" },
+  { english: "feel", hanzi: "感觉", pinyin: "gǎn jué" },
+  { english: "try", hanzi: "试", pinyin: "shì" },
+  { english: "leave", hanzi: "离开", pinyin: "lí kāi" },
+  { english: "call", hanzi: "叫", pinyin: "jiào" },
+  { english: "keep", hanzi: "保持", pinyin: "bǎo chí" },
+  { english: "let", hanzi: "让", pinyin: "ràng" },
+  { english: "begin", hanzi: "开始", pinyin: "kāi shǐ" },
+  { english: "help", hanzi: "帮助", pinyin: "bāng zhù" },
+  { english: "talk", hanzi: "说话", pinyin: "shuō huà" },
+  { english: "turn", hanzi: "转", pinyin: "zhuǎn" },
+  { english: "start", hanzi: "开始", pinyin: "kāi shǐ" },
+  { english: "show", hanzi: "显示", pinyin: "xiǎn shì" },
+  { english: "hear", hanzi: "听见", pinyin: "tīng jiàn" },
+  { english: "play", hanzi: "玩", pinyin: "wán" },
+  { english: "run", hanzi: "跑", pinyin: "pǎo" },
+  { english: "move", hanzi: "移动", pinyin: "yí dòng" },
+  { english: "live", hanzi: "住", pinyin: "zhù" },
+  { english: "believe", hanzi: "相信", pinyin: "xiāng xìn" },
+  { english: "bring", hanzi: "带", pinyin: "dài" },
+  { english: "happen", hanzi: "发生", pinyin: "fā shēng" },
+  { english: "write", hanzi: "写", pinyin: "xiě" },
+  { english: "sit", hanzi: "坐", pinyin: "zuò" },
+  { english: "stand", hanzi: "站", pinyin: "zhàn" },
+  { english: "lose", hanzi: "失去", pinyin: "shī qù" },
+  { english: "pay", hanzi: "付", pinyin: "fù" },
+  { english: "meet", hanzi: "见面", pinyin: "jiàn miàn" },
+  { english: "include", hanzi: "包括", pinyin: "bāo kuò" },
+  { english: "continue", hanzi: "继续", pinyin: "jì xù" },
+  { english: "set", hanzi: "设置", pinyin: "shè zhì" },
+  { english: "learn", hanzi: "学习", pinyin: "xué xí" },
+  { english: "change", hanzi: "改变", pinyin: "gǎi biàn" },
+  { english: "lead", hanzi: "带领", pinyin: "dài lǐng" },
+  { english: "understand", hanzi: "理解", pinyin: "lǐ jiě" },
+  { english: "watch", hanzi: "观看", pinyin: "guān kàn" },
+  { english: "follow", hanzi: "跟随", pinyin: "gēn suí" },
+  { english: "stop", hanzi: "停止", pinyin: "tíng zhǐ" },
+  { english: "create", hanzi: "创造", pinyin: "chuàng zào" },
+  { english: "speak", hanzi: "说", pinyin: "shuō" },
+  { english: "read", hanzi: "读", pinyin: "dú" },
+  { english: "spend", hanzi: "花费", pinyin: "huā fèi" },
+  { english: "grow", hanzi: "成长", pinyin: "chéng zhǎng" },
+  { english: "open", hanzi: "打开", pinyin: "dǎ kāi" },
+  { english: "walk", hanzi: "走", pinyin: "zǒu" },
+  { english: "win", hanzi: "赢", pinyin: "yíng" },
+  { english: "teach", hanzi: "教", pinyin: "jiào" },
+  { english: "offer", hanzi: "提供", pinyin: "tí gōng" },
+  { english: "remember", hanzi: "记得", pinyin: "jì de" },
+  { english: "consider", hanzi: "考虑", pinyin: "kǎo lǜ" },
+  { english: "appear", hanzi: "出现", pinyin: "chū xiàn" },
+  { english: "buy", hanzi: "买", pinyin: "mǎi" },
+  { english: "wait", hanzi: "等", pinyin: "děng" },
+  { english: "serve", hanzi: "服务", pinyin: "fú wù" },
+  { english: "die", hanzi: "死", pinyin: "sǐ" },
+  { english: "send", hanzi: "发送", pinyin: "fā sòng" },
+  { english: "expect", hanzi: "期待", pinyin: "qī dài" },
+  { english: "build", hanzi: "建造", pinyin: "jiàn zào" },
+  { english: "stay", hanzi: "停留", pinyin: "tíng liú" },
+  { english: "fall", hanzi: "掉落", pinyin: "diào luò" },
+  { english: "cut", hanzi: "切", pinyin: "qiē" },
+  { english: "reach", hanzi: "到达", pinyin: "dào dá" },
+  { english: "kill", hanzi: "杀", pinyin: "shā" },
+  { english: "remain", hanzi: "保持", pinyin: "bǎo chí" },
+  { english: "suggest", hanzi: "建议", pinyin: "jiàn yì" },
+  { english: "raise", hanzi: "提高", pinyin: "tí gāo" },
+  { english: "pass", hanzi: "通过", pinyin: "tōng guò" },
+  { english: "sell", hanzi: "卖", pinyin: "mài" },
+  { english: "require", hanzi: "需要", pinyin: "xū yào" },
+  { english: "report", hanzi: "报告", pinyin: "bào gào" },
+  { english: "decide", hanzi: "决定", pinyin: "jué dìng" },
+  { english: "pull", hanzi: "拉", pinyin: "lā" },
+  { english: "time", hanzi: "时间", pinyin: "shí jiān" },
+  { english: "person", hanzi: "人", pinyin: "rén" },
+  { english: "year", hanzi: "年", pinyin: "nián" },
+  { english: "way", hanzi: "方法", pinyin: "fāng fǎ" },
+  { english: "day", hanzi: "天", pinyin: "tiān" },
+  { english: "thing", hanzi: "东西", pinyin: "dōng xi" },
+  { english: "man", hanzi: "男人", pinyin: "nán rén" },
+  { english: "world", hanzi: "世界", pinyin: "shì jiè" },
+  { english: "life", hanzi: "生活", pinyin: "shēng huó" },
+  { english: "hand", hanzi: "手", pinyin: "shǒu" },
+  { english: "part", hanzi: "部分", pinyin: "bù fèn" },
+  { english: "child", hanzi: "孩子", pinyin: "hái zi" },
+  { english: "eye", hanzi: "眼睛", pinyin: "yǎn jīng" },
+  { english: "woman", hanzi: "女人", pinyin: "nǚ rén" },
+  { english: "place", hanzi: "地方", pinyin: "dì fāng" },
+  { english: "work", hanzi: "工作", pinyin: "gōng zuò" },
+  { english: "week", hanzi: "星期", pinyin: "xīng qī" },
+  { english: "case", hanzi: "情况", pinyin: "qíng kuàng" },
+  { english: "point", hanzi: "点", pinyin: "diǎn" },
+  { english: "government", hanzi: "政府", pinyin: "zhèng fǔ" },
+  { english: "company", hanzi: "公司", pinyin: "gōng sī" },
+  { english: "number", hanzi: "号码", pinyin: "hào mǎ" },
+  { english: "group", hanzi: "组", pinyin: "zǔ" },
+  { english: "problem", hanzi: "问题", pinyin: "wèn tí" },
+  { english: "fact", hanzi: "事实", pinyin: "shì shí" },
+  { english: "money", hanzi: "钱", pinyin: "qián" },
+  { english: "water", hanzi: "水", pinyin: "shuǐ" },
+  { english: "book", hanzi: "书", pinyin: "shū" },
+  { english: "month", hanzi: "月", pinyin: "yuè" },
+  { english: "lot", hanzi: "很多", pinyin: "hěn duō" },
+  { english: "right", hanzi: "对", pinyin: "duì" },
+  { english: "study", hanzi: "学习", pinyin: "xué xí" },
+  { english: "question", hanzi: "问题", pinyin: "wèn tí" },
+  { english: "home", hanzi: "家", pinyin: "jiā" },
+  { english: "school", hanzi: "学校", pinyin: "xué xiào" },
+  { english: "student", hanzi: "学生", pinyin: "xué shēng" },
+  { english: "teacher", hanzi: "老师", pinyin: "lǎo shī" },
+  { english: "friend", hanzi: "朋友", pinyin: "péng you" },
+  { english: "family", hanzi: "家庭", pinyin: "jiā tíng" },
+  { english: "father", hanzi: "父亲", pinyin: "fù qīn" },
+  { english: "mother", hanzi: "母亲", pinyin: "mǔ qīn" },
+  { english: "brother", hanzi: "兄弟", pinyin: "xiōng dì" },
+  { english: "sister", hanzi: "姐妹", pinyin: "jiě mèi" },
+  { english: "son", hanzi: "儿子", pinyin: "ér zi" },
+  { english: "daughter", hanzi: "女儿", pinyin: "nǚ ér" },
+  { english: "husband", hanzi: "丈夫", pinyin: "zhàng fu" },
+  { english: "wife", hanzi: "妻子", pinyin: "qī zi" },
+  { english: "doctor", hanzi: "医生", pinyin: "yī shēng" },
+  { english: "hospital", hanzi: "医院", pinyin: "yī yuàn" },
+  { english: "restaurant", hanzi: "餐厅", pinyin: "cān tīng" },
+  { english: "hotel", hanzi: "酒店", pinyin: "jiǔ diàn" },
+  { english: "airport", hanzi: "机场", pinyin: "jī chǎng" },
+  { english: "station", hanzi: "车站", pinyin: "chē zhàn" },
+  { english: "bus", hanzi: "公共汽车", pinyin: "gōng gòng qì chē" },
+  { english: "car", hanzi: "车", pinyin: "chē" },
+  { english: "train", hanzi: "火车", pinyin: "huǒ chē" },
+  { english: "plane", hanzi: "飞机", pinyin: "fēi jī" },
+  { english: "bicycle", hanzi: "自行车", pinyin: "zì xíng chē" },
+  { english: "taxi", hanzi: "出租车", pinyin: "chū zū chē" },
+  { english: "road", hanzi: "路", pinyin: "lù" },
+  { english: "street", hanzi: "街道", pinyin: "jiē dào" },
+  { english: "city", hanzi: "城市", pinyin: "chéng shì" },
+  { english: "country", hanzi: "国家", pinyin: "guó jiā" },
+  { english: "building", hanzi: "建筑", pinyin: "jiàn zhù" },
+  { english: "room", hanzi: "房间", pinyin: "fáng jiān" },
+  { english: "door", hanzi: "门", pinyin: "mén" },
+  { english: "window", hanzi: "窗户", pinyin: "chuāng hu" },
+  { english: "table", hanzi: "桌子", pinyin: "zhuō zi" },
+  { english: "chair", hanzi: "椅子", pinyin: "yǐ zi" },
+  { english: "bed", hanzi: "床", pinyin: "chuáng" },
+  { english: "phone", hanzi: "电话", pinyin: "diàn huà" },
+  { english: "computer", hanzi: "电脑", pinyin: "diàn nǎo" },
+  { english: "television", hanzi: "电视", pinyin: "diàn shì" },
+  { english: "morning", hanzi: "早上", pinyin: "zǎo shang" },
+  { english: "afternoon", hanzi: "下午", pinyin: "xià wǔ" },
+  { english: "evening", hanzi: "晚上", pinyin: "wǎn shang" },
+  { english: "night", hanzi: "夜晚", pinyin: "yè wǎn" },
+  { english: "today", hanzi: "今天", pinyin: "jīn tiān" },
+  { english: "tomorrow", hanzi: "明天", pinyin: "míng tiān" },
+  { english: "yesterday", hanzi: "昨天", pinyin: "zuó tiān" },
+  { english: "now", hanzi: "现在", pinyin: "xiàn zài" },
+  { english: "later", hanzi: "后来", pinyin: "hòu lái" },
+  { english: "before", hanzi: "以前", pinyin: "yǐ qián" },
+  { english: "after", hanzi: "以后", pinyin: "yǐ hòu" },
+  { english: "hour", hanzi: "小时", pinyin: "xiǎo shí" },
+  { english: "minute", hanzi: "分钟", pinyin: "fēn zhōng" },
+  { english: "second", hanzi: "秒", pinyin: "miǎo" },
+  { english: "food", hanzi: "食物", pinyin: "shí wù" },
+  { english: "rice", hanzi: "米饭", pinyin: "mǐ fàn" },
+  { english: "noodles", hanzi: "面条", pinyin: "miàn tiáo" },
+  { english: "bread", hanzi: "面包", pinyin: "miàn bāo" },
+  { english: "meat", hanzi: "肉", pinyin: "ròu" },
+  { english: "fish", hanzi: "鱼", pinyin: "yú" },
+  { english: "chicken", hanzi: "鸡肉", pinyin: "jī ròu" },
+  { english: "egg", hanzi: "鸡蛋", pinyin: "jī dàn" },
+  { english: "vegetable", hanzi: "蔬菜", pinyin: "shū cài" },
+  { english: "fruit", hanzi: "水果", pinyin: "shuǐ guǒ" },
+  { english: "apple", hanzi: "苹果", pinyin: "píng guǒ" },
+  { english: "banana", hanzi: "香蕉", pinyin: "xiāng jiāo" },
+  { english: "orange", hanzi: "橙子", pinyin: "chéng zi" },
+  { english: "coffee", hanzi: "咖啡", pinyin: "kā fēi" },
+  { english: "tea", hanzi: "茶", pinyin: "chá" },
+  { english: "milk", hanzi: "牛奶", pinyin: "niú nǎi" },
+  { english: "juice", hanzi: "果汁", pinyin: "guǒ zhī" },
+  { english: "beer", hanzi: "啤酒", pinyin: "pí jiǔ" },
+  { english: "wine", hanzi: "葡萄酒", pinyin: "pú táo jiǔ" },
+  { english: "hot", hanzi: "热", pinyin: "rè" },
+  { english: "cold", hanzi: "冷", pinyin: "lěng" },
+  { english: "warm", hanzi: "温暖", pinyin: "wēn nuǎn" },
+  { english: "cool", hanzi: "凉爽", pinyin: "liáng shuǎng" },
+  { english: "new", hanzi: "新", pinyin: "xīn" },
+  { english: "old", hanzi: "旧", pinyin: "jiù" },
+  { english: "young", hanzi: "年轻", pinyin: "nián qīng" },
+  { english: "long", hanzi: "长", pinyin: "cháng" },
+  { english: "short", hanzi: "短", pinyin: "duǎn" },
+  { english: "high", hanzi: "高", pinyin: "gāo" },
+  { english: "low", hanzi: "低", pinyin: "dī" },
+  { english: "fast", hanzi: "快", pinyin: "kuài" },
+  { english: "slow", hanzi: "慢", pinyin: "màn" },
+  { english: "early", hanzi: "早", pinyin: "zǎo" },
+  { english: "late", hanzi: "晚", pinyin: "wǎn" },
+  { english: "easy", hanzi: "容易", pinyin: "róng yì" },
+  { english: "difficult", hanzi: "困难", pinyin: "kùn nan" },
+  { english: "important", hanzi: "重要", pinyin: "zhòng yào" },
+  { english: "happy", hanzi: "快乐", pinyin: "kuài lè" },
+  { english: "sad", hanzi: "伤心", pinyin: "shāng xīn" },
+  { english: "beautiful", hanzi: "美丽", pinyin: "měi lì" },
+  { english: "ugly", hanzi: "丑", pinyin: "chǒu" },
+  { english: "clean", hanzi: "干净", pinyin: "gān jìng" },
+  { english: "dirty", hanzi: "脏", pinyin: "zāng" },
+  { english: "busy", hanzi: "忙", pinyin: "máng" },
+  { english: "free", hanzi: "自由", pinyin: "zì yóu" },
+  { english: "one", hanzi: "一", pinyin: "yī" },
+  { english: "two", hanzi: "二", pinyin: "èr" },
+  { english: "three", hanzi: "三", pinyin: "sān" },
+  { english: "four", hanzi: "四", pinyin: "sì" },
+  { english: "five", hanzi: "五", pinyin: "wǔ" },
+  { english: "six", hanzi: "六", pinyin: "liù" },
+  { english: "seven", hanzi: "七", pinyin: "qī" },
+  { english: "eight", hanzi: "八", pinyin: "bā" },
+  { english: "nine", hanzi: "九", pinyin: "jiǔ" },
+  { english: "ten", hanzi: "十", pinyin: "shí" },
+  { english: "hundred", hanzi: "百", pinyin: "bǎi" },
+  { english: "thousand", hanzi: "千", pinyin: "qiān" }
+];
+
+additionalWords.forEach(item => {
+  const key = item.english.toLowerCase().trim();
+  if (!dict.entries[key]) {
+    dict.entries[key] = {
+      hanzi: item.hanzi,
+      pinyin: item.pinyin
+    };
+    added++;
+  }
+});
+
+// Update metadata
+dict._meta.lastUpdated = new Date().toISOString();
+dict._meta.description = `Server-side translation dictionary. Contains HSK-5 vocabulary (1293 words) + common high-frequency words. Total: ${Object.keys(dict.entries).length} entries. Grows automatically when AI translates new words.`;
+
+// Write back
+fs.writeFileSync(dictPath, JSON.stringify(dict, null, 2), 'utf-8');
+
+console.log(`\n✅ Dictionary expanded successfully!`);
+console.log(`   Added: ${added} new entries`);
+console.log(`   Skipped: ${skipped} duplicates`);
+console.log(`   Total entries: ${Object.keys(dict.entries).length}`);

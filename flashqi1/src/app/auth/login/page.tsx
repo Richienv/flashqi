@@ -64,11 +64,14 @@ export default function LoginPage() {
     setResetLoading(true);
     setResetError('');
     try {
+      console.log('Attempting password reset for:', resetEmail);
       const { error } = await resetPassword(resetEmail);
+      console.log('Reset password response:', { error });
       if (error) throw error;
       setResetSuccess(true);
     } catch (error: any) {
-      setResetError(error.message || 'Failed to send reset email');
+      console.error('Password reset error:', error);
+      setResetError(error.message || 'Failed to send reset email. Please check your email address.');
     } finally {
       setResetLoading(false);
     }

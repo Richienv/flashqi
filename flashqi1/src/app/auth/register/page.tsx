@@ -32,10 +32,13 @@ export default function RegisterPage() {
     }
 
     try {
+      console.log('Attempting sign up for:', email);
       const { error: signUpError } = await signUp(email, password, name);
+      console.log('Sign up response:', { error: signUpError });
       if (signUpError) throw signUpError;
       setShowConfirmPopup(true);
     } catch (error: any) {
+      console.error('Sign up error:', error);
       const msg = error.message || '';
       if (msg.includes('User already registered') || msg.includes('already been registered')) {
         setError('This email is already registered. Please sign in instead.');

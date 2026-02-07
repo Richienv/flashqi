@@ -1,7 +1,7 @@
 {
   "_meta": {
-    "description": "Server-side translation dictionary. Grows automatically when AI translates new words.",
-    "lastUpdated": "2026-02-06T17:07:20.471Z",
+    "description": "Server-side translation dictionary. Contains HSK-5 vocabulary (1293 words) + common high-frequency words. Total: 1894 entries. Grows automatically when AI translates new words.",
+    "lastUpdated": "2026-02-06T17:31:31.750Z",
     "totalEntries": 1852
   },
   "entries": {
@@ -7412,6 +7412,178 @@
     "baloon": {
       "hanzi": "气球",
       "pinyin": "qì qiú"
+    },
+    "": {
+      "hanzi": "乙",
+      "pinyin": "yǐ"
+    },
+    "find": {
+      "hanzi": "找",
+      "pinyin": "zhǎo"
+    },
+    "let": {
+      "hanzi": "让",
+      "pinyin": "ràng"
+    },
+    "talk": {
+      "hanzi": "说话",
+      "pinyin": "shuō huà"
+    },
+    "start": {
+      "hanzi": "开始",
+      "pinyin": "kāi shǐ"
+    },
+    "hear": {
+      "hanzi": "听见",
+      "pinyin": "tīng jiàn"
+    },
+    "live": {
+      "hanzi": "住",
+      "pinyin": "zhù"
+    },
+    "bring": {
+      "hanzi": "带",
+      "pinyin": "dài"
+    },
+    "happen": {
+      "hanzi": "发生",
+      "pinyin": "fā shēng"
+    },
+    "continue": {
+      "hanzi": "继续",
+      "pinyin": "jì xù"
+    },
+    "lead": {
+      "hanzi": "带领",
+      "pinyin": "dài lǐng"
+    },
+    "watch": {
+      "hanzi": "观看",
+      "pinyin": "guān kàn"
+    },
+    "follow": {
+      "hanzi": "跟随",
+      "pinyin": "gēn suí"
+    },
+    "teach": {
+      "hanzi": "教",
+      "pinyin": "jiào"
+    },
+    "offer": {
+      "hanzi": "提供",
+      "pinyin": "tí gōng"
+    },
+    "consider": {
+      "hanzi": "考虑",
+      "pinyin": "kǎo lǜ"
+    },
+    "serve": {
+      "hanzi": "服务",
+      "pinyin": "fú wù"
+    },
+    "die": {
+      "hanzi": "死",
+      "pinyin": "sǐ"
+    },
+    "reach": {
+      "hanzi": "到达",
+      "pinyin": "dào dá"
+    },
+    "remain": {
+      "hanzi": "保持",
+      "pinyin": "bǎo chí"
+    },
+    "suggest": {
+      "hanzi": "建议",
+      "pinyin": "jiàn yì"
+    },
+    "raise": {
+      "hanzi": "提高",
+      "pinyin": "tí gāo"
+    },
+    "require": {
+      "hanzi": "需要",
+      "pinyin": "xū yào"
+    },
+    "world": {
+      "hanzi": "世界",
+      "pinyin": "shì jiè"
+    },
+    "case": {
+      "hanzi": "情况",
+      "pinyin": "qíng kuàng"
+    },
+    "point": {
+      "hanzi": "点",
+      "pinyin": "diǎn"
+    },
+    "number": {
+      "hanzi": "号码",
+      "pinyin": "hào mǎ"
+    },
+    "lot": {
+      "hanzi": "很多",
+      "pinyin": "hěn duō"
+    },
+    "son": {
+      "hanzi": "儿子",
+      "pinyin": "ér zi"
+    },
+    "daughter": {
+      "hanzi": "女儿",
+      "pinyin": "nǚ ér"
+    },
+    "station": {
+      "hanzi": "车站",
+      "pinyin": "chē zhàn"
+    },
+    "plane": {
+      "hanzi": "飞机",
+      "pinyin": "fēi jī"
+    },
+    "street": {
+      "hanzi": "街道",
+      "pinyin": "jiē dào"
+    },
+    "building": {
+      "hanzi": "建筑",
+      "pinyin": "jiàn zhù"
+    },
+    "room": {
+      "hanzi": "房间",
+      "pinyin": "fáng jiān"
+    },
+    "later": {
+      "hanzi": "后来",
+      "pinyin": "hòu lái"
+    },
+    "after": {
+      "hanzi": "以后",
+      "pinyin": "yǐ hòu"
+    },
+    "cool": {
+      "hanzi": "凉爽",
+      "pinyin": "liáng shuǎng"
+    },
+    "high": {
+      "hanzi": "高",
+      "pinyin": "gāo"
+    },
+    "low": {
+      "hanzi": "低",
+      "pinyin": "dī"
+    },
+    "early": {
+      "hanzi": "早",
+      "pinyin": "zǎo"
+    },
+    "late": {
+      "hanzi": "晚",
+      "pinyin": "wǎn"
+    },
+    "balon": {
+      "hanzi": "气球",
+      "pinyin": "qìqiú"
     }
   }
 }
