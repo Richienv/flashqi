@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 
@@ -17,6 +17,10 @@ export default function WelcomePage() {
   const [loading, setLoading] = useState(false);
   const [showWelcome, setShowWelcome] = useState(true);
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const [slideDir, setSlideDir] = useState<'left' | 'right'>('left');
+  const autoAdvanceTimer = useRef<NodeJS.Timeout | null>(null);
+  const stepRef = useRef(step);
+  stepRef.current = step;
   const [answers, setAnswers] = useState({
     source: '',
     apps: [] as string[],
@@ -75,6 +79,40 @@ export default function WelcomePage() {
 
   const currentQ = questions[step];
 
+  const handleFinish = useCallback(async () => {
+    setLoading(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        await supabase.from('user_surveys').upsert({
+          user_id: user.id,
+          source: answers.source,
+          apps_used: answers.apps,
+          campus: answers.campus,
+          role: answers.role,
+          country: answers.country,
+          target: answers.target,
+          completed_at: new Date().toISOString(),
+        }, { onConflict: 'user_id' });
+      }
+    } catch (e) {
+      console.error('Survey save error:', e);
+    } finally {
+      setLoading(false);
+      router.push('/dashboard/flashcards');
+    }
+  }, [answers, router]);
+
+  const animateToStep = useCallback((nextStep: number, direction: 'left' | 'right') => {
+    if (autoAdvanceTimer.current) clearTimeout(autoAdvanceTimer.current);
+    setSlideDir(direction);
+    setIsTransitioning(true);
+    setTimeout(() => {
+      setStep(nextStep);
+      setTimeout(() => setIsTransitioning(false), 50);
+    }, 280);
+  }, []);
+
   const handleSelect = (option: string) => {
     if (currentQ.multiple) {
       const current = answers[currentQ.key as keyof typeof answers] as string[];
@@ -85,16 +123,13 @@ export default function WelcomePage() {
       }
     } else {
       setAnswers({ ...answers, [currentQ.key]: option });
-      // Auto-advance for single-choice questions with smooth transition
-      setIsTransitioning(true);
-      setTimeout(() => {
-        if (step < questions.length - 1) {
-          setStep(step + 1);
-        } else {
-          handleNext();
-        }
-        setTimeout(() => setIsTransitioning(false), 100);
-      }, 400);
+      // Auto-advance for single-choice (except last step — user clicks "Start Learning")
+      if (autoAdvanceTimer.current) clearTimeout(autoAdvanceTimer.current);
+      if (step < questions.length - 1) {
+        autoAdvanceTimer.current = setTimeout(() => {
+          animateToStep(stepRef.current + 1, 'left');
+        }, 420);
+      }
     }
   };
 
@@ -111,31 +146,17 @@ export default function WelcomePage() {
   };
 
   const handleNext = async () => {
+    if (autoAdvanceTimer.current) clearTimeout(autoAdvanceTimer.current);
     if (step < questions.length - 1) {
-      setStep(step + 1);
+      animateToStep(step + 1, 'left');
     } else {
-      setLoading(true);
-      try {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (user) {
-          await supabase.from('user_surveys').upsert({
-            user_id: user.id,
-            source: answers.source,
-            apps_used: answers.apps,
-            campus: answers.campus,
-            role: answers.role,
-            country: answers.country,
-            target: answers.target,
-            completed_at: new Date().toISOString(),
-          }, { onConflict: 'user_id' });
-        }
-      } catch (e) {
-        console.error('Survey save error:', e);
-      } finally {
-        setLoading(false);
-        router.push('/dashboard/flashcards');
-      }
+      await handleFinish();
     }
+  };
+
+  const handleBack = () => {
+    if (autoAdvanceTimer.current) clearTimeout(autoAdvanceTimer.current);
+    if (step > 0) animateToStep(step - 1, 'right');
   };
 
   const progress = ((step + 1) / questions.length) * 100;
@@ -159,7 +180,7 @@ export default function WelcomePage() {
       </div>
 
       <div className="flex-1 flex flex-col items-center justify-center px-6 py-12">
-        <div className={`w-full max-w-md transition-all duration-400 ${isTransitioning ? 'opacity-0 translate-x-8' : 'opacity-100 translate-x-0'}`}>
+        <div className={`w-full max-w-md transition-all duration-300 ease-out ${isTransitioning ? (slideDir === 'left' ? 'opacity-0 -translate-x-8' : 'opacity-0 translate-x-8') : 'opacity-100 translate-x-0'}`}>
           {step === 0 && !showWelcome && (
             <div className="text-center mb-8 animate-fade-in">
               <h1 className="shimmer-text text-3xl font-light tracking-wide mb-2">Let's get started</h1>
@@ -175,35 +196,47 @@ export default function WelcomePage() {
                   key={option}
                   onClick={() => handleSelect(option)}
                   style={{ animationDelay: `${idx * 50}ms` }}
-                  className={`w-full py-3 px-4 rounded-xl text-sm font-light transition-all duration-200 animate-fade-in-up ${
+                  className={`w-full py-3 px-4 rounded-xl text-sm font-light transition-all duration-200 animate-fade-in-up flex items-center gap-3 ${
                     isSelected(option)
                       ? 'bg-slate-900 text-white scale-[1.02] shadow-lg'
                       : 'bg-slate-50 text-slate-600 hover:bg-slate-100 hover:scale-[1.01]'
                   }`}
                 >
-                  {option}
+                  {currentQ.multiple && (
+                    <span className={`flex-shrink-0 w-5 h-5 rounded border-2 flex items-center justify-center transition-all ${
+                      isSelected(option) ? 'border-white bg-white/20' : 'border-slate-300'
+                    }`}>
+                      {isSelected(option) && (
+                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                        </svg>
+                      )}
+                    </span>
+                  )}
+                  <span>{option}</span>
                 </button>
               ))}
             </div>
           </div>
 
-          {/* Show Next button only for multiple choice questions */}
+          {/* Navigation */}
           <div className="flex items-center justify-between">
             {step > 0 ? (
-              <button onClick={() => setStep(step - 1)} className="text-sm text-slate-400 hover:text-slate-700 transition-colors">
+              <button onClick={handleBack} className="text-sm text-slate-400 hover:text-slate-700 transition-colors">
                 Back
               </button>
             ) : (
               <div />
             )}
-            {currentQ.multiple && (
+            {/* Show Next for multi-choice, or Start Learning on last step */}
+            {(currentQ.multiple || step === questions.length - 1) && (
               <button
                 onClick={handleNext}
                 disabled={!canProceed() || loading}
                 className="px-6 py-2.5 rounded-full disabled:opacity-40 transition-all hover:scale-105"
               >
                 <span className="shimmer-text text-sm font-light">
-                  {loading ? 'Saving...' : step === questions.length - 1 ? 'Start Learning' : 'Next'}
+                  {loading ? 'Saving...' : step === questions.length - 1 ? 'Start Learning →' : 'Next'}
                 </span>
               </button>
             )}
@@ -211,7 +244,7 @@ export default function WelcomePage() {
 
           <div className="mt-8 flex justify-center gap-2">
             {questions.map((_, i) => (
-              <div key={i} className={`w-2 h-2 rounded-full transition-all duration-300 ${i === step ? 'bg-slate-900 scale-125' : i < step ? 'bg-slate-400' : 'bg-slate-200'}`} />
+              <div key={i} className={`h-2 rounded-full transition-all duration-300 ${i === step ? 'bg-slate-900 w-6' : i < step ? 'bg-slate-400 w-2' : 'bg-slate-200 w-2'}`} />
             ))}
           </div>
         </div>
