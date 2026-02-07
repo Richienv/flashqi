@@ -136,6 +136,36 @@ export default function PremiumCheckoutPage() {
             {/* Step 1: Select Plan */}
             {step === 'select' && (
               <div className="space-y-6">
+                {/* Quick Redeem Code Option */}
+                <div className="bg-gradient-to-r from-amber-50 to-yellow-50 border border-amber-200 rounded-2xl p-5">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center">
+                        <svg className="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
+                        </svg>
+                      </div>
+                      <div>
+                        <p className="font-medium text-slate-800">Already have a code?</p>
+                        <p className="text-sm text-slate-500">Redeem your premium code instantly</p>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => setStep('redeem')}
+                      className="px-5 py-2.5 bg-gradient-to-r from-amber-500 to-yellow-400 hover:from-amber-600 hover:to-yellow-500 text-white rounded-xl font-medium text-sm transition-all shadow-md shadow-amber-500/20"
+                    >
+                      Redeem Code
+                    </button>
+                  </div>
+                </div>
+
+                {/* Divider */}
+                <div className="flex items-center gap-4">
+                  <div className="flex-1 h-px bg-slate-200"></div>
+                  <span className="text-sm text-slate-400 font-medium">Or choose a plan</span>
+                  <div className="flex-1 h-px bg-slate-200"></div>
+                </div>
+
                 <div className="grid md:grid-cols-2 gap-6">
                   {/* Monthly Plan */}
                   <div
