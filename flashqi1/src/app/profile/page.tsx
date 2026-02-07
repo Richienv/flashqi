@@ -12,6 +12,10 @@ export default function ProfilePage() {
   const [dailyGoal, setDailyGoal] = useState('10');
   const [updating, setUpdating] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteConfirmName, setDeleteConfirmName] = useState('');
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState('');
   const router = useRouter();
 
   useEffect(() => {
@@ -69,6 +73,44 @@ export default function ProfilePage() {
       return result;
     } catch (error) {
       return { user: null, error: error instanceof Error ? error : new Error('Update failed') };
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    if (!user) return;
+
+    // Validate that the name matches
+    if (deleteConfirmName.trim().toLowerCase() !== name.trim().toLowerCase()) {
+      setDeleteError('Name does not match. Please type your full name exactly as shown.');
+      return;
+    }
+
+    setIsDeleting(true);
+    setDeleteError('');
+
+    try {
+      const response = await fetch('/api/delete-account', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: user.id }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to delete account');
+      }
+
+      // Clear all local storage
+      localStorage.clear();
+
+      // Sign out and redirect
+      await signOut();
+      router.push('/');
+    } catch (error: any) {
+      console.error('Delete account error:', error);
+      setDeleteError(error.message || 'Failed to delete account. Please try again.');
+      setIsDeleting(false);
     }
   };
 
@@ -191,22 +233,103 @@ export default function ProfilePage() {
 
           <div className="mt-12 border-t border-slate-100 pt-8">
             <h2 className="text-sm uppercase tracking-[0.2em] text-slate-400 mb-4">Danger Zone</h2>
-            <Button
-              type="button"
-              variant="ghost"
-              className="h-auto w-auto p-0 bg-transparent hover:bg-transparent text-red-600"
-              onClick={() => {
-                if (window.confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
-                  localStorage.removeItem('flashqi_user');
-                  localStorage.removeItem('flashqi_users');
-                  localStorage.removeItem('flashqi_passwords');
-                  router.push('/');
-                }
-              }}
-            >
-              Delete Account
-            </Button>
+            <div className="bg-red-50 border border-red-200 rounded-xl p-6">
+              <h3 className="text-lg font-medium text-red-900 mb-2">Delete Account</h3>
+              <p className="text-sm text-red-700 mb-4">
+                Permanently delete your account and all associated data. This action cannot be undone.
+              </p>
+              <Button
+                type="button"
+                variant="ghost"
+                className="h-auto w-auto px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors"
+                onClick={() => setShowDeleteModal(true)}
+              >
+                Delete Account
+              </Button>
+            </div>
           </div>
+
+          {/* Delete Confirmation Modal */}
+          {showDeleteModal && (
+            <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+              <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl">
+                <div className="flex items-start gap-4 mb-6">
+                  <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center flex-shrink-0">
+                    <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-xl font-semibold text-slate-900 mb-2">Delete Account</h3>
+                    <p className="text-sm text-slate-600">
+                      This will permanently delete your account and all your data, including:
+                    </p>
+                    <ul className="mt-3 space-y-1 text-sm text-slate-600">
+                      <li>• All flashcard progress</li>
+                      <li>• Learning statistics</li>
+                      <li>• Spaced repetition data</li>
+                      <li>• Survey responses</li>
+                    </ul>
+                  </div>
+                </div>
+
+                <div className="mb-6">
+                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                    Type your full name <strong className="text-slate-900">{name || 'your name'}</strong> to confirm:
+                  </label>
+                  <input
+                    type="text"
+                    value={deleteConfirmName}
+                    onChange={(e) => {
+                      setDeleteConfirmName(e.target.value);
+                      setDeleteError('');
+                    }}
+                    placeholder={name || 'Your full name'}
+                    className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all"
+                    disabled={isDeleting}
+                  />
+                  {deleteError && (
+                    <p className="mt-2 text-sm text-red-600">{deleteError}</p>
+                  )}
+                </div>
+
+                <div className="flex gap-3">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    className="flex-1 px-4 py-2.5 border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors"
+                    onClick={() => {
+                      setShowDeleteModal(false);
+                      setDeleteConfirmName('');
+                      setDeleteError('');
+                    }}
+                    disabled={isDeleting}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    className="flex-1 px-4 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    onClick={handleDeleteAccount}
+                    disabled={isDeleting || !deleteConfirmName.trim()}
+                  >
+                    {isDeleting ? (
+                      <span className="flex items-center justify-center gap-2">
+                        <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                        </svg>
+                        Deleting...
+                      </span>
+                    ) : (
+                      'Delete My Account'
+                    )}
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </main>
 
