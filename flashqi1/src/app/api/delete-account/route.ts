@@ -1,8 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+const supabaseUrl =
+  process.env.NEXT_PUBLIC_SUPABASE_URL ||
+  process.env.SUPABASE_URL ||
+  '';
+
+const supabaseServiceKey =
+  process.env.SUPABASE_SERVICE_ROLE_KEY ||
+  process.env.SUPABASE_SERVICE_KEY ||
+  '';
 
 export async function POST(req: NextRequest) {
   try {
@@ -10,6 +17,20 @@ export async function POST(req: NextRequest) {
 
     if (!userId) {
       return NextResponse.json({ error: 'User ID is required' }, { status: 400 });
+    }
+
+    if (!supabaseUrl) {
+      return NextResponse.json(
+        { error: 'Server misconfiguration: missing SUPABASE URL' },
+        { status: 500 }
+      );
+    }
+
+    if (!supabaseServiceKey) {
+      return NextResponse.json(
+        { error: 'Server misconfiguration: missing Supabase service role key' },
+        { status: 500 }
+      );
     }
 
     // Create admin client with service role key
