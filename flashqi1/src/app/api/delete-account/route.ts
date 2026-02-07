@@ -85,21 +85,21 @@ export async function POST(req: NextRequest) {
       });
       return NextResponse.json({ 
         error: 'Failed to delete user account from authentication system',
-        details: deleteAuthError.message 
       }, { status: 500 });
     }
-
-    console.log('User deleted from auth successfully:', deleteData);
 
     // Verify the user was actually deleted
     const { data: checkUser, error: checkError } = await supabaseAdmin.auth.admin.getUserById(userId);
-    if (checkUser && !checkError) {
-      console.error('User still exists after deletion attempt!');
+    
+    if (checkUser?.user) {
+      console.error('User still exists after deletion attempt:', checkUser.user.id);
       return NextResponse.json({ 
-        error: 'User deletion verification failed - user still exists' 
+        error: 'Auth deletion did not complete. User still exists. Please check service role key permissions.',
+        userId: userId
       }, { status: 500 });
     }
 
+    console.log('User successfully deleted from auth');
     return NextResponse.json({ success: true, message: 'Account deleted successfully' });
   } catch (error) {
     console.error('Delete account error:', error);
