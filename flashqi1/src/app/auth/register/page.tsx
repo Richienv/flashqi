@@ -40,6 +40,12 @@ export default function RegisterPage() {
     } catch (error: any) {
       console.error('Sign up error:', error);
       const msg = error.message || '';
+      console.log('Raw error message:', msg);
+      
+      // TEMPORARY: Show raw error for debugging
+      setError(`DEBUG: ${msg}`);
+      
+      /* Commented out for debugging - will restore after fixing
       if (msg.includes('User already registered') || msg.includes('already been registered')) {
         setError('This email is already registered. Please sign in instead.');
       } else if (msg.includes('Database error saving new user')) {
@@ -57,6 +63,7 @@ export default function RegisterPage() {
       } else {
         setError(msg || 'Something went wrong. Please try again.');
       }
+      */
     } finally {
       setLoading(false);
     }
