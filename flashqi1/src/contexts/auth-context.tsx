@@ -39,6 +39,8 @@ type AuthContextType = {
   signUp: (email: string, password: string, name: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
   resendConfirmationEmail: (email: string) => Promise<{ error: any }>;
+  resetPassword: (email: string) => Promise<{ error: any }>;
+  updatePassword: (newPassword: string) => Promise<{ error: any }>;
   isAuthenticated: boolean;
   lastError: Error | null;
   updateProfile: (updates: { name?: string }) => Promise<{ error: any }>;
@@ -172,6 +174,42 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const resetPassword = async (email: string) => {
+    setLastError(null);
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/auth/reset-password`,
+      });
+      if (error) {
+        setLastError(error);
+        return { error };
+      }
+      return { error: null };
+    } catch (error) {
+      console.error('Reset password error:', error);
+      setLastError(error instanceof Error ? error : new Error(String(error)));
+      return { error };
+    }
+  };
+
+  const updatePassword = async (newPassword: string) => {
+    setLastError(null);
+    try {
+      const { error } = await supabase.auth.updateUser({
+        password: newPassword,
+      });
+      if (error) {
+        setLastError(error);
+        return { error };
+      }
+      return { error: null };
+    } catch (error) {
+      console.error('Update password error:', error);
+      setLastError(error instanceof Error ? error : new Error(String(error)));
+      return { error };
+    }
+  };
+
   const signOut = async () => {
     setLastError(null);
     try {
@@ -194,6 +232,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         signUp,
         signOut,
         resendConfirmationEmail,
+        resetPassword,
+        updatePassword,
         isAuthenticated: !!user,
         lastError,
         updateProfile,
