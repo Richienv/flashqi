@@ -36,12 +36,23 @@ export default function RegisterPage() {
       if (signUpError) throw signUpError;
       setShowConfirmPopup(true);
     } catch (error: any) {
-      if (error.message?.includes('User already registered')) {
-        setError('This email is already registered. Try signing in.');
-      } else if (error.message?.includes('Invalid email')) {
+      const msg = error.message || '';
+      if (msg.includes('User already registered') || msg.includes('already been registered')) {
+        setError('This email is already registered. Please sign in instead.');
+      } else if (msg.includes('Database error saving new user')) {
+        setError('An account with this email previously existed. Please try a different email or contact support.');
+      } else if (msg.includes('Invalid email') || msg.includes('invalid email')) {
         setError('Please enter a valid email address.');
+      } else if (msg.includes('Password') && msg.includes('least')) {
+        setError('Password must be at least 6 characters long.');
+      } else if (msg.includes('rate limit') || msg.includes('too many requests')) {
+        setError('Too many attempts. Please wait a moment and try again.');
+      } else if (msg.includes('network') || msg.includes('fetch')) {
+        setError('Network error. Please check your connection and try again.');
+      } else if (msg.includes('email') && msg.includes('not authorized')) {
+        setError('This email domain is not authorized for sign up.');
       } else {
-        setError(error.message || 'Failed to register.');
+        setError(msg || 'Something went wrong. Please try again.');
       }
     } finally {
       setLoading(false);

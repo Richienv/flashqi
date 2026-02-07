@@ -41,37 +41,38 @@ export async function POST(req: NextRequest) {
       }
     });
 
-    // Delete user data from all tables
-    // Note: Make sure to delete in the correct order to respect foreign key constraints
-    
-    // 1. Delete user surveys
+    // Delete user data from ALL tables (order matters for foreign keys)
+    const tablesToClean = [
+      { table: 'game_players', column: 'user_id' },
+      { table: 'game_rooms', column: 'host_id' },
+      { table: 'flashcard_progress', column: 'user_id' },
+      { table: 'user_hsk_progress', column: 'user_id' },
+      { table: 'user_surveys', column: 'user_id' },
+      { table: 'user_stats', column: 'user_id' },
+      { table: 'self_learn_cards', column: 'user_id' },
+      { table: 'categories', column: 'user_id' },
+      { table: 'premium_subscriptions', column: 'user_id' },
+      { table: 'daily_usage', column: 'user_id' },
+      { table: 'profiles', column: 'id' },
+    ];
+
+    for (const { table, column } of tablesToClean) {
+      const { error } = await supabaseAdmin
+        .from(table)
+        .delete()
+        .eq(column, userId);
+      if (error) {
+        console.warn(`Warning: failed to delete from ${table}:`, error.message);
+      }
+    }
+
+    // Also clear coupon_codes used_by reference
     await supabaseAdmin
-      .from('user_surveys')
-      .delete()
-      .eq('user_id', userId);
+      .from('coupon_codes')
+      .update({ used_by: null, is_used: false, used_at: null })
+      .eq('used_by', userId);
 
-    // 2. Delete user progress
-    await supabaseAdmin
-      .from('user_progress')
-      .delete()
-      .eq('user_id', userId);
-
-    // 3. Delete user stats
-    await supabaseAdmin
-      .from('user_stats')
-      .delete()
-      .eq('user_id', userId);
-
-    // 4. Delete spaced repetition records
-    await supabaseAdmin
-      .from('spaced_repetition')
-      .delete()
-      .eq('user_id', userId);
-
-    // 5. Delete any other user-specific data
-    // Add more deletions here if you have other tables
-
-    // 6. Finally, delete the user from auth
+    // Finally, delete the user from auth
     const { error: deleteAuthError } = await supabaseAdmin.auth.admin.deleteUser(userId);
 
     if (deleteAuthError) {
