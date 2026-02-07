@@ -29,7 +29,13 @@ export async function GET(req: Request) {
       .from('premium_subscriptions')
       .select('*');
 
+    // Get profiles for checkout tracking
+    const { data: profiles } = await supabase
+      .from('profiles')
+      .select('id, visited_checkout, visited_checkout_at');
+
     const subsMap = new Map((subs || []).map((s: any) => [s.user_id, s]));
+    const profilesMap = new Map((profiles || []).map((p: any) => [p.id, p]));
 
     const users = (authData?.users || []).map((u: any) => ({
       id: u.id,
@@ -38,6 +44,8 @@ export async function GET(req: Request) {
       created_at: u.created_at,
       last_sign_in: u.last_sign_in_at,
       email_confirmed: !!u.email_confirmed_at,
+      visited_checkout: profilesMap.get(u.id)?.visited_checkout || false,
+      visited_checkout_at: profilesMap.get(u.id)?.visited_checkout_at || null,
       premium: subsMap.has(u.id) ? {
         plan: subsMap.get(u.id).plan_type,
         active: subsMap.get(u.id).is_active,
@@ -85,6 +93,9 @@ export async function POST(req: Request) {
         return NextResponse.json({ error: error.message }, { status: 500 });
       }
 
+      // Also update profiles.is_premium
+      await supabase.from('profiles').update({ is_premium: true }).eq('id', userId);
+
       return NextResponse.json({ success: true, message: 'User upgraded to premium' });
     }
 
@@ -97,6 +108,9 @@ export async function POST(req: Request) {
       if (error) {
         return NextResponse.json({ error: error.message }, { status: 500 });
       }
+
+      // Also update profiles.is_premium
+      await supabase.from('profiles').update({ is_premium: false }).eq('id', userId);
 
       return NextResponse.json({ success: true, message: 'User downgraded to free' });
     }

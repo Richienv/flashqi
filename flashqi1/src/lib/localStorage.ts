@@ -15,6 +15,10 @@ const STORAGE_KEYS = {
   GAME_PLAYERS: 'flashqi_game_players',
   CATEGORIES: 'flashqi_categories',
   TRANSLATIONS: 'flashqi_translations',
+  // HSK cache for faster loading
+  HSK_CATEGORIES: 'flashqi_hsk_categories',
+  HSK_WORDS: 'flashqi_hsk_words',
+  HSK_CACHE_TIMESTAMP: 'flashqi_hsk_cache_timestamp',
 } as const;
 
 // Types
@@ -97,6 +101,10 @@ export interface TranslationCacheEntry {
   pinyin: string;
   sentences: string[];
   created_at: string;
+}
+
+function normalizeEnglishKey(english: string): string {
+  return english.trim().toLowerCase();
 }
 
 export interface GamePlayer {
@@ -239,6 +247,75 @@ export const categoryStorage = {
   },
 };
 
+// ==================== HSK CACHE (for faster loading) ====================
+
+export interface HSKCategory {
+  level: number;
+  name: string;
+  wordCount: number;
+}
+
+export interface HSKWord {
+  id?: string;
+  hsk_level: number;
+  word_order: number;
+  hanzi: string;
+  pinyin: string;
+  english: string;
+  category: string;
+}
+
+export const hskStorage = {
+  // Categories
+  getCategories(level: number): HSKCategory[] | null {
+    const all = getItem<Record<string, HSKCategory[]>>(STORAGE_KEYS.HSK_CATEGORIES);
+    return all?.[String(level)] || null;
+  },
+
+  saveCategories(level: number, categories: HSKCategory[]): void {
+    const all = getItem<Record<string, HSKCategory[]>>(STORAGE_KEYS.HSK_CATEGORIES) || {};
+    all[String(level)] = categories;
+    setItem(STORAGE_KEYS.HSK_CATEGORIES, all);
+    setItem(STORAGE_KEYS.HSK_CACHE_TIMESTAMP, Date.now());
+  },
+
+  // Words
+  getWords(level: number): HSKWord[] | null {
+    const all = getItem<Record<string, HSKWord[]>>(STORAGE_KEYS.HSK_WORDS);
+    return all?.[String(level)] || null;
+  },
+
+  saveWords(level: number, words: HSKWord[]): void {
+    const all = getItem<Record<string, HSKWord[]>>(STORAGE_KEYS.HSK_WORDS) || {};
+    all[String(level)] = words;
+    setItem(STORAGE_KEYS.HSK_WORDS, all);
+    setItem(STORAGE_KEYS.HSK_CACHE_TIMESTAMP, Date.now());
+  },
+
+  // Cache invalidation
+  isCacheStale(maxAgeMs: number = 24 * 60 * 60 * 1000): boolean {
+    const timestamp = getItem<number>(STORAGE_KEYS.HSK_CACHE_TIMESTAMP);
+    if (!timestamp) return true;
+    return Date.now() - timestamp > maxAgeMs;
+  },
+
+  clearCache(): void {
+    removeItem(STORAGE_KEYS.HSK_CATEGORIES);
+    removeItem(STORAGE_KEYS.HSK_WORDS);
+    removeItem(STORAGE_KEYS.HSK_CACHE_TIMESTAMP);
+  },
+
+  // Clear specific level
+  clearLevel(level: number): void {
+    const cats = getItem<Record<string, HSKCategory[]>>(STORAGE_KEYS.HSK_CATEGORIES) || {};
+    const words = getItem<Record<string, HSKWord[]>>(STORAGE_KEYS.HSK_WORDS) || {};
+    delete cats[String(level)];
+    delete words[String(level)];
+    setItem(STORAGE_KEYS.HSK_CATEGORIES, cats);
+    setItem(STORAGE_KEYS.HSK_WORDS, words);
+  },
+};
+
 // ==================== TRANSLATIONS (DICTIONARY CACHE) ====================
 
 export const translationStorage = {
@@ -247,10 +324,19 @@ export const translationStorage = {
   },
 
   getByEnglish(english: string): TranslationCacheEntry | null {
-    const normalized = english.trim().toLowerCase();
+    const normalized = normalizeEnglishKey(english);
     if (!normalized) return null;
+
     const entries = this.getAll();
-    return entries.find((e) => e.english.trim().toLowerCase() === normalized) || null;
+    const found = entries.find((e) => normalizeEnglishKey(e.english) === normalized) || null;
+    if (!found) return null;
+
+    // TTL: if cached entry is too old, ignore it (keeps results fresh and storage small)
+    const maxAgeMs = 30 * 24 * 60 * 60 * 1000; // 30 days
+    const createdAt = Date.parse(found.created_at);
+    if (!Number.isNaN(createdAt) && Date.now() - createdAt > maxAgeMs) return null;
+
+    return found;
   },
 
   save(entries: TranslationCacheEntry[]): void {
@@ -259,8 +345,16 @@ export const translationStorage = {
 
   upsert(entry: Omit<TranslationCacheEntry, 'created_at'>): TranslationCacheEntry {
     const entries = this.getAll();
-    const normalized = entry.english.trim().toLowerCase();
-    const existingIndex = entries.findIndex((e) => e.english.trim().toLowerCase() === normalized);
+    const normalized = normalizeEnglishKey(entry.english);
+    if (!normalized) {
+      return {
+        ...entry,
+        english: entry.english,
+        created_at: new Date().toISOString(),
+      };
+    }
+
+    const existingIndex = entries.findIndex((e) => normalizeEnglishKey(e.english) === normalized);
     const nextEntry: TranslationCacheEntry = {
       ...entry,
       created_at: new Date().toISOString(),
@@ -270,7 +364,19 @@ export const translationStorage = {
     } else {
       entries.unshift(nextEntry);
     }
-    this.save(entries);
+
+    // Prune: cap size + remove stale entries
+    const maxEntries = 250;
+    const maxAgeMs = 30 * 24 * 60 * 60 * 1000; // 30 days
+    const now = Date.now();
+    const pruned = entries
+      .filter((e) => {
+        const createdAt = Date.parse(e.created_at);
+        return Number.isNaN(createdAt) ? true : now - createdAt <= maxAgeMs;
+      })
+      .slice(0, maxEntries);
+
+    this.save(pruned);
     return nextEntry;
   },
 };

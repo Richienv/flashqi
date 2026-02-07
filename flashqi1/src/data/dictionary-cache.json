@@ -1,7 +1,7 @@
 {
   "_meta": {
-    "description": "Server-side translation dictionary. Contains HSK-5 vocabulary (1293 words) + common high-frequency words. Total: 1894 entries. Grows automatically when AI translates new words.",
-    "lastUpdated": "2026-02-06T17:31:31.750Z",
+    "description": "FlashQi dictionary cache (auto-seeded with HSK 1-5 vocabulary)",
+    "lastUpdated": "2026-02-07T12:08:10.862Z",
     "totalEntries": 1852
   },
   "entries": {
@@ -7584,6 +7584,2018 @@
     "balon": {
       "hanzi": "气球",
       "pinyin": "qìqiú"
+    },
+    "zh:你好": {
+      "hanzi": "你好",
+      "pinyin": "nǐ hǎo"
+    },
+    "zh:谢谢": {
+      "hanzi": "谢谢",
+      "pinyin": "xiè xie"
+    },
+    "zh:再见": {
+      "hanzi": "再见",
+      "pinyin": "zài jiàn"
+    },
+    "zh:对不起": {
+      "hanzi": "对不起",
+      "pinyin": "duì bu qǐ"
+    },
+    "yes/to be": {
+      "hanzi": "是",
+      "pinyin": "shì"
+    },
+    "zh:是": {
+      "hanzi": "是",
+      "pinyin": "shì"
+    },
+    "no/not": {
+      "hanzi": "不",
+      "pinyin": "bù"
+    },
+    "zh:不": {
+      "hanzi": "不",
+      "pinyin": "bù"
+    },
+    "i/me": {
+      "hanzi": "我",
+      "pinyin": "wǒ"
+    },
+    "zh:我": {
+      "hanzi": "我",
+      "pinyin": "wǒ"
+    },
+    "zh:你": {
+      "hanzi": "你",
+      "pinyin": "nǐ"
+    },
+    "he/him": {
+      "hanzi": "他",
+      "pinyin": "tā"
+    },
+    "zh:他": {
+      "hanzi": "他",
+      "pinyin": "tā"
+    },
+    "she/her": {
+      "hanzi": "她",
+      "pinyin": "tā"
+    },
+    "zh:她": {
+      "hanzi": "她",
+      "pinyin": "tā"
+    },
+    "plural marker": {
+      "hanzi": "们",
+      "pinyin": "men"
+    },
+    "zh:们": {
+      "hanzi": "们",
+      "pinyin": "men"
+    },
+    "zh:这": {
+      "hanzi": "这",
+      "pinyin": "zhè"
+    },
+    "zh:那": {
+      "hanzi": "那",
+      "pinyin": "nà"
+    },
+    "zh:什么": {
+      "hanzi": "什么",
+      "pinyin": "shén me"
+    },
+    "zh:谁": {
+      "hanzi": "谁",
+      "pinyin": "shuí"
+    },
+    "which/where": {
+      "hanzi": "哪",
+      "pinyin": "nǎ"
+    },
+    "zh:哪": {
+      "hanzi": "哪",
+      "pinyin": "nǎ"
+    },
+    "zh:多少": {
+      "hanzi": "多少",
+      "pinyin": "duō shao"
+    },
+    "how many/several": {
+      "hanzi": "几",
+      "pinyin": "jǐ"
+    },
+    "zh:几": {
+      "hanzi": "几",
+      "pinyin": "jǐ"
+    },
+    "zh:怎么": {
+      "hanzi": "怎么",
+      "pinyin": "zěn me"
+    },
+    "how about": {
+      "hanzi": "怎么样",
+      "pinyin": "zěn me yàng"
+    },
+    "zh:怎么样": {
+      "hanzi": "怎么样",
+      "pinyin": "zěn me yàng"
+    },
+    "zh:一": {
+      "hanzi": "一",
+      "pinyin": "yī"
+    },
+    "zh:二": {
+      "hanzi": "二",
+      "pinyin": "èr"
+    },
+    "zh:三": {
+      "hanzi": "三",
+      "pinyin": "sān"
+    },
+    "zh:四": {
+      "hanzi": "四",
+      "pinyin": "sì"
+    },
+    "zh:五": {
+      "hanzi": "五",
+      "pinyin": "wǔ"
+    },
+    "zh:六": {
+      "hanzi": "六",
+      "pinyin": "liù"
+    },
+    "zh:七": {
+      "hanzi": "七",
+      "pinyin": "qī"
+    },
+    "zh:八": {
+      "hanzi": "八",
+      "pinyin": "bā"
+    },
+    "zh:九": {
+      "hanzi": "九",
+      "pinyin": "jiǔ"
+    },
+    "zh:十": {
+      "hanzi": "十",
+      "pinyin": "shí"
+    },
+    "zh:零": {
+      "hanzi": "零",
+      "pinyin": "líng"
+    },
+    "zh:百": {
+      "hanzi": "百",
+      "pinyin": "bǎi"
+    },
+    "zh:爸爸": {
+      "hanzi": "爸爸",
+      "pinyin": "bà ba"
+    },
+    "zh:妈妈": {
+      "hanzi": "妈妈",
+      "pinyin": "mā ma"
+    },
+    "zh:儿子": {
+      "hanzi": "儿子",
+      "pinyin": "ér zi"
+    },
+    "zh:女儿": {
+      "hanzi": "女儿",
+      "pinyin": "nǚ ér"
+    },
+    "zh:老师": {
+      "hanzi": "老师",
+      "pinyin": "lǎo shī"
+    },
+    "zh:学生": {
+      "hanzi": "学生",
+      "pinyin": "xué shēng"
+    },
+    "zh:朋友": {
+      "hanzi": "朋友",
+      "pinyin": "péng you"
+    },
+    "zh:医生": {
+      "hanzi": "医生",
+      "pinyin": "yī shēng"
+    },
+    "zh:人": {
+      "hanzi": "人",
+      "pinyin": "rén"
+    },
+    "zh:大": {
+      "hanzi": "大",
+      "pinyin": "dà"
+    },
+    "zh:小": {
+      "hanzi": "小",
+      "pinyin": "xiǎo"
+    },
+    "zh:多": {
+      "hanzi": "多",
+      "pinyin": "duō"
+    },
+    "zh:少": {
+      "hanzi": "少",
+      "pinyin": "shǎo"
+    },
+    "zh:好": {
+      "hanzi": "好",
+      "pinyin": "hǎo"
+    },
+    "zh:高兴": {
+      "hanzi": "高兴",
+      "pinyin": "gāo xìng"
+    },
+    "zh:冷": {
+      "hanzi": "冷",
+      "pinyin": "lěng"
+    },
+    "zh:热": {
+      "hanzi": "热",
+      "pinyin": "rè"
+    },
+    "zh:漂亮": {
+      "hanzi": "漂亮",
+      "pinyin": "piào liang"
+    },
+    "zh:吃": {
+      "hanzi": "吃",
+      "pinyin": "chī"
+    },
+    "zh:喝": {
+      "hanzi": "喝",
+      "pinyin": "hē"
+    },
+    "zh:去": {
+      "hanzi": "去",
+      "pinyin": "qù"
+    },
+    "zh:来": {
+      "hanzi": "来",
+      "pinyin": "lái"
+    },
+    "look/see": {
+      "hanzi": "看",
+      "pinyin": "kàn"
+    },
+    "zh:看": {
+      "hanzi": "看",
+      "pinyin": "kàn"
+    },
+    "zh:听": {
+      "hanzi": "听",
+      "pinyin": "tīng"
+    },
+    "zh:说": {
+      "hanzi": "说",
+      "pinyin": "shuō"
+    },
+    "zh:读": {
+      "hanzi": "读",
+      "pinyin": "dú"
+    },
+    "zh:写": {
+      "hanzi": "写",
+      "pinyin": "xiě"
+    },
+    "zh:学": {
+      "hanzi": "学",
+      "pinyin": "xué"
+    },
+    "zh:工作": {
+      "hanzi": "工作",
+      "pinyin": "gōng zuò"
+    },
+    "zh:住": {
+      "hanzi": "住",
+      "pinyin": "zhù"
+    },
+    "zh:买": {
+      "hanzi": "买",
+      "pinyin": "mǎi"
+    },
+    "zh:开": {
+      "hanzi": "开",
+      "pinyin": "kāi"
+    },
+    "zh:坐": {
+      "hanzi": "坐",
+      "pinyin": "zuò"
+    },
+    "call/named": {
+      "hanzi": "叫",
+      "pinyin": "jiào"
+    },
+    "zh:叫": {
+      "hanzi": "叫",
+      "pinyin": "jiào"
+    },
+    "zh:爱": {
+      "hanzi": "爱",
+      "pinyin": "ài"
+    },
+    "think/want": {
+      "hanzi": "想",
+      "pinyin": "xiǎng"
+    },
+    "zh:想": {
+      "hanzi": "想",
+      "pinyin": "xiǎng"
+    },
+    "know (person)": {
+      "hanzi": "认识",
+      "pinyin": "rèn shi"
+    },
+    "zh:认识": {
+      "hanzi": "认识",
+      "pinyin": "rèn shi"
+    },
+    "can/will": {
+      "hanzi": "会",
+      "pinyin": "huì"
+    },
+    "zh:会": {
+      "hanzi": "会",
+      "pinyin": "huì"
+    },
+    "can/able": {
+      "hanzi": "能",
+      "pinyin": "néng"
+    },
+    "zh:能": {
+      "hanzi": "能",
+      "pinyin": "néng"
+    },
+    "zh:有": {
+      "hanzi": "有",
+      "pinyin": "yǒu"
+    },
+    "at/in": {
+      "hanzi": "在",
+      "pinyin": "zài"
+    },
+    "zh:在": {
+      "hanzi": "在",
+      "pinyin": "zài"
+    },
+    "do/make": {
+      "hanzi": "做",
+      "pinyin": "zuò"
+    },
+    "zh:做": {
+      "hanzi": "做",
+      "pinyin": "zuò"
+    },
+    "zh:睡觉": {
+      "hanzi": "睡觉",
+      "pinyin": "shuì jiào"
+    },
+    "zh:水": {
+      "hanzi": "水",
+      "pinyin": "shuǐ"
+    },
+    "zh:茶": {
+      "hanzi": "茶",
+      "pinyin": "chá"
+    },
+    "zh:米饭": {
+      "hanzi": "米饭",
+      "pinyin": "mǐ fàn"
+    },
+    "zh:水果": {
+      "hanzi": "水果",
+      "pinyin": "shuǐ guǒ"
+    },
+    "zh:苹果": {
+      "hanzi": "苹果",
+      "pinyin": "píng guǒ"
+    },
+    "dish/vegetable": {
+      "hanzi": "菜",
+      "pinyin": "cài"
+    },
+    "zh:菜": {
+      "hanzi": "菜",
+      "pinyin": "cài"
+    },
+    "zh:猫": {
+      "hanzi": "猫",
+      "pinyin": "māo"
+    },
+    "zh:狗": {
+      "hanzi": "狗",
+      "pinyin": "gǒu"
+    },
+    "zh:书": {
+      "hanzi": "书",
+      "pinyin": "shū"
+    },
+    "zh:电脑": {
+      "hanzi": "电脑",
+      "pinyin": "diàn nǎo"
+    },
+    "tv": {
+      "hanzi": "电视",
+      "pinyin": "diàn shì"
+    },
+    "zh:电视": {
+      "hanzi": "电视",
+      "pinyin": "diàn shì"
+    },
+    "zh:电影": {
+      "hanzi": "电影",
+      "pinyin": "diàn yǐng"
+    },
+    "zh:手机": {
+      "hanzi": "手机",
+      "pinyin": "shǒu jī"
+    },
+    "zh:钱": {
+      "hanzi": "钱",
+      "pinyin": "qián"
+    },
+    "zh:飞机": {
+      "hanzi": "飞机",
+      "pinyin": "fēi jī"
+    },
+    "zh:出租车": {
+      "hanzi": "出租车",
+      "pinyin": "chū zū chē"
+    },
+    "zh:车": {
+      "hanzi": "车",
+      "pinyin": "chē"
+    },
+    "zh:学校": {
+      "hanzi": "学校",
+      "pinyin": "xué xiào"
+    },
+    "zh:医院": {
+      "hanzi": "医院",
+      "pinyin": "yī yuàn"
+    },
+    "zh:商店": {
+      "hanzi": "商店",
+      "pinyin": "shāng diàn"
+    },
+    "zh:饭馆": {
+      "hanzi": "饭馆",
+      "pinyin": "fàn guǎn"
+    },
+    "zh:家": {
+      "hanzi": "家",
+      "pinyin": "jiā"
+    },
+    "zh:中国": {
+      "hanzi": "中国",
+      "pinyin": "zhōng guó"
+    },
+    "beijing": {
+      "hanzi": "北京",
+      "pinyin": "Běi jīng"
+    },
+    "zh:北京": {
+      "hanzi": "北京",
+      "pinyin": "Běi jīng"
+    },
+    "zh:天气": {
+      "hanzi": "天气",
+      "pinyin": "tiān qì"
+    },
+    "zh:下雨": {
+      "hanzi": "下雨",
+      "pinyin": "xià yǔ"
+    },
+    "zh:今天": {
+      "hanzi": "今天",
+      "pinyin": "jīn tiān"
+    },
+    "zh:明天": {
+      "hanzi": "明天",
+      "pinyin": "míng tiān"
+    },
+    "zh:昨天": {
+      "hanzi": "昨天",
+      "pinyin": "zuó tiān"
+    },
+    "zh:现在": {
+      "hanzi": "现在",
+      "pinyin": "xiàn zài"
+    },
+    "time/moment": {
+      "hanzi": "时候",
+      "pinyin": "shí hou"
+    },
+    "zh:时候": {
+      "hanzi": "时候",
+      "pinyin": "shí hou"
+    },
+    "zh:年": {
+      "hanzi": "年",
+      "pinyin": "nián"
+    },
+    "zh:月": {
+      "hanzi": "月",
+      "pinyin": "yuè"
+    },
+    "zh:日": {
+      "hanzi": "日",
+      "pinyin": "rì"
+    },
+    "zh:星期": {
+      "hanzi": "星期",
+      "pinyin": "xīng qī"
+    },
+    "zh:分钟": {
+      "hanzi": "分钟",
+      "pinyin": "fēn zhōng"
+    },
+    "zh:前面": {
+      "hanzi": "前面",
+      "pinyin": "qián miàn"
+    },
+    "back/behind": {
+      "hanzi": "后面",
+      "pinyin": "hòu miàn"
+    },
+    "zh:后面": {
+      "hanzi": "后面",
+      "pinyin": "hòu miàn"
+    },
+    "zh:里面": {
+      "hanzi": "里面",
+      "pinyin": "lǐ miàn"
+    },
+    "up/on": {
+      "hanzi": "上",
+      "pinyin": "shàng"
+    },
+    "zh:上": {
+      "hanzi": "上",
+      "pinyin": "shàng"
+    },
+    "down/under": {
+      "hanzi": "下",
+      "pinyin": "xià"
+    },
+    "zh:下": {
+      "hanzi": "下",
+      "pinyin": "xià"
+    },
+    "zh:很": {
+      "hanzi": "很",
+      "pinyin": "hěn"
+    },
+    "zh:也": {
+      "hanzi": "也",
+      "pinyin": "yě"
+    },
+    "zh:都": {
+      "hanzi": "都",
+      "pinyin": "dōu"
+    },
+    "not/no": {
+      "hanzi": "没",
+      "pinyin": "méi"
+    },
+    "zh:没": {
+      "hanzi": "没",
+      "pinyin": "méi"
+    },
+    "zh:和": {
+      "hanzi": "和",
+      "pinyin": "hé"
+    },
+    "possessive particle": {
+      "hanzi": "的",
+      "pinyin": "de"
+    },
+    "zh:的": {
+      "hanzi": "的",
+      "pinyin": "de"
+    },
+    "completed action": {
+      "hanzi": "了",
+      "pinyin": "le"
+    },
+    "zh:了": {
+      "hanzi": "了",
+      "pinyin": "le"
+    },
+    "question particle": {
+      "hanzi": "吗",
+      "pinyin": "ma"
+    },
+    "zh:吗": {
+      "hanzi": "吗",
+      "pinyin": "ma"
+    },
+    "modal particle": {
+      "hanzi": "呢",
+      "pinyin": "ne"
+    },
+    "zh:呢": {
+      "hanzi": "呢",
+      "pinyin": "ne"
+    },
+    "measure word": {
+      "hanzi": "个",
+      "pinyin": "gè"
+    },
+    "zh:个": {
+      "hanzi": "个",
+      "pinyin": "gè"
+    },
+    "years old": {
+      "hanzi": "岁",
+      "pinyin": "suì"
+    },
+    "zh:岁": {
+      "hanzi": "岁",
+      "pinyin": "suì"
+    },
+    "yuan/piece": {
+      "hanzi": "块",
+      "pinyin": "kuài"
+    },
+    "zh:块": {
+      "hanzi": "块",
+      "pinyin": "kuài"
+    },
+    "mw for books": {
+      "hanzi": "本",
+      "pinyin": "běn"
+    },
+    "zh:本": {
+      "hanzi": "本",
+      "pinyin": "běn"
+    },
+    "zh:些": {
+      "hanzi": "些",
+      "pinyin": "xiē"
+    },
+    "zh:请": {
+      "hanzi": "请",
+      "pinyin": "qǐng"
+    },
+    "too (much)": {
+      "hanzi": "太",
+      "pinyin": "tài"
+    },
+    "zh:太": {
+      "hanzi": "太",
+      "pinyin": "tài"
+    },
+    "zh:对": {
+      "hanzi": "对",
+      "pinyin": "duì"
+    },
+    "zh:名字": {
+      "hanzi": "名字",
+      "pinyin": "míng zi"
+    },
+    "zh:衣服": {
+      "hanzi": "衣服",
+      "pinyin": "yī fu"
+    },
+    "zh:杯子": {
+      "hanzi": "杯子",
+      "pinyin": "bēi zi"
+    },
+    "zh:桌子": {
+      "hanzi": "桌子",
+      "pinyin": "zhuō zi"
+    },
+    "zh:椅子": {
+      "hanzi": "椅子",
+      "pinyin": "yǐ zi"
+    },
+    "zh:东西": {
+      "hanzi": "东西",
+      "pinyin": "dōng xi"
+    },
+    "zh:字": {
+      "hanzi": "字",
+      "pinyin": "zì"
+    },
+    "zh:汉语": {
+      "hanzi": "汉语",
+      "pinyin": "hàn yǔ"
+    },
+    "zh:中午": {
+      "hanzi": "中午",
+      "pinyin": "zhōng wǔ"
+    },
+    "zh:早上": {
+      "hanzi": "早上",
+      "pinyin": "zǎo shang"
+    },
+    "zh:下午": {
+      "hanzi": "下午",
+      "pinyin": "xià wǔ"
+    },
+    "zh:晚上": {
+      "hanzi": "晚上",
+      "pinyin": "wǎn shang"
+    },
+    "zh:小姐": {
+      "hanzi": "小姐",
+      "pinyin": "xiǎo jiě"
+    },
+    "mister": {
+      "hanzi": "先生",
+      "pinyin": "xiān sheng"
+    },
+    "zh:先生": {
+      "hanzi": "先生",
+      "pinyin": "xiān sheng"
+    },
+    "zh:因为": {
+      "hanzi": "因为",
+      "pinyin": "yīn wèi"
+    },
+    "so/therefore": {
+      "hanzi": "所以",
+      "pinyin": "suǒ yǐ"
+    },
+    "zh:所以": {
+      "hanzi": "所以",
+      "pinyin": "suǒ yǐ"
+    },
+    "zh:但是": {
+      "hanzi": "但是",
+      "pinyin": "dàn shì"
+    },
+    "zh:虽然": {
+      "hanzi": "虽然",
+      "pinyin": "suī rán"
+    },
+    "zh:如果": {
+      "hanzi": "如果",
+      "pinyin": "rú guǒ"
+    },
+    "zh:已经": {
+      "hanzi": "已经",
+      "pinyin": "yǐ jīng"
+    },
+    "can/may": {
+      "hanzi": "可以",
+      "pinyin": "kě yǐ"
+    },
+    "zh:可以": {
+      "hanzi": "可以",
+      "pinyin": "kě yǐ"
+    },
+    "zh:可能": {
+      "hanzi": "可能",
+      "pinyin": "kě néng"
+    },
+    "zh:需要": {
+      "hanzi": "需要",
+      "pinyin": "xū yào"
+    },
+    "zh:应该": {
+      "hanzi": "应该",
+      "pinyin": "yīng gāi"
+    },
+    "zh:必须": {
+      "hanzi": "必须",
+      "pinyin": "bì xū"
+    },
+    "zh:知道": {
+      "hanzi": "知道",
+      "pinyin": "zhī dào"
+    },
+    "feel/think": {
+      "hanzi": "觉得",
+      "pinyin": "jué de"
+    },
+    "zh:觉得": {
+      "hanzi": "觉得",
+      "pinyin": "jué de"
+    },
+    "zh:希望": {
+      "hanzi": "希望",
+      "pinyin": "xī wàng"
+    },
+    "zh:相信": {
+      "hanzi": "相信",
+      "pinyin": "xiāng xìn"
+    },
+    "zh:帮助": {
+      "hanzi": "帮助",
+      "pinyin": "bāng zhù"
+    },
+    "zh:准备": {
+      "hanzi": "准备",
+      "pinyin": "zhǔn bèi"
+    },
+    "zh:开始": {
+      "hanzi": "开始",
+      "pinyin": "kāi shǐ"
+    },
+    "zh:完成": {
+      "hanzi": "完成",
+      "pinyin": "wán chéng"
+    },
+    "zh:问": {
+      "hanzi": "问",
+      "pinyin": "wèn"
+    },
+    "zh:回答": {
+      "hanzi": "回答",
+      "pinyin": "huí dá"
+    },
+    "zh:告诉": {
+      "hanzi": "告诉",
+      "pinyin": "gào su"
+    },
+    "zh:介绍": {
+      "hanzi": "介绍",
+      "pinyin": "jiè shào"
+    },
+    "zh:等": {
+      "hanzi": "等",
+      "pinyin": "děng"
+    },
+    "find/look for": {
+      "hanzi": "找",
+      "pinyin": "zhǎo"
+    },
+    "zh:找": {
+      "hanzi": "找",
+      "pinyin": "zhǎo"
+    },
+    "zh:给": {
+      "hanzi": "给",
+      "pinyin": "gěi"
+    },
+    "send/give": {
+      "hanzi": "送",
+      "pinyin": "sòng"
+    },
+    "zh:送": {
+      "hanzi": "送",
+      "pinyin": "sòng"
+    },
+    "zh:到": {
+      "hanzi": "到",
+      "pinyin": "dào"
+    },
+    "zh:走": {
+      "hanzi": "走",
+      "pinyin": "zǒu"
+    },
+    "zh:跑": {
+      "hanzi": "跑",
+      "pinyin": "pǎo"
+    },
+    "zh:玩": {
+      "hanzi": "玩",
+      "pinyin": "wán"
+    },
+    "zh:唱歌": {
+      "hanzi": "唱歌",
+      "pinyin": "chàng gē"
+    },
+    "zh:跳舞": {
+      "hanzi": "跳舞",
+      "pinyin": "tiào wǔ"
+    },
+    "zh:游泳": {
+      "hanzi": "游泳",
+      "pinyin": "yóu yǒng"
+    },
+    "zh:运动": {
+      "hanzi": "运动",
+      "pinyin": "yùn dòng"
+    },
+    "zh:旅游": {
+      "hanzi": "旅游",
+      "pinyin": "lǚ yóu"
+    },
+    "zh:考试": {
+      "hanzi": "考试",
+      "pinyin": "kǎo shì"
+    },
+    "zh:问题": {
+      "hanzi": "问题",
+      "pinyin": "wèn tí"
+    },
+    "zh:快": {
+      "hanzi": "快",
+      "pinyin": "kuài"
+    },
+    "zh:慢": {
+      "hanzi": "慢",
+      "pinyin": "màn"
+    },
+    "zh:远": {
+      "hanzi": "远",
+      "pinyin": "yuǎn"
+    },
+    "zh:近": {
+      "hanzi": "近",
+      "pinyin": "jìn"
+    },
+    "zh:长": {
+      "hanzi": "长",
+      "pinyin": "cháng"
+    },
+    "zh:高": {
+      "hanzi": "高",
+      "pinyin": "gāo"
+    },
+    "zh:新": {
+      "hanzi": "新",
+      "pinyin": "xīn"
+    },
+    "zh:旧": {
+      "hanzi": "旧",
+      "pinyin": "jiù"
+    },
+    "zh:贵": {
+      "hanzi": "贵",
+      "pinyin": "guì"
+    },
+    "zh:便宜": {
+      "hanzi": "便宜",
+      "pinyin": "pián yi"
+    },
+    "zh:容易": {
+      "hanzi": "容易",
+      "pinyin": "róng yì"
+    },
+    "zh:难": {
+      "hanzi": "难",
+      "pinyin": "nán"
+    },
+    "zh:重要": {
+      "hanzi": "重要",
+      "pinyin": "zhòng yào"
+    },
+    "zh:生气": {
+      "hanzi": "生气",
+      "pinyin": "shēng qì"
+    },
+    "zh:难过": {
+      "hanzi": "难过",
+      "pinyin": "nán guò"
+    },
+    "zh:累": {
+      "hanzi": "累",
+      "pinyin": "lèi"
+    },
+    "zh:忙": {
+      "hanzi": "忙",
+      "pinyin": "máng"
+    },
+    "zh:生病": {
+      "hanzi": "生病",
+      "pinyin": "shēng bìng"
+    },
+    "zh:身体": {
+      "hanzi": "身体",
+      "pinyin": "shēn tǐ"
+    },
+    "zh:眼睛": {
+      "hanzi": "眼睛",
+      "pinyin": "yǎn jīng"
+    },
+    "zh:鼻子": {
+      "hanzi": "鼻子",
+      "pinyin": "bí zi"
+    },
+    "zh:耳朵": {
+      "hanzi": "耳朵",
+      "pinyin": "ěr duo"
+    },
+    "zh:哥哥": {
+      "hanzi": "哥哥",
+      "pinyin": "gē ge"
+    },
+    "zh:弟弟": {
+      "hanzi": "弟弟",
+      "pinyin": "dì di"
+    },
+    "zh:姐姐": {
+      "hanzi": "姐姐",
+      "pinyin": "jiě jie"
+    },
+    "zh:妹妹": {
+      "hanzi": "妹妹",
+      "pinyin": "mèi mei"
+    },
+    "zh:丈夫": {
+      "hanzi": "丈夫",
+      "pinyin": "zhàng fu"
+    },
+    "zh:妻子": {
+      "hanzi": "妻子",
+      "pinyin": "qī zi"
+    },
+    "zh:孩子": {
+      "hanzi": "孩子",
+      "pinyin": "hái zi"
+    },
+    "zh:牛奶": {
+      "hanzi": "牛奶",
+      "pinyin": "niú nǎi"
+    },
+    "zh:鸡蛋": {
+      "hanzi": "鸡蛋",
+      "pinyin": "jī dàn"
+    },
+    "zh:面条": {
+      "hanzi": "面条",
+      "pinyin": "miàn tiáo"
+    },
+    "zh:鱼": {
+      "hanzi": "鱼",
+      "pinyin": "yú"
+    },
+    "zh:鸡": {
+      "hanzi": "鸡",
+      "pinyin": "jī"
+    },
+    "zh:咖啡": {
+      "hanzi": "咖啡",
+      "pinyin": "kā fēi"
+    },
+    "zh:啤酒": {
+      "hanzi": "啤酒",
+      "pinyin": "pí jiǔ"
+    },
+    "zh:香蕉": {
+      "hanzi": "香蕉",
+      "pinyin": "xiāng jiāo"
+    },
+    "zh:西瓜": {
+      "hanzi": "西瓜",
+      "pinyin": "xī guā"
+    },
+    "zh:颜色": {
+      "hanzi": "颜色",
+      "pinyin": "yán sè"
+    },
+    "zh:红": {
+      "hanzi": "红",
+      "pinyin": "hóng"
+    },
+    "zh:白": {
+      "hanzi": "白",
+      "pinyin": "bái"
+    },
+    "zh:黑": {
+      "hanzi": "黑",
+      "pinyin": "hēi"
+    },
+    "zh:路": {
+      "hanzi": "路",
+      "pinyin": "lù"
+    },
+    "zh:门": {
+      "hanzi": "门",
+      "pinyin": "mén"
+    },
+    "zh:窗户": {
+      "hanzi": "窗户",
+      "pinyin": "chuāng hu"
+    },
+    "zh:房间": {
+      "hanzi": "房间",
+      "pinyin": "fáng jiān"
+    },
+    "zh:公司": {
+      "hanzi": "公司",
+      "pinyin": "gōng sī"
+    },
+    "zh:教室": {
+      "hanzi": "教室",
+      "pinyin": "jiào shì"
+    },
+    "zh:经常": {
+      "hanzi": "经常",
+      "pinyin": "jīng cháng"
+    },
+    "zh:有时候": {
+      "hanzi": "有时候",
+      "pinyin": "yǒu shí hou"
+    },
+    "zh:从不": {
+      "hanzi": "从不",
+      "pinyin": "cóng bù"
+    },
+    "zh:总是": {
+      "hanzi": "总是",
+      "pinyin": "zǒng shì"
+    },
+    "zh:突然": {
+      "hanzi": "突然",
+      "pinyin": "tū rán"
+    },
+    "zh:马上": {
+      "hanzi": "马上",
+      "pinyin": "mǎ shàng"
+    },
+    "zh:一起": {
+      "hanzi": "一起",
+      "pinyin": "yī qǐ"
+    },
+    "zh:还": {
+      "hanzi": "还",
+      "pinyin": "hái"
+    },
+    "zh:再": {
+      "hanzi": "再",
+      "pinyin": "zài"
+    },
+    "again/also": {
+      "hanzi": "又",
+      "pinyin": "yòu"
+    },
+    "zh:又": {
+      "hanzi": "又",
+      "pinyin": "yòu"
+    },
+    "zh:最": {
+      "hanzi": "最",
+      "pinyin": "zuì"
+    },
+    "zh:只": {
+      "hanzi": "只",
+      "pinyin": "zhǐ"
+    },
+    "just now": {
+      "hanzi": "刚才",
+      "pinyin": "gāng cái"
+    },
+    "zh:刚才": {
+      "hanzi": "刚才",
+      "pinyin": "gāng cái"
+    },
+    "in the process of": {
+      "hanzi": "正在",
+      "pinyin": "zhèng zài"
+    },
+    "zh:正在": {
+      "hanzi": "正在",
+      "pinyin": "zhèng zài"
+    },
+    "zh:决定": {
+      "hanzi": "决定",
+      "pinyin": "jué dìng"
+    },
+    "zh:变化": {
+      "hanzi": "变化",
+      "pinyin": "biàn huà"
+    },
+    "zh:经验": {
+      "hanzi": "经验",
+      "pinyin": "jīng yàn"
+    },
+    "zh:机会": {
+      "hanzi": "机会",
+      "pinyin": "jī huì"
+    },
+    "zh:成功": {
+      "hanzi": "成功",
+      "pinyin": "chéng gōng"
+    },
+    "zh:历史": {
+      "hanzi": "历史",
+      "pinyin": "lì shǐ"
+    },
+    "zh:文化": {
+      "hanzi": "文化",
+      "pinyin": "wén huà"
+    },
+    "zh:音乐": {
+      "hanzi": "音乐",
+      "pinyin": "yīn yuè"
+    },
+    "competition": {
+      "hanzi": "比赛",
+      "pinyin": "bǐ sài"
+    },
+    "zh:比赛": {
+      "hanzi": "比赛",
+      "pinyin": "bǐ sài"
+    },
+    "zh:地方": {
+      "hanzi": "地方",
+      "pinyin": "dì fang"
+    },
+    "zh:环境": {
+      "hanzi": "环境",
+      "pinyin": "huán jìng"
+    },
+    "zh:世界": {
+      "hanzi": "世界",
+      "pinyin": "shì jiè"
+    },
+    "zh:社会": {
+      "hanzi": "社会",
+      "pinyin": "shè huì"
+    },
+    "zh:经济": {
+      "hanzi": "经济",
+      "pinyin": "jīng jì"
+    },
+    "zh:城市": {
+      "hanzi": "城市",
+      "pinyin": "chéng shì"
+    },
+    "zh:国家": {
+      "hanzi": "国家",
+      "pinyin": "guó jiā"
+    },
+    "zh:语言": {
+      "hanzi": "语言",
+      "pinyin": "yǔ yán"
+    },
+    "zh:新闻": {
+      "hanzi": "新闻",
+      "pinyin": "xīn wén"
+    },
+    "zh:健康": {
+      "hanzi": "健康",
+      "pinyin": "jiàn kāng"
+    },
+    "zh:安全": {
+      "hanzi": "安全",
+      "pinyin": "ān quán"
+    },
+    "zh:方便": {
+      "hanzi": "方便",
+      "pinyin": "fāng biàn"
+    },
+    "zh:简单": {
+      "hanzi": "简单",
+      "pinyin": "jiǎn dān"
+    },
+    "zh:复杂": {
+      "hanzi": "复杂",
+      "pinyin": "fù zá"
+    },
+    "zh:特别": {
+      "hanzi": "特别",
+      "pinyin": "tè bié"
+    },
+    "ordinary": {
+      "hanzi": "普通",
+      "pinyin": "pǔ tōng"
+    },
+    "zh:普通": {
+      "hanzi": "普通",
+      "pinyin": "pǔ tōng"
+    },
+    "zh:认真": {
+      "hanzi": "认真",
+      "pinyin": "rèn zhēn"
+    },
+    "zh:紧张": {
+      "hanzi": "紧张",
+      "pinyin": "jǐn zhāng"
+    },
+    "zh:害怕": {
+      "hanzi": "害怕",
+      "pinyin": "hài pà"
+    },
+    "zh:担心": {
+      "hanzi": "担心",
+      "pinyin": "dān xīn"
+    },
+    "zh:满意": {
+      "hanzi": "满意",
+      "pinyin": "mǎn yì"
+    },
+    "zh:失望": {
+      "hanzi": "失望",
+      "pinyin": "shī wàng"
+    },
+    "interested": {
+      "hanzi": "感兴趣",
+      "pinyin": "gǎn xìng qù"
+    },
+    "zh:感兴趣": {
+      "hanzi": "感兴趣",
+      "pinyin": "gǎn xìng qù"
+    },
+    "zh:选择": {
+      "hanzi": "选择",
+      "pinyin": "xuǎn zé"
+    },
+    "zh:同意": {
+      "hanzi": "同意",
+      "pinyin": "tóng yì"
+    },
+    "zh:拒绝": {
+      "hanzi": "拒绝",
+      "pinyin": "jù jué"
+    },
+    "zh:接受": {
+      "hanzi": "接受",
+      "pinyin": "jiē shòu"
+    },
+    "zh:解释": {
+      "hanzi": "解释",
+      "pinyin": "jiě shì"
+    },
+    "zh:讨论": {
+      "hanzi": "讨论",
+      "pinyin": "tǎo lùn"
+    },
+    "zh:注意": {
+      "hanzi": "注意",
+      "pinyin": "zhù yì"
+    },
+    "influence": {
+      "hanzi": "影响",
+      "pinyin": "yǐng xiǎng"
+    },
+    "zh:影响": {
+      "hanzi": "影响",
+      "pinyin": "yǐng xiǎng"
+    },
+    "protect": {
+      "hanzi": "保护",
+      "pinyin": "bǎo hù"
+    },
+    "zh:保护": {
+      "hanzi": "保护",
+      "pinyin": "bǎo hù"
+    },
+    "zh:提高": {
+      "hanzi": "提高",
+      "pinyin": "tí gāo"
+    },
+    "zh:发展": {
+      "hanzi": "发展",
+      "pinyin": "fā zhǎn"
+    },
+    "solve": {
+      "hanzi": "解决",
+      "pinyin": "jiě jué"
+    },
+    "zh:解决": {
+      "hanzi": "解决",
+      "pinyin": "jiě jué"
+    },
+    "express": {
+      "hanzi": "表示",
+      "pinyin": "biǎo shì"
+    },
+    "zh:表示": {
+      "hanzi": "表示",
+      "pinyin": "biǎo shì"
+    },
+    "participate": {
+      "hanzi": "参加",
+      "pinyin": "cān jiā"
+    },
+    "zh:参加": {
+      "hanzi": "参加",
+      "pinyin": "cān jiā"
+    },
+    "zh:离开": {
+      "hanzi": "离开",
+      "pinyin": "lí kāi"
+    },
+    "zh:关心": {
+      "hanzi": "关心",
+      "pinyin": "guān xīn"
+    },
+    "take care of": {
+      "hanzi": "照顾",
+      "pinyin": "zhào gù"
+    },
+    "zh:照顾": {
+      "hanzi": "照顾",
+      "pinyin": "zhào gù"
+    },
+    "zh:习惯": {
+      "hanzi": "习惯",
+      "pinyin": "xí guàn"
+    },
+    "zh:练习": {
+      "hanzi": "练习",
+      "pinyin": "liàn xí"
+    },
+    "zh:努力": {
+      "hanzi": "努力",
+      "pinyin": "nǔ lì"
+    },
+    "zh:关系": {
+      "hanzi": "关系",
+      "pinyin": "guān xi"
+    },
+    "zh:办法": {
+      "hanzi": "办法",
+      "pinyin": "bàn fǎ"
+    },
+    "zh:原因": {
+      "hanzi": "原因",
+      "pinyin": "yuán yīn"
+    },
+    "zh:结果": {
+      "hanzi": "结果",
+      "pinyin": "jié guǒ"
+    },
+    "zh:条件": {
+      "hanzi": "条件",
+      "pinyin": "tiáo jiàn"
+    },
+    "zh:计划": {
+      "hanzi": "计划",
+      "pinyin": "jì huà"
+    },
+    "zh:春天": {
+      "hanzi": "春天",
+      "pinyin": "chūn tiān"
+    },
+    "zh:夏天": {
+      "hanzi": "夏天",
+      "pinyin": "xià tiān"
+    },
+    "zh:秋天": {
+      "hanzi": "秋天",
+      "pinyin": "qiū tiān"
+    },
+    "zh:冬天": {
+      "hanzi": "冬天",
+      "pinyin": "dōng tiān"
+    },
+    "zh:太阳": {
+      "hanzi": "太阳",
+      "pinyin": "tài yáng"
+    },
+    "zh:月亮": {
+      "hanzi": "月亮",
+      "pinyin": "yuè liang"
+    },
+    "zh:地图": {
+      "hanzi": "地图",
+      "pinyin": "dì tú"
+    },
+    "zh:照片": {
+      "hanzi": "照片",
+      "pinyin": "zhào piàn"
+    },
+    "zh:礼物": {
+      "hanzi": "礼物",
+      "pinyin": "lǐ wù"
+    },
+    "zh:节日": {
+      "hanzi": "节日",
+      "pinyin": "jié rì"
+    },
+    "zh:生日": {
+      "hanzi": "生日",
+      "pinyin": "shēng rì"
+    },
+    "neighbor": {
+      "hanzi": "邻居",
+      "pinyin": "lín jū"
+    },
+    "zh:邻居": {
+      "hanzi": "邻居",
+      "pinyin": "lín jū"
+    },
+    "zh:交通": {
+      "hanzi": "交通",
+      "pinyin": "jiāo tōng"
+    },
+    "zh:教育": {
+      "hanzi": "教育",
+      "pinyin": "jiào yù"
+    },
+    "zh:科学": {
+      "hanzi": "科学",
+      "pinyin": "kē xué"
+    },
+    "zh:技术": {
+      "hanzi": "技术",
+      "pinyin": "jì shù"
+    },
+    "zh:法律": {
+      "hanzi": "法律",
+      "pinyin": "fǎ lǜ"
+    },
+    "zh:艺术": {
+      "hanzi": "艺术",
+      "pinyin": "yì shù"
+    },
+    "attitude": {
+      "hanzi": "态度",
+      "pinyin": "tài dù"
+    },
+    "zh:态度": {
+      "hanzi": "态度",
+      "pinyin": "tài dù"
+    },
+    "zh:优点": {
+      "hanzi": "优点",
+      "pinyin": "yōu diǎn"
+    },
+    "disadvantage": {
+      "hanzi": "缺点",
+      "pinyin": "quē diǎn"
+    },
+    "zh:缺点": {
+      "hanzi": "缺点",
+      "pinyin": "quē diǎn"
+    },
+    "zh:性格": {
+      "hanzi": "性格",
+      "pinyin": "xìng gé"
+    },
+    "impression": {
+      "hanzi": "印象",
+      "pinyin": "yìn xiàng"
+    },
+    "zh:印象": {
+      "hanzi": "印象",
+      "pinyin": "yìn xiàng"
+    },
+    "zh:经理": {
+      "hanzi": "经理",
+      "pinyin": "jīng lǐ"
+    },
+    "zh:作家": {
+      "hanzi": "作家",
+      "pinyin": "zuò jiā"
+    },
+    "zh:记者": {
+      "hanzi": "记者",
+      "pinyin": "jì zhě"
+    },
+    "zh:律师": {
+      "hanzi": "律师",
+      "pinyin": "lǜ shī"
+    },
+    "zh:科学家": {
+      "hanzi": "科学家",
+      "pinyin": "kē xué jiā"
+    },
+    "zh:演员": {
+      "hanzi": "演员",
+      "pinyin": "yǎn yuán"
+    },
+    "zh:警察": {
+      "hanzi": "警察",
+      "pinyin": "jǐng chá"
+    },
+    "zh:护士": {
+      "hanzi": "护士",
+      "pinyin": "hù shi"
+    },
+    "zh:翻译": {
+      "hanzi": "翻译",
+      "pinyin": "fān yì"
+    },
+    "recruit": {
+      "hanzi": "招聘",
+      "pinyin": "zhāo pìn"
+    },
+    "zh:招聘": {
+      "hanzi": "招聘",
+      "pinyin": "zhāo pìn"
+    },
+    "compete": {
+      "hanzi": "竞争",
+      "pinyin": "jìng zhēng"
+    },
+    "zh:竞争": {
+      "hanzi": "竞争",
+      "pinyin": "jìng zhēng"
+    },
+    "cooperate": {
+      "hanzi": "合作",
+      "pinyin": "hé zuò"
+    },
+    "zh:合作": {
+      "hanzi": "合作",
+      "pinyin": "hé zuò"
+    },
+    "zh:沟通": {
+      "hanzi": "沟通",
+      "pinyin": "gōu tōng"
+    },
+    "zh:道歉": {
+      "hanzi": "道歉",
+      "pinyin": "dào qiàn"
+    },
+    "encourage": {
+      "hanzi": "鼓励",
+      "pinyin": "gǔ lì"
+    },
+    "zh:鼓励": {
+      "hanzi": "鼓励",
+      "pinyin": "gǔ lì"
+    },
+    "criticize": {
+      "hanzi": "批评",
+      "pinyin": "pī píng"
+    },
+    "zh:批评": {
+      "hanzi": "批评",
+      "pinyin": "pī píng"
+    },
+    "zh:表扬": {
+      "hanzi": "表扬",
+      "pinyin": "biǎo yáng"
+    },
+    "zh:尊重": {
+      "hanzi": "尊重",
+      "pinyin": "zūn zhòng"
+    },
+    "zh:勇敢": {
+      "hanzi": "勇敢",
+      "pinyin": "yǒng gǎn"
+    },
+    "zh:诚实": {
+      "hanzi": "诚实",
+      "pinyin": "chéng shí"
+    },
+    "zh:耐心": {
+      "hanzi": "耐心",
+      "pinyin": "nài xīn"
+    },
+    "zh:自信": {
+      "hanzi": "自信",
+      "pinyin": "zì xìn"
+    },
+    "zh:骄傲": {
+      "hanzi": "骄傲",
+      "pinyin": "jiāo ào"
+    },
+    "zh:害羞": {
+      "hanzi": "害羞",
+      "pinyin": "hài xiū"
+    },
+    "zh:无聊": {
+      "hanzi": "无聊",
+      "pinyin": "wú liáo"
+    },
+    "zh:兴奋": {
+      "hanzi": "兴奋",
+      "pinyin": "xīng fèn"
+    },
+    "regret": {
+      "hanzi": "后悔",
+      "pinyin": "hòu huǐ"
+    },
+    "zh:后悔": {
+      "hanzi": "后悔",
+      "pinyin": "hòu huǐ"
+    },
+    "moved/touched": {
+      "hanzi": "感动",
+      "pinyin": "gǎn dòng"
+    },
+    "zh:感动": {
+      "hanzi": "感动",
+      "pinyin": "gǎn dòng"
+    },
+    "zh:污染": {
+      "hanzi": "污染",
+      "pinyin": "wū rǎn"
+    },
+    "garbage": {
+      "hanzi": "垃圾",
+      "pinyin": "lā jī"
+    },
+    "zh:垃圾": {
+      "hanzi": "垃圾",
+      "pinyin": "lā jī"
+    },
+    "save/conserve": {
+      "hanzi": "节约",
+      "pinyin": "jié yuē"
+    },
+    "zh:节约": {
+      "hanzi": "节约",
+      "pinyin": "jié yuē"
+    },
+    "reduce": {
+      "hanzi": "减少",
+      "pinyin": "jiǎn shǎo"
+    },
+    "zh:减少": {
+      "hanzi": "减少",
+      "pinyin": "jiǎn shǎo"
+    },
+    "increase": {
+      "hanzi": "增加",
+      "pinyin": "zēng jiā"
+    },
+    "zh:增加": {
+      "hanzi": "增加",
+      "pinyin": "zēng jiā"
+    },
+    "zh:改变": {
+      "hanzi": "改变",
+      "pinyin": "gǎi biàn"
+    },
+    "suitable": {
+      "hanzi": "适合",
+      "pinyin": "shì hé"
+    },
+    "zh:适合": {
+      "hanzi": "适合",
+      "pinyin": "shì hé"
+    },
+    "strict": {
+      "hanzi": "严格",
+      "pinyin": "yán gé"
+    },
+    "zh:严格": {
+      "hanzi": "严格",
+      "pinyin": "yán gé"
+    },
+    "rich/abundant": {
+      "hanzi": "丰富",
+      "pinyin": "fēng fù"
+    },
+    "zh:丰富": {
+      "hanzi": "丰富",
+      "pinyin": "fēng fù"
+    },
+    "formal": {
+      "hanzi": "正式",
+      "pinyin": "zhèng shì"
+    },
+    "zh:正式": {
+      "hanzi": "正式",
+      "pinyin": "zhèng shì"
+    },
+    "positive": {
+      "hanzi": "积极",
+      "pinyin": "jī jí"
+    },
+    "zh:积极": {
+      "hanzi": "积极",
+      "pinyin": "jī jí"
+    },
+    "zh:安慰": {
+      "hanzi": "安慰",
+      "pinyin": "ānwèi"
+    },
+    "zh:熬夜": {
+      "hanzi": "熬夜",
+      "pinyin": "áoyè"
+    },
+    "zh:宝贵": {
+      "hanzi": "宝贵",
+      "pinyin": "bǎoguì"
+    },
+    "preserve": {
+      "hanzi": "保存",
+      "pinyin": "bǎocún"
+    },
+    "zh:保存": {
+      "hanzi": "保存",
+      "pinyin": "bǎocún"
+    },
+    "zh:保留": {
+      "hanzi": "保留",
+      "pinyin": "bǎoliú"
+    },
+    "pessimistic": {
+      "hanzi": "悲观",
+      "pinyin": "bēiguān"
+    },
+    "zh:悲观": {
+      "hanzi": "悲观",
+      "pinyin": "bēiguān"
+    },
+    "zh:背景": {
+      "hanzi": "背景",
+      "pinyin": "bèijǐng"
+    },
+    "zh:比例": {
+      "hanzi": "比例",
+      "pinyin": "bǐlì"
+    },
+    "for example": {
+      "hanzi": "比如",
+      "pinyin": "bǐrú"
+    },
+    "zh:比如": {
+      "hanzi": "比如",
+      "pinyin": "bǐrú"
+    },
+    "zh:彼此": {
+      "hanzi": "彼此",
+      "pinyin": "bǐcǐ"
+    },
+    "zh:毕竟": {
+      "hanzi": "毕竟",
+      "pinyin": "bìjìng"
+    },
+    "zh:避免": {
+      "hanzi": "避免",
+      "pinyin": "bìmiǎn"
+    },
+    "zh:编辑": {
+      "hanzi": "编辑",
+      "pinyin": "biānjí"
+    },
+    "zh:辩论": {
+      "hanzi": "辩论",
+      "pinyin": "biànlùn"
+    },
+    "standard": {
+      "hanzi": "标准",
+      "pinyin": "biāozhǔn"
+    },
+    "zh:标准": {
+      "hanzi": "标准",
+      "pinyin": "biāozhǔn"
+    },
+    "zh:表面": {
+      "hanzi": "表面",
+      "pinyin": "biǎomiàn"
+    },
+    "zh:补充": {
+      "hanzi": "补充",
+      "pinyin": "bǔchōng"
+    },
+    "continuously": {
+      "hanzi": "不断",
+      "pinyin": "búduàn"
+    },
+    "zh:不断": {
+      "hanzi": "不断",
+      "pinyin": "búduàn"
+    },
+    "zh:不然": {
+      "hanzi": "不然",
+      "pinyin": "bùrán"
+    },
+    "zh:财产": {
+      "hanzi": "财产",
+      "pinyin": "cáichǎn"
+    },
+    "adopt/take": {
+      "hanzi": "采取",
+      "pinyin": "cǎiqǔ"
+    },
+    "zh:采取": {
+      "hanzi": "采取",
+      "pinyin": "cǎiqǔ"
+    },
+    "operate": {
+      "hanzi": "操作",
+      "pinyin": "cāozuò"
+    },
+    "zh:操作": {
+      "hanzi": "操作",
+      "pinyin": "cāozuò"
+    },
+    "measure": {
+      "hanzi": "测量",
+      "pinyin": "cèliáng"
+    },
+    "zh:测量": {
+      "hanzi": "测量",
+      "pinyin": "cèliáng"
+    },
+    "zh:曾经": {
+      "hanzi": "曾经",
+      "pinyin": "céngjīng"
+    },
+    "gap": {
+      "hanzi": "差距",
+      "pinyin": "chājù"
+    },
+    "zh:差距": {
+      "hanzi": "差距",
+      "pinyin": "chājù"
+    },
+    "zh:产品": {
+      "hanzi": "产品",
+      "pinyin": "chǎnpǐn"
+    },
+    "zh:常识": {
+      "hanzi": "常识",
+      "pinyin": "chángshì"
+    },
+    "zh:成分": {
+      "hanzi": "成分",
+      "pinyin": "chéngfèn"
+    },
+    "zh:成果": {
+      "hanzi": "成果",
+      "pinyin": "chéngguǒ"
+    },
+    "accomplishment": {
+      "hanzi": "成就",
+      "pinyin": "chéngjiù"
+    },
+    "zh:成就": {
+      "hanzi": "成就",
+      "pinyin": "chéngjiù"
+    },
+    "zh:成熟": {
+      "hanzi": "成熟",
+      "pinyin": "chéngshú"
+    },
+    "zh:成长": {
+      "hanzi": "成长",
+      "pinyin": "chéngzhǎng"
+    },
+    "zh:承认": {
+      "hanzi": "承认",
+      "pinyin": "chéngrèn"
+    },
+    "zh:程度": {
+      "hanzi": "程度",
+      "pinyin": "chéngdù"
+    },
+    "zh:充满": {
+      "hanzi": "充满",
+      "pinyin": "chōngmǎn"
+    },
+    "zh:出版": {
+      "hanzi": "出版",
+      "pinyin": "chūbǎn"
+    },
+    "zh:出色": {
+      "hanzi": "出色",
+      "pinyin": "chūsè"
+    },
+    "zh:传播": {
+      "hanzi": "传播",
+      "pinyin": "chuánbō"
+    },
+    "zh:创造": {
+      "hanzi": "创造",
+      "pinyin": "chuàngzào"
+    },
+    "zh:词汇": {
+      "hanzi": "词汇",
+      "pinyin": "cíhuì"
+    },
+    "zh:促进": {
+      "hanzi": "促进",
+      "pinyin": "cùjìn"
+    },
+    "exist": {
+      "hanzi": "存在",
+      "pinyin": "cúnzài"
+    },
+    "zh:存在": {
+      "hanzi": "存在",
+      "pinyin": "cúnzài"
+    },
+    "zh:达到": {
+      "hanzi": "达到",
+      "pinyin": "dádào"
+    },
+    "zh:导致": {
+      "hanzi": "导致",
+      "pinyin": "dǎozhì"
+    },
+    "zh:独立": {
+      "hanzi": "独立",
+      "pinyin": "dúlì"
+    },
+    "object/target": {
+      "hanzi": "对象",
+      "pinyin": "duìxiàng"
+    },
+    "zh:对象": {
+      "hanzi": "对象",
+      "pinyin": "duìxiàng"
+    },
+    "worried": {
+      "hanzi": "发愁",
+      "pinyin": "fāchóu"
+    },
+    "zh:发愁": {
+      "hanzi": "发愁",
+      "pinyin": "fāchóu"
+    },
+    "zh:发明": {
+      "hanzi": "发明",
+      "pinyin": "fāmíng"
+    },
+    "prosperity": {
+      "hanzi": "繁荣",
+      "pinyin": "fánróng"
+    },
+    "zh:繁荣": {
+      "hanzi": "繁荣",
+      "pinyin": "fánróng"
+    },
+    "zh:反映": {
+      "hanzi": "反映",
+      "pinyin": "fǎnyìng"
     }
   }
 }

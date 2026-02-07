@@ -26,6 +26,7 @@ export interface FlashcardWithProgress {
   correct_count: number;
   last_difficulty?: 'easy' | 'normal' | 'hard' | 'difficult';
   created_at: string;
+  categories?: string[];
 }
 
 export interface StudyStats {

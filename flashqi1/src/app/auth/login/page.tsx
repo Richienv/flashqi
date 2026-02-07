@@ -1,8 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/auth-context';
+import { testSupabaseConnection } from '@/lib/supabase';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -16,7 +18,15 @@ export default function LoginPage() {
   const [resetLoading, setResetLoading] = useState(false);
   const [resetSuccess, setResetSuccess] = useState(false);
   const [resetError, setResetError] = useState('');
-  const { signIn, resendConfirmationEmail, resetPassword } = useAuth();
+  const { signIn, resendConfirmationEmail, resetPassword, isAuthenticated, isLoading } = useAuth();
+  const router = useRouter();
+
+  // Redirect if already logged in
+  useEffect(() => {
+    if (!isLoading && isAuthenticated) {
+      router.replace('/dashboard/flashcards');
+    }
+  }, [isLoading, isAuthenticated, router]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -25,8 +35,9 @@ export default function LoginPage() {
     setResendEmailSuccess(false);
 
     try {
-      const { error: signInError } = await signIn(email, password);
-      if (signInError) throw signInError;
+      const result = await signIn(email, password);
+      if (result.error) throw result.error;
+      // Don't set loading false here - let the redirect happen
     } catch (error: any) {
       if (error.message?.includes('Invalid login credentials')) {
         setError('Invalid email or password.');
@@ -35,7 +46,6 @@ export default function LoginPage() {
       } else {
         setError(error.message || 'Failed to sign in.');
       }
-    } finally {
       setLoading(false);
     }
   };
@@ -64,16 +74,23 @@ export default function LoginPage() {
     setResetLoading(true);
     setResetError('');
     try {
-      console.log('Attempting password reset for:', resetEmail);
       const { error } = await resetPassword(resetEmail);
-      console.log('Reset password response:', { error });
       if (error) throw error;
       setResetSuccess(true);
     } catch (error: any) {
-      console.error('Password reset error:', error);
       setResetError(error.message || 'Failed to send reset email. Please check your email address.');
     } finally {
       setResetLoading(false);
+    }
+  };
+
+  const handleTestConnection = async () => {
+    console.log('User initiated connection test');
+    const result = await testSupabaseConnection();
+    if (result.success) {
+      alert('✓ Connection successful! Supabase is reachable. Check console for details.');
+    } else {
+      alert(`✗ Connection failed: ${result.error}\n\nCheck console for detailed diagnostics.`);
     }
   };
 
@@ -155,6 +172,17 @@ export default function LoginPage() {
             </span>
           </button>
         </form>
+
+        {/* Debug: Test Connection Button - only in development */}
+        {process.env.NODE_ENV === 'development' && error && error.toLowerCase().includes('network') && (
+          <button
+            type="button"
+            onClick={handleTestConnection}
+            className="w-full mt-3 py-2 text-xs text-slate-500 hover:text-slate-700 border border-slate-200 rounded-lg transition-colors"
+          >
+            🔧 Test Connection (Debug)
+          </button>
+        )}
 
         <p className="text-center text-sm text-slate-400 font-light mt-8">
           No account?{' '}

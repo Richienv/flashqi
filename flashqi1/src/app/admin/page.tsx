@@ -10,6 +10,8 @@ interface UserRow {
   created_at: string;
   last_sign_in: string | null;
   email_confirmed: boolean;
+  visited_checkout: boolean;
+  visited_checkout_at: string | null;
   premium: { plan: string; active: boolean; expires: string; coupon: string } | null;
 }
 
@@ -85,8 +87,19 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     if (!authenticated) return;
+    const controller = new AbortController();
     fetchUsers();
     fetchCoupons();
+    // Auto-refresh on window focus
+    const handleFocus = () => {
+      fetchUsers();
+      fetchCoupons();
+    };
+    window.addEventListener('focus', handleFocus);
+    return () => {
+      controller.abort('Component unmounted');
+      window.removeEventListener('focus', handleFocus);
+    };
   }, [authenticated, fetchUsers, fetchCoupons]);
 
   const handleLogin = (e: React.FormEvent) => {
@@ -262,7 +275,7 @@ export default function AdminDashboard() {
               <table className="w-full text-left">
                 <thead>
                   <tr className="border-b border-slate-100">
-                    {['Email', 'Name', 'Signed Up', 'Last Login', 'Status', 'Premium', ''].map(h => (
+                    {['Email', 'Name', 'Signed Up', 'Last Login', 'Status', 'Checkout', 'Premium', ''].map(h => (
                       <th key={h} className="pb-3 text-[10px] uppercase tracking-widest text-slate-400 font-medium pr-4">{h}</th>
                     ))}
                   </tr>
@@ -278,6 +291,15 @@ export default function AdminDashboard() {
                         <span className={`text-[10px] px-2 py-0.5 rounded-full ${u.email_confirmed ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-500'}`}>
                           {u.email_confirmed ? 'Confirmed' : 'Unconfirmed'}
                         </span>
+                      </td>
+                      <td className="py-3 pr-4">
+                        {u.visited_checkout ? (
+                          <span className="text-[10px] px-2 py-0.5 rounded-full bg-blue-50 text-blue-600" title={u.visited_checkout_at ? fmt(u.visited_checkout_at) : ''}>
+                            Visited
+                          </span>
+                        ) : (
+                          <span className="text-[10px] text-slate-300">-</span>
+                        )}
                       </td>
                       <td className="py-3 pr-4">
                         {u.premium ? (
@@ -304,7 +326,7 @@ export default function AdminDashboard() {
                     </tr>
                   ))}
                   {users.length === 0 && !usersLoading && (
-                    <tr><td colSpan={7} className="py-12 text-center text-sm text-slate-400 font-light">No users found</td></tr>
+                    <tr><td colSpan={8} className="py-12 text-center text-sm text-slate-400 font-light">No users found</td></tr>
                   )}
                 </tbody>
               </table>

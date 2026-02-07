@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/auth-context';
 
@@ -9,34 +9,39 @@ interface RouteGuardProps {
 }
 
 export default function RouteGuard({ children }: RouteGuardProps) {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading, user } = useAuth();
   const router = useRouter();
   const [authorized, setAuthorized] = useState(false);
+  const hasRedirected = useRef(false);
+
+  // Extract primitive values to avoid object reference changes triggering re-renders
+  const hasSeenWelcome = user?.hasSeenWelcome;
 
   useEffect(() => {
-    // Authentication check function
-    const authCheck = () => {
-      // If auth is still loading, don't do anything yet
-      if (isLoading) return;
-      
-      // If not authenticated, redirect to login
-      if (!isAuthenticated) {
+    // If auth is still loading, don't do anything yet
+    if (isLoading) return;
+    
+    // If not authenticated, redirect to login
+    if (!isAuthenticated) {
+      if (!hasRedirected.current) {
+        hasRedirected.current = true;
+        router.replace('/auth/login');
+      }
+      setAuthorized(false);
+    } else {
+      // Check if user needs to see welcome survey
+      if (hasSeenWelcome === false) {
+        if (!hasRedirected.current) {
+          hasRedirected.current = true;
+          router.replace('/auth/welcome');
+        }
         setAuthorized(false);
-        router.push('/auth/login');
       } else {
+        hasRedirected.current = false;
         setAuthorized(true);
       }
-    };
-
-    // Check authentication status when the component mounts
-    authCheck();
-
-    // Set up our auth check listener
-    const intervalId = setInterval(authCheck, 2000);
-
-    // Clean up the interval
-    return () => clearInterval(intervalId);
-  }, [isAuthenticated, isLoading, router]);
+    }
+  }, [isAuthenticated, isLoading, router, hasSeenWelcome]);
 
   // Show loading indicator while the auth check is in progress
   if (isLoading) {

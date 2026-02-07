@@ -3,8 +3,7 @@
 -- This is durable on serverless deployments (Vercel) unlike fs.writeFileSync
 
 CREATE TABLE IF NOT EXISTS dictionary_cache (
-  id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
-  english text NOT NULL UNIQUE,
+  english text PRIMARY KEY,
   hanzi text NOT NULL,
   pinyin text NOT NULL,
   source text DEFAULT 'seed',  -- 'seed' for pre-loaded, 'gemini', 'openrouter' for AI-generated
@@ -22,9 +21,3 @@ CREATE POLICY "Dictionary cache is publicly readable"
   ON dictionary_cache FOR SELECT
   USING (true);
 
--- Only service role or authenticated users can insert/update
--- (the API route runs server-side with anon key, but inserts via service role)
-CREATE POLICY "Service role can manage dictionary cache"
-  ON dictionary_cache FOR ALL
-  USING (true)
-  WITH CHECK (true);

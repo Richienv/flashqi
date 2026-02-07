@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
+import { useAuth } from "@/contexts/auth-context";
 
 // Fixed particle positions to avoid hydration mismatch
 const PARTICLE_POSITIONS = [
@@ -17,6 +18,7 @@ const PARTICLE_POSITIONS = [
 export default function Home() {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const containerRef = useRef<HTMLDivElement>(null);
+  const { isAuthenticated } = useAuth();
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
@@ -95,7 +97,7 @@ export default function Home() {
             {/* CTA Button - 2026 flat glass style */}
             <div className="mt-12">
               <Link
-                href="/dashboard/flashcards"
+                href={isAuthenticated ? "/dashboard/flashcards" : "/auth/login"}
                 className="group relative inline-flex items-center gap-3 px-8 py-4 rounded-2xl text-slate-900 font-light text-lg tracking-wide transition-all duration-500"
               >
                 <span className="relative z-10 shimmer-text font-bold">Start Learning</span>

@@ -406,19 +406,38 @@ CREATE TRIGGER update_profiles_updated_at BEFORE UPDATE ON profiles FOR EACH ROW
 CREATE TRIGGER update_lessons_updated_at BEFORE UPDATE ON lessons FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 CREATE TRIGGER update_translation_cache_updated_at BEFORE UPDATE ON translation_cache FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 
--- Function to create profile on user signup
+-- Function to create profile on user signup (bulletproof with EXCEPTION handling)
 CREATE OR REPLACE FUNCTION handle_new_user()
-RETURNS TRIGGER AS $$
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
 BEGIN
-  INSERT INTO profiles (id, name, email)
-  VALUES (NEW.id, NEW.raw_user_meta_data->>'name', NEW.email);
-  
-  INSERT INTO user_stats (user_id)
-  VALUES (NEW.id);
-  
+  -- Try to insert profile, handle ANY error gracefully
+  BEGIN
+    INSERT INTO public.profiles (id, name, email)
+    VALUES (NEW.id, NEW.raw_user_meta_data->>'name', NEW.email)
+    ON CONFLICT (id) DO UPDATE SET
+      name = COALESCE(EXCLUDED.name, public.profiles.name),
+      email = COALESCE(EXCLUDED.email, public.profiles.email),
+      updated_at = now();
+  EXCEPTION WHEN OTHERS THEN
+    RAISE WARNING 'handle_new_user: failed to insert profile for %: %', NEW.id, SQLERRM;
+  END;
+
+  -- Try to insert user_stats, handle ANY error gracefully
+  BEGIN
+    INSERT INTO public.user_stats (user_id)
+    VALUES (NEW.id)
+    ON CONFLICT (user_id) DO NOTHING;
+  EXCEPTION WHEN OTHERS THEN
+    RAISE WARNING 'handle_new_user: failed to insert user_stats for %: %', NEW.id, SQLERRM;
+  END;
+
   RETURN NEW;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$;
 
 -- Trigger to create profile on signup
 DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;

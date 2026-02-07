@@ -1,7 +1,10 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
+import { useAuth } from '@/contexts/auth-context';
+import confetti from 'canvas-confetti';
 
 interface PremiumModalProps {
   isOpen: boolean;
@@ -10,6 +13,8 @@ interface PremiumModalProps {
 }
 
 export default function PremiumModal({ isOpen, onClose, featureName = 'HSK Vocabulary' }: PremiumModalProps) {
+  const router = useRouter();
+  const { user, refreshPremiumStatus } = useAuth();
   const [selectedPlan, setSelectedPlan] = useState<'monthly' | 'yearly'>('yearly');
   const [couponCode, setCouponCode] = useState('');
   const [couponError, setCouponError] = useState('');
@@ -36,7 +41,7 @@ export default function PremiumModal({ isOpen, onClose, featureName = 'HSK Vocab
       const res = await fetch('/api/redeem', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ code }),
+        body: JSON.stringify({ code, userId: user?.id }),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -45,6 +50,11 @@ export default function PremiumModal({ isOpen, onClose, featureName = 'HSK Vocab
       }
       setCouponSuccess(true);
       setCouponError('');
+      await refreshPremiumStatus();
+      // Gold confetti burst
+      const gold = ['#FFD700', '#DAA520', '#FFA500', '#B8860B', '#FFE066'];
+      confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 }, colors: gold });
+      setTimeout(() => confetti({ particleCount: 60, spread: 100, origin: { y: 0.5 }, colors: gold }), 300);
     } catch {
       setCouponError('Network error. Try again.');
     } finally {
@@ -58,7 +68,7 @@ export default function PremiumModal({ isOpen, onClose, featureName = 'HSK Vocab
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/20 backdrop-blur-sm">
       <div className="w-full max-w-sm bg-white rounded-2xl border border-amber-200/60 p-6 relative animate-in fade-in zoom-in duration-200 overflow-hidden">
-        <div className="absolute top-0 left-0 right-0 h-1 gold-shimmer-bar" />
+        <div className="absolute top-0 left-0 right-0 h-1 gold-static-bar" />
 
         <button
           onClick={onClose}
@@ -86,12 +96,12 @@ export default function PremiumModal({ isOpen, onClose, featureName = 'HSK Vocab
 
         {couponSuccess ? (
           <div className="text-center py-6">
-            <div className="w-14 h-14 mx-auto mb-3 rounded-full bg-green-50 flex items-center justify-center">
-              <svg className="w-7 h-7 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="w-14 h-14 mx-auto mb-3 rounded-full bg-amber-50 flex items-center justify-center">
+              <svg className="w-7 h-7 gold-shimmer-check" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
             </div>
-            <p className="text-lg font-light text-slate-900 mb-1">Welcome to Premium!</p>
+            <p className="text-lg font-light text-slate-900 mb-1">Welcome to <span className="gold-shimmer-text font-medium">Premium</span>!</p>
             <p className="text-xs text-slate-400">All features are now unlocked.</p>
             <button onClick={onClose} className="mt-4 text-sm text-slate-500 hover:text-slate-900">Close</button>
           </div>
@@ -129,11 +139,11 @@ export default function PremiumModal({ isOpen, onClose, featureName = 'HSK Vocab
                 onClick={() => setSelectedPlan('yearly')}
                 className={`flex-1 py-2.5 rounded-xl text-center text-sm transition-all relative ${
                   selectedPlan === 'yearly'
-                    ? 'bg-slate-900 text-white'
-                    : 'bg-slate-50 text-slate-500 hover:bg-slate-100'
+                    ? 'bg-transparent border-2 border-amber-400 text-amber-600'
+                    : 'bg-transparent border border-slate-200 text-slate-500 hover:border-amber-300'
                 }`}
               >
-                <span className="absolute -top-2 right-2 text-[9px] save-badge text-white px-1.5 py-0.5 rounded-full font-medium">
+                <span className="absolute -top-2 right-2 text-[9px] bg-amber-500 text-white px-1.5 py-0.5 rounded-full font-medium">
                   SAVE 40%
                 </span>
                 <div className="font-medium">Yearly</div>
@@ -154,12 +164,12 @@ export default function PremiumModal({ isOpen, onClose, featureName = 'HSK Vocab
                   }}
                   placeholder="XXXXXXXX"
                   maxLength={8}
-                  className={`flex-1 rounded-lg px-3 py-2 text-sm font-mono tracking-widest text-center placeholder:text-slate-300 focus:outline-none transition-all duration-300 ${couponCode.length > 0 ? 'coupon-input-gold text-white border-amber-400' : 'border border-slate-200 text-slate-900 focus:border-amber-400 focus:ring-1 focus:ring-amber-400/30'}`}
+                  className={`flex-1 rounded-lg px-3 py-2 text-sm font-mono tracking-widest text-center placeholder:text-slate-300 focus:outline-none transition-all duration-300 ${couponCode.length > 0 ? 'border border-amber-400 bg-amber-50 text-amber-800' : 'border border-slate-200 bg-white text-slate-900 focus:border-amber-400 focus:ring-1 focus:ring-amber-400/30'}`}
                 />
                 <button
                   onClick={handleRedeemCoupon}
                   disabled={couponCode.length !== 8 || couponLoading}
-                  className="gold-shimmer-btn px-4 py-2 rounded-lg text-xs font-medium text-white disabled:opacity-40 disabled:cursor-not-allowed transition-all hover:shadow-md"
+                  className="bg-amber-500 hover:bg-amber-600 px-4 py-2 rounded-lg text-xs font-medium text-white disabled:opacity-40 disabled:cursor-not-allowed transition-all hover:shadow-md"
                 >
                   {couponLoading ? '...' : 'Redeem'}
                 </button>
@@ -167,6 +177,13 @@ export default function PremiumModal({ isOpen, onClose, featureName = 'HSK Vocab
               {couponError && <p className="text-[11px] text-red-500 mt-1">{couponError}</p>}
               <p className="text-[10px] text-slate-400 mt-1">Enter your 8-digit premium code</p>
             </div>
+
+            <button
+              onClick={() => { onClose(); router.push('/premium'); }}
+              className="w-full mt-3 py-2.5 rounded-xl text-sm font-medium transition-all gold-shimmer-btn text-white shadow-md hover:shadow-lg"
+            >
+              Go to Checkout
+            </button>
 
             <p className="text-center text-[10px] text-slate-400 mt-2">
               Purchase a code to unlock Premium instantly
@@ -177,67 +194,41 @@ export default function PremiumModal({ isOpen, onClose, featureName = 'HSK Vocab
         <style jsx>{`
           .gold-shimmer-text {
             display: inline-block;
-            background: linear-gradient(
-              120deg,
-              #8b6914 0%, #b8860b 5%, #daa520 9%, #ffd700 13%, #fff5c0 16%, #ffd700 19%,
-              #b8860b 23%, #daa520 27%, #ffd700 31%, #ffe680 34%, #ffd700 37%,
-              #b8860b 41%, #daa520 45%, #ffd700 49%, #fff5c0 52%, #ffd700 55%,
-              #b8860b 59%, #daa520 63%, #ffd700 67%, #ffe680 70%, #ffd700 73%,
-              #b8860b 77%, #daa520 81%, #ffd700 85%, #fff5c0 88%, #ffd700 91%,
-              #b8860b 95%, #8b6914 100%
-            );
-            background-size: 300% 100%;
+            background: linear-gradient(120deg, #b45309, #d97706);
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
-            animation: goldShimmer 30s linear infinite;
           }
-          .gold-shimmer-bar {
-            background: linear-gradient(
-              90deg,
-              transparent 0%, #8b6914 5%, #ffd700 10%, #fff5c0 14%, #ffd700 18%,
-              #b8860b 22%, #daa520 26%, #ffd700 30%, #ffe680 34%, #ffd700 38%,
-              #b8860b 42%, #daa520 46%, #ffd700 50%, #fff5c0 54%, #ffd700 58%,
-              #b8860b 62%, #daa520 66%, #ffd700 70%, #ffe680 74%, #ffd700 78%,
-              #b8860b 82%, #ffd700 86%, #fff5c0 90%, #ffd700 94%, transparent 100%
-            );
-            background-size: 300% 100%;
-            animation: goldShimmer 30s linear infinite;
+          .gold-static-bar {
+            background: linear-gradient(90deg, transparent 0%, #daa520 15%, #ffd700 50%, #daa520 85%, transparent 100%);
           }
           .gold-shimmer-btn {
             background: linear-gradient(
               120deg,
-              #8b6914 0%, #b8860b 5%, #daa520 10%, #ffd700 14%, #fff1a8 17%, #ffd700 20%,
-              #b8860b 25%, #daa520 30%, #ffd700 34%, #ffe066 37%, #ffd700 40%,
-              #b8860b 45%, #daa520 50%, #ffd700 54%, #fff1a8 57%, #ffd700 60%,
-              #b8860b 65%, #daa520 70%, #ffd700 74%, #ffe066 77%, #ffd700 80%,
-              #b8860b 85%, #daa520 90%, #ffd700 94%, #fff1a8 97%, #8b6914 100%
-            );
-            background-size: 300% 100%;
-            animation: goldShimmer 30s linear infinite;
-            box-shadow: 0 0 14px rgba(255, 215, 0, 0.35), inset 0 0 6px rgba(255, 255, 255, 0.15);
-            text-shadow: 0 1px 2px rgba(139, 105, 20, 0.6);
-          }
-          .save-badge {
-            background: linear-gradient(
-              120deg,
-              #b8860b 0%, #ffd700 20%, #fff1a8 40%, #ffd700 60%, #b8860b 80%, #ffd700 100%
-            );
-            background-size: 300% 100%;
-            animation: goldShimmer 30s linear infinite;
-          }
-          @keyframes goldShimmer {
-            0% { background-position: 300% 0; }
-            100% { background-position: -300% 0; }
-          }
-          .coupon-input-gold {
-            background: linear-gradient(
-              120deg,
-              #8b6914 0%, #b8860b 15%, #daa520 30%, #ffd700 45%, #ffe066 55%, #ffd700 70%, #b8860b 85%, #8b6914 100%
+              #8b6914 0%, #b8860b 10%, #daa520 20%, #ffd700 30%, #fff1a8 40%, #ffd700 50%,
+              #daa520 60%, #b8860b 70%, #ffd700 80%, #fff1a8 90%, #8b6914 100%
             );
             background-size: 200% 100%;
-            animation: goldShimmer 30s linear infinite;
-            box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+            animation: goldShimmer 3s linear infinite;
+            box-shadow: 0 0 14px rgba(255, 215, 0, 0.35);
+          }
+          @keyframes goldShimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+          }
+          .gold-shimmer-check {
+            stroke: #daa520;
+            filter: drop-shadow(0 0 4px rgba(255, 215, 0, 0.5));
+            animation: goldCheckPulse 2s ease-in-out infinite;
+          }
+          @keyframes goldCheckPulse {
+            0%, 100% { stroke: #b8860b; filter: drop-shadow(0 0 4px rgba(255, 215, 0, 0.3)); }
+            50% { stroke: #ffd700; filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.6)); }
+          }
+          .coupon-input-gold {
+            background: #fffbeb;
+            border-color: #fbbf24;
+            color: #b45309;
           }
         `}</style>
       </div>

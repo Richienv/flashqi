@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
+import { useAuth } from '@/contexts/auth-context';
 
 const SOURCES = ['Friend', 'Xiaohongshu', 'Instagram', 'Other'];
 const APPS = ['Duolingo', 'Pleco', 'HelloChinese', 'Anki', 'None', 'Other'];
@@ -13,6 +14,7 @@ const TARGETS = ['Finish Level 1', 'Pass HSK 2', 'Pass HSK 3', 'Get a job in Chi
 
 export default function WelcomePage() {
   const router = useRouter();
+  const { markWelcomeSeen } = useAuth();
   const [step, setStep] = useState(0);
   const [loading, setLoading] = useState(false);
   const [showWelcome, setShowWelcome] = useState(true);
@@ -98,10 +100,11 @@ export default function WelcomePage() {
     } catch (e) {
       console.error('Survey save error:', e);
     } finally {
+      await markWelcomeSeen();
       setLoading(false);
       router.push('/dashboard/flashcards');
     }
-  }, [answers, router]);
+  }, [answers, router, markWelcomeSeen]);
 
   const animateToStep = useCallback((nextStep: number, direction: 'left' | 'right') => {
     if (autoAdvanceTimer.current) clearTimeout(autoAdvanceTimer.current);

@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef, useMemo } from 'react';
 import { FlashcardDatabaseService } from '@/services/flashcardDatabaseService';
 import { categoryStorage, translationStorage } from '@/lib/localStorage';
+import { HSK_LEVELS } from '@/data/hsk-levels';
 import PremiumModal from '@/components/flashcards/PremiumModal';
 
 interface AddSelfLearnCardModalProps {
@@ -38,6 +39,22 @@ export default function AddSelfLearnCardModal({
     const [dailyUsage, setDailyUsage] = useState<{ usage: number; limit: number } | null>(null);
     const [showPremiumModal, setShowPremiumModal] = useState(false);
 
+    // Build client-side HSK lookup map (instant, no API call)
+    const hskLookup = useMemo(() => {
+        const map = new Map<string, { hanzi: string; pinyin: string }>();
+        for (const level of HSK_LEVELS) {
+            for (const word of level.words) {
+                const key = word.english.trim().toLowerCase();
+                if (key && !map.has(key)) {
+                    map.set(key, { hanzi: word.hanzi, pinyin: word.pinyin });
+                }
+            }
+        }
+        return map;
+    }, []);
+
+    const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
     useEffect(() => {
         if (!isOpen) return;
         availableCategories.forEach((cat) => categoryStorage.add(cat));
@@ -48,6 +65,21 @@ export default function AddSelfLearnCardModal({
     const translateWithGroq = useCallback(async (text: string) => {
         if (text.trim().length < 2) return;
 
+        // 1. Instant client-side HSK lookup (zero latency, zero cost)
+        const hskMatch = hskLookup.get(text.trim().toLowerCase());
+        if (hskMatch) {
+            setHanzi(hskMatch.hanzi);
+            setPinyin(hskMatch.pinyin);
+            translationStorage.upsert({
+                english: text,
+                hanzi: hskMatch.hanzi,
+                pinyin: hskMatch.pinyin,
+                sentences: [],
+            });
+            return;
+        }
+
+        // 2. Check localStorage cache
         const cached = translationStorage.getByEnglish(text);
         if (cached) {
             setHanzi(cached.hanzi || '');
@@ -62,8 +94,7 @@ export default function AddSelfLearnCardModal({
 
         try {
             const controller = new AbortController();
-            const timeoutId = window.setTimeout(() => controller.abort(), 15000);
-            console.log(`[FlashQi] Translating: "${text}"`);
+            const timeoutId = window.setTimeout(() => controller.abort('Translation request timed out'), 15000);
             const res = await fetch('/api/translate', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -74,7 +105,6 @@ export default function AddSelfLearnCardModal({
 
             if (!res.ok) {
                 const errData = await res.json();
-                console.error('[FlashQi] API error:', errData);
 
                 // Handle daily limit reached
                 if (errData.limitReached) {
@@ -97,7 +127,6 @@ export default function AddSelfLearnCardModal({
             }
 
             const data = await res.json();
-            console.log(`[FlashQi] Success (${data.source}): ${data.hanzi} / ${data.pinyin}`);
 
             // Track usage
             if (data.usage !== undefined) {
@@ -124,12 +153,38 @@ export default function AddSelfLearnCardModal({
             const msg = isAbort
                 ? 'Request timed out (15s). AI provider may be slow.'
                 : err instanceof Error ? err.message : 'Translation failed';
-            console.error('[FlashQi] Translation error:', msg);
             setError(msg);
             setManualMode(true);
         } finally {
             setIsLoading(false);
         }
+    }, [hskLookup]);
+
+    // Debounced auto-translate as user types
+    const handleEnglishChange = useCallback((value: string) => {
+        setEnglish(value);
+        // Reset fields when input changes
+        if (!value.trim()) {
+            setHanzi('');
+            setPinyin('');
+            setError('');
+            setSuggestions([]);
+            setManualMode(false);
+            return;
+        }
+        // Clear previous debounce
+        if (debounceRef.current) clearTimeout(debounceRef.current);
+        // Debounce: 600ms delay for API calls (HSK/cache hits are instant inside translateWithGroq)
+        debounceRef.current = setTimeout(() => {
+            translateWithGroq(value);
+        }, 600);
+    }, [translateWithGroq]);
+
+    // Cleanup debounce on unmount
+    useEffect(() => {
+        return () => {
+            if (debounceRef.current) clearTimeout(debounceRef.current);
+        };
     }, []);
 
     // Cycle loading text for a polished feel
@@ -221,7 +276,7 @@ export default function AddSelfLearnCardModal({
                             <input
                                 type="text"
                                 value={english}
-                                onChange={(e) => setEnglish(e.target.value)}
+                                onChange={(e) => handleEnglishChange(e.target.value)}
                                 placeholder="e.g. Apple"
                                 className="w-full border-b border-slate-200 bg-transparent pb-2 text-base font-light text-slate-900 placeholder:text-slate-400 focus:border-slate-900 focus:outline-none"
                                 autoFocus

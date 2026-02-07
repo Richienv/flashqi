@@ -1,16 +1,26 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Settings } from 'lucide-react';
 import { HSK_LEVELS } from '@/data/hsk-levels';
 import PremiumModal from '@/components/flashcards/PremiumModal';
+import { useAuth } from '@/contexts/auth-context';
 
 export default function FlashcardsPage() {
     const router = useRouter();
+    const { user, refreshPremiumStatus } = useAuth();
     const [premiumModalOpen, setPremiumModalOpen] = useState(false);
     const [premiumFeature, setPremiumFeature] = useState('');
+
+    // Refresh premium status on mount and window focus
+    useEffect(() => {
+        refreshPremiumStatus();
+        const handleFocus = () => refreshPremiumStatus();
+        window.addEventListener('focus', handleFocus);
+        return () => window.removeEventListener('focus', handleFocus);
+    }, [refreshPremiumStatus]);
 
     const navigateToLevel = (level: 'level1' | 'level2') => {
         router.push(`/dashboard/flashcards/levels/${level}`);
@@ -21,7 +31,7 @@ export default function FlashcardsPage() {
     };
 
     const handleHskClick = (hskLevel: typeof HSK_LEVELS[number]) => {
-        if (hskLevel.isPremium) {
+        if (hskLevel.isPremium && !user?.isPremium) {
             setPremiumFeature(hskLevel.title + ' Vocabulary');
             setPremiumModalOpen(true);
         } else {
@@ -35,6 +45,22 @@ export default function FlashcardsPage() {
             <main className="min-h-screen flex flex-col items-center justify-center px-6 py-12">
                 {/* Minimalist options */}
                 <div className="w-full max-w-md space-y-6">
+                    {/* Welcome + Premium/Standard badge */}
+                    {user && (
+                        <div className="text-center mb-20">
+                            <p className="text-sm font-light text-slate-500">
+                                Welcome, <span className="text-slate-900 font-medium">{user.name || user.email.split('@')[0]}</span>
+                            </p>
+                            <span className={`inline-block mt-1.5 text-[9px] font-medium tracking-wider uppercase px-2 py-0.5 rounded-full ${
+                                user.isPremium
+                                    ? 'premium-badge text-white'
+                                    : 'bg-slate-100 text-slate-400'
+                            }`}>
+                                {user.isPremium ? 'Premium' : 'Standard'}
+                            </span>
+                        </div>
+                    )}
+
                     <Button
                         asChild
                         variant="ghost"
@@ -74,9 +100,14 @@ export default function FlashcardsPage() {
                     {/* HSK Levels Section */}
                     <div className="h-px bg-slate-200/80 my-4" />
 
-                    <div className="text-center flex items-center justify-center gap-2">
-                        <span className="text-[10px] uppercase tracking-[0.25em] text-slate-400">HSK Vocabulary</span>
-                        <span className="premium-badge text-[7px] font-medium tracking-wider uppercase px-1.5 py-0.5 rounded-full">Premium</span>
+                    <div className="text-center">
+                        <div className="flex items-center justify-center gap-2">
+                            <span className="text-[10px] uppercase tracking-[0.25em] text-slate-400">HSK Vocabulary</span>
+                            {!user?.isPremium && (
+                                <span className="premium-badge text-[7px] font-medium tracking-wider uppercase px-1.5 py-0.5 rounded-full">Premium</span>
+                            )}
+                        </div>
+                        <p className="text-[10px] text-slate-300 font-light mt-1">2,500+ embedded words ready to learn</p>
                     </div>
 
                     {HSK_LEVELS.map((hsk) => (
