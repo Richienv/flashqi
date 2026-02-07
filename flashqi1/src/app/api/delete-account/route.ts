@@ -73,11 +73,31 @@ export async function POST(req: NextRequest) {
       .eq('used_by', userId);
 
     // Finally, delete the user from auth
-    const { error: deleteAuthError } = await supabaseAdmin.auth.admin.deleteUser(userId);
+    console.log('Attempting to delete user from auth:', userId);
+    const { data: deleteData, error: deleteAuthError } = await supabaseAdmin.auth.admin.deleteUser(userId);
 
     if (deleteAuthError) {
-      console.error('Error deleting user from auth:', deleteAuthError);
-      return NextResponse.json({ error: 'Failed to delete user account' }, { status: 500 });
+      console.error('Error deleting user from auth:', {
+        error: deleteAuthError,
+        message: deleteAuthError.message,
+        status: deleteAuthError.status,
+        code: deleteAuthError.code
+      });
+      return NextResponse.json({ 
+        error: 'Failed to delete user account from authentication system',
+        details: deleteAuthError.message 
+      }, { status: 500 });
+    }
+
+    console.log('User deleted from auth successfully:', deleteData);
+
+    // Verify the user was actually deleted
+    const { data: checkUser, error: checkError } = await supabaseAdmin.auth.admin.getUserById(userId);
+    if (checkUser && !checkError) {
+      console.error('User still exists after deletion attempt!');
+      return NextResponse.json({ 
+        error: 'User deletion verification failed - user still exists' 
+      }, { status: 500 });
     }
 
     return NextResponse.json({ success: true, message: 'Account deleted successfully' });
