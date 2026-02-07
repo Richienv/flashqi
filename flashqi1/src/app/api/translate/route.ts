@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
-import fs from 'fs';
-import path from 'path';
+import { createClient } from '@supabase/supabase-js';
+import staticDict from '@/data/dictionary-cache.json';
 
 const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
 const OPENROUTER_API_URL = 'https://openrouter.ai/api/v1/chat/completions';
@@ -26,8 +26,8 @@ function levenshtein(a: string, b: string): number {
 }
 
 function findSuggestions(input: string, maxResults = 3): string[] {
-  const dict = loadDict();
-  const keys = Object.keys(dict.entries);
+  ensureStaticEntries();
+  const keys = Array.from(memoryCache.keys());
   const lower = input.trim().toLowerCase();
   if (lower.length < 2) return [];
   const maxDist = Math.max(1, Math.floor(lower.length * 0.4));
@@ -64,48 +64,84 @@ function incrementUsage(ip: string): number {
   return entry.count;
 }
 
-// --- Server-side dictionary (shared across all users) ---
-const DICT_PATH = path.join(process.cwd(), 'src', 'data', 'dictionary-cache.json');
+// --- Server-side Supabase client (runs only in API route, never in browser) ---
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+const supabaseKey = process.env.SUPABASE_SERVICE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
 
-interface DictFile {
-  _meta: { description: string; lastUpdated: string };
-  entries: Record<string, { hanzi: string; pinyin: string }>;
-}
+const supabaseServer = createClient(supabaseUrl, supabaseKey, {
+  auth: { autoRefreshToken: false, persistSession: false },
+});
 
-let dictCache: DictFile | null = null;
-let dictLoadedAt = 0;
-const DICT_TTL = 30_000;
+// --- In-memory dictionary cache (avoids hitting Supabase on every request) ---
+interface DictEntry { hanzi: string; pinyin: string }
+const memoryCache = new Map<string, DictEntry>();
+let memoryCacheLoaded = false;
+let memoryCacheLoadedAt = 0;
+const MEMORY_CACHE_TTL = 5 * 60_000; // 5 minutes
 
-function loadDict(): DictFile {
-  const now = Date.now();
-  if (dictCache && now - dictLoadedAt < DICT_TTL) return dictCache;
-  try {
-    const raw = fs.readFileSync(DICT_PATH, 'utf-8');
-    dictCache = JSON.parse(raw) as DictFile;
-    dictLoadedAt = now;
-  } catch {
-    dictCache = { _meta: { description: '', lastUpdated: '' }, entries: {} };
-    dictLoadedAt = now;
+// Pre-load static JSON entries into memory cache (read-only seed data)
+function ensureStaticEntries() {
+  if (memoryCacheLoaded && Date.now() - memoryCacheLoadedAt < MEMORY_CACHE_TTL) return;
+  const entries = (staticDict as any).entries as Record<string, DictEntry>;
+  if (entries) {
+    for (const [key, val] of Object.entries(entries)) {
+      if (!memoryCache.has(key)) {
+        memoryCache.set(key, val);
+      }
+    }
   }
-  return dictCache;
+  memoryCacheLoaded = true;
+  memoryCacheLoadedAt = Date.now();
 }
 
-function saveDictEntry(key: string, hanzi: string, pinyin: string) {
+// Bulk-load Supabase dictionary_cache rows into memory (runs once per cold start + TTL)
+let supabaseCacheLoaded = false;
+let supabaseCacheLoadedAt = 0;
+
+async function loadSupabaseEntries() {
+  if (supabaseCacheLoaded && Date.now() - supabaseCacheLoadedAt < MEMORY_CACHE_TTL) return;
   try {
-    const dict = loadDict();
-    dict.entries[key] = { hanzi, pinyin };
-    dict._meta.lastUpdated = new Date().toISOString();
-    fs.writeFileSync(DICT_PATH, JSON.stringify(dict, null, 2), 'utf-8');
-    dictCache = dict;
-    dictLoadedAt = Date.now();
+    const { data } = await supabaseServer
+      .from('dictionary_cache')
+      .select('english, hanzi, pinyin');
+    if (data) {
+      for (const row of data) {
+        memoryCache.set(row.english, { hanzi: row.hanzi, pinyin: row.pinyin });
+      }
+    }
+    supabaseCacheLoaded = true;
+    supabaseCacheLoadedAt = Date.now();
   } catch {
-    // Non-critical
+    // Supabase unavailable — fall back to static JSON only
   }
 }
 
-function lookupDict(english: string): { hanzi: string; pinyin: string } | null {
-  const dict = loadDict();
-  return dict.entries[english.trim().toLowerCase()] || null;
+async function lookupDict(english: string): Promise<DictEntry | null> {
+  const key = english.trim().toLowerCase();
+  ensureStaticEntries();
+  await loadSupabaseEntries();
+  return memoryCache.get(key) || null;
+}
+
+async function saveDictEntry(key: string, hanzi: string, pinyin: string, source: string) {
+  // Update in-memory cache immediately
+  memoryCache.set(key, { hanzi, pinyin });
+  // Persist to Supabase (non-blocking, non-critical)
+  try {
+    await supabaseServer
+      .from('dictionary_cache')
+      .upsert(
+        { english: key, hanzi, pinyin, source, updated_at: new Date().toISOString() },
+        { onConflict: 'english' }
+      );
+  } catch {
+    // Non-critical — in-memory cache still has the entry for this lambda lifetime
+  }
+}
+
+function getDictSize(): number {
+  ensureStaticEntries();
+  return memoryCache.size;
 }
 
 function extractJson(content: string) {
@@ -181,18 +217,42 @@ async function tryOpenRouter(english: string, apiKey: string, signal: AbortSigna
 
 export async function POST(req: Request) {
   const startTime = Date.now();
+  const isDev = process.env.NODE_ENV === 'development';
   const debug: string[] = [];
-  const log = (msg: string) => { debug.push(`[${Date.now() - startTime}ms] ${msg}`); console.log(`[translate] ${msg}`); };
+  const log = (msg: string) => {
+    debug.push(`[${Date.now() - startTime}ms] ${msg}`);
+    if (isDev) console.log(`[translate] ${msg}`);
+  };
+  // Only include debug traces in development responses
+  const debugPayload = isDev ? debug : undefined;
 
   try {
     const { english } = await req.json();
     log(`Request: "${english}"`);
 
     if (!english || typeof english !== 'string' || english.trim().length < 1) {
-      return NextResponse.json({ error: 'Missing english text', debug }, { status: 400 });
+      return NextResponse.json({ error: 'Missing english text', debug: debugPayload }, { status: 400 });
     }
 
-    // 0) Daily usage limit check
+    const normalizedEnglish = english.trim().toLowerCase();
+
+    // 0) Dictionary lookup (instant) - does NOT count against daily usage
+    const cached = await lookupDict(normalizedEnglish);
+    if (cached) {
+      log(`DICT HIT: "${english}" -> ${cached.hanzi} (${cached.pinyin})`);
+      const usage = getUsage(req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || 'unknown');
+      return NextResponse.json({
+        hanzi: cached.hanzi,
+        pinyin: cached.pinyin,
+        source: 'dictionary',
+        usage,
+        limit: DAILY_LIMIT,
+        suggestions: [],
+        debug: debugPayload,
+      });
+    }
+
+    // 1) Daily usage limit check (AI providers only)
     const ip = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || 'unknown';
     const currentUsage = getUsage(ip);
     if (currentUsage >= DAILY_LIMIT) {
@@ -202,18 +262,11 @@ export async function POST(req: Request) {
         limitReached: true,
         usage: currentUsage,
         limit: DAILY_LIMIT,
-        debug,
+        debug: debugPayload,
       }, { status: 429 });
     }
 
-    // 1) Dictionary lookup (instant)
-    const cached = lookupDict(english);
-    if (cached) {
-      log(`DICT HIT: "${english}" -> ${cached.hanzi} (${cached.pinyin})`);
-      const usage = incrementUsage(ip);
-      return NextResponse.json({ hanzi: cached.hanzi, pinyin: cached.pinyin, source: 'dictionary', usage, limit: DAILY_LIMIT, debug });
-    }
-    log(`DICT MISS (${Object.keys(loadDict().entries).length} entries)`);
+    log(`DICT MISS (${getDictSize()} entries)`);
 
     // 1.5) Fuzzy match - suggest corrections for typos
     const suggestions = findSuggestions(english);
@@ -227,41 +280,53 @@ export async function POST(req: Request) {
 
     if (!geminiKey && !openRouterKey) {
       log('FAIL: No API key. Set GEMINI_API_KEY in .env.local');
-      return NextResponse.json({ error: 'No API key configured. Add GEMINI_API_KEY to .env.local', debug }, { status: 500 });
+      return NextResponse.json({ error: 'No API key configured. Add GEMINI_API_KEY to .env.local', debug: debugPayload }, { status: 500 });
     }
 
     const controller = new AbortController();
     const timeout = setTimeout(() => { log('TIMEOUT 12s'); controller.abort(); }, 12000);
     let result: { hanzi: string; pinyin: string } | null = null;
+    let provider: 'gemini' | 'openrouter' | null = null;
 
     // Try Gemini first (primary - fast & reliable)
     if (geminiKey && !result) {
-      try { result = await tryGemini(english.trim(), geminiKey, controller.signal, log); } catch (e: any) { log(`Gemini exception: ${e.message}`); }
+      try {
+        result = await tryGemini(english.trim(), geminiKey, controller.signal, log);
+        if (result) provider = 'gemini';
+      } catch (e: any) {
+        log(`Gemini exception: ${e.message}`);
+      }
     }
 
     // Fallback to OpenRouter
     if (!result && openRouterKey) {
-      try { result = await tryOpenRouter(english.trim(), openRouterKey, controller.signal, log); } catch (e: any) { log(`OpenRouter exception: ${e.message}`); }
+      try {
+        result = await tryOpenRouter(english.trim(), openRouterKey, controller.signal, log);
+        if (result) provider = 'openrouter';
+      } catch (e: any) {
+        log(`OpenRouter exception: ${e.message}`);
+      }
     }
 
     clearTimeout(timeout);
 
     if (result) {
-      saveDictEntry(english.trim().toLowerCase(), result.hanzi, result.pinyin);
+      await saveDictEntry(normalizedEnglish, result.hanzi, result.pinyin, provider || 'ai');
       const usage = incrementUsage(ip);
+      const source = provider || 'ai';
       log(`SUCCESS: "${english}" -> ${result.hanzi} (${result.pinyin})`);
-      return NextResponse.json({ hanzi: result.hanzi, pinyin: result.pinyin, source: geminiKey ? 'gemini' : 'openrouter', usage, limit: DAILY_LIMIT, suggestions, debug });
+      return NextResponse.json({ hanzi: result.hanzi, pinyin: result.pinyin, source, usage, limit: DAILY_LIMIT, suggestions, debug: debugPayload });
     }
 
     log('FAIL: All providers failed');
-    return NextResponse.json({ error: 'Translation failed. All providers returned errors.', suggestions, debug }, { status: 500 });
+    return NextResponse.json({ error: 'Translation failed. All providers returned errors.', suggestions, debug: debugPayload }, { status: 500 });
   } catch (error: unknown) {
     const errMsg = error instanceof Error ? error.message : String(error);
     const isAbort = error instanceof Error && error.name === 'AbortError';
     log(`EXCEPTION: ${errMsg}`);
     return NextResponse.json({
       error: isAbort ? 'Translation timed out (12s). Try again.' : errMsg,
-      debug,
+      debug: debugPayload,
     }, { status: 500 });
   }
 }

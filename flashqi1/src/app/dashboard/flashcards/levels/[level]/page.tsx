@@ -5,10 +5,11 @@ import { useRouter, useParams, useSearchParams } from 'next/navigation';
 import AddSelfLearnCardModal from '@/components/flashcards/AddSelfLearnCardModal';
 import { Button } from '@/components/ui/button';
 import { FlashcardDatabaseService, FlashcardWithProgress } from '@/services/flashcardDatabaseService';
-import { categoryStorage, flashcardStorage } from '@/lib/localStorage';
+import { categoryStorage, flashcardStorage, hskStorage } from '@/lib/localStorage';
+import { supabase } from '@/lib/supabase';
 
 // Hardcoded lesson data for Level 1 and Level 2
-const LEVEL_DATA = {
+const LEVEL_DATA: Record<string, { title: string; lessons: { id: string; title: string }[] }> = {
   level1: {
     title: 'Level 1',
     lessons: [
@@ -35,10 +36,16 @@ const LEVEL_DATA = {
   },
 };
 
+// Map HSK level param to numeric level
+function hskParamToLevel(param: string): number | null {
+  const match = param.match(/^hsk(\d+)$/);
+  return match ? parseInt(match[1]) : null;
+}
+
 export default function FlashcardLevelPage() {
   const router = useRouter();
   const params = useParams();
-  const level = params.level as string; // 'level1' | 'level2' | 'self-learn'
+  const level = params.level as string; // 'level1' | 'level2' | 'self-learn' | 'hsk1' etc.
   const searchParams = useSearchParams();
   const categoryParam = searchParams.get('category');
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -49,16 +56,130 @@ export default function FlashcardLevelPage() {
   const [selectMode, setSelectMode] = useState(false);
   const [selectedCards, setSelectedCards] = useState<string[]>([]);
 
+  // HSK categories fetched from Supabase
+  const [hskCategories, setHskCategories] = useState<{ name: string; wordCount: number }[]>([]);
+  const [isHskLoading, setIsHskLoading] = useState(false);
+
+  const isHsk = level?.startsWith('hsk');
+  const hskNum = isHsk ? hskParamToLevel(level) : null;
+
+  // Fetch HSK categories from Supabase with caching
+  useEffect(() => {
+    if (!isHsk || !hskNum) return;
+    let cancelled = false;
+
+    const sortCategories = (cats: { name: string; wordCount: number }[]) =>
+      cats.sort((a, b) => {
+        const isVocabA = a.name === 'General Vocabulary';
+        const isVocabB = b.name === 'General Vocabulary';
+        if (isVocabA && !isVocabB) return 1;
+        if (!isVocabA && isVocabB) return -1;
+        return a.name.localeCompare(b.name);
+      });
+
+    const fetchCategories = async () => {
+      setIsHskLoading(true);
+
+      // 1. Try cache first for instant load
+      const cached = hskStorage.getCategories(hskNum);
+      if (cached && cached.length > 0) {
+        setHskCategories(cached.map(c => ({ name: c.name, wordCount: c.wordCount })));
+        setIsHskLoading(false);
+        // Background refresh if cache is stale
+        if (!hskStorage.isCacheStale(60 * 60 * 1000)) return; // 1 hour freshness
+      }
+
+      // 2. Server-side aggregation (much faster than fetching all rows)
+      try {
+        // Try RPC first
+        const { data, error } = await supabase
+          .rpc('get_hsk_categories', { level: hskNum });
+
+        if (!error && data && data.length > 0) {
+          const categories = data.map((row: any) => ({
+            name: row.category,
+            wordCount: Number(row.count)
+          }));
+          const sorted = sortCategories(categories);
+          if (!cancelled) {
+            setHskCategories(sorted);
+            hskStorage.saveCategories(hskNum, sorted.map(c => ({ level: hskNum, ...c })));
+            setIsHskLoading(false);
+          }
+          return;
+        }
+
+        // Fallback A: fetch category column client-side (works if column exists)
+        const { data: catData, error: catError } = await supabase
+          .from('hsk_vocabulary')
+          .select('category')
+          .eq('hsk_level', hskNum);
+
+        if (!catError && catData && catData.length > 0 && catData[0].category !== undefined) {
+          const catMap: Record<string, number> = {};
+          catData.forEach((row: any) => {
+            const cat = row.category || 'General';
+            catMap[cat] = (catMap[cat] || 0) + 1;
+          });
+          const sorted = sortCategories(
+            Object.entries(catMap).map(([name, wordCount]) => ({ name, wordCount }))
+          );
+          if (!cancelled) {
+            setHskCategories(sorted);
+            hskStorage.saveCategories(hskNum, sorted.map(c => ({ level: hskNum, ...c })));
+            setIsHskLoading(false);
+          }
+          return;
+        }
+
+        // Fallback B: category column doesn't exist — just count total words
+        const { count, error: countError } = await supabase
+          .from('hsk_vocabulary')
+          .select('*', { count: 'exact', head: true })
+          .eq('hsk_level', hskNum);
+
+        if (!countError && count && count > 0) {
+          const fallback = [{ name: `All HSK ${hskNum} Words`, wordCount: count }];
+          if (!cancelled) {
+            setHskCategories(fallback);
+            setIsHskLoading(false);
+          }
+          return;
+        }
+
+        // Nothing found at all
+        if (!cancelled) {
+          setHskCategories([]);
+          setIsHskLoading(false);
+        }
+      } catch (err) {
+        console.error('Failed to fetch HSK categories:', err);
+        // Keep showing cached data if available, stop loading
+        if (!cancelled) setIsHskLoading(false);
+      }
+    };
+
+    fetchCategories();
+    return () => { cancelled = true; };
+  }, [isHsk, hskNum]);
+
   // Construct data based on level param
-  let levelData: any;
+  let levelData: { title: string; lessons: { id: string; title: string }[] };
 
   if (level === 'self-learn') {
     levelData = {
       title: 'Self Learn',
       lessons: [],
     };
+  } else if (isHsk && hskNum) {
+    levelData = {
+      title: `HSK ${hskNum}`,
+      lessons: hskCategories.map((cat) => ({
+        id: `${level}-cat-${encodeURIComponent(cat.name)}`,
+        title: `${cat.name} (${cat.wordCount})`,
+      })),
+    };
   } else {
-    // @ts-ignore
     levelData = LEVEL_DATA[level] || LEVEL_DATA.level1;
   }
 
@@ -339,20 +460,32 @@ export default function FlashcardLevelPage() {
             </div>
           ) : (
             <div className="space-y-6">
-              {levelData.lessons.map((lesson: any) => (
-                <Button
-                  key={lesson.id}
-                  asChild
-                  variant="ghost"
-                  className="h-auto w-full p-0 bg-transparent hover:bg-transparent text-left"
-                >
-                  <button type="button" onClick={() => navigateToStudy(lesson.id)}>
-                    <span className="shimmer-text text-xl sm:text-2xl font-light tracking-wide">
-                      {lesson.title}
-                    </span>
-                  </button>
-                </Button>
-              ))}
+              {isHsk && isHskLoading ? (
+                <div className="text-center py-8">
+                  <div className="inline-block w-8 h-8 border-2 border-slate-200 border-t-slate-400 rounded-full animate-spin" />
+                  <p className="text-sm text-slate-400 mt-3 font-light">Loading categories...</p>
+                </div>
+              ) : isHsk && levelData.lessons.length === 0 ? (
+                <div className="text-center py-8">
+                  <p className="text-sm text-slate-400 font-light">No categories found for HSK {hskNum}.</p>
+                  <p className="text-xs text-slate-300 mt-2">Make sure the HSK seed data has been loaded.</p>
+                </div>
+              ) : (
+                levelData.lessons.map((lesson: any) => (
+                  <Button
+                    key={lesson.id}
+                    asChild
+                    variant="ghost"
+                    className="h-auto w-full p-0 bg-transparent hover:bg-transparent text-left"
+                  >
+                    <button type="button" onClick={() => navigateToStudy(lesson.id)}>
+                      <span className="shimmer-text text-xl sm:text-2xl font-light tracking-wide">
+                        {lesson.title}
+                      </span>
+                    </button>
+                  </Button>
+                ))
+              )}
             </div>
           )}
         </div>

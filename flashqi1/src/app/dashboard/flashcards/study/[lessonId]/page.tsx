@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useRouter, useParams, useSearchParams } from 'next/navigation';
 import { FlashcardDatabaseService } from '@/services/flashcardDatabaseService';
 import { Button } from '@/components/ui/button';
+import { supabase } from '@/lib/supabase';
 
 // Hardcoded flashcard data
 const FLASHCARD_DATA: { [key: string]: { title: string; cards: { id: string; hanzi: string; pinyin: string; english: string; }[] } } = {
@@ -206,6 +207,63 @@ export default function FlashcardStudyPage() {
         setIsLoading(false);
       };
       loadSelfLearnData();
+    } else if (typeof lessonId === 'string' && lessonId.includes('hsk')) {
+      // Handle HSK category lessons (e.g., "hsk1-cat-Greetings")
+      const catMatch = lessonId.match(/^(hsk\d+)-cat-(.+)$/);
+      if (catMatch) {
+        const [, hskId, encodedCat] = catMatch;
+        const categoryName = decodeURIComponent(encodedCat);
+        const hskNum = parseInt(hskId.replace('hsk', ''), 10);
+        const isAllWords = categoryName.startsWith('All HSK');
+        
+        setIsLoading(true);
+        const fetchHskCards = async () => {
+          let cards: any[] = [];
+
+          if (!isAllWords) {
+            // Try category-based query first
+            const { data, error } = await supabase
+              .from('hsk_vocabulary')
+              .select('*')
+              .eq('hsk_level', hskNum)
+              .eq('category', categoryName)
+              .order('word_order');
+
+            if (!error && data && data.length > 0) {
+              cards = data;
+            }
+          }
+
+          // Fallback: load all words for this HSK level (no category filter)
+          if (cards.length === 0) {
+            const { data: allData, error: allError } = await supabase
+              .from('hsk_vocabulary')
+              .select('*')
+              .eq('hsk_level', hskNum)
+              .order('word_order');
+
+            if (!allError && allData) {
+              cards = allData;
+            }
+          }
+
+          if (cards.length > 0) {
+            setDynamicLessonData({
+              title: `HSK ${hskNum} - ${categoryName}`,
+              cards: cards.map((w: any) => ({
+                id: w.id,
+                hanzi: w.hanzi,
+                pinyin: w.pinyin,
+                english: w.english,
+                ...w
+              }))
+            });
+          }
+          setIsLoading(false);
+        };
+        fetchHskCards();
+        return;
+      }
     }
   }, [lessonId]);
 
@@ -310,6 +368,13 @@ export default function FlashcardStudyPage() {
   const goBack = () => {
     if (lessonId === 'self-learn') {
       router.push(`/dashboard/flashcards/levels/self-learn`);
+      return;
+    }
+
+    // HSK category routes: hsk1-cat-..., hsk2-cat-..., etc.
+    const hskMatch = lessonId.match(/^(hsk\d+)-cat-/);
+    if (hskMatch) {
+      router.push(`/dashboard/flashcards/levels/${hskMatch[1]}`);
       return;
     }
 
