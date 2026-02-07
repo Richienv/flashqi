@@ -163,21 +163,21 @@ export default function LoginPage() {
 
       {/* Forgot Password Modal */}
       {showForgotPasswordModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl">
+        <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-3xl max-w-md w-full p-8 shadow-xl">
             {resetSuccess ? (
               <div className="text-center">
-                <div className="w-16 h-16 mx-auto mb-6 rounded-full bg-green-50 flex items-center justify-center">
-                  <svg className="w-8 h-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                <div className="w-14 h-14 mx-auto mb-6 rounded-full bg-blue-50 flex items-center justify-center">
+                  <svg className="w-7 h-7 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                   </svg>
                 </div>
-                <h3 className="text-xl font-semibold text-slate-900 mb-3">Check Your Email</h3>
-                <p className="text-sm text-slate-600 mb-2">
-                  We sent a password reset link to:
+                <h3 className="shimmer-text text-2xl font-light tracking-wide mb-3">Check Your Email</h3>
+                <p className="text-sm text-slate-500 font-light mb-2">
+                  We sent a password reset link to
                 </p>
                 <p className="text-sm text-slate-900 font-medium mb-6">{resetEmail}</p>
-                <p className="text-xs text-slate-400 mb-6">
+                <p className="text-xs text-slate-400 font-light mb-8">
                   Click the link in your email to reset your password.
                 </p>
                 <button
@@ -185,32 +185,36 @@ export default function LoginPage() {
                     setShowForgotPasswordModal(false);
                     setResetSuccess(false);
                   }}
-                  className="w-full px-4 py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-lg transition-colors"
+                  className="w-full py-3 text-center"
                 >
-                  Got it
+                  <span className="shimmer-text text-base font-light tracking-wide">
+                    Got it
+                  </span>
                 </button>
               </div>
             ) : (
               <>
-                <h3 className="text-xl font-semibold text-slate-900 mb-2">Reset Password</h3>
-                <p className="text-sm text-slate-600 mb-6">
-                  Enter your email address and we'll send you a link to reset your password.
+                <h3 className="shimmer-text text-2xl font-light tracking-wide mb-2 text-center">Reset Password</h3>
+                <p className="text-sm text-slate-400 font-light mb-8 text-center">
+                  Enter your email to receive a reset link
                 </p>
 
                 {resetError && (
-                  <div className="mb-4 bg-red-50 border border-red-100 text-red-600 px-4 py-3 rounded-xl text-sm">
+                  <div className="mb-6 bg-red-50 border border-red-100 text-red-600 px-4 py-3 rounded-xl text-sm font-light">
                     {resetError}
                   </div>
                 )}
 
-                <input
-                  type="email"
-                  value={resetEmail}
-                  onChange={(e) => setResetEmail(e.target.value)}
-                  placeholder="Email address"
-                  className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all mb-6"
-                  disabled={resetLoading}
-                />
+                <div className="mb-8">
+                  <input
+                    type="email"
+                    value={resetEmail}
+                    onChange={(e) => setResetEmail(e.target.value)}
+                    placeholder="Email"
+                    className="w-full border-b border-slate-200 bg-transparent pb-3 text-sm font-light text-slate-900 placeholder:text-slate-400 focus:border-slate-900 focus:outline-none transition-colors"
+                    disabled={resetLoading}
+                  />
+                </div>
 
                 <div className="flex gap-3">
                   <button
@@ -219,16 +223,20 @@ export default function LoginPage() {
                       setResetError('');
                     }}
                     disabled={resetLoading}
-                    className="flex-1 px-4 py-2.5 border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors disabled:opacity-50"
+                    className="flex-1 py-3 text-center disabled:opacity-40"
                   >
-                    Cancel
+                    <span className="text-sm font-light text-slate-400 hover:text-slate-900 transition-colors">
+                      Cancel
+                    </span>
                   </button>
                   <button
                     onClick={handleForgotPassword}
                     disabled={resetLoading || !resetEmail}
-                    className="flex-1 px-4 py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="flex-1 py-3 text-center disabled:opacity-40"
                   >
-                    {resetLoading ? 'Sending...' : 'Send Reset Link'}
+                    <span className="shimmer-text text-sm font-light tracking-wide">
+                      {resetLoading ? 'Sending...' : 'Send Link'}
+                    </span>
                   </button>
                 </div>
               </>
