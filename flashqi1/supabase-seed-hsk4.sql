@@ -405,7 +405,7 @@ INSERT INTO hsk_vocabulary (hsk_level, word_order, hanzi, pinyin, english) VALUE
   (4, 400, '居然', 'jū rán', 'unexpectedly'),
   (4, 401, '竟然', 'jìng rán', 'actually'),
   (4, 402, '难道', 'nán dào', 'could it be'),
-  (4, 403, '究竟', 'jiū jìng', 'after all'),
+  (4, 403, '毕竟', 'bì jìng', 'after all'),
   (4, 404, '到底', 'dào dǐ', 'in the end'),
   (4, 405, '恐怕', 'kǒng pà', 'I''m afraid'),
   (4, 406, '大概', 'dà gài', 'roughly'),
