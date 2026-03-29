@@ -22,13 +22,18 @@ export function Navbar() {
         setIsPremium(false);
         return;
       }
+      // Dev user always has premium
+      if (user.id === 'dev-premium-user') {
+        setIsPremium(true);
+        return;
+      }
       try {
         const { data } = await supabase
           .from('premium_subscriptions')
           .select('is_active, expires_at')
           .eq('user_id', user.id)
           .single();
-        
+
         const active = data?.is_active && (!data.expires_at || new Date(data.expires_at) > new Date());
         setIsPremium(active || false);
       } catch {

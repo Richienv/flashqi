@@ -83,7 +83,7 @@ export default function Home() {
             {/* Floating Chinese characters */}
             {/* Main headline with gradient text */}
             <h1 className="relative">
-              <span className="block text-5xl sm:text-7xl lg:text-8xl font-semibold text-transparent bg-clip-text bg-gradient-to-r from-blue-700 via-sky-500 to-blue-700 leading-[1.1] tracking-tight mb-4">
+              <span className="block text-5xl sm:text-7xl lg:text-8xl font-light text-transparent bg-clip-text bg-gradient-to-r from-blue-700 via-sky-500 to-blue-700 leading-[1.1] tracking-wide mb-4">
                 Chinese with ZJU Curriculum + AI
               </span>
             </h1>
@@ -100,7 +100,7 @@ export default function Home() {
                 href={isAuthenticated ? "/dashboard/flashcards" : "/auth/login"}
                 className="group relative inline-flex items-center gap-3 px-8 py-4 rounded-2xl text-slate-900 font-light text-lg tracking-wide transition-all duration-500"
               >
-                <span className="relative z-10 shimmer-text font-bold">Start Learning</span>
+                <span className="relative z-10 shimmer-text font-light">Start Learning</span>
                 <span className="text-slate-400 group-hover:text-slate-700 group-hover:translate-x-1 transition-all duration-300">→</span>
               </Link>
             </div>

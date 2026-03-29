@@ -5,6 +5,8 @@ import { useRouter, useParams, useSearchParams } from 'next/navigation';
 import { FlashcardDatabaseService } from '@/services/flashcardDatabaseService';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/lib/supabase';
+import { HSK_LEVELS } from '@/data/hsk-levels';
+import { hskWordId, SPRINT_SIZE } from '@/lib/sprintUtils';
 
 // Hardcoded flashcard data
 const FLASHCARD_DATA: { [key: string]: { title: string; cards: { id: string; hanzi: string; pinyin: string; english: string; }[] } } = {
@@ -194,6 +196,7 @@ export default function FlashcardStudyPage() {
 
   const [dynamicLessonData, setDynamicLessonData] = useState<{ title: string; cards: any[] } | null>(null);
   const [isLoading, setIsLoading] = useState(lessonId === 'self-learn');
+  const [showExamples, setShowExamples] = useState(false);
 
   useEffect(() => {
     if (lessonId === 'self-learn') {
@@ -207,6 +210,30 @@ export default function FlashcardStudyPage() {
         setIsLoading(false);
       };
       loadSelfLearnData();
+    } else if (typeof lessonId === 'string' && lessonId.match(/^hsk\d+-sprint-\d+$/)) {
+      // Handle HSK sprint lessons (e.g., "hsk4-sprint-3")
+      const sprintMatch = lessonId.match(/^(hsk\d+)-sprint-(\d+)$/);
+      if (sprintMatch) {
+        const [, hskId, sprintNumStr] = sprintMatch;
+        const sprintNum = parseInt(sprintNumStr, 10);
+        const hskLevel = HSK_LEVELS.find(l => l.id === hskId);
+
+        if (hskLevel && hskLevel.words.length > 0) {
+          const start = (sprintNum - 1) * SPRINT_SIZE;
+          const end = Math.min(start + SPRINT_SIZE, hskLevel.words.length);
+          const sprintWords = hskLevel.words.slice(start, end);
+
+          setDynamicLessonData({
+            title: `HSK ${hskId.replace('hsk', '')} \u00b7 Sprint ${sprintNum}`,
+            cards: sprintWords.map((w, idx) => ({
+              id: hskWordId(hskId, start + idx),
+              hanzi: w.hanzi,
+              pinyin: w.pinyin,
+              english: w.english,
+            })),
+          });
+        }
+      }
     } else if (typeof lessonId === 'string' && lessonId.includes('hsk')) {
       // Handle HSK category lessons (e.g., "hsk1-cat-Greetings")
       const catMatch = lessonId.match(/^(hsk\d+)-cat-(.+)$/);
@@ -352,6 +379,7 @@ export default function FlashcardStudyPage() {
       setCurrentIndex(currentIndex + 1);
       setIsFlipped(false);
       setShowHint(false);
+      setShowExamples(false);
       clearCanvas();
     }
   };
@@ -361,9 +389,36 @@ export default function FlashcardStudyPage() {
       setCurrentIndex(currentIndex - 1);
       setIsFlipped(false);
       setShowHint(false);
+      setShowExamples(false);
       clearCanvas();
     }
   };
+
+  // Load example sentences for the current HSK level
+  const [exampleSentences, setExampleSentences] = useState<Record<string, { cn: string; en: string }[]>>({});
+
+  useEffect(() => {
+    const match = typeof lessonId === 'string' ? lessonId.match(/^(hsk\d+)/) : null;
+    if (!match) return;
+    const loadExamples = async () => {
+      try {
+        let mod;
+        switch (match[1]) {
+          case 'hsk1': mod = await import('@/data/hsk1-examples'); break;
+          case 'hsk2': mod = await import('@/data/hsk2-examples'); break;
+          case 'hsk3': mod = await import('@/data/hsk3-examples'); break;
+          case 'hsk4': mod = await import('@/data/hsk4-examples'); break;
+          case 'hsk5': mod = await import('@/data/hsk5-examples'); break;
+          case 'hsk6': mod = await import('@/data/hsk6-examples'); break;
+          case 'hsk7': mod = await import('@/data/hsk7-examples'); break;
+          case 'hsk8': mod = await import('@/data/hsk8-examples'); break;
+          case 'hsk9': mod = await import('@/data/hsk9-examples'); break;
+        }
+        if (mod?.default) setExampleSentences(mod.default);
+      } catch { /* Examples not yet available for this level */ }
+    };
+    loadExamples();
+  }, [lessonId]);
 
   const goBack = () => {
     if (lessonId === 'self-learn') {
@@ -551,9 +606,44 @@ export default function FlashcardStudyPage() {
                       style={{ backfaceVisibility: 'hidden', transform: 'rotateY(180deg)' }}
                     >
                       <div className="relative h-full flex flex-col items-center justify-center p-6 text-center">
-                        <span className="text-4xl font-light text-slate-900 mb-2">{currentCard.english}</span>
-                        <div className="w-10 h-px bg-slate-200 my-4" />
-                        <span className="text-5xl text-slate-100 mt-6 select-none">{currentCard.hanzi}</span>
+                        <span className="text-xl sm:text-2xl font-light text-slate-900 leading-relaxed mb-2">{currentCard.english}</span>
+                        <div className="w-10 h-px bg-slate-200 my-3" />
+                        <span className="text-4xl text-slate-100 mt-4 select-none">{currentCard.hanzi}</span>
+
+                        {/* Examples button */}
+                        <button
+                          onClick={(e) => { e.stopPropagation(); setShowExamples(!showExamples); }}
+                          className="absolute bottom-4 right-4 text-xs text-slate-400 hover:text-blue-500 transition-colors font-light tracking-wide"
+                        >
+                          {showExamples ? 'Hide' : 'Examples'}
+                        </button>
+
+                        {/* Example sentences overlay */}
+                        {showExamples && (
+                          <div
+                            className="absolute inset-0 bg-white/95 backdrop-blur-sm rounded-3xl flex flex-col items-center justify-center p-6 z-10"
+                            onClick={(e) => { e.stopPropagation(); setShowExamples(false); }}
+                          >
+                            <p className="text-xs text-slate-400 font-light tracking-widest uppercase mb-5">Example Sentences</p>
+                            <div className="space-y-4 w-full max-w-xs">
+                              {(exampleSentences[currentCard.hanzi] || []).length > 0 ? (
+                                exampleSentences[currentCard.hanzi].map((ex, i) => (
+                                  <div key={i} className="text-center">
+                                    <p className="text-base text-slate-800 font-light" dangerouslySetInnerHTML={{
+                                      __html: ex.cn.replace(
+                                        new RegExp(`(${currentCard.hanzi})`, 'g'),
+                                        '<span class="text-blue-500 font-normal">$1</span>'
+                                      )
+                                    }} />
+                                    <p className="text-xs text-slate-400 mt-0.5">{ex.en}</p>
+                                  </div>
+                                ))
+                              ) : (
+                                <p className="text-sm text-slate-400 font-light">No examples available yet</p>
+                              )}
+                            </div>
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>

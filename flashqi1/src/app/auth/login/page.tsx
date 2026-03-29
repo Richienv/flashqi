@@ -18,7 +18,10 @@ export default function LoginPage() {
   const [resetLoading, setResetLoading] = useState(false);
   const [resetSuccess, setResetSuccess] = useState(false);
   const [resetError, setResetError] = useState('');
-  const { signIn, resendConfirmationEmail, resetPassword, isAuthenticated, isLoading } = useAuth();
+  const [showPremiumAccess, setShowPremiumAccess] = useState(false);
+  const [premiumPassword, setPremiumPassword] = useState('');
+  const [premiumError, setPremiumError] = useState('');
+  const { signIn, resendConfirmationEmail, resetPassword, devSignIn, isAuthenticated, isLoading } = useAuth();
   const router = useRouter();
 
   // Redirect if already logged in
@@ -91,6 +94,17 @@ export default function LoginPage() {
       alert('✓ Connection successful! Supabase is reachable. Check console for details.');
     } else {
       alert(`✗ Connection failed: ${result.error}\n\nCheck console for detailed diagnostics.`);
+    }
+  };
+
+  const handlePremiumAccess = (e: React.FormEvent) => {
+    e.preventDefault();
+    setPremiumError('');
+    const result = devSignIn(premiumPassword);
+    if (result.success) {
+      router.push('/dashboard/flashcards');
+    } else {
+      setPremiumError('Invalid access code.');
     }
   };
 
@@ -190,6 +204,14 @@ export default function LoginPage() {
             Create one
           </Link>
         </p>
+
+        <button
+          type="button"
+          onClick={() => { setShowPremiumAccess(true); setPremiumPassword(''); setPremiumError(''); }}
+          className="w-full mt-4 py-2.5 text-center border border-amber-200 rounded-xl hover:bg-amber-50 transition-colors"
+        >
+          <span className="text-xs font-light text-amber-600 tracking-wide">Premium Access</span>
+        </button>
       </div>
 
       {/* Forgot Password Modal */}
@@ -272,6 +294,58 @@ export default function LoginPage() {
                 </div>
               </>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* Premium Access Modal */}
+      {showPremiumAccess && (
+        <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-3xl max-w-md w-full p-8 shadow-xl">
+            <div className="text-center mb-6">
+              <div className="w-14 h-14 mx-auto mb-4 rounded-full bg-amber-50 flex items-center justify-center">
+                <svg className="w-7 h-7 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+              </div>
+              <h3 className="text-2xl font-light tracking-wide text-amber-600 mb-1">Premium Access</h3>
+              <p className="text-sm text-slate-400 font-light">Enter access code to continue</p>
+            </div>
+
+            {premiumError && (
+              <div className="mb-4 bg-red-50 border border-red-100 text-red-600 px-4 py-3 rounded-xl text-sm font-light">
+                {premiumError}
+              </div>
+            )}
+
+            <form onSubmit={handlePremiumAccess}>
+              <div className="mb-6">
+                <input
+                  type="password"
+                  value={premiumPassword}
+                  onChange={(e) => setPremiumPassword(e.target.value)}
+                  placeholder="Access code"
+                  autoFocus
+                  className="w-full border-b border-slate-200 bg-transparent pb-3 text-sm font-light text-slate-900 placeholder:text-slate-400 focus:border-amber-500 focus:outline-none transition-colors"
+                />
+              </div>
+              <div className="flex gap-3">
+                <button
+                  type="button"
+                  onClick={() => setShowPremiumAccess(false)}
+                  className="flex-1 py-3 text-center"
+                >
+                  <span className="text-sm font-light text-slate-400 hover:text-slate-900 transition-colors">Cancel</span>
+                </button>
+                <button
+                  type="submit"
+                  disabled={!premiumPassword}
+                  className="flex-1 py-3 text-center disabled:opacity-40"
+                >
+                  <span className="text-sm font-light tracking-wide text-amber-600">Enter</span>
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

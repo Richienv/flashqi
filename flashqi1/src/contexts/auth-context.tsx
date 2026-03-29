@@ -47,6 +47,7 @@ type AuthContextType = {
   updateProfile: (updates: { name?: string }) => Promise<{ error: any }>;
   refreshPremiumStatus: () => Promise<void>;
   markWelcomeSeen: () => Promise<void>;
+  devSignIn: (password: string) => { success: boolean };
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -281,7 +282,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signOut = async () => {
     setLastError(null);
     try {
-      await supabase.auth.signOut();
+      if (user?.id !== 'dev-premium-user') {
+        await supabase.auth.signOut();
+      }
       setUser(null);
       router.push('/auth/login');
     } catch (error) {
@@ -294,6 +297,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const refreshPremiumStatus = useCallback(async () => {
     if (!user) return;
+    // Dev user always has premium - skip Supabase check
+    if (user.id === 'dev-premium-user') return;
     try {
       const [isPremiumSubscription, profileResult] = await Promise.all([
         checkPremiumStatus(user.id),
@@ -343,6 +348,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const devSignIn = (password: string): { success: boolean } => {
+    if (password !== 'xiao') return { success: false };
+    const now = new Date().toISOString();
+    setUser({
+      id: 'dev-premium-user',
+      email: 'dev@flashqi.app',
+      name: 'Developer',
+      user_metadata: { name: 'Developer', avatar_url: null },
+      created_at: now,
+      updated_at: now,
+      isPremium: true,
+      hasSeenWelcome: true,
+    });
+    return { success: true };
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -359,6 +380,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         updateProfile,
         refreshPremiumStatus,
         markWelcomeSeen,
+        devSignIn,
       }}
     >
       {children}

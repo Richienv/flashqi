@@ -22,10 +22,6 @@ export default function FlashcardsPage() {
         return () => window.removeEventListener('focus', handleFocus);
     }, [refreshPremiumStatus]);
 
-    const navigateToLevel = (level: 'level1' | 'level2') => {
-        router.push(`/dashboard/flashcards/levels/${level}`);
-    };
-
     const navigateToSelfLearn = () => {
         router.push(`/dashboard/flashcards/levels/self-learn`);
     };
@@ -73,31 +69,6 @@ export default function FlashcardsPage() {
                         </button>
                     </Button>
 
-                    <Button
-                        asChild
-                        variant="ghost"
-                        className="h-auto w-full p-0 bg-transparent hover:bg-transparent"
-                    >
-                        <button type="button" onClick={() => navigateToLevel('level1')}>
-                            <span className="shimmer-text text-2xl sm:text-3xl font-light tracking-wide">
-                                Level 1
-                            </span>
-                        </button>
-                    </Button>
-
-                    <Button
-                        asChild
-                        variant="ghost"
-                        className="h-auto w-full p-0 bg-transparent hover:bg-transparent"
-                    >
-                        <button type="button" onClick={() => navigateToLevel('level2')}>
-                            <span className="shimmer-text text-2xl sm:text-3xl font-light tracking-wide">
-                                Level 2
-                            </span>
-                        </button>
-                    </Button>
-
-                    {/* HSK Levels Section */}
                     <div className="h-px bg-slate-200/80 my-4" />
 
                     <div className="text-center">
@@ -107,7 +78,7 @@ export default function FlashcardsPage() {
                                 <span className="premium-badge text-[7px] font-medium tracking-wider uppercase px-1.5 py-0.5 rounded-full">Premium</span>
                             )}
                         </div>
-                        <p className="text-[10px] text-slate-300 font-light mt-1">2,500+ embedded words ready to learn</p>
+                        <p className="text-[10px] text-slate-300 font-light mt-1">10,000+ embedded words ready to learn</p>
                     </div>
 
                     {HSK_LEVELS.map((hsk) => (

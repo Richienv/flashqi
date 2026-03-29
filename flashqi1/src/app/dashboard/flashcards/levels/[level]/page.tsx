@@ -5,36 +5,10 @@ import { useRouter, useParams, useSearchParams } from 'next/navigation';
 import AddSelfLearnCardModal from '@/components/flashcards/AddSelfLearnCardModal';
 import { Button } from '@/components/ui/button';
 import { FlashcardDatabaseService, FlashcardWithProgress } from '@/services/flashcardDatabaseService';
-import { categoryStorage, flashcardStorage, hskStorage } from '@/lib/localStorage';
-import { supabase } from '@/lib/supabase';
-
-// Hardcoded lesson data for Level 1 and Level 2
-const LEVEL_DATA: Record<string, { title: string; lessons: { id: string; title: string }[] }> = {
-  level1: {
-    title: 'Level 1',
-    lessons: [
-      { id: 'lesson1', title: '你好 - Greetings' },
-      { id: 'lesson2', title: '数字 - Numbers' },
-      { id: 'lesson3', title: '家人 - Family' },
-      { id: 'lesson4', title: '食物 - Food' },
-      { id: 'lesson5', title: '颜色 - Colors' },
-      { id: 'lesson6', title: '时间 - Time' },
-      { id: 'lesson7', title: '地方 - Places' },
-      { id: 'lesson8', title: '动物 - Animals' },
-    ],
-  },
-  level2: {
-    title: 'Level 2',
-    lessons: [
-      { id: 'level2_lesson1', title: '购物 - Shopping' },
-      { id: 'level2_lesson2', title: '旅行 - Travel' },
-      { id: 'level2_lesson3', title: '工作 - Work' },
-      { id: 'level2_lesson4', title: '健康 - Health' },
-      { id: 'level2_lesson5', title: '天气 - Weather' },
-      { id: 'level2_lesson6', title: '爱好 - Hobbies' },
-    ],
-  },
-};
+import { categoryStorage, flashcardStorage, progressStorage } from '@/lib/localStorage';
+import { HSK_LEVELS } from '@/data/hsk-levels';
+import { buildSprints, Sprint, SPRINT_SIZE } from '@/lib/sprintUtils';
+import { useAuth } from '@/contexts/auth-context';
 
 // Map HSK level param to numeric level
 function hskParamToLevel(param: string): number | null {
@@ -45,7 +19,7 @@ function hskParamToLevel(param: string): number | null {
 export default function FlashcardLevelPage() {
   const router = useRouter();
   const params = useParams();
-  const level = params.level as string; // 'level1' | 'level2' | 'self-learn' | 'hsk1' etc.
+  const level = params.level as string;
   const searchParams = useSearchParams();
   const categoryParam = searchParams.get('category');
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -56,132 +30,35 @@ export default function FlashcardLevelPage() {
   const [selectMode, setSelectMode] = useState(false);
   const [selectedCards, setSelectedCards] = useState<string[]>([]);
 
-  // HSK categories fetched from Supabase
-  const [hskCategories, setHskCategories] = useState<{ name: string; wordCount: number }[]>([]);
-  const [isHskLoading, setIsHskLoading] = useState(false);
+  // Sprint system
+  const { user } = useAuth();
+  const [sprints, setSprints] = useState<Sprint[]>([]);
 
   const isHsk = level?.startsWith('hsk');
   const hskNum = isHsk ? hskParamToLevel(level) : null;
 
-  // Fetch HSK categories from Supabase with caching
+  // Compute sprints for all HSK levels
   useEffect(() => {
-    if (!isHsk || !hskNum) return;
-    let cancelled = false;
+    if (!isHsk) return;
 
-    const sortCategories = (cats: { name: string; wordCount: number }[]) =>
-      cats.sort((a, b) => {
-        const isVocabA = a.name === 'General Vocabulary';
-        const isVocabB = b.name === 'General Vocabulary';
-        if (isVocabA && !isVocabB) return 1;
-        if (!isVocabA && isVocabB) return -1;
-        return a.name.localeCompare(b.name);
-      });
+    const hskLevel = HSK_LEVELS.find(l => l.id === level);
+    if (!hskLevel || hskLevel.words.length === 0) return;
 
-    const fetchCategories = async () => {
-      setIsHskLoading(true);
+    const allProgress = user
+      ? progressStorage.getByUserId(user.id)
+      : progressStorage.getAll();
 
-      // 1. Try cache first for instant load
-      const cached = hskStorage.getCategories(hskNum);
-      if (cached && cached.length > 0) {
-        setHskCategories(cached.map(c => ({ name: c.name, wordCount: c.wordCount })));
-        setIsHskLoading(false);
-        // Background refresh if cache is stale
-        if (!hskStorage.isCacheStale(60 * 60 * 1000)) return; // 1 hour freshness
-      }
+    const reviewedIds = new Set(
+      allProgress
+        .filter(p => p.review_count > 0)
+        .map(p => p.flashcard_id)
+    );
 
-      // 2. Server-side aggregation (much faster than fetching all rows)
-      try {
-        // Try RPC first
-        const { data, error } = await supabase
-          .rpc('get_hsk_categories', { level: hskNum });
+    const computed = buildSprints(level, hskLevel.words, reviewedIds);
+    setSprints(computed);
+  }, [isHsk, level, user]);
 
-        if (!error && data && data.length > 0) {
-          const categories = data.map((row: any) => ({
-            name: row.category,
-            wordCount: Number(row.count)
-          }));
-          const sorted = sortCategories(categories);
-          if (!cancelled) {
-            setHskCategories(sorted);
-            hskStorage.saveCategories(hskNum, sorted.map(c => ({ level: hskNum, ...c })));
-            setIsHskLoading(false);
-          }
-          return;
-        }
-
-        // Fallback A: fetch category column client-side (works if column exists)
-        const { data: catData, error: catError } = await supabase
-          .from('hsk_vocabulary')
-          .select('category')
-          .eq('hsk_level', hskNum);
-
-        if (!catError && catData && catData.length > 0 && catData[0].category !== undefined) {
-          const catMap: Record<string, number> = {};
-          catData.forEach((row: any) => {
-            const cat = row.category || 'General';
-            catMap[cat] = (catMap[cat] || 0) + 1;
-          });
-          const sorted = sortCategories(
-            Object.entries(catMap).map(([name, wordCount]) => ({ name, wordCount }))
-          );
-          if (!cancelled) {
-            setHskCategories(sorted);
-            hskStorage.saveCategories(hskNum, sorted.map(c => ({ level: hskNum, ...c })));
-            setIsHskLoading(false);
-          }
-          return;
-        }
-
-        // Fallback B: category column doesn't exist — just count total words
-        const { count, error: countError } = await supabase
-          .from('hsk_vocabulary')
-          .select('*', { count: 'exact', head: true })
-          .eq('hsk_level', hskNum);
-
-        if (!countError && count && count > 0) {
-          const fallback = [{ name: `All HSK ${hskNum} Words`, wordCount: count }];
-          if (!cancelled) {
-            setHskCategories(fallback);
-            setIsHskLoading(false);
-          }
-          return;
-        }
-
-        // Nothing found at all
-        if (!cancelled) {
-          setHskCategories([]);
-          setIsHskLoading(false);
-        }
-      } catch (err) {
-        console.error('Failed to fetch HSK categories:', err);
-        // Keep showing cached data if available, stop loading
-        if (!cancelled) setIsHskLoading(false);
-      }
-    };
-
-    fetchCategories();
-    return () => { cancelled = true; };
-  }, [isHsk, hskNum]);
-
-  // Construct data based on level param
-  let levelData: { title: string; lessons: { id: string; title: string }[] };
-
-  if (level === 'self-learn') {
-    levelData = {
-      title: 'Self Learn',
-      lessons: [],
-    };
-  } else if (isHsk && hskNum) {
-    levelData = {
-      title: `HSK ${hskNum}`,
-      lessons: hskCategories.map((cat) => ({
-        id: `${level}-cat-${encodeURIComponent(cat.name)}`,
-        title: `${cat.name} (${cat.wordCount})`,
-      })),
-    };
-  } else {
-    levelData = LEVEL_DATA[level] || LEVEL_DATA.level1;
-  }
+  const levelTitle = isHsk && hskNum ? `HSK ${hskNum}` : level === 'self-learn' ? 'Self Learn' : 'Flashcards';
 
   const navigateToStudy = (lessonId: string) => {
     router.push(`/dashboard/flashcards/study/${lessonId}`);
@@ -259,7 +136,6 @@ export default function FlashcardLevelPage() {
 
   return (
     <div className="min-h-screen bg-white font-sans">
-      {/* Main content */}
       <main className="min-h-screen px-6 py-10">
         <div className="max-w-md mx-auto">
           {/* Back button */}
@@ -276,57 +152,59 @@ export default function FlashcardLevelPage() {
           {/* Header */}
           <div className="text-center mt-10 mb-12">
             <h1 className="text-3xl sm:text-4xl font-light text-slate-900 tracking-wide">
-              {levelData.title}
+              {levelTitle}
             </h1>
           </div>
 
-          {/* Add Card / Add Category */}
-          <div className="flex justify-center mb-8 items-center gap-3 text-sm">
-            <Button
-              asChild
-              variant="ghost"
-              className="h-auto w-auto p-0 bg-transparent hover:bg-transparent"
-            >
-              <button type="button" onClick={() => setIsAddModalOpen(true)}>
-                <span className="shimmer-text text-lg sm:text-xl font-light tracking-wide">
-                  Add Card
-                </span>
-              </button>
-            </Button>
-            <div className="h-4 w-px bg-slate-200" />
-            <Button
-              asChild
-              variant="ghost"
-              className="h-auto w-auto p-0 bg-transparent hover:bg-transparent"
-            >
-              <button
-                type="button"
-                onClick={() => {
-                  const name = window.prompt('New category name');
-                  if (!name) return;
-                  const next = categoryStorage.add(name);
-                  setCategories(next);
-                  setActiveCategory(name.trim());
-                }}
+          {level === 'self-learn' && (
+            /* Add Card / Add Category / Edit toolbar for self-learn */
+            <div className="flex justify-center mb-8 items-center gap-3 text-sm">
+              <Button
+                asChild
+                variant="ghost"
+                className="h-auto w-auto p-0 bg-transparent hover:bg-transparent"
               >
-                <span className="shimmer-text text-lg sm:text-xl font-light tracking-wide">
-                  Add Category
-                </span>
-              </button>
-            </Button>
-            <div className="h-4 w-px bg-slate-200" />
-            <Button
-              asChild
-              variant="ghost"
-              className="h-auto w-auto p-0 bg-transparent hover:bg-transparent"
-            >
-              <button type="button" onClick={() => setSelectMode((prev) => !prev)}>
-                <span className="shimmer-text text-lg sm:text-xl font-light tracking-wide">
-                  {selectMode ? 'Done' : 'Edit'}
-                </span>
-              </button>
-            </Button>
-          </div>
+                <button type="button" onClick={() => setIsAddModalOpen(true)}>
+                  <span className="shimmer-text text-lg sm:text-xl font-light tracking-wide">
+                    Add Card
+                  </span>
+                </button>
+              </Button>
+              <div className="h-4 w-px bg-slate-200" />
+              <Button
+                asChild
+                variant="ghost"
+                className="h-auto w-auto p-0 bg-transparent hover:bg-transparent"
+              >
+                <button
+                  type="button"
+                  onClick={() => {
+                    const name = window.prompt('New category name');
+                    if (!name) return;
+                    const next = categoryStorage.add(name);
+                    setCategories(next);
+                    setActiveCategory(name.trim());
+                  }}
+                >
+                  <span className="shimmer-text text-lg sm:text-xl font-light tracking-wide">
+                    Add Category
+                  </span>
+                </button>
+              </Button>
+              <div className="h-4 w-px bg-slate-200" />
+              <Button
+                asChild
+                variant="ghost"
+                className="h-auto w-auto p-0 bg-transparent hover:bg-transparent"
+              >
+                <button type="button" onClick={() => setSelectMode((prev) => !prev)}>
+                  <span className="shimmer-text text-lg sm:text-xl font-light tracking-wide">
+                    {selectMode ? 'Done' : 'Edit'}
+                  </span>
+                </button>
+              </Button>
+            </div>
+          )}
 
           {level === 'self-learn' ? (
             <div className="space-y-6">
@@ -458,36 +336,85 @@ export default function FlashcardLevelPage() {
                 </>
               )}
             </div>
-          ) : (
-            <div className="space-y-6">
-              {isHsk && isHskLoading ? (
+          ) : isHsk ? (
+            /* Sprint view for all HSK levels */
+            <div className="space-y-3">
+              {sprints.length === 0 ? (
                 <div className="text-center py-8">
                   <div className="inline-block w-8 h-8 border-2 border-slate-200 border-t-slate-400 rounded-full animate-spin" />
-                  <p className="text-sm text-slate-400 mt-3 font-light">Loading categories...</p>
-                </div>
-              ) : isHsk && levelData.lessons.length === 0 ? (
-                <div className="text-center py-8">
-                  <p className="text-sm text-slate-400 font-light">No categories found for HSK {hskNum}.</p>
-                  <p className="text-xs text-slate-300 mt-2">Make sure the HSK seed data has been loaded.</p>
+                  <p className="text-sm text-slate-400 mt-3 font-light">Loading sprints...</p>
                 </div>
               ) : (
-                levelData.lessons.map((lesson: any) => (
-                  <Button
-                    key={lesson.id}
-                    asChild
-                    variant="ghost"
-                    className="h-auto w-full p-0 bg-transparent hover:bg-transparent text-left"
+                sprints.map((sprint) => (
+                  <button
+                    key={sprint.number}
+                    type="button"
+                    disabled={sprint.isLocked}
+                    onClick={() => {
+                      if (!sprint.isLocked) {
+                        router.push(
+                          `/dashboard/flashcards/study/${level}-sprint-${sprint.number}`
+                        );
+                      }
+                    }}
+                    className={`w-full text-left px-4 py-3 rounded-lg border transition-all ${
+                      sprint.isLocked
+                        ? 'border-slate-100 bg-slate-50 opacity-50 cursor-not-allowed'
+                        : sprint.status === 'completed'
+                        ? 'border-green-200 bg-green-50 hover:bg-green-100'
+                        : sprint.isCurrent
+                        ? 'border-blue-200 bg-blue-50 hover:bg-blue-100'
+                        : 'border-slate-200 bg-white hover:bg-slate-50'
+                    }`}
                   >
-                    <button type="button" onClick={() => navigateToStudy(lesson.id)}>
-                      <span className="shimmer-text text-xl sm:text-2xl font-light tracking-wide">
-                        {lesson.title}
-                      </span>
-                    </button>
-                  </Button>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <span className="text-lg">
+                          {sprint.status === 'completed'
+                            ? '\u2705'
+                            : sprint.isLocked
+                            ? '\uD83D\uDD12'
+                            : sprint.status === 'in_progress'
+                            ? '\uD83D\uDD04'
+                            : '\u2B1C'}
+                        </span>
+                        <div>
+                          <div className={`text-base font-medium ${
+                            sprint.isLocked ? 'text-slate-400' : 'text-slate-800'
+                          }`}>
+                            Sprint {sprint.number}
+                            {sprint.isCurrent && (
+                              <span className="ml-2 text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">
+                                Current
+                              </span>
+                            )}
+                          </div>
+                          <div className="text-xs text-slate-400 mt-0.5">
+                            Words {(sprint.number - 1) * SPRINT_SIZE + 1}&ndash;{(sprint.number - 1) * SPRINT_SIZE + sprint.totalCount}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-sm text-slate-500">
+                          {sprint.reviewedCount}/{sprint.totalCount}
+                        </div>
+                        <div className="w-16 h-1.5 bg-slate-200 rounded-full mt-1">
+                          <div
+                            className={`h-full rounded-full transition-all ${
+                              sprint.status === 'completed' ? 'bg-green-500' : 'bg-blue-500'
+                            }`}
+                            style={{
+                              width: `${sprint.totalCount > 0 ? (sprint.reviewedCount / sprint.totalCount) * 100 : 0}%`,
+                            }}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </button>
                 ))
               )}
             </div>
-          )}
+          ) : null}
         </div>
       </main>
 
@@ -501,15 +428,7 @@ export default function FlashcardLevelPage() {
           }
         }}
         initialCategories={activeCategory ? [activeCategory] : []}
-        availableCategories={
-          level === 'self-learn'
-            ? []
-            : levelData.lessons.map((l: any) => {
-                const raw = String(l.title || '');
-                const parts = raw.split(' - ');
-                return (parts[1] || raw).trim();
-              })
-        }
+        availableCategories={[]}
       />
 
       <style jsx>{`
