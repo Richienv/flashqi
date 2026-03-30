@@ -3194,3 +3194,1575 @@ const HSK3_EXAMPLES: Record<string, { cn: string; en: string }[]> = {
     { cn: '他在看世界杯比赛。', en: 'He is watching the World Cup.' },
     { cn: '世界杯是最大的足球赛事。', en: 'The World Cup is the biggest soccer event.' },
   ],
+  '市场': [
+    { cn: '市场上有很多新产品。', en: 'There are many new products on the market.' },
+    { cn: '他去市场买菜了。', en: 'He went to the market to buy vegetables.' },
+    { cn: '房地产市场很火。', en: 'The real estate market is booming.' },
+  ],
+  '事故': [
+    { cn: '高速公路上发生了事故。', en: 'An accident occurred on the highway.' },
+    { cn: '我们要防止事故的发生。', en: 'We must prevent accidents from occurring.' },
+    { cn: '交通事故造成了堵车。', en: 'The traffic accident caused a traffic jam.' },
+  ],
+  '事件': [
+    { cn: '这是一个重大事件。', en: 'This is a major event.' },
+    { cn: '他报道了这个事件。', en: 'He reported on this event.' },
+    { cn: '这个事件引起了广泛关注。', en: 'This incident attracted widespread attention.' },
+  ],
+  '事实': [
+    { cn: '事实胜于雄辩。', en: 'Facts speak louder than words.' },
+    { cn: '我们要尊重事实。', en: 'We must respect the facts.' },
+    { cn: '事实证明他是对的。', en: 'Facts proved he was right.' },
+  ],
+  '事实上': [
+    { cn: '事实上他已经知道了。', en: 'In fact, he already knew.' },
+    { cn: '事实上问题并不严重。', en: 'In reality, the problem is not serious.' },
+    { cn: '事实上我们都同意。', en: 'Actually, we all agree.' },
+  ],
+  '事业': [
+    { cn: '他的事业很成功。', en: 'His career is very successful.' },
+    { cn: '她把所有精力都投入到事业中。', en: 'She put all her energy into her career.' },
+    { cn: '教育是伟大的事业。', en: 'Education is a great undertaking.' },
+  ],
+  '试题': [
+    { cn: '这道试题很难。', en: 'This exam question is very difficult.' },
+    { cn: '老师出了十道试题。', en: 'The teacher set ten exam questions.' },
+    { cn: '试题的难度适中。', en: 'The difficulty of the test questions is moderate.' },
+  ],
+  '试验': [
+    { cn: '科学家正在进行试验。', en: 'Scientists are conducting experiments.' },
+    { cn: '试验结果还没出来。', en: 'The test results haven\'t come out yet.' },
+    { cn: '新药需要经过多次试验。', en: 'New drugs need to go through many tests.' },
+  ],
+  '室': [
+    { cn: '办公室在三楼。', en: 'The office is on the third floor.' },
+    { cn: '教室里有三十个学生。', en: 'There are thirty students in the classroom.' },
+    { cn: '请到会议室开会。', en: 'Please go to the meeting room for the meeting.' },
+  ],
+  '适合': [
+    { cn: '这份工作很适合你。', en: 'This job is very suitable for you.' },
+    { cn: '这个季节适合旅行。', en: 'This season is suitable for traveling.' },
+    { cn: '他找到了适合自己的方法。', en: 'He found a method suitable for himself.' },
+  ],
+  '适应': [
+    { cn: '他很快就适应了新环境。', en: 'He quickly adapted to the new environment.' },
+    { cn: '需要时间来适应。', en: 'It takes time to adapt.' },
+    { cn: '她还没有适应这里的气候。', en: 'She hasn\'t adapted to the climate here yet.' },
+  ],
+  '适用': [
+    { cn: '这个方法适用于所有人。', en: 'This method is applicable to everyone.' },
+    { cn: '这条规定适用于全校师生。', en: 'This rule applies to all teachers and students.' },
+    { cn: '这个软件适用于各种系统。', en: 'This software is compatible with all systems.' },
+  ],
+  '收费': [
+    { cn: '停车场收费吗？', en: 'Does the parking lot charge a fee?' },
+    { cn: '这里的收费很合理。', en: 'The fees here are very reasonable.' },
+    { cn: '这条高速公路不收费。', en: 'This highway doesn\'t charge a toll.' },
+  ],
+  '收看': [
+    { cn: '全国观众收看了这个节目。', en: 'Viewers across the country watched this program.' },
+    { cn: '请收看今天的新闻。', en: 'Please watch today\'s news.' },
+    { cn: '每天有很多人收看直播。', en: 'Many people watch live broadcasts every day.' },
+  ],
+  '收听': [
+    { cn: '他每天收听广播。', en: 'He listens to the radio every day.' },
+    { cn: '请收听我们的节目。', en: 'Please tune in to our program.' },
+    { cn: '很多人在收听这个电台。', en: 'Many people are listening to this station.' },
+  ],
+  '收音机': [
+    { cn: '爷爷喜欢听收音机。', en: 'Grandpa likes to listen to the radio.' },
+    { cn: '这台收音机是老式的。', en: 'This radio is old-fashioned.' },
+    { cn: '收音机里传来了音乐。', en: 'Music came from the radio.' },
+  ],
+  '手续': [
+    { cn: '办理入住手续。', en: 'Go through check-in procedures.' },
+    { cn: '手续很简单。', en: 'The procedures are simple.' },
+    { cn: '你还要办哪些手续？', en: 'What other procedures do you need to complete?' },
+  ],
+  '手指': [
+    { cn: '他用手指指着地图。', en: 'He pointed at the map with his finger.' },
+    { cn: '我的手指受伤了。', en: 'My finger is injured.' },
+    { cn: '她戴了一枚戒指在手指上。', en: 'She wore a ring on her finger.' },
+  ],
+  '首都': [
+    { cn: '北京是中国的首都。', en: 'Beijing is the capital of China.' },
+    { cn: '每个国家都有自己的首都。', en: 'Every country has its own capital.' },
+    { cn: '首都的交通很方便。', en: 'Transportation in the capital is very convenient.' },
+  ],
+  '首先': [
+    { cn: '首先，我要感谢大家。', en: 'First of all, I want to thank everyone.' },
+    { cn: '首先要打好基础。', en: 'First, you need to lay a good foundation.' },
+    { cn: '做事首先要有计划。', en: 'You should first have a plan before doing anything.' },
+  ],
+  '受': [
+    { cn: '这部电影很受欢迎。', en: 'This movie is very popular.' },
+    { cn: '他受到了大家的表扬。', en: 'He received praise from everyone.' },
+    { cn: '我受不了这种天气。', en: 'I can\'t stand this weather.' },
+  ],
+  '受伤': [
+    { cn: '他在比赛中受伤了。', en: 'He was injured in the match.' },
+    { cn: '幸好没有人受伤。', en: 'Fortunately, no one was injured.' },
+    { cn: '她的腿受伤了。', en: 'Her leg was injured.' },
+  ],
+  '书架': [
+    { cn: '书架上放满了书。', en: 'The bookshelf is full of books.' },
+    { cn: '他买了一个新书架。', en: 'He bought a new bookshelf.' },
+    { cn: '请把书放回书架上。', en: 'Please put the book back on the shelf.' },
+  ],
+  '输': [
+    { cn: '我们队输了。', en: 'Our team lost.' },
+    { cn: '他不怕输。', en: 'He is not afraid of losing.' },
+    { cn: '比赛输了，但我们学到了很多。', en: 'We lost the match, but we learned a lot.' },
+  ],
+  '输入': [
+    { cn: '请输入你的密码。', en: 'Please enter your password.' },
+    { cn: '他在电脑上输入了数据。', en: 'He entered data on the computer.' },
+    { cn: '输入法可以打中文。', en: 'The input method can type Chinese.' },
+  ],
+  '熟人': [
+    { cn: '他在这里没有熟人。', en: 'He has no acquaintances here.' },
+    { cn: '通过熟人介绍找到了工作。', en: 'He found a job through an acquaintance\'s introduction.' },
+    { cn: '那个人是我的熟人。', en: 'That person is my acquaintance.' },
+  ],
+  '属': [
+    { cn: '你属什么？', en: 'What is your zodiac sign?' },
+    { cn: '我属虎。', en: 'I was born in the year of the tiger.' },
+    { cn: '这个问题属于技术问题。', en: 'This problem belongs to the category of technical issues.' },
+  ],
+  '属于': [
+    { cn: '这本书属于图书馆。', en: 'This book belongs to the library.' },
+    { cn: '胜利属于坚持到底的人。', en: 'Victory belongs to those who persist.' },
+    { cn: '他属于管理层。', en: 'He belongs to the management level.' },
+  ],
+  '束': [
+    { cn: '他送了她一束花。', en: 'He gave her a bouquet of flowers.' },
+    { cn: '她把头发束起来了。', en: 'She tied her hair up.' },
+    { cn: '一束阳光照进了房间。', en: 'A beam of sunlight shone into the room.' },
+  ],
+  '数量': [
+    { cn: '数量有限，先到先得。', en: 'Quantities are limited, first come first served.' },
+    { cn: '参加的人数量很多。', en: 'The number of participants is large.' },
+    { cn: '质量比数量重要。', en: 'Quality is more important than quantity.' },
+  ],
+  '双': [
+    { cn: '她有一双大眼睛。', en: 'She has a pair of big eyes.' },
+    { cn: '我买了一双新鞋。', en: 'I bought a new pair of shoes.' },
+    { cn: '双手合在一起。', en: 'Both hands clasped together.' },
+  ],
+  '双方': [
+    { cn: '双方达成了协议。', en: 'Both sides reached an agreement.' },
+    { cn: '谈判双方都很满意。', en: 'Both negotiating parties are very satisfied.' },
+    { cn: '双方要互相尊重。', en: 'Both parties should respect each other.' },
+  ],
+  '思想': [
+    { cn: '他的思想很先进。', en: 'His ideas are very progressive.' },
+    { cn: '我们要解放思想。', en: 'We should free our thinking.' },
+    { cn: '这位哲学家的思想影响了很多人。', en: 'This philosopher\'s ideas influenced many people.' },
+  ],
+  '死': [
+    { cn: '花死了。', en: 'The flower died.' },
+    { cn: '他热死了。', en: 'He is dying of heat.' },
+    { cn: '这件事已经是死结了。', en: 'This matter is already a dead end.' },
+  ],
+  '速度': [
+    { cn: '他开车的速度很快。', en: 'He drives very fast.' },
+    { cn: '请降低速度。', en: 'Please slow down.' },
+    { cn: '网络速度越来越快。', en: 'Internet speed is getting faster and faster.' },
+  ],
+  '随': [
+    { cn: '随他去吧。', en: 'Let him do as he pleases.' },
+    { cn: '你随便坐。', en: 'Sit wherever you like.' },
+    { cn: '随着时间的变化。', en: 'Along with the passage of time.' },
+  ],
+  '所': [
+    { cn: '这所学校很有名。', en: 'This school is very famous.' },
+    { cn: '一所医院在附近。', en: 'A hospital is nearby.' },
+    { cn: '研究所在大学旁边。', en: 'The research institute is next to the university.' },
+  ],
+  '所长': [
+    { cn: '他是研究所的所长。', en: 'He is the director of the research institute.' },
+    { cn: '所长主持了会议。', en: 'The director presided over the meeting.' },
+    { cn: '新所长上任了。', en: 'The new director has taken office.' },
+  ],
+  '台': [
+    { cn: '桌子上有一台电脑。', en: 'There is a computer on the desk.' },
+    { cn: '他买了一台新电视。', en: 'He bought a new TV.' },
+    { cn: '舞台上有一架钢琴。', en: 'There is a piano on the stage.' },
+  ],
+  '谈': [
+    { cn: '我们谈谈吧。', en: 'Let\'s have a talk.' },
+    { cn: '他们在谈生意。', en: 'They are discussing business.' },
+    { cn: '关于这件事我不想谈。', en: 'I don\'t want to talk about this matter.' },
+  ],
+  '谈话': [
+    { cn: '他们正在进行一次谈话。', en: 'They are having a conversation.' },
+    { cn: '领导找他谈话了。', en: 'The leader had a talk with him.' },
+    { cn: '谈话的内容是保密的。', en: 'The content of the conversation is confidential.' },
+  ],
+  '谈判': [
+    { cn: '双方开始了谈判。', en: 'Both sides began negotiations.' },
+    { cn: '谈判进行得很顺利。', en: 'The negotiations went smoothly.' },
+    { cn: '他参加了一次重要的谈判。', en: 'He participated in an important negotiation.' },
+  ],
+  '汤': [
+    { cn: '妈妈做了一碗汤。', en: 'Mom made a bowl of soup.' },
+    { cn: '这碗汤很好喝。', en: 'This soup is very delicious.' },
+    { cn: '冬天喝汤暖身体。', en: 'Drinking soup in winter warms the body.' },
+  ],
+  '糖': [
+    { cn: '咖啡里放糖吗？', en: 'Do you put sugar in your coffee?' },
+    { cn: '小孩子喜欢吃糖。', en: 'Children like to eat candy.' },
+    { cn: '少吃糖对健康有好处。', en: 'Eating less sugar is good for health.' },
+  ],
+  '特色': [
+    { cn: '这是当地的特色菜。', en: 'This is a local specialty dish.' },
+    { cn: '每个城市都有自己的特色。', en: 'Every city has its own characteristics.' },
+    { cn: '这家店很有特色。', en: 'This shop has a lot of character.' },
+  ],
+  '提前': [
+    { cn: '请提前到达。', en: 'Please arrive early.' },
+    { cn: '会议提前了一天。', en: 'The meeting was moved up by one day.' },
+    { cn: '他提前完成了任务。', en: 'He completed the task ahead of time.' },
+  ],
+  '提问': [
+    { cn: '老师开始提问了。', en: 'The teacher started asking questions.' },
+    { cn: '如果有问题请提问。', en: 'If you have questions, please ask.' },
+    { cn: '他提问了一个很好的问题。', en: 'He asked a very good question.' },
+  ],
+  '题目': [
+    { cn: '这道题目很难。', en: 'This question is very difficult.' },
+    { cn: '文章的题目是什么？', en: 'What is the title of the article?' },
+    { cn: '老师出了几个题目。', en: 'The teacher set several questions.' },
+  ],
+  '体会': [
+    { cn: '请谈谈你的体会。', en: 'Please share your experience.' },
+    { cn: '我深深地体会到了他的辛苦。', en: 'I deeply felt his hardship.' },
+    { cn: '只有亲身经历才能体会。', en: 'You can only understand through personal experience.' },
+  ],
+  '体现': [
+    { cn: '这体现了他的能力。', en: 'This reflects his ability.' },
+    { cn: '作品体现了作者的思想。', en: 'The work embodies the author\'s ideas.' },
+    { cn: '团队精神在比赛中得到了体现。', en: 'Team spirit was reflected in the competition.' },
+  ],
+  '体验': [
+    { cn: '这是一次难忘的体验。', en: 'This was an unforgettable experience.' },
+    { cn: '你想体验一下农村生活吗？', en: 'Would you like to experience rural life?' },
+    { cn: '亲自体验才能真正了解。', en: 'You can only truly understand by experiencing it yourself.' },
+  ],
+  '天空': [
+    { cn: '天空很蓝。', en: 'The sky is very blue.' },
+    { cn: '天空中飞过一群鸟。', en: 'A flock of birds flew across the sky.' },
+    { cn: '夜晚的天空布满了星星。', en: 'The night sky was full of stars.' },
+  ],
+  '甜': [
+    { cn: '这块蛋糕很甜。', en: 'This cake is very sweet.' },
+    { cn: '她笑得很甜。', en: 'She smiled sweetly.' },
+    { cn: '西瓜又甜又好吃。', en: 'The watermelon is sweet and delicious.' },
+  ],
+  '跳': [
+    { cn: '小孩子喜欢跳来跳去。', en: 'Children like to jump around.' },
+    { cn: '他跳过了那道墙。', en: 'He jumped over that wall.' },
+    { cn: '她的心跳得很快。', en: 'Her heart was beating fast.' },
+  ],
+  '跳高': [
+    { cn: '他擅长跳高。', en: 'He is good at high jump.' },
+    { cn: '跳高比赛就要开始了。', en: 'The high jump competition is about to begin.' },
+    { cn: '她在跳高项目中获得了金牌。', en: 'She won the gold medal in high jump.' },
+  ],
+  '跳舞': [
+    { cn: '她喜欢跳舞。', en: 'She likes to dance.' },
+    { cn: '我们一起去跳舞吧。', en: 'Let\'s go dancing together.' },
+    { cn: '他跳舞跳得很好。', en: 'He dances very well.' },
+  ],
+  '跳远': [
+    { cn: '他参加了跳远比赛。', en: 'He participated in the long jump competition.' },
+    { cn: '跳远需要很好的爆发力。', en: 'Long jump requires great explosive power.' },
+    { cn: '她在跳远中获得了第二名。', en: 'She got second place in long jump.' },
+  ],
+  '铁': [
+    { cn: '这把刀是铁做的。', en: 'This knife is made of iron.' },
+    { cn: '他的意志像铁一样坚强。', en: 'His will is as strong as iron.' },
+    { cn: '铁是一种常见的金属。', en: 'Iron is a common metal.' },
+  ],
+  '铁路': [
+    { cn: '中国的铁路网很发达。', en: 'China\'s railway network is very developed.' },
+    { cn: '铁路连接了两个城市。', en: 'The railway connects the two cities.' },
+    { cn: '他在铁路部门工作。', en: 'He works in the railway department.' },
+  ],
+  '听力': [
+    { cn: '他的听力不太好。', en: 'His hearing is not very good.' },
+    { cn: '今天有听力考试。', en: 'There is a listening test today.' },
+    { cn: '多听可以提高听力。', en: 'Listening more can improve listening ability.' },
+  ],
+  '听众': [
+    { cn: '听众对演讲反应很好。', en: 'The audience responded well to the speech.' },
+    { cn: '广播的听众越来越少了。', en: 'Radio listeners are getting fewer and fewer.' },
+    { cn: '他感谢了所有的听众。', en: 'He thanked all the listeners.' },
+  ],
+  '停止': [
+    { cn: '请停止说话。', en: 'Please stop talking.' },
+    { cn: '雨停止了。', en: 'The rain stopped.' },
+    { cn: '工厂已经停止生产了。', en: 'The factory has stopped production.' },
+  ],
+  '通常': [
+    { cn: '他通常七点起床。', en: 'He usually gets up at seven.' },
+    { cn: '通常情况下不会有问题。', en: 'Usually there won\'t be any problems.' },
+    { cn: '我通常坐地铁上班。', en: 'I usually take the subway to work.' },
+  ],
+  '通信': [
+    { cn: '现在通信很方便。', en: 'Communication is very convenient now.' },
+    { cn: '他们通过信件通信。', en: 'They communicate through letters.' },
+    { cn: '通信技术发展很快。', en: 'Communication technology is developing rapidly.' },
+  ],
+  '同意': [
+    { cn: '我同意你的看法。', en: 'I agree with your view.' },
+    { cn: '他不同意这个计划。', en: 'He doesn\'t agree with this plan.' },
+    { cn: '大家一致同意了。', en: 'Everyone agreed unanimously.' },
+  ],
+  '痛': [
+    { cn: '我头痛。', en: 'I have a headache.' },
+    { cn: '他的腿很痛。', en: 'His leg hurts a lot.' },
+    { cn: '伤口还在痛。', en: 'The wound still hurts.' },
+  ],
+  '痛苦': [
+    { cn: '他经历了很多痛苦。', en: 'He experienced a lot of pain.' },
+    { cn: '失去亲人是很痛苦的。', en: 'Losing loved ones is very painful.' },
+    { cn: '痛苦让人成长。', en: 'Pain helps people grow.' },
+  ],
+  '头脑': [
+    { cn: '他的头脑很清楚。', en: 'His mind is very clear.' },
+    { cn: '要保持冷静的头脑。', en: 'Keep a cool head.' },
+    { cn: '她是一个头脑聪明的人。', en: 'She is a smart person.' },
+  ],
+  '突出': [
+    { cn: '他的表现很突出。', en: 'His performance is outstanding.' },
+    { cn: '这是最突出的问题。', en: 'This is the most prominent problem.' },
+    { cn: '要突出重点。', en: 'Emphasize the key points.' },
+  ],
+  '突然': [
+    { cn: '他突然出现了。', en: 'He appeared suddenly.' },
+    { cn: '天气突然变冷了。', en: 'The weather suddenly turned cold.' },
+    { cn: '突然停电了。', en: 'The power went out suddenly.' },
+  ],
+  '图': [
+    { cn: '请看这张图。', en: 'Please look at this picture.' },
+    { cn: '地图上标着路线。', en: 'The route is marked on the map.' },
+    { cn: '他在画一幅图。', en: 'He is drawing a picture.' },
+  ],
+  '图画': [
+    { cn: '墙上挂着一幅图画。', en: 'A picture hangs on the wall.' },
+    { cn: '孩子们在画图画。', en: 'The children are drawing pictures.' },
+    { cn: '这本书有很多图画。', en: 'This book has many illustrations.' },
+  ],
+  '土': [
+    { cn: '花盆里的土很干。', en: 'The soil in the flowerpot is very dry.' },
+    { cn: '这是本土的产品。', en: 'This is a local product.' },
+    { cn: '他的方法太土了。', en: 'His method is too unsophisticated.' },
+  ],
+  '团': [
+    { cn: '旅行团明天出发。', en: 'The tour group departs tomorrow.' },
+    { cn: '他参加了一个学习团。', en: 'He joined a study group.' },
+    { cn: '一团火在燃烧。', en: 'A ball of fire is burning.' },
+  ],
+  '团结': [
+    { cn: '大家要团结一致。', en: 'Everyone should unite as one.' },
+    { cn: '团结就是力量。', en: 'Unity is strength.' },
+    { cn: '我们班很团结。', en: 'Our class is very united.' },
+  ],
+  '团体': [
+    { cn: '他加入了一个体育团体。', en: 'He joined a sports organization.' },
+    { cn: '团体活动增进了友谊。', en: 'Group activities enhanced friendship.' },
+    { cn: '这个团体有一百多名成员。', en: 'This group has over a hundred members.' },
+  ],
+  '推动': [
+    { cn: '科技推动了社会进步。', en: 'Technology has driven social progress.' },
+    { cn: '他推动了这项改革。', en: 'He promoted this reform.' },
+    { cn: '我们要推动经济发展。', en: 'We should promote economic development.' },
+  ],
+  '推广': [
+    { cn: '公司在推广新产品。', en: 'The company is promoting new products.' },
+    { cn: '普通话在全国推广。', en: 'Mandarin is being promoted nationwide.' },
+    { cn: '这项技术值得推广。', en: 'This technology is worth promoting.' },
+  ],
+  '推进': [
+    { cn: '项目正在稳步推进。', en: 'The project is advancing steadily.' },
+    { cn: '我们要推进改革。', en: 'We should push forward with reforms.' },
+    { cn: '计划按步骤推进中。', en: 'The plan is advancing step by step.' },
+  ],
+  '推开': [
+    { cn: '他推开了门。', en: 'He pushed open the door.' },
+    { cn: '她轻轻地推开窗户。', en: 'She gently pushed open the window.' },
+    { cn: '他推开了面前的杯子。', en: 'He pushed away the cup in front of him.' },
+  ],
+  '退': [
+    { cn: '他退了一步。', en: 'He took a step back.' },
+    { cn: '这个东西可以退吗？', en: 'Can this be returned?' },
+    { cn: '洪水已经退了。', en: 'The floodwaters have receded.' },
+  ],
+  '退出': [
+    { cn: '他退出了比赛。', en: 'He withdrew from the competition.' },
+    { cn: '请退出程序。', en: 'Please quit the program.' },
+    { cn: '她决定退出这个组织。', en: 'She decided to withdraw from this organization.' },
+  ],
+  '退休': [
+    { cn: '他明年退休。', en: 'He retires next year.' },
+    { cn: '退休以后他打算去旅行。', en: 'After retirement, he plans to travel.' },
+    { cn: '她已经到了退休年龄。', en: 'She has reached retirement age.' },
+  ],
+  '外交': [
+    { cn: '他从事外交工作。', en: 'He is engaged in diplomatic work.' },
+    { cn: '两国建立了外交关系。', en: 'The two countries established diplomatic relations.' },
+    { cn: '外交政策很重要。', en: 'Foreign policy is very important.' },
+  ],
+  '外面': [
+    { cn: '外面在下雨。', en: 'It\'s raining outside.' },
+    { cn: '孩子们在外面玩。', en: 'The children are playing outside.' },
+    { cn: '外面的温度很低。', en: 'The temperature outside is very low.' },
+  ],
+  '外文': [
+    { cn: '他会说好几种外文。', en: 'He can speak several foreign languages.' },
+    { cn: '外文书店在前面。', en: 'The foreign language bookstore is ahead.' },
+    { cn: '学外文需要多练习。', en: 'Learning a foreign language requires a lot of practice.' },
+  ],
+  '完美': [
+    { cn: '他的表演很完美。', en: 'His performance was perfect.' },
+    { cn: '没有人是完美的。', en: 'No one is perfect.' },
+    { cn: '这是一个完美的计划。', en: 'This is a perfect plan.' },
+  ],
+  '完善': [
+    { cn: '制度需要进一步完善。', en: 'The system needs further improvement.' },
+    { cn: '公司正在完善管理体系。', en: 'The company is improving its management system.' },
+    { cn: '这个方案已经很完善了。', en: 'This plan is already very well-developed.' },
+  ],
+  '完整': [
+    { cn: '请提交完整的材料。', en: 'Please submit complete materials.' },
+    { cn: '这套书很完整。', en: 'This set of books is complete.' },
+    { cn: '他讲了一个完整的故事。', en: 'He told a complete story.' },
+  ],
+  '玩具': [
+    { cn: '孩子们喜欢玩玩具。', en: 'Children like to play with toys.' },
+    { cn: '他给儿子买了一个新玩具。', en: 'He bought his son a new toy.' },
+    { cn: '玩具店在二楼。', en: 'The toy store is on the second floor.' },
+  ],
+  '往往': [
+    { cn: '成功往往需要耐心。', en: 'Success often requires patience.' },
+    { cn: '他往往很晚才回家。', en: 'He often comes home very late.' },
+    { cn: '事情往往不像想象的那么简单。', en: 'Things are often not as simple as imagined.' },
+  ],
+  '危害': [
+    { cn: '吸烟危害健康。', en: 'Smoking is harmful to health.' },
+    { cn: '污染对环境造成了危害。', en: 'Pollution has caused harm to the environment.' },
+    { cn: '这种行为危害了公共安全。', en: 'This behavior endangered public safety.' },
+  ],
+  '危险': [
+    { cn: '这里很危险。', en: 'It\'s very dangerous here.' },
+    { cn: '不要做危险的事。', en: 'Don\'t do dangerous things.' },
+    { cn: '病人已经脱离了危险。', en: 'The patient is out of danger.' },
+  ],
+  '围': [
+    { cn: '孩子们围着老师坐。', en: 'The children sat around the teacher.' },
+    { cn: '他围着操场跑了三圈。', en: 'He ran three laps around the playground.' },
+    { cn: '她围了一条围巾。', en: 'She wore a scarf.' },
+  ],
+  '伟大': [
+    { cn: '他是一位伟大的科学家。', en: 'He is a great scientist.' },
+    { cn: '母爱是伟大的。', en: 'A mother\'s love is great.' },
+    { cn: '这是一项伟大的工程。', en: 'This is a great project.' },
+  ],
+  '卫生': [
+    { cn: '注意个人卫生。', en: 'Pay attention to personal hygiene.' },
+    { cn: '这家餐厅的卫生很好。', en: 'This restaurant has good hygiene.' },
+    { cn: '他在卫生部门工作。', en: 'He works in the health department.' },
+  ],
+  '卫生间': [
+    { cn: '卫生间在哪里？', en: 'Where is the bathroom?' },
+    { cn: '卫生间很干净。', en: 'The bathroom is very clean.' },
+    { cn: '这间房有独立的卫生间。', en: 'This room has its own bathroom.' },
+  ],
+  '为了': [
+    { cn: '为了健康，要多运动。', en: 'For the sake of health, exercise more.' },
+    { cn: '他为了家人努力工作。', en: 'He works hard for his family.' },
+    { cn: '为了考试我复习了一整天。', en: 'I reviewed all day for the exam.' },
+  ],
+  '温暖': [
+    { cn: '春天的阳光很温暖。', en: 'The spring sunshine is very warm.' },
+    { cn: '他的话让人感到温暖。', en: 'His words made people feel warm.' },
+    { cn: '这个地方冬天也很温暖。', en: 'This place is warm even in winter.' },
+  ],
+  '文化': [
+    { cn: '中国文化历史悠久。', en: 'Chinese culture has a long history.' },
+    { cn: '文化交流促进了理解。', en: 'Cultural exchange promotes understanding.' },
+    { cn: '他对中国文化很感兴趣。', en: 'He is very interested in Chinese culture.' },
+  ],
+  '文件': [
+    { cn: '请把文件发给我。', en: 'Please send me the file.' },
+    { cn: '这份文件很重要。', en: 'This document is very important.' },
+    { cn: '文件已经签好了。', en: 'The document has been signed.' },
+  ],
+  '文明': [
+    { cn: '中华文明是世界上最古老的文明之一。', en: 'Chinese civilization is one of the oldest in the world.' },
+    { cn: '要做一个文明的人。', en: 'Be a civilized person.' },
+    { cn: '文明驾驶很重要。', en: 'Civilized driving is important.' },
+  ],
+  '文学': [
+    { cn: '他喜欢中国文学。', en: 'He likes Chinese literature.' },
+    { cn: '她学的是英国文学。', en: 'She studies English literature.' },
+    { cn: '文学作品反映了社会。', en: 'Literary works reflect society.' },
+  ],
+  '文章': [
+    { cn: '他写了一篇很好的文章。', en: 'He wrote a very good article.' },
+    { cn: '这篇文章发表在报纸上。', en: 'This article was published in the newspaper.' },
+    { cn: '请认真阅读这篇文章。', en: 'Please read this article carefully.' },
+  ],
+  '文字': [
+    { cn: '中国文字很复杂。', en: 'Chinese characters are very complex.' },
+    { cn: '文字是记录语言的工具。', en: 'Writing is a tool for recording language.' },
+    { cn: '他的文字功底很好。', en: 'He has a strong foundation in writing.' },
+  ],
+  '握手': [
+    { cn: '他们握手表示友好。', en: 'They shook hands to show friendliness.' },
+    { cn: '两位领导人握手了。', en: 'The two leaders shook hands.' },
+    { cn: '见面时通常要握手。', en: 'It\'s customary to shake hands when meeting.' },
+  ],
+  '屋子': [
+    { cn: '屋子里很暖和。', en: 'The room is very warm.' },
+    { cn: '他打扫了屋子。', en: 'He cleaned the room.' },
+    { cn: '屋子虽然小，但很干净。', en: 'The room is small but very clean.' },
+  ],
+  '武器': [
+    { cn: '知识是最好的武器。', en: 'Knowledge is the best weapon.' },
+    { cn: '不允许携带武器。', en: 'Weapons are not allowed.' },
+    { cn: '古代的武器有刀和剑。', en: 'Ancient weapons included knives and swords.' },
+  ],
+  '武术': [
+    { cn: '中国武术历史悠久。', en: 'Chinese martial arts have a long history.' },
+    { cn: '他从小就练武术。', en: 'He has practiced martial arts since childhood.' },
+    { cn: '武术是中国的传统运动。', en: 'Martial arts are a traditional Chinese sport.' },
+  ],
+  '舞台': [
+    { cn: '她站在舞台上唱歌。', en: 'She stood on the stage singing.' },
+    { cn: '舞台上灯光闪耀。', en: 'The lights on stage are shining.' },
+    { cn: '人生就是一个大舞台。', en: 'Life is a big stage.' },
+  ],
+  '希望': [
+    { cn: '我希望你能来。', en: 'I hope you can come.' },
+    { cn: '不要放弃希望。', en: 'Don\'t give up hope.' },
+    { cn: '她对未来充满了希望。', en: 'She is full of hope for the future.' },
+  ],
+  '系': [
+    { cn: '他在中文系学习。', en: 'He studies in the Chinese department.' },
+    { cn: '这件事跟他有关系。', en: 'This matter is related to him.' },
+    { cn: '请系好安全带。', en: 'Please fasten your seat belt.' },
+  ],
+  '西部': [
+    { cn: '中国西部地区面积很大。', en: 'The western region of China has a large area.' },
+    { cn: '西部开发是国家战略。', en: 'Western development is a national strategy.' },
+    { cn: '他去了中国西部旅游。', en: 'He went to western China for tourism.' },
+  ],
+  '下来': [
+    { cn: '你下来吧。', en: 'Come down.' },
+    { cn: '他从楼上走下来了。', en: 'He walked down from upstairs.' },
+    { cn: '把名字记下来。', en: 'Write down the name.' },
+  ],
+  '下面': [
+    { cn: '下面请看第二张图。', en: 'Next, please look at the second picture.' },
+    { cn: '桌子下面有一只猫。', en: 'There is a cat under the table.' },
+    { cn: '下面我来回答大家的问题。', en: 'Next I will answer everyone\'s questions.' },
+  ],
+  '下去': [
+    { cn: '这样下去不是办法。', en: 'It won\'t work to continue like this.' },
+    { cn: '他走了下去。', en: 'He went down.' },
+    { cn: '坚持下去就会成功。', en: 'If you keep going, you will succeed.' },
+  ],
+  '先进': [
+    { cn: '这项技术很先进。', en: 'This technology is very advanced.' },
+    { cn: '他被评为先进工作者。', en: 'He was named an advanced worker.' },
+    { cn: '先进的设备提高了效率。', en: 'Advanced equipment improved efficiency.' },
+  ],
+  '显得': [
+    { cn: '她穿这件衣服显得很漂亮。', en: 'She looks very pretty in this outfit.' },
+    { cn: '他今天显得很高兴。', en: 'He seems very happy today.' },
+    { cn: '房间显得很宽敞。', en: 'The room appears very spacious.' },
+  ],
+  '显然': [
+    { cn: '显然他说的不对。', en: 'Obviously what he said is wrong.' },
+    { cn: '这显然是个误会。', en: 'This is obviously a misunderstanding.' },
+    { cn: '他显然很生气。', en: 'He is obviously very angry.' },
+  ],
+  '显示': [
+    { cn: '数据显示经济在增长。', en: 'The data shows that the economy is growing.' },
+    { cn: '屏幕上显示了结果。', en: 'The results were displayed on the screen.' },
+    { cn: '这显示了他的能力。', en: 'This demonstrates his ability.' },
+  ],
+  '现场': [
+    { cn: '记者赶到了现场。', en: 'The journalist rushed to the scene.' },
+    { cn: '现场有很多观众。', en: 'There were many spectators at the scene.' },
+    { cn: '我们进行了现场直播。', en: 'We conducted a live broadcast on site.' },
+  ],
+  '现代': [
+    { cn: '现代社会变化很快。', en: 'Modern society changes very quickly.' },
+    { cn: '他是一位现代作家。', en: 'He is a modern writer.' },
+    { cn: '现代科技改变了生活。', en: 'Modern technology has changed life.' },
+  ],
+  '现代化': [
+    { cn: '国家在推进现代化建设。', en: 'The country is promoting modernization.' },
+    { cn: '农业现代化是重要目标。', en: 'Agricultural modernization is an important goal.' },
+    { cn: '这座城市非常现代化。', en: 'This city is very modernized.' },
+  ],
+  '现金': [
+    { cn: '你可以用现金支付。', en: 'You can pay in cash.' },
+    { cn: '他身上没有现金。', en: 'He doesn\'t have cash on him.' },
+    { cn: '现在很少有人用现金了。', en: 'Very few people use cash now.' },
+  ],
+  '现实': [
+    { cn: '要面对现实。', en: 'Face reality.' },
+    { cn: '现实和理想之间有差距。', en: 'There is a gap between reality and ideals.' },
+    { cn: '他是一个很现实的人。', en: 'He is a very practical person.' },
+  ],
+  '现象': [
+    { cn: '这是一种普遍现象。', en: 'This is a common phenomenon.' },
+    { cn: '自然现象很有趣。', en: 'Natural phenomena are very interesting.' },
+    { cn: '这种现象值得研究。', en: 'This phenomenon is worth studying.' },
+  ],
+  '线': [
+    { cn: '请在线后面排队。', en: 'Please line up behind the line.' },
+    { cn: '他沿着这条线走。', en: 'He walked along this line.' },
+    { cn: '电话线断了。', en: 'The phone line was cut off.' },
+  ],
+  '相比': [
+    { cn: '和去年相比，今年进步了很多。', en: 'Compared with last year, there has been a lot of progress this year.' },
+    { cn: '两者相比，这个更好。', en: 'Comparing the two, this one is better.' },
+    { cn: '相比之下，她的方案更合理。', en: 'By comparison, her plan is more reasonable.' },
+  ],
+  '相当': [
+    { cn: '他的中文水平相当高。', en: 'His Chinese level is quite high.' },
+    { cn: '这件事相当重要。', en: 'This matter is quite important.' },
+    { cn: '两个人的能力相当。', en: 'The two people\'s abilities are equivalent.' },
+  ],
+  '相关': [
+    { cn: '这两件事是相关的。', en: 'These two matters are related.' },
+    { cn: '请提供相关的资料。', en: 'Please provide relevant information.' },
+    { cn: '相关部门正在处理。', en: 'The relevant departments are handling it.' },
+  ],
+  '相互': [
+    { cn: '同学之间要相互帮助。', en: 'Classmates should help each other.' },
+    { cn: '两国相互信任。', en: 'The two countries trust each other.' },
+    { cn: '我们要相互学习。', en: 'We should learn from each other.' },
+  ],
+  '相似': [
+    { cn: '他们两个长得很相似。', en: 'The two of them look very similar.' },
+    { cn: '这两种文化有相似之处。', en: 'These two cultures have similarities.' },
+    { cn: '情况和上次很相似。', en: 'The situation is very similar to last time.' },
+  ],
+  '香': [
+    { cn: '花很香。', en: 'The flowers smell nice.' },
+    { cn: '这道菜真香。', en: 'This dish smells really good.' },
+    { cn: '他睡得很香。', en: 'He slept soundly.' },
+  ],
+  '香蕉': [
+    { cn: '我喜欢吃香蕉。', en: 'I like to eat bananas.' },
+    { cn: '香蕉富含钾元素。', en: 'Bananas are rich in potassium.' },
+    { cn: '这些香蕉还没熟。', en: 'These bananas are not ripe yet.' },
+  ],
+  '消费': [
+    { cn: '消费水平在提高。', en: 'The consumption level is rising.' },
+    { cn: '他在这里消费了五百元。', en: 'He spent five hundred yuan here.' },
+    { cn: '理性消费很重要。', en: 'Rational consumption is important.' },
+  ],
+  '消失': [
+    { cn: '他突然消失了。', en: 'He suddenly disappeared.' },
+    { cn: '声音渐渐消失了。', en: 'The sound gradually faded away.' },
+    { cn: '很多动物正在消失。', en: 'Many animals are disappearing.' },
+  ],
+  '消息': [
+    { cn: '你有什么消息吗？', en: 'Do you have any news?' },
+    { cn: '这是一个好消息。', en: 'This is good news.' },
+    { cn: '他还没有收到消息。', en: 'He hasn\'t received the message yet.' },
+  ],
+  '效果': [
+    { cn: '效果非常好。', en: 'The effect is very good.' },
+    { cn: '这种药的效果怎么样？', en: 'How effective is this medicine?' },
+    { cn: '学习的效果取决于方法。', en: 'The effectiveness of learning depends on the method.' },
+  ],
+  '写作': [
+    { cn: '写作是他的爱好。', en: 'Writing is his hobby.' },
+    { cn: '她在大学学习写作。', en: 'She studies writing in college.' },
+    { cn: '写作需要灵感和练习。', en: 'Writing requires inspiration and practice.' },
+  ],
+  '心': [
+    { cn: '他的心很善良。', en: 'He has a kind heart.' },
+    { cn: '我心里很高兴。', en: 'I feel very happy in my heart.' },
+    { cn: '放心吧，没问题的。', en: 'Don\'t worry, there\'s no problem.' },
+  ],
+  '信封': [
+    { cn: '他把信放进了信封。', en: 'He put the letter in the envelope.' },
+    { cn: '信封上写着地址。', en: 'The address is written on the envelope.' },
+    { cn: '请给我一个信封。', en: 'Please give me an envelope.' },
+  ],
+  '信任': [
+    { cn: '我完全信任你。', en: 'I completely trust you.' },
+    { cn: '信任是合作的基础。', en: 'Trust is the foundation of cooperation.' },
+    { cn: '他赢得了大家的信任。', en: 'He earned everyone\'s trust.' },
+  ],
+  '行李': [
+    { cn: '请带好你的行李。', en: 'Please take your luggage.' },
+    { cn: '行李太多了。', en: 'There is too much luggage.' },
+    { cn: '他把行李放在了车上。', en: 'He put the luggage in the car.' },
+  ],
+  '形成': [
+    { cn: '好习惯需要慢慢形成。', en: 'Good habits need to form gradually.' },
+    { cn: '已经形成了统一意见。', en: 'A consensus has been formed.' },
+    { cn: '这座山是火山活动形成的。', en: 'This mountain was formed by volcanic activity.' },
+  ],
+  '形式': [
+    { cn: '活动的形式很多样。', en: 'The activity takes many forms.' },
+    { cn: '不要只注重形式。', en: 'Don\'t focus only on formalities.' },
+    { cn: '教学形式需要创新。', en: 'Teaching methods need innovation.' },
+  ],
+  '形象': [
+    { cn: '他的形象很好。', en: 'He has a good image.' },
+    { cn: '这个角色的形象很生动。', en: 'The image of this character is very vivid.' },
+    { cn: '公司很注重形象。', en: 'The company pays great attention to its image.' },
+  ],
+  '形状': [
+    { cn: '这块石头的形状很特别。', en: 'The shape of this stone is very unique.' },
+    { cn: '各种各样的形状。', en: 'All kinds of shapes.' },
+    { cn: '请描述一下它的形状。', en: 'Please describe its shape.' },
+  ],
+  '幸福': [
+    { cn: '他们过着幸福的生活。', en: 'They live a happy life.' },
+    { cn: '幸福是什么？', en: 'What is happiness?' },
+    { cn: '祝你们幸福！', en: 'Wish you happiness!' },
+  ],
+  '幸运': [
+    { cn: '他很幸运。', en: 'He is very lucky.' },
+    { cn: '幸运的是没有人受伤。', en: 'Fortunately, no one was injured.' },
+    { cn: '祝你好运！', en: 'Good luck to you!' },
+  ],
+  '性': [
+    { cn: '他的性格很好。', en: 'He has a good character.' },
+    { cn: '这个问题的重要性不言而喻。', en: 'The importance of this issue goes without saying.' },
+    { cn: '安全性是第一位的。', en: 'Safety is the top priority.' },
+  ],
+  '性别': [
+    { cn: '性别歧视是不对的。', en: 'Gender discrimination is wrong.' },
+    { cn: '不分性别，人人平等。', en: 'Regardless of gender, everyone is equal.' },
+    { cn: '请填写你的性别。', en: 'Please fill in your gender.' },
+  ],
+  '性格': [
+    { cn: '她的性格很开朗。', en: 'She has an outgoing personality.' },
+    { cn: '每个人的性格都不同。', en: 'Everyone\'s personality is different.' },
+    { cn: '性格决定命运。', en: 'Character determines destiny.' },
+  ],
+  '修': [
+    { cn: '他在修自行车。', en: 'He is repairing a bicycle.' },
+    { cn: '这条路需要修一修。', en: 'This road needs to be repaired.' },
+    { cn: '他把房子修了一下。', en: 'He fixed up the house.' },
+  ],
+  '修改': [
+    { cn: '请修改一下这篇文章。', en: 'Please revise this article.' },
+    { cn: '计划需要修改。', en: 'The plan needs to be revised.' },
+    { cn: '他修改了好几次才满意。', en: 'He revised it several times before he was satisfied.' },
+  ],
+  '需求': [
+    { cn: '市场的需求在增加。', en: 'Market demand is increasing.' },
+    { cn: '满足客户的需求。', en: 'Meet customer requirements.' },
+    { cn: '这种产品的需求量很大。', en: 'The demand for this product is very large.' },
+  ],
+  '需要': [
+    { cn: '我需要你的帮助。', en: 'I need your help.' },
+    { cn: '不需要担心。', en: 'No need to worry.' },
+    { cn: '这件事需要时间。', en: 'This matter needs time.' },
+  ],
+  '宣布': [
+    { cn: '总统宣布了新政策。', en: 'The president announced the new policy.' },
+    { cn: '他宣布退休。', en: 'He announced his retirement.' },
+    { cn: '比赛结果已经宣布了。', en: 'The competition results have been announced.' },
+  ],
+  '宣传': [
+    { cn: '我们要加强宣传。', en: 'We need to strengthen publicity.' },
+    { cn: '这是一次很好的宣传活动。', en: 'This is a very good publicity campaign.' },
+    { cn: '他负责公司的宣传工作。', en: 'He is in charge of the company\'s publicity work.' },
+  ],
+  '选手': [
+    { cn: '他是一名优秀的选手。', en: 'He is an excellent contestant.' },
+    { cn: '各国选手都很厉害。', en: 'Contestants from all countries are very impressive.' },
+    { cn: '选手们正在做准备。', en: 'The contestants are preparing.' },
+  ],
+  '学费': [
+    { cn: '大学的学费不便宜。', en: 'University tuition is not cheap.' },
+    { cn: '他的学费是父母付的。', en: 'His tuition is paid by his parents.' },
+    { cn: '学费涨了不少。', en: 'Tuition has gone up quite a bit.' },
+  ],
+  '血': [
+    { cn: '他的手指流血了。', en: 'His finger is bleeding.' },
+    { cn: '献血可以救人。', en: 'Donating blood can save lives.' },
+    { cn: '血的颜色是红色的。', en: 'The color of blood is red.' },
+  ],
+  '训练': [
+    { cn: '运动员每天都要训练。', en: 'Athletes need to train every day.' },
+    { cn: '经过训练，他进步了很多。', en: 'After training, he improved a lot.' },
+    { cn: '训练的时间是早上六点。', en: 'Training time is at six in the morning.' },
+  ],
+  '压': [
+    { cn: '不要压在上面。', en: 'Don\'t press on top of it.' },
+    { cn: '书把花压扁了。', en: 'The book flattened the flower.' },
+    { cn: '他压住了心里的怒气。', en: 'He suppressed the anger in his heart.' },
+  ],
+  '压力': [
+    { cn: '工作压力很大。', en: 'Work pressure is very high.' },
+    { cn: '他承受着很大的压力。', en: 'He is under a lot of pressure.' },
+    { cn: '适当的压力有好处。', en: 'A moderate amount of pressure is beneficial.' },
+  ],
+  '烟': [
+    { cn: '他不抽烟。', en: 'He doesn\'t smoke.' },
+    { cn: '厨房里冒出了烟。', en: 'Smoke came from the kitchen.' },
+    { cn: '烟对健康有害。', en: 'Smoking is harmful to health.' },
+  ],
+  '眼前': [
+    { cn: '眼前的困难是暂时的。', en: 'The difficulties before us are temporary.' },
+    { cn: '美丽的景色展现在眼前。', en: 'Beautiful scenery unfolded before our eyes.' },
+    { cn: '不要只看眼前的利益。', en: 'Don\'t just focus on immediate benefits.' },
+  ],
+  '演': [
+    { cn: '他演了一部新电影。', en: 'He acted in a new movie.' },
+    { cn: '这个角色谁来演？', en: 'Who will play this role?' },
+    { cn: '她演得非常好。', en: 'She performed very well.' },
+  ],
+  '演唱': [
+    { cn: '她在晚会上演唱了一首歌。', en: 'She sang a song at the party.' },
+    { cn: '他的演唱感动了观众。', en: 'His singing moved the audience.' },
+    { cn: '演唱会就要开始了。', en: 'The concert is about to begin.' },
+  ],
+  '演唱会': [
+    { cn: '我买了演唱会的票。', en: 'I bought tickets for the concert.' },
+    { cn: '演唱会非常精彩。', en: 'The concert was wonderful.' },
+    { cn: '他举办了一场个人演唱会。', en: 'He held a solo concert.' },
+  ],
+  '演出': [
+    { cn: '今天的演出非常成功。', en: 'Today\'s performance was very successful.' },
+    { cn: '演出从八点开始。', en: 'The performance starts at eight o\'clock.' },
+    { cn: '他们到各地去演出。', en: 'They go on tour to perform in various places.' },
+  ],
+  '演员': [
+    { cn: '她是一名优秀的演员。', en: 'She is an excellent actress.' },
+    { cn: '这部电影的演员都很有名。', en: 'All the actors in this movie are famous.' },
+    { cn: '他想当演员。', en: 'He wants to be an actor.' },
+  ],
+  '羊': [
+    { cn: '山坡上有一群羊。', en: 'There is a flock of sheep on the hillside.' },
+    { cn: '羊肉串很好吃。', en: 'Lamb skewers are very delicious.' },
+    { cn: '他养了很多羊。', en: 'He raises many sheep.' },
+  ],
+  '阳光': [
+    { cn: '今天阳光很好。', en: 'The sunshine is very nice today.' },
+    { cn: '阳光照在身上很舒服。', en: 'The sunlight feels nice on the body.' },
+    { cn: '他是一个阳光的男孩。', en: 'He is an upbeat boy.' },
+  ],
+  '要是': [
+    { cn: '要是明天下雨，我们就不去了。', en: 'If it rains tomorrow, we won\'t go.' },
+    { cn: '要是你有时间，来我家吧。', en: 'If you have time, come to my place.' },
+    { cn: '要是早知道就好了。', en: 'If only I had known earlier.' },
+  ],
+  '一方面': [
+    { cn: '一方面要工作，一方面要照顾家庭。', en: 'On one hand we need to work, on the other hand we need to take care of the family.' },
+    { cn: '一方面是压力，另一方面是动力。', en: 'On one hand it\'s pressure, on the other hand it\'s motivation.' },
+    { cn: '一方面他很聪明。', en: 'On one hand, he is very smart.' },
+  ],
+  '一切': [
+    { cn: '一切都会好的。', en: 'Everything will be fine.' },
+    { cn: '他把一切都准备好了。', en: 'He prepared everything.' },
+    { cn: '一切顺利吗？', en: 'Is everything going smoothly?' },
+  ],
+  '衣架': [
+    { cn: '请把衣服挂在衣架上。', en: 'Please hang the clothes on the hanger.' },
+    { cn: '衣架上挂着一件外套。', en: 'A coat is hanging on the hanger.' },
+    { cn: '她买了几个新衣架。', en: 'She bought a few new hangers.' },
+  ],
+  '已': [
+    { cn: '他已经走了。', en: 'He has already left.' },
+    { cn: '事情已成事实。', en: 'The matter is already a fact.' },
+    { cn: '已是深夜了。', en: 'It is already late at night.' },
+  ],
+  '以来': [
+    { cn: '开学以来他一直很努力。', en: 'He has been working hard since the start of school.' },
+    { cn: '自古以来就是如此。', en: 'It has been so since ancient times.' },
+    { cn: '来中国以来，他学了很多。', en: 'Since coming to China, he has learned a lot.' },
+  ],
+  '艺术': [
+    { cn: '他热爱艺术。', en: 'He loves art.' },
+    { cn: '艺术可以陶冶情操。', en: 'Art can cultivate one\'s character.' },
+    { cn: '这是一件艺术品。', en: 'This is a work of art.' },
+  ],
+  '意外': [
+    { cn: '这件事完全是意外。', en: 'This was completely unexpected.' },
+    { cn: '意外时有发生。', en: 'Accidents happen from time to time.' },
+    { cn: '结果出乎意外。', en: 'The result was unexpected.' },
+  ],
+  '意义': [
+    { cn: '这件事很有意义。', en: 'This matter is very meaningful.' },
+    { cn: '生命的意义是什么？', en: 'What is the meaning of life?' },
+    { cn: '教育具有重大意义。', en: 'Education has great significance.' },
+  ],
+  '因此': [
+    { cn: '他生病了，因此没来上课。', en: 'He was sick, so he didn\'t come to class.' },
+    { cn: '天气不好，因此航班取消了。', en: 'The weather was bad, therefore the flight was canceled.' },
+    { cn: '我们应该因此更加努力。', en: 'We should therefore work even harder.' },
+  ],
+  '银': [
+    { cn: '这条项链是银的。', en: 'This necklace is silver.' },
+    { cn: '银行在前面。', en: 'The bank is ahead.' },
+    { cn: '银色的月光很美。', en: 'The silver moonlight is very beautiful.' },
+  ],
+  '银牌': [
+    { cn: '她获得了银牌。', en: 'She won the silver medal.' },
+    { cn: '银牌也是很好的成绩。', en: 'A silver medal is also a great achievement.' },
+    { cn: '他在比赛中拿了银牌。', en: 'He won the silver medal in the competition.' },
+  ],
+  '印象': [
+    { cn: '他给我留下了很好的印象。', en: 'He left a very good impression on me.' },
+    { cn: '我对这个地方印象很深。', en: 'I have a deep impression of this place.' },
+    { cn: '第一印象很重要。', en: 'First impressions are very important.' },
+  ],
+  '应当': [
+    { cn: '我们应当遵守法律。', en: 'We should obey the law.' },
+    { cn: '应当尊重每一个人。', en: 'We ought to respect everyone.' },
+    { cn: '你应当早点休息。', en: 'You should rest earlier.' },
+  ],
+  '应用': [
+    { cn: '这项技术被广泛应用。', en: 'This technology is widely applied.' },
+    { cn: '他在手机上下载了一个应用。', en: 'He downloaded an app on his phone.' },
+    { cn: '理论要应用到实际中去。', en: 'Theory should be applied to practice.' },
+  ],
+  '迎接': [
+    { cn: '大家去机场迎接客人。', en: 'Everyone went to the airport to welcome the guests.' },
+    { cn: '让我们迎接新的一年。', en: 'Let us welcome the new year.' },
+    { cn: '他们热情地迎接了我们。', en: 'They welcomed us warmly.' },
+  ],
+  '营养': [
+    { cn: '水果的营养很丰富。', en: 'Fruits are very nutritious.' },
+    { cn: '孩子需要均衡的营养。', en: 'Children need balanced nutrition.' },
+    { cn: '这道菜既好吃又有营养。', en: 'This dish is both delicious and nutritious.' },
+  ],
+  '赢': [
+    { cn: '我们赢了！', en: 'We won!' },
+    { cn: '他赢了比赛。', en: 'He won the match.' },
+    { cn: '想赢就要努力。', en: 'If you want to win, you have to work hard.' },
+  ],
+  '影视': [
+    { cn: '他在影视行业工作。', en: 'He works in the film and television industry.' },
+    { cn: '影视作品反映了社会现实。', en: 'Film and TV works reflect social reality.' },
+    { cn: '这座城市是影视拍摄基地。', en: 'This city is a film and TV shooting location.' },
+  ],
+  '优点': [
+    { cn: '每个人都有自己的优点。', en: 'Everyone has their own merits.' },
+    { cn: '他的优点是勤奋。', en: 'His strength is diligence.' },
+    { cn: '要多看别人的优点。', en: 'Focus more on other people\'s strengths.' },
+  ],
+  '优势': [
+    { cn: '他有语言优势。', en: 'He has a language advantage.' },
+    { cn: '发挥自己的优势。', en: 'Play to your own strengths.' },
+    { cn: '我们的产品有很大优势。', en: 'Our products have a great advantage.' },
+  ],
+  '由': [
+    { cn: '这个项目由他负责。', en: 'This project is handled by him.' },
+    { cn: '活动由学校组织。', en: 'The activity is organized by the school.' },
+    { cn: '由于天气原因，航班延误了。', en: 'Due to weather, the flight was delayed.' },
+  ],
+  '由于': [
+    { cn: '由于下雨，比赛取消了。', en: 'Due to rain, the match was canceled.' },
+    { cn: '由于工作太忙，他没时间休息。', en: 'Because of being too busy with work, he had no time to rest.' },
+    { cn: '由于经验不足，他犯了错。', en: 'Due to lack of experience, he made a mistake.' },
+  ],
+  '邮件': [
+    { cn: '我收到了一封邮件。', en: 'I received an email.' },
+    { cn: '请查收邮件。', en: 'Please check your email.' },
+    { cn: '他每天都会回复邮件。', en: 'He replies to emails every day.' },
+  ],
+  '邮票': [
+    { cn: '他喜欢收集邮票。', en: 'He likes to collect stamps.' },
+    { cn: '你需要贴一张邮票。', en: 'You need to put a stamp on it.' },
+    { cn: '这枚邮票很珍贵。', en: 'This stamp is very valuable.' },
+  ],
+  '邮箱': [
+    { cn: '请把文件发到我的邮箱。', en: 'Please send the file to my email.' },
+    { cn: '你的邮箱地址是什么？', en: 'What is your email address?' },
+    { cn: '我每天都会检查邮箱。', en: 'I check my email every day.' },
+  ],
+  '游': [
+    { cn: '鱼在水里游。', en: 'Fish swim in the water.' },
+    { cn: '他去三峡游了一趟。', en: 'He went on a trip to the Three Gorges.' },
+    { cn: '我们明天去游长城。', en: 'We are going to tour the Great Wall tomorrow.' },
+  ],
+  '游戏': [
+    { cn: '孩子们在玩游戏。', en: 'The children are playing games.' },
+    { cn: '他喜欢玩电脑游戏。', en: 'He likes to play computer games.' },
+    { cn: '这个游戏很有趣。', en: 'This game is very fun.' },
+  ],
+  '游泳': [
+    { cn: '他喜欢游泳。', en: 'He likes swimming.' },
+    { cn: '夏天我们去游泳吧。', en: 'Let\'s go swimming in summer.' },
+    { cn: '游泳是很好的运动。', en: 'Swimming is a great exercise.' },
+  ],
+  '有的是': [
+    { cn: '时间有的是，不着急。', en: 'There\'s plenty of time, no rush.' },
+    { cn: '我们有的是办法。', en: 'We have plenty of ways to do it.' },
+    { cn: '钱有的是，不用担心。', en: 'There\'s plenty of money, don\'t worry.' },
+  ],
+  '有利': [
+    { cn: '这个条件对我们有利。', en: 'This condition is favorable to us.' },
+    { cn: '运动有利于健康。', en: 'Exercise is beneficial to health.' },
+    { cn: '好的环境有利于学习。', en: 'A good environment is conducive to learning.' },
+  ],
+  '有效': [
+    { cn: '这个方法很有效。', en: 'This method is very effective.' },
+    { cn: '签证在三个月内有效。', en: 'The visa is valid for three months.' },
+    { cn: '我们要提高工作的有效性。', en: 'We should improve the effectiveness of our work.' },
+  ],
+  '预报': [
+    { cn: '天气预报说明天会下雨。', en: 'The weather forecast says it will rain tomorrow.' },
+    { cn: '预报很准确。', en: 'The forecast is very accurate.' },
+    { cn: '请注意天气预报。', en: 'Please pay attention to the weather forecast.' },
+  ],
+  '预防': [
+    { cn: '预防疾病很重要。', en: 'Disease prevention is very important.' },
+    { cn: '预防胜于治疗。', en: 'Prevention is better than cure.' },
+    { cn: '我们要做好预防工作。', en: 'We should do a good job in prevention.' },
+  ],
+  '预计': [
+    { cn: '预计明天会晴天。', en: 'It is expected to be sunny tomorrow.' },
+    { cn: '预计需要三天时间。', en: 'It is estimated to take three days.' },
+    { cn: '预计参加的人数超过一百。', en: 'The estimated number of participants exceeds one hundred.' },
+  ],
+  '预习': [
+    { cn: '请预习下一课的内容。', en: 'Please preview the content of the next lesson.' },
+    { cn: '预习可以提高学习效果。', en: 'Preview can improve learning outcomes.' },
+    { cn: '他每天都预习功课。', en: 'He previews his lessons every day.' },
+  ],
+  '员': [
+    { cn: '他是公司的职员。', en: 'He is a company employee.' },
+    { cn: '服务员态度很好。', en: 'The waiter has a very good attitude.' },
+    { cn: '团员要积极参加活动。', en: 'Members should actively participate in activities.' },
+  ],
+  '员工': [
+    { cn: '公司有五百名员工。', en: 'The company has five hundred employees.' },
+    { cn: '员工们工作很努力。', en: 'The employees work very hard.' },
+    { cn: '老板对员工很好。', en: 'The boss is very good to the staff.' },
+  ],
+  '愿望': [
+    { cn: '他的愿望是当医生。', en: 'His wish is to become a doctor.' },
+    { cn: '希望你的愿望能实现。', en: 'I hope your wish can come true.' },
+    { cn: '她许了一个愿望。', en: 'She made a wish.' },
+  ],
+  '约': [
+    { cn: '我和朋友约好了见面。', en: 'I made an appointment to meet my friend.' },
+    { cn: '大约需要一个小时。', en: 'It takes approximately one hour.' },
+    { cn: '他约我明天吃饭。', en: 'He invited me to dinner tomorrow.' },
+  ],
+  '运输': [
+    { cn: '货物正在运输中。', en: 'The goods are being transported.' },
+    { cn: '运输成本越来越高。', en: 'Transportation costs are getting higher.' },
+    { cn: '他在一家运输公司工作。', en: 'He works at a transportation company.' },
+  ],
+  '杂志': [
+    { cn: '她每月都买杂志。', en: 'She buys magazines every month.' },
+    { cn: '这本杂志的内容很丰富。', en: 'The content of this magazine is very rich.' },
+    { cn: '他在杂志上发表了文章。', en: 'He published an article in the magazine.' },
+  ],
+  '早已': [
+    { cn: '我早已知道了。', en: 'I knew long ago.' },
+    { cn: '他早已离开了。', en: 'He left a long time ago.' },
+    { cn: '这个问题早已解决了。', en: 'This problem was resolved long ago.' },
+  ],
+  '造': [
+    { cn: '他们正在造一座新桥。', en: 'They are building a new bridge.' },
+    { cn: '这艘船是中国造的。', en: 'This ship was made in China.' },
+    { cn: '不要造谣。', en: 'Don\'t spread rumors.' },
+  ],
+  '造成': [
+    { cn: '暴雨造成了严重的损失。', en: 'Heavy rain caused serious losses.' },
+    { cn: '这件事造成了很大的影响。', en: 'This matter caused a great impact.' },
+    { cn: '误会造成了不必要的麻烦。', en: 'The misunderstanding caused unnecessary trouble.' },
+  ],
+  '责任': [
+    { cn: '这是我的责任。', en: 'This is my responsibility.' },
+    { cn: '每个人都要承担自己的责任。', en: 'Everyone must bear their own responsibilities.' },
+    { cn: '他是一个有责任心的人。', en: 'He is a responsible person.' },
+  ],
+  '增加': [
+    { cn: '公司的收入增加了。', en: 'The company\'s income has increased.' },
+    { cn: '请增加一些人手。', en: 'Please add some more people.' },
+    { cn: '运动可以增加体力。', en: 'Exercise can increase physical strength.' },
+  ],
+  '增长': [
+    { cn: '经济保持稳定增长。', en: 'The economy maintains steady growth.' },
+    { cn: '人口增长速度在放慢。', en: 'The rate of population growth is slowing down.' },
+    { cn: '销售额增长了百分之二十。', en: 'Sales grew by twenty percent.' },
+  ],
+  '展开': [
+    { cn: '他展开了地图。', en: 'He unfolded the map.' },
+    { cn: '双方展开了激烈的讨论。', en: 'Both sides launched an intense discussion.' },
+    { cn: '救援工作已经展开。', en: 'Rescue work has been launched.' },
+  ],
+  '张': [
+    { cn: '给我两张纸。', en: 'Give me two sheets of paper.' },
+    { cn: '桌子上有一张照片。', en: 'There is a photo on the table.' },
+    { cn: '他张开了双臂。', en: 'He spread his arms wide.' },
+  ],
+  '长城': [
+    { cn: '长城是中国的象征。', en: 'The Great Wall is a symbol of China.' },
+    { cn: '不到长城非好汉。', en: 'He who has never been to the Great Wall is not a true hero.' },
+    { cn: '长城有几千年的历史。', en: 'The Great Wall has thousands of years of history.' },
+  ],
+  '长处': [
+    { cn: '每个人都有自己的长处。', en: 'Everyone has their own strengths.' },
+    { cn: '要善于发现别人的长处。', en: 'Be good at discovering others\' strengths.' },
+    { cn: '他的长处是耐心。', en: 'His strong point is patience.' },
+  ],
+  '长期': [
+    { cn: '这需要长期的努力。', en: 'This requires long-term effort.' },
+    { cn: '他在国外长期居住。', en: 'He lives abroad long-term.' },
+    { cn: '长期坚持才能看到效果。', en: 'You can only see results through long-term persistence.' },
+  ],
+  '照': [
+    { cn: '阳光照在窗户上。', en: 'Sunlight shines on the window.' },
+    { cn: '他照了一张相。', en: 'He took a photo.' },
+    { cn: '按照规定办事。', en: 'Act according to regulations.' },
+  ],
+  '者': [
+    { cn: '作者是一位年轻人。', en: 'The author is a young person.' },
+    { cn: '读者对这本书评价很高。', en: 'Readers rate this book highly.' },
+    { cn: '记者报道了这件事。', en: 'The reporter covered this event.' },
+  ],
+  '真实': [
+    { cn: '这个故事是真实的。', en: 'This story is true.' },
+    { cn: '他说的都是真实的。', en: 'Everything he said is real.' },
+    { cn: '真实的感受最重要。', en: 'Genuine feelings are the most important.' },
+  ],
+  '争': [
+    { cn: '他们在争第一名。', en: 'They are competing for first place.' },
+    { cn: '不要争了。', en: 'Stop arguing.' },
+    { cn: '大家都在争这个机会。', en: 'Everyone is fighting for this opportunity.' },
+  ],
+  '争取': [
+    { cn: '我们要争取更好的成绩。', en: 'We should strive for better results.' },
+    { cn: '他争取到了出国的机会。', en: 'He won the opportunity to go abroad.' },
+    { cn: '争取时间完成任务。', en: 'Race against time to complete the task.' },
+  ],
+  '整': [
+    { cn: '他等了整整一天。', en: 'He waited a whole day.' },
+    { cn: '把房间整一整。', en: 'Tidy up the room.' },
+    { cn: '一切都很整齐。', en: 'Everything is very orderly.' },
+  ],
+  '整个': [
+    { cn: '整个城市很安静。', en: 'The entire city is very quiet.' },
+    { cn: '他花了整个下午写报告。', en: 'He spent the entire afternoon writing the report.' },
+    { cn: '整个过程很顺利。', en: 'The entire process went smoothly.' },
+  ],
+  '整理': [
+    { cn: '请整理一下你的房间。', en: 'Please tidy up your room.' },
+    { cn: '他在整理资料。', en: 'He is organizing materials.' },
+    { cn: '出发前要整理好行李。', en: 'Pack your luggage before departure.' },
+  ],
+  '整齐': [
+    { cn: '书架上的书排列得很整齐。', en: 'The books on the shelf are arranged neatly.' },
+    { cn: '同学们站得很整齐。', en: 'The students stood very neatly.' },
+    { cn: '他的衣服总是很整齐。', en: 'His clothes are always very neat.' },
+  ],
+  '整体': [
+    { cn: '从整体来看，效果不错。', en: 'Overall, the effect is good.' },
+    { cn: '整体水平有了提高。', en: 'The overall level has improved.' },
+    { cn: '我们要从整体上考虑问题。', en: 'We should consider problems from an overall perspective.' },
+  ],
+  '整天': [
+    { cn: '他整天都在学习。', en: 'He studies all day long.' },
+    { cn: '不要整天看手机。', en: 'Don\'t look at your phone all day.' },
+    { cn: '她整天忙个不停。', en: 'She is busy all day long.' },
+  ],
+  '整整': [
+    { cn: '他等了整整三个小时。', en: 'He waited for a whole three hours.' },
+    { cn: '整整一年过去了。', en: 'A whole year has passed.' },
+    { cn: '我在那里住了整整两年。', en: 'I lived there for a full two years.' },
+  ],
+  '正式': [
+    { cn: '这是一个正式的场合。', en: 'This is a formal occasion.' },
+    { cn: '合同已经正式签署了。', en: 'The contract has been officially signed.' },
+    { cn: '他正式加入了公司。', en: 'He officially joined the company.' },
+  ],
+  '证': [
+    { cn: '你有证吗？', en: 'Do you have an ID?' },
+    { cn: '他拿出了工作证。', en: 'He took out his work permit.' },
+    { cn: '事实可以证明一切。', en: 'Facts can prove everything.' },
+  ],
+  '证件': [
+    { cn: '请出示你的证件。', en: 'Please show your identification documents.' },
+    { cn: '证件带了吗？', en: 'Did you bring your ID?' },
+    { cn: '所有证件都要保管好。', en: 'All documents should be kept safe.' },
+  ],
+  '证据': [
+    { cn: '警察找到了证据。', en: 'The police found evidence.' },
+    { cn: '没有证据不能下结论。', en: 'You can\'t draw conclusions without evidence.' },
+    { cn: '证据确凿。', en: 'The evidence is conclusive.' },
+  ],
+  '证明': [
+    { cn: '事实证明他是对的。', en: 'Facts proved he was right.' },
+    { cn: '请提供一份证明。', en: 'Please provide a certificate.' },
+    { cn: '他用行动证明了自己。', en: 'He proved himself through actions.' },
+  ],
+  '支': [
+    { cn: '给我一支笔。', en: 'Give me a pen.' },
+    { cn: '他买了一支新铅笔。', en: 'He bought a new pencil.' },
+    { cn: '这支队伍很强大。', en: 'This team is very strong.' },
+  ],
+  '支持': [
+    { cn: '我支持你的决定。', en: 'I support your decision.' },
+    { cn: '谢谢大家的支持。', en: 'Thank you all for your support.' },
+    { cn: '他得到了家人的支持。', en: 'He received support from his family.' },
+  ],
+  '支付': [
+    { cn: '你可以用手机支付。', en: 'You can pay with your phone.' },
+    { cn: '请支付一百元。', en: 'Please pay one hundred yuan.' },
+    { cn: '费用由公司支付。', en: 'The expenses are paid by the company.' },
+  ],
+  '直': [
+    { cn: '这条路很直。', en: 'This road is very straight.' },
+    { cn: '他一直往前走。', en: 'He kept walking straight ahead.' },
+    { cn: '他说话很直。', en: 'He speaks very frankly.' },
+  ],
+  '直播': [
+    { cn: '比赛正在直播。', en: 'The match is being broadcast live.' },
+    { cn: '她在网上做直播。', en: 'She is livestreaming online.' },
+    { cn: '观看直播的人很多。', en: 'Many people are watching the livestream.' },
+  ],
+  '直到': [
+    { cn: '他一直等到天黑。', en: 'He waited until dark.' },
+    { cn: '直到最后我才明白。', en: 'I didn\'t understand until the very end.' },
+    { cn: '直到现在他还没来。', en: 'He still hasn\'t come until now.' },
+  ],
+  '值': [
+    { cn: '这幅画值很多钱。', en: 'This painting is worth a lot of money.' },
+    { cn: '这本书值得一读。', en: 'This book is worth reading.' },
+    { cn: '今天谁值班？', en: 'Who is on duty today?' },
+  ],
+  '值得': [
+    { cn: '这部电影值得看。', en: 'This movie is worth watching.' },
+    { cn: '他的经验值得学习。', en: 'His experience is worth learning from.' },
+    { cn: '值得一提的是。', en: 'It is worth mentioning that...' },
+  ],
+  '职工': [
+    { cn: '公司有两百名职工。', en: 'The company has two hundred workers.' },
+    { cn: '职工的福利很好。', en: 'The employees\' benefits are very good.' },
+    { cn: '职工代表大会明天召开。', en: 'The workers\' congress will be held tomorrow.' },
+  ],
+  '职业': [
+    { cn: '你的职业是什么？', en: 'What is your occupation?' },
+    { cn: '他是一名职业运动员。', en: 'He is a professional athlete.' },
+    { cn: '选择职业要慎重。', en: 'Choose your career carefully.' },
+  ],
+  '只好': [
+    { cn: '没有公共汽车了，只好走路。', en: 'There are no more buses, so I had to walk.' },
+    { cn: '他只好同意了。', en: 'He had no choice but to agree.' },
+    { cn: '商店关门了，只好明天再来。', en: 'The store is closed, I\'ll have to come back tomorrow.' },
+  ],
+  '只是': [
+    { cn: '我只是随便说说。', en: 'I\'m just saying it casually.' },
+    { cn: '只是有点累。', en: 'I\'m just a little tired.' },
+    { cn: '他只是一个学生。', en: 'He is merely a student.' },
+  ],
+  '只有': [
+    { cn: '只有努力才能成功。', en: 'Only through effort can you succeed.' },
+    { cn: '只有他一个人来了。', en: 'Only he came.' },
+    { cn: '只有坚持才有希望。', en: 'Only by persisting is there hope.' },
+  ],
+  '指': [
+    { cn: '他用手指着地图。', en: 'He pointed at the map with his finger.' },
+    { cn: '你指的是哪一个？', en: 'Which one are you referring to?' },
+    { cn: '这个词指的是什么意思？', en: 'What does this word refer to?' },
+  ],
+  '指出': [
+    { cn: '老师指出了我的错误。', en: 'The teacher pointed out my mistakes.' },
+    { cn: '专家指出了问题所在。', en: 'Experts pointed out where the problem lies.' },
+    { cn: '他指出这个方案有缺陷。', en: 'He pointed out that this plan has flaws.' },
+  ],
+  '指导': [
+    { cn: '老师的指导对我帮助很大。', en: 'The teacher\'s guidance helped me a lot.' },
+    { cn: '他指导学生写论文。', en: 'He guides students in writing theses.' },
+    { cn: '请多多指导。', en: 'Please give me more guidance.' },
+  ],
+  '至今': [
+    { cn: '至今他还没有回来。', en: 'He still hasn\'t come back to this day.' },
+    { cn: '这座桥至今已有百年历史。', en: 'This bridge has a hundred years of history to this day.' },
+    { cn: '至今我还记得那天的事。', en: 'To this day I still remember what happened that day.' },
+  ],
+  '至少': [
+    { cn: '至少要准备三天。', en: 'You need at least three days to prepare.' },
+    { cn: '至少有一百个人。', en: 'There are at least a hundred people.' },
+    { cn: '至少你应该试一试。', en: 'At least you should try.' },
+  ],
+  '志愿': [
+    { cn: '他的志愿是当医生。', en: 'His aspiration is to be a doctor.' },
+    { cn: '很多人志愿参加了活动。', en: 'Many people volunteered for the activity.' },
+    { cn: '填报高考志愿很重要。', en: 'Filling in college entrance exam preferences is very important.' },
+  ],
+  '志愿者': [
+    { cn: '他是一名志愿者。', en: 'He is a volunteer.' },
+    { cn: '志愿者们帮助了很多人。', en: 'The volunteers helped many people.' },
+    { cn: '我想当志愿者。', en: 'I want to be a volunteer.' },
+  ],
+  '制定': [
+    { cn: '公司制定了新的规章制度。', en: 'The company formulated new rules and regulations.' },
+    { cn: '我们需要制定一个计划。', en: 'We need to draw up a plan.' },
+    { cn: '政府制定了新的政策。', en: 'The government formulated new policies.' },
+  ],
+  '制度': [
+    { cn: '公司有完善的制度。', en: 'The company has a well-developed system.' },
+    { cn: '教育制度在不断改革。', en: 'The education system is constantly being reformed.' },
+    { cn: '好的制度有利于发展。', en: 'A good system is conducive to development.' },
+  ],
+  '制造': [
+    { cn: '这家工厂制造汽车。', en: 'This factory manufactures cars.' },
+    { cn: '中国制造的产品质量越来越好。', en: 'The quality of made-in-China products is getting better.' },
+    { cn: '他们制造了很多问题。', en: 'They created many problems.' },
+  ],
+  '制作': [
+    { cn: '她制作了一个蛋糕。', en: 'She made a cake.' },
+    { cn: '这个节目是我们制作的。', en: 'This program was made by us.' },
+    { cn: '手工制作的东西很特别。', en: 'Handmade things are very special.' },
+  ],
+  '中部': [
+    { cn: '他住在中国的中部。', en: 'He lives in the central part of China.' },
+    { cn: '城市中部是商业区。', en: 'The central part of the city is a commercial district.' },
+    { cn: '中部地区发展很快。', en: 'The central region is developing rapidly.' },
+  ],
+  '中华民族': [
+    { cn: '中华民族有悠久的历史。', en: 'The Chinese nation has a long history.' },
+    { cn: '中华民族是勤劳勇敢的民族。', en: 'The Chinese nation is hardworking and brave.' },
+    { cn: '我们为中华民族感到骄傲。', en: 'We are proud of the Chinese nation.' },
+  ],
+  '终于': [
+    { cn: '他终于成功了。', en: 'He finally succeeded.' },
+    { cn: '雨终于停了。', en: 'The rain finally stopped.' },
+    { cn: '我终于找到了答案。', en: 'I finally found the answer.' },
+  ],
+  '钟': [
+    { cn: '墙上挂着一个钟。', en: 'A clock hangs on the wall.' },
+    { cn: '现在几点钟了？', en: 'What time is it now?' },
+    { cn: '再等十分钟。', en: 'Wait another ten minutes.' },
+  ],
+  '种': [
+    { cn: '这种水果很甜。', en: 'This kind of fruit is very sweet.' },
+    { cn: '有很多种方法。', en: 'There are many kinds of methods.' },
+    { cn: '你喜欢哪种颜色？', en: 'Which kind of color do you like?' },
+  ],
+  '种子': [
+    { cn: '春天要播种子。', en: 'Seeds should be sown in spring.' },
+    { cn: '种子发芽了。', en: 'The seeds have sprouted.' },
+    { cn: '他在花盆里种了种子。', en: 'He planted seeds in the flowerpot.' },
+  ],
+  '重大': [
+    { cn: '这是一个重大的发现。', en: 'This is a major discovery.' },
+    { cn: '公司做出了重大决定。', en: 'The company made a major decision.' },
+    { cn: '今天发生了重大事件。', en: 'A major event happened today.' },
+  ],
+  '周围': [
+    { cn: '学校周围有很多商店。', en: 'There are many shops around the school.' },
+    { cn: '他看了看周围。', en: 'He looked around.' },
+    { cn: '周围的环境很安静。', en: 'The surrounding environment is very quiet.' },
+  ],
+  '猪': [
+    { cn: '农场里养了很多猪。', en: 'The farm raises many pigs.' },
+    { cn: '猪肉是中国人最常吃的肉。', en: 'Pork is the meat most commonly eaten by Chinese people.' },
+    { cn: '他属猪。', en: 'He was born in the year of the pig.' },
+  ],
+  '主持': [
+    { cn: '他主持了今天的会议。', en: 'He presided over today\'s meeting.' },
+    { cn: '她是这个节目的主持人。', en: 'She is the host of this program.' },
+    { cn: '谁来主持这次活动？', en: 'Who will host this event?' },
+  ],
+  '主动': [
+    { cn: '他主动帮助别人。', en: 'He takes the initiative to help others.' },
+    { cn: '做事要主动。', en: 'Be proactive in doing things.' },
+    { cn: '她主动向老师提问。', en: 'She took the initiative to ask the teacher questions.' },
+  ],
+  '主任': [
+    { cn: '他是科室主任。', en: 'He is the department director.' },
+    { cn: '主任同意了我们的方案。', en: 'The director agreed to our plan.' },
+    { cn: '请去找主任签字。', en: 'Please go to the director for a signature.' },
+  ],
+  '主意': [
+    { cn: '你有什么好主意？', en: 'Do you have any good ideas?' },
+    { cn: '这是一个好主意。', en: 'This is a good idea.' },
+    { cn: '她自己拿主意。', en: 'She makes her own decisions.' },
+  ],
+  '主张': [
+    { cn: '他主张和平解决问题。', en: 'He advocates solving problems peacefully.' },
+    { cn: '大家的主张不一样。', en: 'Everyone has different viewpoints.' },
+    { cn: '我主张先讨论再决定。', en: 'I advocate discussing first before deciding.' },
+  ],
+  '注意': [
+    { cn: '请注意安全。', en: 'Please pay attention to safety.' },
+    { cn: '他没有注意到这个问题。', en: 'He didn\'t notice this problem.' },
+    { cn: '注意你的言行。', en: 'Watch your words and actions.' },
+  ],
+  '祝': [
+    { cn: '祝你生日快乐！', en: 'Happy birthday to you!' },
+    { cn: '祝你一切顺利。', en: 'Wish you all the best.' },
+    { cn: '祝大家新年快乐！', en: 'Wish everyone a happy New Year!' },
+  ],
+  '抓': [
+    { cn: '猫抓了他一下。', en: 'The cat scratched him.' },
+    { cn: '警察抓住了小偷。', en: 'The police caught the thief.' },
+    { cn: '快抓紧时间。', en: 'Hurry up and make the most of the time.' },
+  ],
+  '抓住': [
+    { cn: '他抓住了那根绳子。', en: 'He grabbed hold of the rope.' },
+    { cn: '要抓住机会。', en: 'Seize the opportunity.' },
+    { cn: '警察抓住了罪犯。', en: 'The police captured the criminal.' },
+  ],
+  '专家': [
+    { cn: '他是一位医学专家。', en: 'He is a medical expert.' },
+    { cn: '专家们进行了讨论。', en: 'The experts held a discussion.' },
+    { cn: '请教一下专家的意见。', en: 'Please consult the expert\'s opinion.' },
+  ],
+  '专门': [
+    { cn: '他专门研究中国历史。', en: 'He specializes in Chinese history.' },
+    { cn: '这是专门为你准备的。', en: 'This is specially prepared for you.' },
+    { cn: '我们专门开了一个会。', en: 'We held a special meeting.' },
+  ],
+  '专题': [
+    { cn: '今天的专题是环保。', en: 'Today\'s special topic is environmental protection.' },
+    { cn: '电视台播了一期专题节目。', en: 'The TV station aired a special program.' },
+    { cn: '他做了一个专题报告。', en: 'He gave a special report.' },
+  ],
+  '专业': [
+    { cn: '你学的什么专业？', en: 'What is your major?' },
+    { cn: '他是一个很专业的人。', en: 'He is a very professional person.' },
+    { cn: '这个问题需要专业知识。', en: 'This problem requires specialized knowledge.' },
+  ],
+  '转': [
+    { cn: '请向右转。', en: 'Please turn right.' },
+    { cn: '地球绕着太阳转。', en: 'The Earth revolves around the sun.' },
+    { cn: '他把话题转了。', en: 'He changed the topic.' },
+  ],
+  '转变': [
+    { cn: '他的态度发生了转变。', en: 'His attitude has changed.' },
+    { cn: '观念的转变需要时间。', en: 'A change in mindset takes time.' },
+    { cn: '公司正在转变发展方式。', en: 'The company is transforming its development approach.' },
+  ],
+  '状况': [
+    { cn: '他的健康状况不好。', en: 'His health condition is not good.' },
+    { cn: '经济状况在改善。', en: 'The economic situation is improving.' },
+    { cn: '请了解一下目前的状况。', en: 'Please understand the current situation.' },
+  ],
+  '状态': [
+    { cn: '他最近状态很好。', en: 'He has been in good form recently.' },
+    { cn: '保持良好的精神状态。', en: 'Maintain a good mental state.' },
+    { cn: '运动员需要调整状态。', en: 'Athletes need to adjust their condition.' },
+  ],
+  '追': [
+    { cn: '他在追那只猫。', en: 'He is chasing that cat.' },
+    { cn: '警察追上了小偷。', en: 'The police caught up with the thief.' },
+    { cn: '年轻人追求梦想。', en: 'Young people pursue their dreams.' },
+  ],
+  '准': [
+    { cn: '这块表很准。', en: 'This watch is very accurate.' },
+    { cn: '他的判断很准。', en: 'His judgment is very accurate.' },
+    { cn: '天气预报不太准。', en: 'The weather forecast is not very accurate.' },
+  ],
+  '资格': [
+    { cn: '他有参加比赛的资格。', en: 'He is qualified to participate in the competition.' },
+    { cn: '你没有资格说这种话。', en: 'You are not qualified to say such things.' },
+    { cn: '考试合格才能取得资格。', en: 'You can only get the qualification by passing the exam.' },
+  ],
+  '资金': [
+    { cn: '项目缺少资金。', en: 'The project lacks funds.' },
+    { cn: '他投入了大量资金。', en: 'He invested a large amount of capital.' },
+    { cn: '资金问题已经解决了。', en: 'The funding issue has been resolved.' },
+  ],
+  '自从': [
+    { cn: '自从他走了以后，我很想他。', en: 'Since he left, I miss him very much.' },
+    { cn: '自从来到中国，他学到了很多。', en: 'Since coming to China, he has learned a lot.' },
+    { cn: '自从那次以后他再也没来过。', en: 'He has never come back since that time.' },
+  ],
+  '自动': [
+    { cn: '门是自动的。', en: 'The door is automatic.' },
+    { cn: '他自动报名参加了活动。', en: 'He voluntarily signed up for the activity.' },
+    { cn: '自动售货机很方便。', en: 'Vending machines are very convenient.' },
+  ],
+  '自觉': [
+    { cn: '学习要自觉。', en: 'Studying should be done consciously on your own initiative.' },
+    { cn: '他很自觉地遵守规定。', en: 'He consciously follows the rules.' },
+    { cn: '要培养自觉的习惯。', en: 'Develop the habit of self-discipline.' },
+  ],
+  '自然': [
+    { cn: '大自然是美丽的。', en: 'Nature is beautiful.' },
+    { cn: '一切顺其自然吧。', en: 'Let everything take its natural course.' },
+    { cn: '他的表情很自然。', en: 'His expression is very natural.' },
+  ],
+  '自身': [
+    { cn: '要提高自身的能力。', en: 'Improve your own abilities.' },
+    { cn: '问题出在自身。', en: 'The problem lies with oneself.' },
+    { cn: '他对自身要求很高。', en: 'He has high standards for himself.' },
+  ],
+  '自主': [
+    { cn: '要培养独立自主的能力。', en: 'Cultivate the ability to be independent and autonomous.' },
+    { cn: '学生应该自主学习。', en: 'Students should study independently.' },
+    { cn: '自主创新很重要。', en: 'Independent innovation is very important.' },
+  ],
+  '子女': [
+    { cn: '父母关心子女的教育。', en: 'Parents care about their children\'s education.' },
+    { cn: '他有两个子女。', en: 'He has two children.' },
+    { cn: '子女要孝顺父母。', en: 'Children should be filial to their parents.' },
+  ],
+  '总': [
+    { cn: '他总是很忙。', en: 'He is always very busy.' },
+    { cn: '总会有办法的。', en: 'There will always be a way.' },
+    { cn: '总的来说，效果不错。', en: 'Overall, the results are good.' },
+  ],
+  '总结': [
+    { cn: '老师做了课程总结。', en: 'The teacher gave a course summary.' },
+    { cn: '请总结一下你的经验。', en: 'Please summarize your experience.' },
+    { cn: '年底要做一个工作总结。', en: 'A work summary needs to be done at year-end.' },
+  ],
+  '总是': [
+    { cn: '他总是第一个到。', en: 'He is always the first to arrive.' },
+    { cn: '她总是面带微笑。', en: 'She always has a smile on her face.' },
+    { cn: '问题总是出在细节上。', en: 'Problems always arise from the details.' },
+  ],
+  '足够': [
+    { cn: '时间足够吗？', en: 'Is there enough time?' },
+    { cn: '他有足够的经验。', en: 'He has enough experience.' },
+    { cn: '钱足够用了。', en: 'There is enough money.' },
+  ],
+  '足球': [
+    { cn: '他喜欢踢足球。', en: 'He likes to play soccer.' },
+    { cn: '足球是世界上最受欢迎的运动。', en: 'Soccer is the most popular sport in the world.' },
+    { cn: '今晚有一场足球赛。', en: 'There is a soccer match tonight.' },
+  ],
+  '组合': [
+    { cn: '这是一个新的组合。', en: 'This is a new combination.' },
+    { cn: '不同元素的组合产生了新的效果。', en: 'The combination of different elements produced new effects.' },
+    { cn: '他们是一个音乐组合。', en: 'They are a music group.' },
+  ],
+  '左右': [
+    { cn: '大约八点左右到。', en: 'Arriving at around eight o\'clock.' },
+    { cn: '请看左右两边。', en: 'Please look at both sides.' },
+    { cn: '一个小时左右就能到。', en: 'You can get there in about an hour.' },
+  ],
+  '作品': [
+    { cn: '这是他最新的作品。', en: 'This is his latest work.' },
+    { cn: '她的作品很受欢迎。', en: 'Her works are very popular.' },
+    { cn: '美术馆里展出了很多作品。', en: 'Many works are exhibited in the art museum.' },
+  ],
+  '作者': [
+    { cn: '这本书的作者是谁？', en: 'Who is the author of this book?' },
+    { cn: '作者花了三年写这本书。', en: 'The author spent three years writing this book.' },
+    { cn: '我很喜欢这位作者。', en: 'I really like this author.' },
+  ],
+  '做客': [
+    { cn: '欢迎到我家做客。', en: 'Welcome to visit my home.' },
+    { cn: '他去朋友家做客了。', en: 'He went to visit a friend\'s home.' },
+    { cn: '做客时要注意礼貌。', en: 'Pay attention to manners when visiting.' },
+  ],
+};
+export default HSK3_EXAMPLES;
